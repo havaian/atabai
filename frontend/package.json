@@ -1,18 +1,40 @@
 {
-  "name": "frontend",
-  "private": true,
-  "version": "0.1.0",
+  "name": "atabai-frontend",
+  "version": "1.0.0",
+  "description": "ATABAI Frontend - Vue 3 application for Excel automation platform",
   "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
-    "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore",
-    "format": "prettier --write src/"
+  "engines": {
+    "node": ">=24.0.0",
+    "npm": ">=10.0.0"
   },
+  "scripts": {
+    "dev": "vite --host 0.0.0.0 --port 8080",
+    "build": "vite build",
+    "preview": "vite preview --host 0.0.0.0 --port 8080",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest --coverage",
+    "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore",
+    "format": "prettier --write src/",
+    "type-check": "vue-tsc --noEmit",
+    "docker:build": "docker build -t atabai-frontend .",
+    "docker:run": "docker run -p 8080:80 atabai-frontend",
+    "analyze": "npx vite-bundle-analyzer"
+  },
+  "keywords": [
+    "vue3",
+    "excel",
+    "ifrs",
+    "financial",
+    "frontend",
+    "tailwind",
+    "spreadsheet"
+  ],
+  "author": "ATABAI Team",
+  "license": "MIT",
   "dependencies": {
     "@fullcalendar/core": "^6.1.19",
-    "@fullcalendar/daygrid": "^6.1.19",
+    "@fullcalendar/daygrid": "^6.1.19", 
     "@fullcalendar/interaction": "^6.1.19",
     "@fullcalendar/timegrid": "^6.1.19",
     "@fullcalendar/vue3": "^6.1.19",
@@ -20,31 +42,48 @@
     "@heroicons/vue": "^2.2.0",
     "@stripe/stripe-js": "^2.4.0",
     "@tailwindcss/forms": "^0.5.7",
+    "@tailwindcss/typography": "^0.5.10",
     "@unhead/vue": "^2.0.12",
     "@vueuse/core": "^10.9.0",
+    "@vueuse/head": "^2.0.0",
     "axios": "^1.6.7",
     "date-fns": "^3.6.0",
-    "install": "^0.13.0",
+    "lucide-vue-next": "^0.441.0",
     "marked": "^15.0.11",
-    "npm": "^11.5.1",
     "pinia": "^2.1.7",
-    "recharts": "^3.1.0",
+    "pinia-plugin-persistedstate": "^4.1.1",
+    "recharts": "^2.12.7",
     "sanitize-html": "^2.16.0",
     "socket.io-client": "^4.7.4",
     "unhead": "^2.0.12",
     "vue": "^3.4.19",
     "vue-router": "^4.3.0",
+    "vue-toastification": "^2.0.0-rc.5",
     "yup": "^1.3.3"
   },
   "devDependencies": {
     "@rushstack/eslint-patch": "^1.7.2",
+    "@tailwindcss/aspect-ratio": "^0.4.2",
+    "@types/node": "^20.14.0",
     "@vitejs/plugin-vue": "^5.0.4",
+    "@vue/eslint-config-prettier": "^9.0.0",
+    "@vue/test-utils": "^2.4.6",
     "autoprefixer": "^10.4.17",
     "eslint": "^8.56.0",
     "eslint-plugin-vue": "^9.21.1",
+    "jsdom": "^24.1.0",
     "postcss": "^8.4.35",
     "prettier": "^3.2.5",
     "tailwindcss": "^3.4.1",
-    "vite": "^5.1.4"
-  }
+    "vite": "^5.1.4",
+    "vite-plugin-eslint": "^1.8.1",
+    "vitest": "^1.6.0",
+    "vue-tsc": "^2.0.21"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead",
+    "not ie 11"
+  ]
 }
