@@ -60,25 +60,25 @@ LABEL maintainer="ATABAI Team"
 LABEL description="ATABAI Frontend - Vue 3 SPA with nginx"
 LABEL version="1.0.0"
 
-# Development stage (for local development)
-FROM node:24-alpine AS development
+# # Development stage (for local development)
+# FROM node:24-alpine AS development
 
-WORKDIR /app
+# WORKDIR /app
 
-# Install development dependencies
-RUN apk add --no-cache git curl
+# # Install development dependencies
+# RUN apk add --no-cache git curl
 
-# Copy package files
-COPY package*.json ./
+# # Copy package files
+# COPY package*.json ./
 
-# Install all dependencies (including dev)
-RUN npm ci
+# # Install all dependencies (including dev)
+# RUN npm ci
 
-# Copy source code
-COPY . .
+# # Copy source code
+# COPY . .
 
-# Expose development port
-EXPOSE 8080
+# # Expose development port
+# EXPOSE 8080
 
-# Start development server
-CMD ["npm", "run", "dev"]
+# # Start development server
+# CMD ["npm", "run", "dev"]
