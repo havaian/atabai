@@ -53,8 +53,7 @@
 
             <!-- Auth Buttons -->
             <div v-if="!authStore.isAuthenticated" class="flex items-center space-x-4">
-              <button @click="authStore.login"
-                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors">
+              <button @click="authStore.login" class="btn-auth inline-flex items-center">
                 <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
                   <path
                     d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -63,7 +62,7 @@
                   <path
                     d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
                   <path
-                    d="M12 1c2.97 0 5.46.98 7.28 2.66l-3.57 2.77c-.98-.66-2.23-1.06-3.71-1.06-2.86 0-5.29 1.93-6.16 4.53H2.18V8.07C3.99 3.47 7.7 1 12 1z" />
+                    d="M12 1c2.97 0 5.46.98 7.28 2.66l-3.57 2.77c-.98-.66-2.23-1.06-3.71 1.06-2.86 0-5.29 1.93-6.16 4.53H2.18V8.07C3.99 3.47 7.7 1 12 1z" />
                 </svg>
                 {{ $t('auth.signInWithGoogle') }}
               </button>
@@ -146,9 +145,10 @@
             class="max-w-xl text-xl text-black font-medium text-center leading-7 mt-8 md:text-base md:leading-6 md:mt-4 md:px-2">
             {{ $t('hero.subtitle') }}
           </p>
-          <div class="flex gap-3 text-base text-white font-medium mt-15 md:mt-10 md:mb-15">
+          <!-- Centered first CTA button -->
+          <div class="flex justify-center mt-15 md:mt-10 md:mb-15">
             <button @click="authStore.isAuthenticated ? $router.push('/dashboard') : authStore.login()"
-              class="bg-black flex min-w-60 min-h-14 items-center gap-2 justify-center px-7 rounded-32 md:px-5 hover:bg-gray-800 transition-colors">
+              class="btn-rounded pulse-glow min-w-60 min-h-14 flex items-center gap-2 justify-center md:px-5">
               {{ $t('hero.tryFree') }}
             </button>
           </div>
@@ -257,8 +257,7 @@
                       <span class="font-medium">85</span>
                     </div>
                   </div>
-                  <button
-                    class="w-full bg-primary text-white py-2 px-4 rounded-lg text-sm font-medium hover:bg-primary-dark transition-colors">
+                  <button class="btn-primary w-full">
                     {{ $t('common.download') }}
                   </button>
                 </div>
@@ -279,7 +278,7 @@
                   </p>
                 </div>
                 <button @click="authStore.isAuthenticated ? $router.push('/dashboard') : authStore.login()"
-                  class="bg-primary text-white font-medium mt-12 min-w-60 min-h-14 px-7 rounded-32 hover:bg-primary-dark transition-colors md:mt-10">
+                  class="btn-primary mt-12 min-w-60 min-h-14 px-7 hover-glow md:mt-10">
                   {{ $t('cta.button') }}
                 </button>
               </div>
@@ -344,9 +343,9 @@
             </div>
           </div>
 
-          <div class="self-center flex gap-3 text-base text-white font-medium mt-13 md:mt-10">
+          <div class="self-center flex justify-center mt-13 md:mt-10">
             <button @click="authStore.isAuthenticated ? $router.push('/dashboard') : authStore.login()"
-              class="bg-black flex min-w-60 min-h-14 items-center gap-2 justify-center px-7 rounded-32 md:px-5 hover:bg-gray-800 transition-colors">
+              class="btn-rounded min-w-60 min-h-14 flex items-center gap-2 justify-center md:px-5">
               {{ $t('hero.tryFree') }}
             </button>
           </div>
@@ -378,7 +377,7 @@
                     <div class="text-3xl font-bold text-gray-900 mb-2">{{ $t('pricing.basic.price') }}</div>
                     <div class="invisible text-sm text-gray-600 mb-6">placeholder</div>
                     <button @click="authStore.isAuthenticated ? $router.push('/dashboard') : authStore.login()"
-                      class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 h-10 bg-black hover:bg-gray-800 text-white px-8 py-2 rounded-32 w-full">
+                      class="btn-secondary w-full h-10">
                       {{ $t('pricing.getStarted') }}
                     </button>
                   </div>
@@ -429,7 +428,7 @@
                     <div class="text-3xl font-bold text-gray-900 mb-2">{{ $t('pricing.enterprise.price') }}</div>
                     <div class="invisible text-sm text-gray-600 mb-6">placeholder</div>
                     <button @click="authStore.isAuthenticated ? $router.push('/dashboard') : authStore.login()"
-                      class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 h-10 bg-black hover:bg-gray-800 text-white px-8 py-2 rounded-32 w-full">
+                      class="btn-secondary w-full h-10">
                       {{ $t('pricing.contactUs') }}
                     </button>
                   </div>
@@ -475,7 +474,7 @@
           </div>
           <div class="flex md:flex-col md:mt-10 md:items-center mt-10">
             <button @click="authStore.isAuthenticated ? $router.push('/dashboard') : authStore.login()"
-              class="w-65 h-65 rounded-full bg-white md:ml-0 flex justify-center items-center flex-col gap-5 text-xl font-medium whitespace-pre-line leading-tight text-center cursor-pointer hover:bg-gray-100 transition-all">
+              class="btn-circle w-65 h-65 flex justify-center items-center flex-col gap-5 text-xl font-medium whitespace-pre-line leading-tight text-center">
               <ArrowRightIcon class="w-12 h-12 text-black" />
               {{ $t('finalCta.button') }}
             </button>
@@ -492,7 +491,7 @@
       </div>
       <div class="flex items-center gap-3 order-2 md:order-none">
         <button @click="authStore.isAuthenticated ? $router.push('/dashboard') : authStore.login()"
-          class="bg-gray-100 min-h-10 px-6 rounded-3xl hover:bg-gray-200 transition-colors text-sm w-full md:w-auto md:order-none">
+          class="btn-ghost text-sm w-full md:w-auto md:order-none">
           {{ $t('hero.tryFree') }}
         </button>
       </div>
