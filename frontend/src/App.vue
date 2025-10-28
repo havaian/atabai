@@ -33,8 +33,7 @@ const authStore = useAuthStore()
 
 onMounted(async () => {
     try {
-        // Initialize auth store
-        authStore.setupAxiosInterceptors()
+        // Initialize auth store - interceptors are already set up in the axios plugin
         await authStore.checkAuth()
     } catch (error) {
         console.error('Failed to initialize app:', error)
@@ -117,7 +116,7 @@ onMounted(async () => {
 
 /* Typography */
 body {
-    font-family: 'Montserrat', 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+    font-family: 'Inter', 'Montserrat', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
 }
 
 /* Smooth scrolling */

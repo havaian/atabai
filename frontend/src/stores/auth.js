@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import axios from 'axios'
+import { apiClient } from '@/plugins/axios'
 
 export const useAuthStore = defineStore('auth', () => {
     // State
@@ -25,7 +25,7 @@ export const useAuthStore = defineStore('auth', () => {
             error.value = null
 
             // Redirect to Google OAuth
-            const response = await axios.get('/api/auth/google')
+            const response = await apiClient.get('/auth/google')
             window.location.href = response.data.authUrl
         } catch (err) {
             error.value = err.response?.data?.message || 'Failed to initiate login'
@@ -40,15 +40,12 @@ export const useAuthStore = defineStore('auth', () => {
             isLoading.value = true
             error.value = null
 
-            const response = await axios.post('/api/auth/google/callback', { code })
+            const response = await apiClient.post('/auth/google/callback', { code })
             const { user: userData, accessToken: access, refreshToken: refresh } = response.data
 
             user.value = userData
             accessToken.value = access
             refreshToken.value = refresh
-
-            // Set axios default authorization header
-            axios.defaults.headers.common['Authorization'] = `Bearer ${access}`
 
             return userData
         } catch (err) {
@@ -66,13 +63,12 @@ export const useAuthStore = defineStore('auth', () => {
         }
 
         try {
-            const response = await axios.post('/api/auth/refresh', {
+            const response = await apiClient.post('/auth/refresh', {
                 refreshToken: refreshToken.value
             })
 
             const { accessToken: newAccessToken } = response.data
             accessToken.value = newAccessToken
-            axios.defaults.headers.common['Authorization'] = `Bearer ${newAccessToken}`
 
             return newAccessToken
         } catch (err) {
@@ -93,9 +89,6 @@ export const useAuthStore = defineStore('auth', () => {
                 refreshToken.value = storedRefreshToken
                 user.value = JSON.parse(storedUser)
 
-                // Set axios header
-                axios.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`
-
                 // Verify token validity by fetching user profile
                 await fetchProfile()
             } catch (err) {
@@ -107,24 +100,14 @@ export const useAuthStore = defineStore('auth', () => {
 
     async function fetchProfile() {
         try {
-            const response = await axios.get('/api/auth/profile')
+            const response = await apiClient.get('/auth/profile')
             user.value = response.data
             localStorage.setItem('user', JSON.stringify(response.data))
             return response.data
         } catch (err) {
             if (err.response?.status === 401) {
-                // Try to refresh token
-                try {
-                    await refreshAccessToken()
-                    const retryResponse = await axios.get('/api/auth/profile')
-                    user.value = retryResponse.data
-                    localStorage.setItem('user', JSON.stringify(retryResponse.data))
-                    return retryResponse.data
-                } catch (refreshErr) {
-                    console.error('Profile fetch after refresh failed:', refreshErr)
-                    await logout()
-                    throw refreshErr
-                }
+                // The axios interceptor will handle token refresh automatically
+                throw err
             }
             throw err
         }
@@ -134,7 +117,7 @@ export const useAuthStore = defineStore('auth', () => {
         try {
             // Call logout endpoint if we have a token
             if (accessToken.value) {
-                await axios.post('/api/auth/logout')
+                await apiClient.post('/auth/logout')
             }
         } catch (err) {
             console.error('Logout API call failed:', err)
@@ -152,9 +135,6 @@ export const useAuthStore = defineStore('auth', () => {
         localStorage.removeItem('refreshToken')
         localStorage.removeItem('user')
 
-        // Clear axios header
-        delete axios.defaults.headers.common['Authorization']
-
         // Redirect to home page
         window.location.href = '/'
     }
@@ -162,7 +142,7 @@ export const useAuthStore = defineStore('auth', () => {
     async function updateProfile(profileData) {
         try {
             isLoading.value = true
-            const response = await axios.put('/api/auth/profile', profileData)
+            const response = await apiClient.put('/auth/profile', profileData)
             user.value = response.data
             localStorage.setItem('user', JSON.stringify(response.data))
             return response.data
@@ -172,43 +152,6 @@ export const useAuthStore = defineStore('auth', () => {
         } finally {
             isLoading.value = false
         }
-    }
-
-    // Axios interceptor for automatic token refresh
-    function setupAxiosInterceptors() {
-        axios.interceptors.response.use(
-            (response) => response,
-            async (error) => {
-                const original = error.config
-
-                if (error.response?.status === 401 && !original._retry) {
-                    original._retry = true
-
-                    try {
-                        await refreshAccessToken()
-                        return axios(original)
-                    } catch (refreshError) {
-                        await logout()
-                        return Promise.reject(refreshError)
-                    }
-                }
-
-                return Promise.reject(error)
-            }
-        )
-    }
-
-    // Persist state to localStorage
-    function persistState() {
-        if (accessToken.value) localStorage.setItem('accessToken', accessToken.value)
-        if (refreshToken.value) localStorage.setItem('refreshToken', refreshToken.value)
-        if (user.value) localStorage.setItem('user', JSON.stringify(user.value))
-    }
-
-    // Watch for state changes and persist
-    function initializePersistence() {
-        // Save tokens when they change
-        watch([accessToken, refreshToken, user], persistState, { deep: true })
     }
 
     return {
@@ -234,9 +177,7 @@ export const useAuthStore = defineStore('auth', () => {
         fetchProfile,
         updateProfile,
         handleOAuthCallback,
-        refreshAccessToken,
-        setupAxiosInterceptors,
-        initializePersistence
+        refreshAccessToken
     }
 }, {
     persist: {

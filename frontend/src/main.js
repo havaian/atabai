@@ -1,20 +1,14 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
-import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 import router from './router'
 import i18n, { getStoredLocale, setLocale } from './utils/i18n'
-import axios from 'axios'
+import axiosPlugin from './plugins/axios'
 
 import App from './App.vue'
 import './assets/main.css'
 
-// Configure axios defaults
-axios.defaults.baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api'
-axios.defaults.withCredentials = true
-
 // Create Pinia store
 const pinia = createPinia()
-pinia.use(piniaPluginPersistedstate)
 
 // Create Vue app
 const app = createApp(App)
@@ -23,6 +17,7 @@ const app = createApp(App)
 app.use(pinia)
 app.use(router)
 app.use(i18n)
+app.use(axiosPlugin)
 
 // Initialize language from localStorage
 const storedLocale = getStoredLocale()

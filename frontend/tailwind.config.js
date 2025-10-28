@@ -29,7 +29,7 @@ export default {
         },
       },
       fontFamily: {
-        sans: ['Montserrat', 'Inter', 'system-ui', 'sans-serif'],
+        sans: ['Inter', 'Montserrat', 'system-ui', 'sans-serif'],
       },
       fontSize: {
         '5xl': '3rem',
