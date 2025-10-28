@@ -1,0 +1,139 @@
+{
+  "nav": {
+    "home": "Home",
+    "dashboard": "Dashboard",
+    "templates": "Templates",
+    "profile": "Profile",
+    "history": "File History",
+    "logout": "Sign Out",
+    "features": "Features",
+    "howItWorks": "How It Works",
+    "pricing": "Pricing"
+  },
+  "hero": {
+    "title": "Powerful platform for automating Excel calculations according to IFRS",
+    "subtitle": "With ATABAI, financial reporting will be tens of times cheaper and faster",
+    "tryFree": "Try for free",
+    "loginGoogle": "Sign in with Google"
+  },
+  "stats": {
+    "minute": "min.",
+    "analysisTime": "Time to analyze 1000+ Excel files",
+    "accuracy": "Calculation accuracy",
+    "availability": "Works without breaks",
+    "timeSaving": "Time savings through automation"
+  },
+  "howItWorks": {
+    "title": "How it works",
+    "step1": {
+      "title": "Upload Excel files",
+      "description": "Upload your financial Excel files for processing according to IFRS requirements",
+      "uploadText": "Drag files here or click to select",
+      "supportedFormats": "Supported formats: .xlsx, .xls, .csv"
+    },
+    "step2": {
+      "title": "Select IFRS template",
+      "description": "Choose the appropriate calculation template in accordance with international financial reporting standards"
+    },
+    "step3": {
+      "title": "Get ready results",
+      "description": "Download processed files with applied IFRS formulas and detailed change reports",
+      "processed": "File processed",
+      "changes": "Changes",
+      "formulas": "Formulas applied"
+    }
+  },
+  "features": {
+    "title": "Why ATABAI is great",
+    "automation": {
+      "title": "Complete Automation",
+      "description": "Automatic application of IFRS formulas to your Excel files"
+    },
+    "compliance": {
+      "title": "IFRS Compliance",
+      "description": "Compliance with international financial reporting standards"
+    },
+    "accuracy": {
+      "title": "High Accuracy",
+      "description": "Minimizing errors in financial calculations"
+    },
+    "speed": {
+      "title": "Fast Processing",
+      "description": "Processing large files in minutes"
+    },
+    "easy": {
+      "title": "Easy to Use",
+      "description": "Intuitive interface requires no special training"
+    },
+    "universal": {
+      "title": "Universal",
+      "description": "Suitable for any type of financial calculations and reports"
+    }
+  },
+  "templates": {
+    "depreciation": "Fixed Asset Depreciation",
+    "discounts": "Discount Calculations",
+    "impairment": "Asset Impairment",
+    "reports": "Financial Reports"
+  },
+  "pricing": {
+    "title": "ATABAI helps you save time and money",
+    "popular": "Popular",
+    "getStarted": "Get Started",
+    "contactUs": "Contact Us",
+    "basic": {
+      "title": "Basic",
+      "price": "Free",
+      "files": "5 files per month",
+      "templates": "Basic IFRS templates",
+      "history": "Last 10 files history",
+      "export": "Export processed files"
+    },
+    "premium": {
+      "title": "Premium",
+      "price": "On request",
+      "perMonth": "Custom pricing",
+      "files": "Unlimited files",
+      "templates": "All IFRS templates",
+      "priority": "Priority processing",
+      "history": "Complete processing history",
+      "support": "Technical support",
+      "api": "API access"
+    },
+    "enterprise": {
+      "title": "Enterprise",
+      "price": "Custom",
+      "custom": "Customize to your needs",
+      "dedicated": "Dedicated server",
+      "sla": "SLA agreement",
+      "training": "Team training"
+    }
+  },
+  "cta": {
+    "title": "Try now for free",
+    "subtitle": "For any of your tasks and see the effectiveness of ATABAI",
+    "button": "Try now"
+  },
+  "finalCta": {
+    "title": "Ready to start?",
+    "subtitle": "Start automating your IFRS calculations today",
+    "button": "Get Started"
+  },
+  "auth": {
+    "signIn": "Sign In",
+    "signOut": "Sign Out",
+    "signInWithGoogle": "Sign in with Google"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "upload": "Upload",
+    "download": "Download",
+    "process": "Process"
+  }
+}

@@ -1,0 +1,139 @@
+{
+  "nav": {
+    "home": "Bosh sahifa",
+    "dashboard": "Boshqaruv paneli",
+    "templates": "Shablonlar",
+    "profile": "Profil",
+    "history": "Fayllar tarixi",
+    "logout": "Chiqish",
+    "features": "Imkoniyatlar",
+    "howItWorks": "Qanday ishlaydi",
+    "pricing": "Tariflar"
+  },
+  "hero": {
+    "title": "IFRS bo'yicha Excel hisob-kitoblarini avtomatlashtirishning kuchli platformasi",
+    "subtitle": "ATABAI bilan hisobot tayyorlash o'n marta arzonroq va tezroq bo'ladi",
+    "tryFree": "Bepul sinab ko'ring",
+    "loginGoogle": "Google orqali kirish"
+  },
+  "stats": {
+    "minute": "daq.",
+    "analysisTime": "1000+ Excel fayllarini tahlil qilish vaqti",
+    "accuracy": "Hisob-kitob aniqligi",
+    "availability": "Tanaffussiz ishlaydi",
+    "timeSaving": "Avtomatlashtirish orqali vaqt tejash"
+  },
+  "howItWorks": {
+    "title": "Qanday ishlaydi",
+    "step1": {
+      "title": "Excel fayllarini yuklang",
+      "description": "IFRS talablariga muvofiq qayta ishlash uchun moliyaviy Excel fayllaringizni yuklang",
+      "uploadText": "Fayllarni bu yerga torting yoki tanlash uchun bosing",
+      "supportedFormats": "Qo'llab-quvvatlanadigan formatlar: .xlsx, .xls, .csv"
+    },
+    "step2": {
+      "title": "IFRS shablonini tanlang",
+      "description": "Xalqaro moliyaviy hisobot standartlariga muvofiq mos hisob-kitob shablonini tanlang"
+    },
+    "step3": {
+      "title": "Tayyor natijalarni oling",
+      "description": "IFRS formulalari qo'llanilgan va o'zgarishlar haqida batafsil hisoboti bilan qayta ishlangan fayllarni yuklab oling",
+      "processed": "Fayl qayta ishlandi",
+      "changes": "O'zgarishlar",
+      "formulas": "Formula qo'llanildi"
+    }
+  },
+  "features": {
+    "title": "Nima uchun ATABAI zo'r",
+    "automation": {
+      "title": "To'liq avtomatlashtirish",
+      "description": "Excel fayllaringizga IFRS formulalarini avtomatik qo'llash"
+    },
+    "compliance": {
+      "title": "IFRS talablariga muvofiqlik",
+      "description": "Xalqaro moliyaviy hisobot standartlari talablariga rioya qilish"
+    },
+    "accuracy": {
+      "title": "Yuqori aniqlik",
+      "description": "Moliyaviy hisob-kitoblardagi xatolarni minimallash"
+    },
+    "speed": {
+      "title": "Tez ishlov berish",
+      "description": "Katta fayllarni bir necha daqiqada qayta ishlash"
+    },
+    "easy": {
+      "title": "Foydalanish osonligi",
+      "description": "Intuitiv interfeys maxsus o'qitishni talab qilmaydi"
+    },
+    "universal": {
+      "title": "Universal",
+      "description": "Har qanday turdagi moliyaviy hisob-kitoblar va hisobotlar uchun mos"
+    }
+  },
+  "templates": {
+    "depreciation": "Asosiy vositalarning amortizatsiyasi",
+    "discounts": "Chegirmalar hisob-kitobi",
+    "impairment": "Aktivlarning qadrsizlanishi",
+    "reports": "Moliyaviy hisobotlar"
+  },
+  "pricing": {
+    "title": "ATABAI vaqt va pulni tejashga yordam beradi",
+    "popular": "Mashhur",
+    "getStarted": "Boshlash",
+    "contactUs": "Biz bilan bog'laning",
+    "basic": {
+      "title": "Asosiy",
+      "price": "Bepul",
+      "files": "Oyiga 5 ta fayl",
+      "templates": "Asosiy IFRS shablonlari",
+      "history": "Oxirgi 10 ta fayl tarixi",
+      "export": "Qayta ishlangan fayllarni eksport qilish"
+    },
+    "premium": {
+      "title": "Premium",
+      "price": "So'rov bo'yicha",
+      "perMonth": "Individual narx",
+      "files": "Cheksiz fayllar soni",
+      "templates": "Barcha IFRS shablonlari",
+      "priority": "Ustuvor qayta ishlash",
+      "history": "To'liq qayta ishlash tarixi",
+      "support": "Texnik yordam",
+      "api": "API kirish"
+    },
+    "enterprise": {
+      "title": "Korporativ",
+      "price": "Individual",
+      "custom": "Ehtiyojlaringizga moslash",
+      "dedicated": "Maxsus server",
+      "sla": "SLA shartnoma",
+      "training": "Jamoa o'qitish"
+    }
+  },
+  "cta": {
+    "title": "Hozir bepul sinab ko'ring",
+    "subtitle": "Har qanday vazifangiz uchun va ATABAI samaradorligiga ishonch hosil qiling",
+    "button": "Hozir sinab ko'ring"
+  },
+  "finalCta": {
+    "title": "Boshlashga tayyormisiz?",
+    "subtitle": "IFRS hisob-kitoblaringizni bugundan boshlab avtomatlashtiring",
+    "button": "Ishni boshlash"
+  },
+  "auth": {
+    "signIn": "Kirish",
+    "signOut": "Chiqish",
+    "signInWithGoogle": "Google orqali kirish"
+  },
+  "common": {
+    "loading": "Yuklanmoqda...",
+    "error": "Xato",
+    "success": "Muvaffaqiyatli",
+    "cancel": "Bekor qilish",
+    "save": "Saqlash",
+    "delete": "O'chirish",
+    "edit": "Tahrirlash",
+    "upload": "Yuklash",
+    "download": "Yuklab olish",
+    "process": "Qayta ishlash"
+  }
+}
