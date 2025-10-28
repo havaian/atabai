@@ -2,139 +2,288 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Button styles with hover animations */
+/* Button styles with innovative hover animations */
 @layer components {
-  /* Primary button - main CTA style */
-  .btn-primary {
-    @apply bg-primary text-white font-medium px-6 py-3 rounded-lg transition-all duration-300 ease-out;
-    @apply hover:bg-primary-dark hover:shadow-lg hover:-translate-y-0.5;
-    @apply active:translate-y-0 active:shadow-md;
-    @apply focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2;
-  }
 
-  /* Secondary button - alternative style */
-  .btn-secondary {
-    @apply bg-black text-white font-medium px-6 py-3 rounded-lg transition-all duration-300 ease-out;
-    @apply hover:bg-gray-800 hover:shadow-lg hover:-translate-y-0.5;
-    @apply active:translate-y-0 active:shadow-md;
-    @apply focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2;
-  }
+    /* Primary button - main CTA style */
+    .btn-primary {
+        @apply bg-primary text-white font-medium px-6 py-3 rounded-lg transition-all duration-500 ease-out relative overflow-hidden;
+        @apply focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2;
+    }
 
-  /* Rounded button - for special CTAs */
-  .btn-rounded {
-    @apply bg-black text-white font-medium px-8 py-4 rounded-full transition-all duration-300 ease-out;
-    @apply hover:bg-gray-800 hover:shadow-xl hover:-translate-y-1;
-    @apply active:translate-y-0 active:shadow-lg;
-    @apply focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2;
-  }
+    .btn-primary::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        transition: left 0.6s ease-out;
+    }
 
-  /* Circle button - for the final CTA */
-  .btn-circle {
-    @apply bg-white text-black font-medium rounded-full transition-all duration-500 ease-out;
-    @apply hover:bg-gray-100 hover:shadow-2xl hover:-translate-y-2 hover:scale-105;
-    @apply active:translate-y-0 active:shadow-xl active:scale-100;
-    @apply focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2;
-  }
+    .btn-primary:hover::before {
+        left: 100%;
+    }
 
-  /* Ghost button - for subtle actions */
-  .btn-ghost {
-    @apply bg-gray-100 text-gray-700 font-medium px-6 py-3 rounded-lg transition-all duration-300 ease-out;
-    @apply hover:bg-gray-200 hover:text-gray-900 hover:shadow-md hover:-translate-y-0.5;
-    @apply active:translate-y-0 active:shadow-sm;
-    @apply focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2;
-  }
+    .btn-primary:hover {
+        @apply shadow-2xl;
+        transform: perspective(1000px) rotateX(5deg) rotateY(-2deg) scale(1.05);
+        box-shadow: 0 25px 50px -12px rgba(139, 92, 246, 0.5);
+    }
 
-  /* Auth button - special Google style */
-  .btn-auth {
-    @apply bg-primary text-white font-medium px-4 py-2 rounded-md transition-all duration-300 ease-out;
-    @apply hover:bg-primary-dark hover:shadow-lg hover:-translate-y-0.5;
-    @apply active:translate-y-0 active:shadow-md;
-    @apply focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2;
-  }
+    /* Secondary button - alternative style */
+    .btn-secondary {
+        @apply bg-black text-white font-medium px-6 py-3 rounded-lg transition-all duration-500 ease-out relative;
+        @apply focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2;
+        transform-style: preserve-3d;
+    }
+
+    .btn-secondary::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(45deg, #9500FF, #7c3aed);
+        border-radius: inherit;
+        opacity: 0;
+        transition: opacity 0.4s ease-out;
+        z-index: -1;
+    }
+
+    .btn-secondary:hover::after {
+        opacity: 1;
+    }
+
+    .btn-secondary:hover {
+        transform: perspective(1000px) rotateX(-10deg) scale(1.08);
+        box-shadow: 0 30px 60px -15px rgba(149, 0, 255, 0.4);
+    }
+
+    /* Rounded button - for special CTAs */
+    .btn-rounded {
+        @apply bg-black text-white font-medium px-8 py-4 rounded-full transition-all duration-700 ease-out relative;
+        @apply focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2;
+        background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+    }
+
+    .btn-rounded::before {
+        content: '';
+        position: absolute;
+        inset: -2px;
+        padding: 2px;
+        background: linear-gradient(45deg, #9500FF, #7c3aed, #9500FF);
+        border-radius: inherit;
+        mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+        mask-composite: xor;
+        opacity: 0;
+        transition: opacity 0.5s ease-out;
+    }
+
+    .btn-rounded:hover::before {
+        opacity: 1;
+        animation: borderRotate 2s linear infinite;
+    }
+
+    .btn-rounded:hover {
+        transform: perspective(1000px) rotateY(15deg) rotateX(-5deg) scale(1.1);
+        box-shadow: 0 35px 70px -20px rgba(149, 0, 255, 0.6);
+    }
+
+    /* Circle button - for the final CTA */
+    .btn-circle {
+        @apply bg-white text-black font-medium rounded-full transition-all duration-700 ease-out relative;
+        @apply focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2;
+        transform-style: preserve-3d;
+    }
+
+    .btn-circle::before {
+        content: '';
+        position: absolute;
+        inset: -4px;
+        background: conic-gradient(from 0deg, #9500FF, #7c3aed, #5b21b6, #9500FF);
+        border-radius: inherit;
+        padding: 4px;
+        mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+        mask-composite: xor;
+        opacity: 0;
+        transition: opacity 0.6s ease-out;
+    }
+
+    .btn-circle:hover::before {
+        opacity: 1;
+        animation: spinGlow 3s linear infinite;
+    }
+
+    .btn-circle:hover {
+        transform: perspective(1000px) rotateY(-20deg) rotateX(10deg) scale(1.15);
+        box-shadow:
+            0 50px 100px -25px rgba(149, 0, 255, 0.5),
+            inset 0 0 30px rgba(149, 0, 255, 0.1);
+    }
+
+    /* Ghost button - for subtle actions */
+    .btn-ghost {
+        @apply bg-gray-100 text-gray-700 font-medium px-6 py-3 rounded-lg transition-all duration-400 ease-out relative;
+        @apply focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2;
+    }
+
+    .btn-ghost:hover {
+        @apply bg-gray-200 text-gray-900;
+        transform: perspective(1000px) rotateX(-8deg) scale(1.03);
+        box-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Auth button - special Google style */
+    .btn-auth {
+        @apply bg-primary text-white font-medium px-4 py-2 rounded-md transition-all duration-400 ease-out relative;
+        @apply focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2;
+    }
+
+    .btn-auth:hover {
+        transform: perspective(1000px) rotateX(5deg) scale(1.05);
+        box-shadow: 0 20px 40px -15px rgba(139, 92, 246, 0.4);
+    }
 }
 
-/* Custom gradient with brighter toxic violet */
+/* Custom gradient with toxic violet */
 @layer utilities {
-  .bg-gradient-hero {
-    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 25%, #6d28d9 50%, #5b21b6 75%, #000000 100%);
-  }
-  
-  .bg-gradient-hero-alt {
-    background: linear-gradient(to bottom, #8b5cf6, #000000);
-  }
+    .bg-gradient-hero {
+        background: linear-gradient(to top, #9500FF 0%, #7c3aed 25%, #5b21b6 50%, #1a1a1a 75%, #000000 100%);
+    }
+
+    .bg-gradient-hero-alt {
+        background: linear-gradient(to bottom, #9500FF, #000000);
+    }
+}
+
+/* Keyframe animations */
+@keyframes borderRotate {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes spinGlow {
+    0% {
+        transform: rotate(0deg) scale(1);
+    }
+
+    50% {
+        transform: rotate(180deg) scale(1.05);
+    }
+
+    100% {
+        transform: rotate(360deg) scale(1);
+    }
+}
+
+@keyframes morphShadow {
+
+    0%,
+    100% {
+        border-radius: 50%;
+        box-shadow: 0 20px 40px rgba(149, 0, 255, 0.3);
+    }
+
+    25% {
+        border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+        box-shadow: 0 25px 50px rgba(149, 0, 255, 0.4);
+    }
+
+    50% {
+        border-radius: 70% 30% 30% 70% / 70% 70% 30% 30%;
+        box-shadow: 0 30px 60px rgba(149, 0, 255, 0.5);
+    }
+
+    75% {
+        border-radius: 40% 60% 40% 60% / 60% 40% 60% 40%;
+        box-shadow: 0 25px 50px rgba(149, 0, 255, 0.4);
+    }
 }
 
 /* Enhanced button hover effects for all buttons */
 button {
-  @apply transition-all duration-300 ease-out;
-}
-
-button:hover {
-  @apply shadow-md;
+    @apply transition-all duration-400 ease-out;
+    transform-style: preserve-3d;
 }
 
 button:active {
-  @apply scale-95;
+    transform: perspective(1000px) rotateX(10deg) scale(0.95) !important;
+    transition-duration: 0.1s;
 }
 
 /* Specific enhancements for different button patterns */
 button.bg-black:hover {
-  @apply shadow-lg -translate-y-0.5;
+    transform: perspective(1000px) rotateX(-12deg) rotateY(5deg) scale(1.08);
+    box-shadow: 0 35px 70px -20px rgba(0, 0, 0, 0.4);
 }
 
 button.bg-primary:hover {
-  @apply shadow-lg -translate-y-0.5;
+    transform: perspective(1000px) rotateX(8deg) rotateY(-3deg) scale(1.06);
+    box-shadow: 0 30px 60px -15px rgba(139, 92, 246, 0.5);
 }
 
 button.bg-white:hover {
-  @apply shadow-xl -translate-y-1;
+    transform: perspective(1000px) rotateY(-15deg) rotateX(8deg) scale(1.12);
+    box-shadow: 0 40px 80px -25px rgba(149, 0, 255, 0.3);
 }
 
 button.bg-gray-100:hover {
-  @apply shadow-md -translate-y-0.5;
+    transform: perspective(1000px) rotateX(-6deg) scale(1.04);
+    box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.12);
 }
 
 /* Special effects for rounded buttons */
 button.rounded-full {
-  @apply transition-all duration-500 ease-out;
+    @apply transition-all duration-700 ease-out;
 }
 
 button.rounded-full:hover {
-  @apply shadow-2xl -translate-y-2;
+    animation: morphShadow 4s ease-in-out infinite;
 }
 
 /* Pulse animation for important CTAs */
-@keyframes pulse-glow {
-  0%, 100% {
-    box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.4);
-  }
-  50% {
-    box-shadow: 0 0 20px 10px rgba(139, 92, 246, 0.1);
-  }
+@keyframes pulseGlow {
+
+    0%,
+    100% {
+        box-shadow:
+            0 0 0 0 rgba(149, 0, 255, 0.7),
+            0 20px 40px -10px rgba(149, 0, 255, 0.3);
+    }
+
+    50% {
+        box-shadow:
+            0 0 30px 15px rgba(149, 0, 255, 0.1),
+            0 25px 50px -12px rgba(149, 0, 255, 0.5);
+    }
 }
 
 .pulse-glow {
-  animation: pulse-glow 3s infinite;
+    animation: pulseGlow 3s ease-in-out infinite;
 }
 
-/* Smooth hover glow effect */
+/* Hover glow effect */
 .hover-glow {
-  @apply transition-all duration-300;
+    @apply transition-all duration-500;
 }
 
 .hover-glow:hover {
-  box-shadow: 0 0 25px rgba(139, 92, 246, 0.3);
+    box-shadow:
+        0 0 50px rgba(149, 0, 255, 0.4),
+        0 30px 60px -15px rgba(149, 0, 255, 0.3);
+    filter: brightness(1.1);
 }
 
 /* Micro interactions for buttons */
 .btn-micro {
-  @apply transform transition-all duration-200 ease-out;
+    @apply transform transition-all duration-300 ease-out;
 }
 
 .btn-micro:hover {
-  @apply scale-105;
-}
-
-.btn-micro:active {
-  @apply scale-95;
+    transform: perspective(1000px) rotateX(-10deg) rotateY(5deg) scale(1.08);
 }
