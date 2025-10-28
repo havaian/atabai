@@ -66,7 +66,7 @@ services:
   #     - ./uploads:/app/uploads
   #     - ./logs:/app/logs
   #   ports:
-  #     - "${BACKEND_EXPOSE:-127.0.0.1:3000}:3000"
+  #     - "${BACKEND_EXPOSE:-127.0.0.1:3000}:${BACKEND_PORT}"
   #   # depends_on:
   #   #   mongodb:
   #   #     condition: service_healthy
@@ -100,7 +100,7 @@ services:
   #     - ./frontend:/app
   #     - /app/node_modules
   #   ports:
-  #     - "${FRONTEND_EXPOSE:-127.0.0.1:8080}:8080"
+  #     - "${FRONTEND_EXPOSE:-127.0.0.1:8080}:${FRONTEND_DEV_EXPOSE}"
   #   depends_on:
   #     - backend
   #   networks:
@@ -118,7 +118,7 @@ services:
     volumes:
       - ./frontend/nginx.conf:/etc/nginx/conf.d/default.conf:ro
     ports:
-      - "${FRONTEND_PROD_EXPOSE:-127.0.0.1:80}:80"
+      - "${FRONTEND_EXPOSE:-127.0.0.1:80}:${FRONTEND_PROD_PORT}"
     # depends_on:
     #   - backend
     networks:
