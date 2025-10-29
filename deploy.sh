@@ -291,15 +291,15 @@ ultra_fast_deploy() {
         $DOCKER_COMPOSE build --parallel  # NO --no-cache flag!
     fi
     
-    # Use up instead of force-recreate for faster deployment
-    log "${RECYCLE} Updating containers..."
-    if [ -n "$service" ]; then
-        $DOCKER_COMPOSE up -d $service
-        health_check $service
-    else
-        $DOCKER_COMPOSE up -d
-        health_check "backend" && health_check "frontend-prod"
-    fi
+    # # Use up instead of force-recreate for faster deployment
+    # log "${RECYCLE} Updating containers..."
+    # if [ -n "$service" ]; then
+    #     $DOCKER_COMPOSE up -d $service
+    #     health_check $service
+    # else
+    #     $DOCKER_COMPOSE up -d
+    #     health_check "backend" && health_check "frontend-prod"
+    # fi
     
     success "${SPEAKER} Ultra-fast deployment complete!"
     end_timer
