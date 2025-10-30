@@ -1,97 +1,12 @@
+/* Import mask animations */
+@import './mask-animations.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Import mask animations */
-@import './mask-animations.css';
-
 /* Button styles with innovative hover animations */
 @layer components {
-
-    /* Keyframe animations for mask effects */
-    @keyframes maskHover {
-    from {
-        -webkit-mask-position: 0 0;
-        mask-position: 0 0;
-    }
-    to {
-        -webkit-mask-position: 100% 0;
-        mask-position: 100% 0;
-    }
-    }
-
-    @keyframes maskReset {
-    from {
-        -webkit-mask-position: 100% 0;
-        mask-position: 100% 0;
-    }
-    to {
-        -webkit-mask-position: 0 0;
-        mask-position: 0 0;
-    }
-    }
-
-    /* Base mask animation class - can be applied to any button */
-    .btn-mask-animate {
-    position: relative;
-    overflow: hidden;
-    transition: all 0.3s ease;
-    
-    /* Apply mask properties */
-    -webkit-mask: url("/images/masks/1.png");
-    mask: url("/images/masks/1.png");
-    -webkit-mask-size: 2300% 100%;
-    mask-size: 2300% 100%;
-    
-    /* Initial animation state */
-    -webkit-animation: maskReset 0.7s steps(22) forwards;
-    animation: maskReset 0.7s steps(22) forwards;
-    }
-
-    .btn-mask-animate:hover {
-    -webkit-animation: maskHover 0.7s steps(22) forwards;
-    animation: maskHover 0.7s steps(22) forwards;
-    }
-
-    /* Alternative mask effects for variety */
-    .btn-mask-urban {
-    position: relative;
-    overflow: hidden;
-    transition: all 0.3s ease;
-    
-    -webkit-mask: url("/images/masks/2.png");
-    mask: url("/images/masks/2.png");
-    -webkit-mask-size: 3000% 100%;
-    mask-size: 3000% 100%;
-    
-    -webkit-animation: maskReset 0.7s steps(29) forwards;
-    animation: maskReset 0.7s steps(29) forwards;
-    }
-
-    .btn-mask-urban:hover {
-    -webkit-animation: maskHover 0.7s steps(29) forwards;
-    animation: maskHover 0.7s steps(29) forwards;
-    }
-
-    .btn-mask-nature {
-    position: relative;
-    overflow: hidden;
-    transition: all 0.3s ease;
-    
-    -webkit-mask: url("/images/masks/3.png");
-    mask: url("/images/masks/3.png");
-    -webkit-mask-size: 7100% 100%;
-    mask-size: 7100% 100%;
-    
-    -webkit-animation: maskReset 0.7s steps(70) forwards;
-    animation: maskReset 0.7s steps(70) forwards;
-    }
-
-    .btn-mask-nature:hover {
-    -webkit-animation: maskHover 0.7s steps(70) forwards;
-    animation: maskHover 0.7s steps(70) forwards;
-    }
-
     /* Primary button base styles */
     .btn-primary {
         @apply bg-white text-black font-medium px-6 py-3 rounded-lg transition-all duration-300 ease-out relative overflow-hidden;
@@ -106,8 +21,8 @@
 
     /* When mask is applied: Override for mask effect */
     .btn-primary.btn-mask-animate {
-        background-color: black;
-        color: white;
+        background-color: white;
+        color: black;
     }
 
     /* Disable regular hover when mask is active */
@@ -216,15 +131,15 @@
 
     /* When mask 3 (nature) is applied: Override for mask effect */
     .btn-ghost.btn-mask-nature {
-        background-color: #374151;
+        background-color: #f3f4f6;
         /* gray-700 */
-        color: white;
+        color: #374151;
     }
 
     /* Disable regular hover when mask is active */
     .btn-ghost.btn-mask-nature:hover {
-        background-color: #374151;
-        color: white;
+        background-color: #111827;
+        color: #111827;
         box-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.15);
     }
 
