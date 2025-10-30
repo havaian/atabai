@@ -390,7 +390,7 @@ show_help() {
 }
 
 # Main command handling
-case "${1:-ultrafast}" in
+case "${1:-standard}" in
     "quick")
         quick_deploy "${2:-}"
         ;;
@@ -416,7 +416,7 @@ case "${1:-ultrafast}" in
         echo -e "${YELLOW}Unknown command: $1${NC}"
         echo "Use '$0 help' to see available commands."
         echo ""
-        echo -e "${BLUE}Running ultrafast deployment...${NC}"
-        ultra_fast_deploy "${1:-}"
+        echo -e "${BLUE}Running standard deployment...${NC}"
+        standard_deploy "${1:-}"
         ;;
 esac
