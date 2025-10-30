@@ -13,19 +13,19 @@
         @apply bg-white text-black font-medium px-6 py-3 rounded-lg transition-all duration-300 ease-out relative overflow-hidden;
         @apply focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2;
     }
-    
+
     /* Default hover: Real color transitions (smooth bg/text change) */
     .btn-primary:hover {
         @apply bg-black text-white shadow-2xl;
         box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
     }
-    
+
     /* When mask is applied: Override for mask effect */
     .btn-primary.btn-mask-animate {
         background-color: black;
         color: white;
     }
-    
+
     /* Disable regular hover when mask is active */
     .btn-primary.btn-mask-animate:hover {
         background-color: black;
@@ -36,13 +36,14 @@
     .btn-secondary {
         @apply bg-black text-white font-medium px-6 py-3 rounded-lg transition-all duration-500 ease-out relative;
         @apply focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2;
+        transform-style: preserve-3d;
     }
 
     .btn-secondary::after {
         content: '';
         position: absolute;
         inset: 0;
-        background: linear-gradient(45deg, atabai-violet, #7c3aed);
+        background: linear-gradient(45deg, #9500FF, #7c3aed);
         border-radius: inherit;
         opacity: 0;
         transition: opacity 0.4s ease-out;
@@ -69,7 +70,7 @@
         position: absolute;
         inset: -2px;
         padding: 2px;
-        background: linear-gradient(45deg, atabai-violet, #7c3aed, atabai-violet);
+        background: linear-gradient(45deg, #9500FF, #7c3aed, #9500FF);
         border-radius: inherit;
         mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
         mask-composite: xor;
@@ -97,7 +98,7 @@
         content: '';
         position: absolute;
         inset: -4px;
-        background: conic-gradient(from 0deg, atabai-violet, #7c3aed, #5b21b6, atabai-violet);
+        background: conic-gradient(from 0deg, #9500FF, #7c3aed, #5b21b6, #9500FF);
         border-radius: inherit;
         padding: 4px;
         mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
@@ -117,28 +118,30 @@
             inset 0 0 30px rgba(149, 0, 255, 0.1);
     }
 
-    /* Ghost button - for subtle actions */
+    /* Ghost button base styles */
     .btn-ghost {
-        @apply bg-gray-100 text-gray-700 font-medium px-6 py-3 rounded-lg transition-all duration-300 ease-out relative;
+        @apply bg-gray-100 text-gray-700 font-medium px-6 py-3 rounded-lg transition-all duration-300 ease-out relative overflow-hidden;
         @apply focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2;
     }
-    
-    /* Default hover: Real color transitions (smooth bg/text change) */
+
+    /* Default hover: Real color transitions */
     .btn-ghost:hover {
         @apply bg-gray-200 text-gray-900;
         box-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.15);
     }
-    
-    /* When mask is applied: Override for mask effect */
+
+    /* When mask 3 (nature) is applied: Override for mask effect */
     .btn-ghost.btn-mask-nature {
-        background-color: #f3f4f6;
-        color: #374151;
+        background-color: #374151;
+        /* gray-700 */
+        color: white;
     }
-    
+
     /* Disable regular hover when mask is active */
     .btn-ghost.btn-mask-nature:hover {
-        background-color: #e5e7eb;
-        color: #111827;
+        background-color: #374151;
+        color: white;
+        box-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.15);
     }
 
     /* Auth button - Google style */
@@ -155,11 +158,11 @@
 /* Custom gradient with toxic violet */
 @layer utilities {
     .bg-gradient-hero {
-        background: linear-gradient(to top, atabai-violet 0%, #7c3aed 25%, #5b21b6 50%, #1a1a1a 75%, #000000 100%);
+        background: linear-gradient(to top, #9500FF 0%, #7c3aed 25%, #5b21b6 50%, #1a1a1a 75%, #000000 100%);
     }
 
     .bg-gradient-hero-alt {
-        background: linear-gradient(to bottom, atabai-violet, #000000);
+        background: linear-gradient(to bottom, #9500FF, #000000);
     }
 }
 
