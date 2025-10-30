@@ -248,7 +248,7 @@
                       <span class="font-medium">85</span>
                     </div>
                   </div>
-                  <button class="btn-primary w-full">
+                  <button class="btn-primary btn-mask-animate w-full">
                     {{ $t('common.download') }}
                   </button>
                 </div>
@@ -269,7 +269,7 @@
                   </p>
                 </div>
                 <button @click="authStore.isAuthenticated ? $router.push('/dashboard') : authStore.login()"
-                  class="btn-primary mt-12 min-w-60 min-h-14 px-7 hover-glow md:mt-10">
+                  class="btn-primary btn-mask-animate mt-12 min-w-60 min-h-14 px-7 hover-glow md:mt-10">
                   {{ $t('cta.button') }}
                 </button>
               </div>
@@ -482,7 +482,7 @@
       </div>
       <div class="flex items-center gap-3 order-2 md:order-none">
         <button @click="authStore.isAuthenticated ? $router.push('/dashboard') : authStore.login()"
-          class="btn-ghost text-sm w-full md:w-auto md:order-none">
+          class="btn-ghost btn-mask-nature text-sm w-full md:w-auto md:order-none">
           {{ $t('hero.tryFree') }}
         </button>
       </div>
