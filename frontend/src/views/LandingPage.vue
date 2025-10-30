@@ -501,7 +501,7 @@
         
         <!-- Instagram Button -->
         <button 
-          @click="window.open('https://instagram.com/atabai_official', '_blank')"
+          @click="window.open('https://instagram.com/atabai.official', '_blank')"
           class="btn-ghost p-3 rounded-full transition-colors"
           title="Instagram"
         >
