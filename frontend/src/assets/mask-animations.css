@@ -1,0 +1,85 @@
+/* Portable CSS Mask Button Animations */
+
+/* Keyframe animations for mask effects */
+@keyframes maskHover {
+  from {
+    -webkit-mask-position: 0 0;
+    mask-position: 0 0;
+  }
+  to {
+    -webkit-mask-position: 100% 0;
+    mask-position: 100% 0;
+  }
+}
+
+@keyframes maskReset {
+  from {
+    -webkit-mask-position: 100% 0;
+    mask-position: 100% 0;
+  }
+  to {
+    -webkit-mask-position: 0 0;
+    mask-position: 0 0;
+  }
+}
+
+/* Base mask animation class - can be applied to any button */
+.btn-mask-animate {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  
+  /* Apply mask properties */
+  -webkit-mask: url("/images/masks/nature-sprite.png");
+  mask: url("/images/masks/nature-sprite.png");
+  -webkit-mask-size: 2300% 100%;
+  mask-size: 2300% 100%;
+  
+  /* Initial animation state */
+  -webkit-animation: maskReset 0.7s steps(22) forwards;
+  animation: maskReset 0.7s steps(22) forwards;
+}
+
+.btn-mask-animate:hover {
+  -webkit-animation: maskHover 0.7s steps(22) forwards;
+  animation: maskHover 0.7s steps(22) forwards;
+}
+
+/* Alternative mask effects for variety */
+.btn-mask-urban {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  
+  -webkit-mask: url("/images/masks/urban-sprite.png");
+  mask: url("/images/masks/urban-sprite.png");
+  -webkit-mask-size: 3000% 100%;
+  mask-size: 3000% 100%;
+  
+  -webkit-animation: maskReset 0.7s steps(29) forwards;
+  animation: maskReset 0.7s steps(29) forwards;
+}
+
+.btn-mask-urban:hover {
+  -webkit-animation: maskHover 0.7s steps(29) forwards;
+  animation: maskHover 0.7s steps(29) forwards;
+}
+
+.btn-mask-nature {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  
+  -webkit-mask: url("/images/masks/nature-smaller.png");
+  mask: url("/images/masks/nature-smaller.png");
+  -webkit-mask-size: 7100% 100%;
+  mask-size: 7100% 100%;
+  
+  -webkit-animation: maskReset 0.7s steps(70) forwards;
+  animation: maskReset 0.7s steps(70) forwards;
+}
+
+.btn-mask-nature:hover {
+  -webkit-animation: maskHover 0.7s steps(70) forwards;
+  animation: maskHover 0.7s steps(70) forwards;
+}

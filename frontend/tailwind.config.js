@@ -18,6 +18,7 @@ export default {
           dark: '#059669',
         },
         accent: '#9333ea',
+        'atabai-violet': '#9500FF',
         danger: '#EF4444',
         warning: '#F59E0B',
         success: '#10B981',
@@ -167,7 +168,6 @@ export default {
       },
       backgroundImage: {
         'gradient-primary': 'linear-gradient(to bottom right, var(--tw-gradient-stops))',
-        'gradient-hero': 'linear-gradient(to top, #8D1A3F, #000000)',
       },
     },
   },
