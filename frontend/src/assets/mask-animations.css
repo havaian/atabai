@@ -30,8 +30,8 @@
   transition: all 0.3s ease;
   
   /* Apply mask properties */
-  -webkit-mask: url("/images/masks/nature-sprite.png");
-  mask: url("/images/masks/nature-sprite.png");
+  -webkit-mask: url("/images/masks/1.png");
+  mask: url("/images/masks/1.png");
   -webkit-mask-size: 2300% 100%;
   mask-size: 2300% 100%;
   
@@ -51,8 +51,8 @@
   overflow: hidden;
   transition: all 0.3s ease;
   
-  -webkit-mask: url("/images/masks/urban-sprite.png");
-  mask: url("/images/masks/urban-sprite.png");
+  -webkit-mask: url("/images/masks/2.png");
+  mask: url("/images/masks/2.png");
   -webkit-mask-size: 3000% 100%;
   mask-size: 3000% 100%;
   
@@ -70,8 +70,8 @@
   overflow: hidden;
   transition: all 0.3s ease;
   
-  -webkit-mask: url("/images/masks/nature-smaller.png");
-  mask: url("/images/masks/nature-smaller.png");
+  -webkit-mask: url("/images/masks/1.png");
+  mask: url("/images/masks/1.png");
   -webkit-mask-size: 7100% 100%;
   mask-size: 7100% 100%;
   
