@@ -36,7 +36,6 @@
     .btn-secondary {
         @apply bg-black text-white font-medium px-6 py-3 rounded-lg transition-all duration-500 ease-out relative;
         @apply focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2;
-        transform-style: preserve-3d;
     }
 
     .btn-secondary::after {
@@ -55,8 +54,7 @@
     }
 
     .btn-secondary:hover {
-        transform: perspective(1000px) rotateX(-10deg) scale(1.08);
-        box-shadow: 0 30px 60px -15px rgba(149, 0, 255, 0.4);
+        box-shadow: 0 8px 25px -8px rgba(149, 0, 255, 0.4);
     }
 
     /* Rounded button - for special CTAs */
@@ -133,15 +131,15 @@
         box-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.15);
     }
 
-    /* Auth button - special Google style */
+    /* Auth button - Google style */
     .btn-auth {
-        @apply bg-primary text-white font-medium px-4 py-2 rounded-md transition-all duration-300 ease-out relative;
-        @apply focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2;
+        @apply bg-white text-gray-700 font-medium px-4 py-2 rounded-md transition-all duration-300 ease-out relative border border-gray-300;
+        @apply focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2;
     }
 
     .btn-auth:hover {
-        transform: perspective(1000px) rotateX(5deg) scale(1.05);
-        box-shadow: 0 20px 40px -15px rgba(139, 92, 246, 0.4);
+        @apply bg-gray-50;
+        box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.12);
     }
 }
 
