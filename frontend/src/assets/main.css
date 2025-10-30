@@ -20,13 +20,13 @@
     }
 
     /* When mask is applied: Override for mask effect */
-    .btn-primary.btn-mask-animate {
+    .btn-primary.btn-mask-1 {
         background-color: white;
         color: black;
     }
 
     /* Disable regular hover when mask is active */
-    .btn-primary.btn-mask-animate:hover {
+    .btn-primary.btn-mask-1:hover {
         background-color: black;
         color: white;
     }
@@ -130,14 +130,14 @@
     }
 
     /* When mask 3 (nature) is applied: Override for mask effect */
-    .btn-ghost.btn-mask-nature {
+    .btn-ghost.btn-mask-3 {
         background-color: #f3f4f6;
         /* gray-700 */
         color: #374151;
     }
 
     /* Disable regular hover when mask is active */
-    .btn-ghost.btn-mask-nature:hover {
+    .btn-ghost.btn-mask-3:hover {
         background-color: #111827;
         color: #111827;
         box-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.15);

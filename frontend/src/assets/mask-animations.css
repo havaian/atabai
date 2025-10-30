@@ -26,7 +26,7 @@
 }
 
 /* Base mask animation class - can be applied to any button */
-.btn-mask-animate {
+.btn-mask-1 {
   position: relative;
   overflow: hidden;
   transition: all 0.3s ease;
@@ -42,13 +42,13 @@
   animation: maskReset 0.7s steps(22) forwards;
 }
 
-.btn-mask-animate:hover {
+.btn-mask-1:hover {
   -webkit-animation: maskHover 0.7s steps(22) forwards;
   animation: maskHover 0.7s steps(22) forwards;
 }
 
 /* Alternative mask effects for variety */
-.btn-mask-urban {
+.btn-mask-2 {
   position: relative;
   overflow: hidden;
   transition: all 0.3s ease;
@@ -62,12 +62,12 @@
   animation: maskReset 0.7s steps(29) forwards;
 }
 
-.btn-mask-urban:hover {
+.btn-mask-2:hover {
   -webkit-animation: maskHover 0.7s steps(29) forwards;
   animation: maskHover 0.7s steps(29) forwards;
 }
 
-.btn-mask-nature {
+.btn-mask-3 {
   position: relative;
   overflow: hidden;
   transition: all 0.3s ease;
@@ -81,7 +81,7 @@
   animation: maskReset 0.7s steps(70) forwards;
 }
 
-.btn-mask-nature:hover {
+.btn-mask-3:hover {
   -webkit-animation: maskHover 0.7s steps(70) forwards;
   animation: maskHover 0.7s steps(70) forwards;
 }

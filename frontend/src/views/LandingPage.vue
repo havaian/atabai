@@ -248,7 +248,7 @@
                       <span class="font-medium">85</span>
                     </div>
                   </div>
-                  <button class="btn-primary btn-mask-animate w-full">
+                  <button class="btn-primary btn-mask-1 w-full">
                     {{ $t('common.download') }}
                   </button>
                 </div>
@@ -269,7 +269,7 @@
                   </p>
                 </div>
                 <button @click="authStore.isAuthenticated ? $router.push('/dashboard') : authStore.login()"
-                  class="btn-primary btn-mask-animate mt-12 min-w-60 min-h-14 px-7 hover-glow md:mt-10">
+                  class="btn-primary mt-12 min-w-60 min-h-14 px-7 hover-glow md:mt-10">
                   {{ $t('cta.button') }}
                 </button>
               </div>
@@ -481,9 +481,31 @@
         <div class="text-2xl font-bold text-primary">ATABAI</div>
       </div>
       <div class="flex items-center gap-3 order-2 md:order-none">
-        <button @click="authStore.isAuthenticated ? $router.push('/dashboard') : authStore.login()"
-          class="btn-ghost btn-mask-nature text-sm w-full md:w-auto md:order-none">
-          {{ $t('hero.tryFree') }}
+        <!-- Telegram Button -->
+        <button 
+          @click="window.open('https://t.me/atabai_official', '_blank')"
+          class="btn-ghost p-3 rounded-full transition-colors"
+          title="Telegram"
+        >
+          <TelegramIcon size="20" />
+        </button>
+        
+        <!-- Mail Button -->
+        <button 
+          @click="window.open('mailto:contact@atabai.uz', '_blank')"
+          class="btn-ghost p-3 rounded-full transition-colors"
+          title="Email"
+        >
+          <MailIcon size="20" />
+        </button>
+        
+        <!-- Instagram Button -->
+        <button 
+          @click="window.open('https://instagram.com/atabai_official', '_blank')"
+          class="btn-ghost p-3 rounded-full transition-colors"
+          title="Instagram"
+        >
+          <InstagramIcon size="20" />
         </button>
       </div>
     </footer>
@@ -496,6 +518,9 @@ import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
 import GoogleIcon from '@/components/icons/GoogleIcon.vue'
+import TelegramIcon from '@/components/icons/TelegramIcon.vue'
+import MailIcon from '@/components/icons/MailIcon.vue'
+import InstagramIcon from '@/components/icons/InstagramIcon.vue'
 import {
   ChevronDownIcon,
   Bars3Icon,
