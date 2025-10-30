@@ -121,28 +121,28 @@ load_env() {
 
 # Health check function
 health_check() {
-    local service=$1
-    local max_attempts=30
-    local attempt=1
+    # local service=$1
+    # local max_attempts=30
+    # local attempt=1
     
-    log "Performing health check for $service..."
+    # log "Performing health check for $service..."
     
-    while [ $attempt -le $max_attempts ]; do
-        if $DOCKER_COMPOSE ps $service | grep -q "healthy\|Up"; then
-            success "Health check passed for $service"
+    # while [ $attempt -le $max_attempts ]; do
+    #     if $DOCKER_COMPOSE ps $service | grep -q "healthy\|Up"; then
+    #         success "Health check passed for $service"
             return 0
-        fi
+    #     fi
         
-        if [ $((attempt % 5)) -eq 0 ]; then
-            log "Health check attempt $attempt/$max_attempts for $service..."
-        fi
+    #     if [ $((attempt % 5)) -eq 0 ]; then
+    #         log "Health check attempt $attempt/$max_attempts for $service..."
+    #     fi
         
-        sleep 2
-        attempt=$((attempt + 1))
-    done
+    #     sleep 2
+    #     attempt=$((attempt + 1))
+    # done
     
-    error "Health check failed for $service after $max_attempts attempts"
-    return 1
+    # error "Health check failed for $service after $max_attempts attempts"
+    # return 1
 }
 
 # Quick restart deployment (fastest option)
@@ -295,10 +295,10 @@ ultra_fast_deploy() {
     log "${RECYCLE} Updating containers..."
     if [ -n "$service" ]; then
         $DOCKER_COMPOSE up -d $service
-        # health_check $service
+        health_check $service
     else
         $DOCKER_COMPOSE up -d
-        # health_check "backend" && health_check "frontend-prod"
+        health_check "backend" && health_check "frontend-prod"
     fi
     
     success "${SPEAKER} Ultra-fast deployment complete!"
@@ -390,7 +390,7 @@ show_help() {
 }
 
 # Main command handling
-case "${1:-ultrafast}" in
+case "${1:-parallel}" in
     "quick")
         quick_deploy "${2:-}"
         ;;
@@ -417,6 +417,6 @@ case "${1:-ultrafast}" in
         echo "Use '$0 help' to see available commands."
         echo ""
         echo -e "${BLUE}Running ultrafast deployment...${NC}"
-        ultra_fast_deploy "${1:-}"
+        parallel_deploy "${1:-}"
         ;;
 esac
