@@ -291,15 +291,15 @@ ultra_fast_deploy() {
         $DOCKER_COMPOSE build --parallel  # NO --no-cache flag!
     fi
     
-    # # Use up instead of force-recreate for faster deployment
-    # log "${RECYCLE} Updating containers..."
-    # if [ -n "$service" ]; then
-    #     $DOCKER_COMPOSE up -d $service
-    #     health_check $service
-    # else
-    #     $DOCKER_COMPOSE up -d
-    #     health_check "backend" && health_check "frontend-prod"
-    # fi
+    # Use up instead of force-recreate for faster deployment
+    log "${RECYCLE} Updating containers..."
+    if [ -n "$service" ]; then
+        $DOCKER_COMPOSE up -d $service
+        # health_check $service
+    else
+        $DOCKER_COMPOSE up -d
+        # health_check "backend" && health_check "frontend-prod"
+    fi
     
     success "${SPEAKER} Ultra-fast deployment complete!"
     end_timer
@@ -390,7 +390,7 @@ show_help() {
 }
 
 # Main command handling
-case "${1:-standard}" in
+case "${1:-ultrafast}" in
     "quick")
         quick_deploy "${2:-}"
         ;;
@@ -416,7 +416,7 @@ case "${1:-standard}" in
         echo -e "${YELLOW}Unknown command: $1${NC}"
         echo "Use '$0 help' to see available commands."
         echo ""
-        echo -e "${BLUE}Running standard deployment...${NC}"
-        standard_deploy "${1:-}"
+        echo -e "${BLUE}Running ultrafast deployment...${NC}"
+        ultra_fast_deploy "${1:-}"
         ;;
 esac
