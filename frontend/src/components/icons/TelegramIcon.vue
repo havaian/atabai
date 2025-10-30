@@ -1,9 +1,9 @@
 <template>
     <svg :class="className" :width="size" :height="size" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <!-- Simple, large Telegram paper plane -->
+        <!-- Telegram paper plane icon - clean, large, and recognizable -->
         <path 
             :fill="color" 
-            d="M23.9 2.6c.2-.8-.5-1.5-1.3-1.3L1.1 8.7c-.8.3-.8 1.5 0 1.8l5.4 1.4 1.8 6.1c.2.8 1.3 1 1.9.5l2.4-2 4.4 3.4c.7.5 1.7.1 1.9-.7L23.9 2.6zM9.5 11.5l9.8-6.2c.3-.2.6.2.4.4L11 14.8l-.5 4-1-3.3z"
+            d="M22.269 2.316c.748-.047 1.336.598 1.211 1.329L20.367 20.863c-.1.583-.603.972-1.177.91-.201-.022-.4-.086-.576-.189L12 18.5l-3.707 4.365c-.532.626-1.54.251-1.54-.574v-5.318L2.316 15.05c-.75-.213-1.07-1.155-.529-1.56L22.269 2.316z"
         />
     </svg>
 </template>
