@@ -8,7 +8,7 @@
             class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div class="bg-white rounded-lg p-6 flex items-center space-x-4">
                 <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                <span class="text-gray-700">{{ authStore.loadingMessage || $t('common.loading') }}</span>
+                <span class="text-gray-700">{{ authStore.loadingMessage || 'Loading...' }}</span>
             </div>
         </div>
 
@@ -25,20 +25,30 @@
 </template>
 
 <script setup>
-import { onMounted } from 'vue'
+import { onMounted, nextTick } from 'vue'
 import { XMarkIcon } from '@heroicons/vue/24/outline'
 import { useAuthStore } from './stores/auth'
-import { setupGlobalPageTitles } from './composables/usePageTitle'
 
 const authStore = useAuthStore()
 
 onMounted(async () => {
     try {
-        // Initialize auth store - interceptors are already set up in the axios plugin
+        // Initialize auth store first
         await authStore.checkAuth()
 
-        // Setup global page titles within Vue context
-        setupGlobalPageTitles()
+        // Setup page titles after everything is initialized
+        await nextTick(() => {
+            try {
+                // Dynamically import the composable to ensure i18n is ready
+                import('./composables/usePageTitle.js').then(({ setupGlobalPageTitles }) => {
+                    setupGlobalPageTitles()
+                }).catch(error => {
+                    console.warn('Could not setup page titles:', error)
+                })
+            } catch (error) {
+                console.warn('Page title setup error:', error)
+            }
+        })
     } catch (error) {
         console.error('Failed to initialize app:', error)
     }

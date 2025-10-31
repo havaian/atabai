@@ -8,20 +8,55 @@ import { useI18n } from 'vue-i18n'
  */
 export function usePageTitle() {
     const route = useRoute()
-    const { t, locale } = useI18n()
+    const { t, locale, te } = useI18n()
+
+    // Helper function to safely get translation
+    const safeTranslate = (key, fallback = '') => {
+        try {
+            // Use te() to check if translation exists before translating
+            if (te(key)) {
+                return t(key)
+            }
+            return fallback
+        } catch (error) {
+            console.warn(`Translation error for key "${key}":`, error)
+            return fallback
+        }
+    }
 
     // Computed property that reactively gets the page title
     const pageTitle = computed(() => {
         try {
-            const currentPath = route.path
-            const title = t(`pageTitles.${currentPath}`)
+            // Map route paths to translation keys or use route name/meta
+            const routeTitleMap = {
+                '/': 'nav.home',
+                '/dashboard': 'nav.dashboard',
+                '/templates': 'nav.templates',
+                '/profile': 'nav.profile',
+                '/history': 'nav.history',
+                '/processing': 'Processing',
+                '/results': 'Results'
+            }
 
-            // If translation exists and is not the key itself, use it
-            if (title && title !== `pageTitles.${currentPath}`) {
+            const currentPath = route.path
+            const titleKey = routeTitleMap[currentPath]
+
+            let title = ''
+            if (titleKey) {
+                title = safeTranslate(titleKey, titleKey)
+            }
+
+            // If we have a valid title, use it
+            if (title && title !== titleKey) {
                 return `${title} | ATABAI`
             }
 
-            // Fallback to a generic title based on current locale
+            // Try route meta title
+            if (route.meta?.title) {
+                return route.meta.title
+            }
+
+            // Fallback to generic title based on current locale
             const fallbacks = {
                 'ru': 'ATABAI - Автоматизация Excel для МСФО',
                 'uz': 'ATABAI - Excel avtomatlashtirish IFRS uchun',
@@ -38,15 +73,25 @@ export function usePageTitle() {
     // Computed property for meta description
     const pageDescription = computed(() => {
         try {
-            const currentPath = route.path
-            const description = t(`pageDescriptions.${currentPath}`)
-
-            // If translation exists and is not the key itself, use it
-            if (description && description !== `pageDescriptions.${currentPath}`) {
-                return description
+            // Try route meta description first
+            if (route.meta?.description) {
+                return route.meta.description
             }
 
-            // Fallback to a generic description based on current locale
+            // Map route paths to description keys
+            const routeDescriptionMap = {
+                '/': 'Платформа для автоматизации финансовых расчетов в Excel в соответствии с требованиями МСФО',
+                '/dashboard': 'Рабочий стол для управления вашими Excel файлами и шаблонами МСФО',
+                '/templates': 'Шаблоны для автоматизации расчетов в соответствии с международными стандартами',
+                '/profile': 'Управление профилем и настройками аккаунта'
+            }
+
+            const currentPath = route.path
+            if (routeDescriptionMap[currentPath]) {
+                return routeDescriptionMap[currentPath]
+            }
+
+            // Fallback to generic description based on current locale
             const fallbacks = {
                 'ru': 'Платформа для автоматизации финансовых расчетов в Excel в соответствии с требованиями МСФО и законодательством Республики Узбекистан',
                 'uz': 'IFRS talablariga va O\'zbekiston Respublikasi qonunchiligiga muvofiq Excel moliyaviy hisob-kitoblarini avtomatlashtirish platformasi',
@@ -63,7 +108,9 @@ export function usePageTitle() {
     // Watch the computed title and update document.title
     watch(pageTitle, (newTitle) => {
         try {
-            document.title = newTitle
+            if (newTitle && typeof newTitle === 'string') {
+                document.title = newTitle
+            }
         } catch (error) {
             console.error('Error setting page title:', error)
         }
@@ -72,6 +119,8 @@ export function usePageTitle() {
     // Watch the computed description and update meta description
     watch(pageDescription, (newDescription) => {
         try {
+            if (!newDescription || typeof newDescription !== 'string') return
+
             let metaDescription = document.querySelector('meta[name="description"]')
             if (metaDescription) {
                 metaDescription.content = newDescription
@@ -99,9 +148,14 @@ export function usePageTitle() {
  */
 export function setupGlobalPageTitles() {
     try {
-        usePageTitle()
+        return usePageTitle()
     } catch (error) {
         console.error('Error setting up global page titles:', error)
+        // Return a fallback object to prevent further errors
+        return {
+            pageTitle: computed(() => 'ATABAI'),
+            pageDescription: computed(() => 'ATABAI - Excel Automation Platform')
+        }
     }
 }
 
@@ -111,27 +165,31 @@ export function setupGlobalPageTitles() {
  */
 export function setCustomPageTitle(customTitle, customDescription = null) {
     try {
-        const { locale } = useI18n()
+        if (!customTitle) return
 
         const title = typeof customTitle === 'function'
-            ? customTitle(locale.value)
+            ? customTitle()
             : customTitle
 
-        document.title = `${title} | ATABAI`
+        if (title && typeof title === 'string') {
+            document.title = title.includes('ATABAI') ? title : `${title} | ATABAI`
+        }
 
         if (customDescription) {
             const description = typeof customDescription === 'function'
-                ? customDescription(locale.value)
+                ? customDescription()
                 : customDescription
 
-            let metaDescription = document.querySelector('meta[name="description"]')
-            if (metaDescription) {
-                metaDescription.content = description
-            } else {
-                metaDescription = document.createElement('meta')
-                metaDescription.name = 'description'
-                metaDescription.content = description
-                document.head.appendChild(metaDescription)
+            if (description && typeof description === 'string') {
+                let metaDescription = document.querySelector('meta[name="description"]')
+                if (metaDescription) {
+                    metaDescription.content = description
+                } else {
+                    metaDescription = document.createElement('meta')
+                    metaDescription.name = 'description'
+                    metaDescription.content = description
+                    document.head.appendChild(metaDescription)
+                }
             }
         }
     } catch (error) {
