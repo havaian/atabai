@@ -133,7 +133,8 @@
           </p> -->
           <!-- Centered first CTA button -->
           <div class="flex justify-center mt-15 md:mt-10 md:mb-15">
-            <button @click="authStore.isAuthenticated ? $router.push('/dashboard') : authStore.login()"
+            <button 
+              @click="true ? goToComingSoon() : (authStore.isAuthenticated ? $router.push('/dashboard') : authStore.login())"
               class="btn-rounded pulse-glow min-w-60 min-h-14 flex items-center gap-2 justify-center md:px-5">
               {{ $t('hero.tryFree') }}
             </button>
@@ -266,7 +267,8 @@
                 </div>
                 <!-- Fixed mask button structure -->
                 <div class="btn-mask-container mt-12 md:mt-10">
-                  <button @click="authStore.isAuthenticated ? $router.push('/dashboard') : authStore.login()"
+                  <button 
+                    @click="true ? goToComingSoon() : (authStore.isAuthenticated ? $router.push('/dashboard') : authStore.login())"
                     class="btn-primary bg-white text-black border-white hover:bg-transparent hover:text-white hover:border-white min-w-60 min-h-14 px-7">
                     {{ $t('cta.button') }}
                   </button>
@@ -334,7 +336,7 @@
           </div>
 
           <!-- <div class="self-center flex justify-center mt-13 md:mt-10">
-            <button @click="authStore.isAuthenticated ? $router.push('/dashboard') : authStore.login()"
+              @click="true ? goToComingSoon() : (authStore.isAuthenticated ? $router.push('/dashboard') : authStore.login())"
               class="btn-rounded min-w-60 min-h-14 flex items-center gap-2 justify-center md:px-5">
               {{ $t('hero.tryFree') }}
             </button>
@@ -366,7 +368,8 @@
                     </div>
                     <div class="text-3xl font-bold text-gray-900 mb-2">{{ $t('pricing.basic.price') }}</div>
                     <div class="invisible text-sm text-gray-600 mb-6">placeholder</div>
-                    <button @click="authStore.isAuthenticated ? $router.push('/dashboard') : authStore.login()"
+                    <button 
+                      @click="true ? goToComingSoon() : (authStore.isAuthenticated ? $router.push('/dashboard') : authStore.login())"
                       class="btn-secondary w-full h-10">
                       {{ $t('pricing.getStarted') }}
                     </button>
@@ -417,7 +420,8 @@
                     </div>
                     <div class="text-3xl font-bold text-gray-900 mb-2">{{ $t('pricing.enterprise.price') }}</div>
                     <div class="invisible text-sm text-gray-600 mb-6">placeholder</div>
-                    <button @click="authStore.isAuthenticated ? $router.push('/dashboard') : authStore.login()"
+                    <button 
+                      @click="true ? goToComingSoon() : (authStore.isAuthenticated ? $router.push('/dashboard') : authStore.login())"
                       class="btn-secondary w-full h-10">
                       {{ $t('pricing.contactUs') }}
                     </button>
@@ -463,7 +467,8 @@
             </p>
           </div>
           <div class="flex md:flex-col md:mt-10 md:items-center mt-10">
-            <button @click="authStore.isAuthenticated ? $router.push('/dashboard') : authStore.login()"
+            <button 
+              @click="true ? goToComingSoon() : (authStore.isAuthenticated ? $router.push('/dashboard') : authStore.login())"
               class="btn-circle w-65 h-65 flex justify-center items-center flex-col gap-5 text-xl font-medium whitespace-pre-line leading-tight text-center">
               <ArrowRightIcon class="w-12 h-12 text-black" />
               {{ $t('finalCta.button') }}
@@ -475,7 +480,7 @@
 
     <!-- Footer -->
     <footer
-      class="flex w-full max-w-4xl flex-col md:flex-row items-center gap-6 md:gap-10 justify-between mt-27 py-4 px-8 rounded-47 md:mt-10 mx-auto">
+      class="flex w-full max-w-4xl flex-col md:flex-row items-center gap-6 md:gap-10 justify-between mt-15 py-4 px-8 mb-8 rounded-47 md:mt-5 mx-auto">
       <div class="order-1 md:order-none">
         <div class="text-2xl font-bold text-primary">ATABAI</div>
       </div>
@@ -546,6 +551,10 @@ const currentLocale = computed(() => {
 // Methods
 async function changeLanguage(newLocale) {
   await changeLocale(newLocale)
+}
+
+function goToComingSoon() {
+  router.push('/coming-soon')
 }
 
 // Lifecycle

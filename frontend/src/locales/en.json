@@ -11,23 +11,24 @@
     "pricing": "Pricing"
   },
   "hero": {
-    "title": "Powerful platform for automating Excel calculations in accordance with IFRS",
+    "title": "Powerful platform for automating Excel calculations according to IFRS",
     "subtitle": "With ATABAI, financial reporting will be tens of times cheaper and faster",
     "tryFree": "Try for free",
     "loginGoogle": "Sign in with Google"
   },
   "stats": {
-    "seconds": "seconds",
-    "analysisTime": "Time to analyze Excel file",
+    "seconds": "sec.",
+    "minute": "min.",
+    "analysisTime": "Excel file analysis time",
     "accuracy": "Calculation accuracy",
     "availability": "Works without breaks",
-    "timeSaving": "Time savings"
+    "timeSaving": "Time savings through automation"
   },
   "howItWorks": {
     "title": "How it works",
     "step1": {
       "title": "Upload Excel files",
-      "description": "Upload your financial Excel files for processing per IFRS requirements",
+      "description": "Upload your financial Excel files for processing according to IFRS requirements",
       "uploadText": "Drag files here or click to select",
       "supportedFormats": "Supported formats: .xlsx, .xls, .csv"
     },
@@ -118,6 +119,21 @@
     "title": "Ready to start?",
     "subtitle": "Start automating your IFRS calculations today",
     "button": "Get Started"
+  },
+  "comingSoon": {
+    "pageTitle": "Coming Soon",
+    "title": "Launching Soon!",
+    "description": "We're working hard to create the best platform for IFRS calculation automation. Our team is finalizing all features to provide you with an exceptional experience.",
+    "featuresTitle": "What's coming:",
+    "feature1": "Automated depreciation and impairment calculations",
+    "feature2": "Full compliance with IFRS standards",
+    "feature3": "Intuitive interface and fast processing",
+    "feature4": "Detailed reports and result exports",
+    "contactTitle": "Have questions?",
+    "contactDescription": "Contact us for more information or to be notified about the launch.",
+    "telegram": "Message on Telegram",
+    "email": "Send email",
+    "backToHome": "Back to home"
   },
   "auth": {
     "signIn": "Sign In",

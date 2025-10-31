@@ -17,11 +17,12 @@
     "loginGoogle": "Google orqali kirish"
   },
   "stats": {
-    "seconds": "soniya",
+    "seconds": "son.",
+    "minute": "daq.",
     "analysisTime": "Excel fayllarini tahlil qilish vaqti",
     "accuracy": "Hisob-kitob aniqligi",
     "availability": "Tanaffussiz ishlaydi",
-    "timeSaving": "Vaqt tejash"
+    "timeSaving": "Avtomatlashtirish orqali vaqt tejash"
   },
   "howItWorks": {
     "title": "Qanday ishlaydi",
@@ -118,6 +119,21 @@
     "title": "Boshlashga tayyormisiz?",
     "subtitle": "IFRS hisob-kitoblaringizni bugundan boshlab avtomatlashtiring",
     "button": "Ishni boshlash"
+  },
+  "comingSoon": {
+    "pageTitle": "Tez orada",
+    "title": "Tez orada ishga tushadi!",
+    "description": "Biz IFRS hisob-kitoblarini avtomatlashtirish uchun eng yaxshi platformani yaratish ustida qattiq ishlayapmiz. Jamoa sizga ajoyib tajriba taqdim etish uchun barcha xususiyatlarni yakunlayapti.",
+    "featuresTitle": "Sizni nima kutmoqda:",
+    "feature1": "Amortizatsiya va qadrsizlanish hisob-kitoblarini avtomatlashtirish",
+    "feature2": "IFRS standartlariga to'liq muvofiqlik",
+    "feature3": "Intuitiv interfeys va tez ishlov berish",
+    "feature4": "Batafsil hisobotlar va natijalarni eksport qilish",
+    "contactTitle": "Savollaringiz bormi?",
+    "contactDescription": "Qo'shimcha ma'lumot olish yoki ishga tushirish haqida xabardor bo'lish uchun biz bilan bog'laning.",
+    "telegram": "Telegramda yozish",
+    "email": "Email yuborish",
+    "backToHome": "Bosh sahifaga qaytish"
   },
   "auth": {
     "signIn": "Kirish",

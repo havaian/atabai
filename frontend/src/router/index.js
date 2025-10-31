@@ -3,6 +3,7 @@ import { useAuthStore } from '@/stores/auth'
 
 // Import views
 import LandingPage from '@/views/LandingPage.vue'
+import ComingSoon from '@/views/ComingSoon.vue'
 // import Dashboard from '@/views/Dashboard.vue'
 // import ProcessingPage from '@/views/ProcessingPage.vue'
 // import ResultsPage from '@/views/ResultsPage.vue'
@@ -18,6 +19,15 @@ const routes = [
         meta: {
             title: 'ATABAI - Автоматизация Excel для МСФО',
             description: 'Платформа для автоматизации финансовых расчетов в Excel в соответствии с требованиями МСФО'
+        }
+    },
+    {
+        path: '/coming-soon',
+        name: 'ComingSoon',
+        component: ComingSoon,
+        meta: {
+            title: 'Скоро запуск - ATABAI',
+            description: 'ATABAI скоро будет доступен. Следите за обновлениями о запуске нашей платформы автоматизации МСФО.'
         }
     },
     // {
