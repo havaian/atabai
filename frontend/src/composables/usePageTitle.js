@@ -3,8 +3,8 @@ import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 
 /**
- * Composable for managing page titles based on current route
- * Automatically updates document.title when route or locale changes
+ * Composable for managing page titles and meta descriptions based on current route
+ * Automatically updates document.title and meta description when route or locale changes
  */
 export function usePageTitle() {
     const route = useRoute()
@@ -30,18 +30,53 @@ export function usePageTitle() {
         return fallbacks[locale.value] || fallbacks['en']
     })
 
+    // Computed property for meta description
+    const pageDescription = computed(() => {
+        const currentPath = route.path
+        const description = t(`pageDescriptions.${currentPath}`)
+
+        // If translation exists and is not the key itself, use it
+        if (description && description !== `pageDescriptions.${currentPath}`) {
+            return description
+        }
+
+        // Fallback to a generic description based on current locale
+        const fallbacks = {
+            'ru': 'Платформа для автоматизации финансовых расчетов в Excel в соответствии с требованиями МСФО и законодательством Республики Узбекистан',
+            'uz': 'IFRS talablariga va O\'zbekiston Respublikasi qonunchiligiga muvofiq Excel moliyaviy hisob-kitoblarini avtomatlashtirish platformasi',
+            'en': 'Platform for automating financial calculations in Excel in accordance with IFRS requirements and legislation of the Republic of Uzbekistan'
+        }
+
+        return fallbacks[locale.value] || fallbacks['en']
+    })
+
     // Watch the computed title and update document.title
     watch(pageTitle, (newTitle) => {
         document.title = newTitle
     }, { immediate: true })
 
+    // Watch the computed description and update meta description
+    watch(pageDescription, (newDescription) => {
+        const metaDescription = document.querySelector('meta[name="description"]')
+        if (metaDescription) {
+            metaDescription.content = newDescription
+        } else {
+            // Create meta description if it doesn't exist
+            const meta = document.createElement('meta')
+            meta.name = 'description'
+            meta.content = newDescription
+            document.head.appendChild(meta)
+        }
+    }, { immediate: true })
+
     return {
-        pageTitle
+        pageTitle,
+        pageDescription
     }
 }
 
 /**
- * Global setup function to automatically handle page titles for all routes
+ * Global setup function to automatically handle page titles and descriptions for all routes
  * This should be called once in the main app setup
  */
 export function setupGlobalPageTitles() {
@@ -49,10 +84,10 @@ export function setupGlobalPageTitles() {
 }
 
 /**
- * Alternative function for setting custom page titles
+ * Alternative function for setting custom page titles and descriptions
  * Useful for dynamic pages where the title depends on data
  */
-export function setCustomPageTitle(customTitle) {
+export function setCustomPageTitle(customTitle, customDescription = null) {
     const { locale } = useI18n()
 
     const title = typeof customTitle === 'function'
@@ -60,4 +95,15 @@ export function setCustomPageTitle(customTitle) {
         : customTitle
 
     document.title = `${title} | ATABAI`
+
+    if (customDescription) {
+        const description = typeof customDescription === 'function'
+            ? customDescription(locale.value)
+            : customDescription
+
+        const metaDescription = document.querySelector('meta[name="description"]')
+        if (metaDescription) {
+            metaDescription.content = description
+        }
+    }
 }

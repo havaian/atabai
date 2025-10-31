@@ -9,6 +9,16 @@
     "/results": "Processing Results",
     "/coming-soon": "Coming Soon"
   },
+  "pageDescriptions": {
+    "/": "Powerful platform for automating Excel calculations according to IFRS. With ATABAI, financial reporting will be tens of times cheaper and faster.",
+    "/dashboard": "ATABAI Dashboard - manage files, IFRS templates and monitor the processing of financial documents.",
+    "/templates": "IFRS templates for automating depreciation calculations, discounts, asset impairment and financial reports.",
+    "/profile": "ATABAI user profile settings - manage subscription, preferences and personal data.",
+    "/history": "File processing history in ATABAI - view results, download processed documents and statistics.",
+    "/processing": "Processing Excel files according to IFRS standards - applying automation formulas and generating reports.",
+    "/results": "ATABAI file processing results - compare changes, detailed reports and export ready documents.",
+    "/coming-soon": "ATABAI will be available soon. The Excel calculation automation platform for IFRS is under development."
+  },
   "nav": {
     "home": "Home",
     "dashboard": "Dashboard",

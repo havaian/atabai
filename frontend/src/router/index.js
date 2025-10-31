@@ -15,28 +15,19 @@ const routes = [
     {
         path: '/',
         name: 'Landing',
-        component: LandingPage,
-        meta: {
-            title: 'ATABAI - Автоматизация Excel для МСФО',
-            description: 'Платформа для автоматизации финансовых расчетов в Excel в соответствии с требованиями МСФО'
-        }
+        component: LandingPage
     },
     {
         path: '/coming-soon',
         name: 'ComingSoon',
-        component: ComingSoon,
-        meta: {
-            title: 'Скоро запуск - ATABAI',
-            description: 'ATABAI скоро будет доступен. Следите за обновлениями о запуске нашей платформы автоматизации МСФО.'
-        }
+        component: ComingSoon
     },
     // {
     //     path: '/dashboard',
     //     name: 'Dashboard',
     //     component: Dashboard,
     //     meta: {
-    //         requiresAuth: true,
-    //         title: 'Рабочий стол - ATABAI'
+    //         requiresAuth: true
     //     }
     // },
     // {
@@ -44,8 +35,7 @@ const routes = [
     //     name: 'Templates',
     //     component: TemplatesPage,
     //     meta: {
-    //         requiresAuth: true,
-    //         title: 'Шаблоны МСФО - ATABAI'
+    //         requiresAuth: true
     //     }
     // },
     // {
@@ -53,8 +43,7 @@ const routes = [
     //     name: 'Processing',
     //     component: ProcessingPage,
     //     meta: {
-    //         requiresAuth: true,
-    //         title: 'Обработка файла - ATABAI'
+    //         requiresAuth: true
     //     }
     // },
     // {
@@ -62,8 +51,7 @@ const routes = [
     //     name: 'Results',
     //     component: ResultsPage,
     //     meta: {
-    //         requiresAuth: true,
-    //         title: 'Результаты обработки - ATABAI'
+    //         requiresAuth: true
     //     }
     // },
     // {
@@ -71,8 +59,7 @@ const routes = [
     //     name: 'Profile',
     //     component: ProfilePage,
     //     meta: {
-    //         requiresAuth: true,
-    //         title: 'Профиль - ATABAI'
+    //         requiresAuth: true
     //     }
     // },
     // {
@@ -80,8 +67,7 @@ const routes = [
     //     name: 'History',
     //     component: HistoryPage,
     //     meta: {
-    //         requiresAuth: true,
-    //         title: 'История файлов - ATABAI'
+    //         requiresAuth: true
     //     }
     // },
     {
@@ -108,18 +94,8 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
     const authStore = useAuthStore()
 
-    // Set page title
-    if (to.meta.title) {
-        document.title = to.meta.title
-    }
-
-    // Set meta description
-    if (to.meta.description) {
-        const metaDescription = document.querySelector('meta[name="description"]')
-        if (metaDescription) {
-            metaDescription.content = to.meta.description
-        }
-    }
+    // Meta descriptions are now handled automatically by the global composable
+    // No need to manually set them here
 
     // Check authentication
     if (to.meta.requiresAuth && !authStore.isAuthenticated) {

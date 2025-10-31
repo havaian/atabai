@@ -9,6 +9,16 @@
     "/results": "Qayta ishlash natijalari",
     "/coming-soon": "Tez orada"
   },
+  "pageDescriptions": {
+    "/": "IFRS bo'yicha Excel hisob-kitoblarini avtomatlashtirishning kuchli platformasi. ATABAI bilan hisobot tayyorlash o'n marta arzonroq va tezroq bo'ladi.",
+    "/dashboard": "ATABAI boshqaruv paneli - fayllar, IFRS shablonlari va moliyaviy hujjatlarni qayta ishlash jarayonini boshqarish.",
+    "/templates": "Amortizatsiya hisob-kitoblari, chegirmalar, aktivlarning qadrsizlanishi va moliyaviy hisobotlarni avtomatlashtirish uchun IFRS shablonlari.",
+    "/profile": "ATABAI foydalanuvchi profili sozlamalari - obuna, afzalliklar va shaxsiy ma'lumotlarni boshqarish.",
+    "/history": "ATABAI da fayllarni qayta ishlash tarixi - natijalarni ko'rish, qayta ishlangan hujjatlarni yuklab olish va statistika.",
+    "/processing": "IFRS standartlariga muvofiq Excel fayllarini qayta ishlash - avtomatlashtirish formulalarini qo'llash va hisobotlar yaratish.",
+    "/results": "ATABAI fayllarni qayta ishlash natijalari - o'zgarishlarni solishtirish, batafsil hisobotlar va tayyor hujjatlarni eksport qilish.",
+    "/coming-soon": "ATABAI tez orada mavjud bo'ladi. IFRS uchun Excel hisob-kitoblarini avtomatlashtirish platformasi ishlab chiqilmoqda."
+  },
   "nav": {
     "home": "Bosh sahifa",
     "dashboard": "Boshqaruv paneli",
