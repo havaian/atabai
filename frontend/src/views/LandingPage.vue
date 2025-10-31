@@ -245,7 +245,7 @@
                       <span class="font-medium">85</span>
                     </div>
                   </div>
-                  <button class="btn-primary  bg-black text-white border-black hover:bg-white hover:text-black w-full">
+                  <button class="btn-primary  bg-black text-white border-black hover:bg-white hover:text-black hover:shadow-none w-full">
                     {{ $t('common.download') }}
                   </button>
                 </div>
@@ -272,9 +272,6 @@
                     <!-- Hidden text for mask button -->
                     {{ $t('cta.button') }}
                   </button>
-                  <div class="btn-mask-overlay">
-                    {{ $t('cta.button') }}
-                  </div>
                 </div>
               </div>
             </section>
