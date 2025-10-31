@@ -24,7 +24,7 @@
         <div class="relative z-10 min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8">
             <div class="max-w-2xl w-full text-center">
                 <!-- Rotating Gear Icon -->
-                <div class="mb-10">
+                <div class="mb-8">
                     <div class="relative inline-block">
                         <div class="w-32 h-32 mx-auto mb-8">
                             <div class="w-full h-full rounded-full flex items-center justify-center shadow-2xl"
@@ -45,7 +45,7 @@
                 <!-- Clean actions -->
                 <div class="space-y-4">
                     <!-- Contact buttons -->
-                    <div class="flex flex-col sm:flex-row gap-3 justify-center max-w-lg mx-auto mb-14">
+                    <div class="flex flex-col sm:flex-row gap-3 justify-center max-w-lg mx-auto mb-16">
                         <button @click="openTelegram"
                             class="text-white/80 hover:text-white font-medium py-3 px-6 rounded-lg hover:bg-white/10 transition-colors inline-flex items-center justify-center">
                             <TelegramIcon size="20" className="mr-2" />
