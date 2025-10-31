@@ -3,8 +3,9 @@
 @tailwind utilities;
 
 :root {
-  --primary: #0284c7;
-  --accent: #0369a1;
+    --primary: #0284c7;
+    --accent: #0369a1;
+    --atabai-violet: #9500ff;
 }
 
 /* Global transition base - applied to base state, not hover */

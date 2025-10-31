@@ -115,12 +115,12 @@ onMounted(async () => {
 }
 
 ::-webkit-scrollbar-thumb {
-    background: var(--primary);
+    background: var(--primary-dark);
     border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: var(--primary-dark);
+    background: var(--atabai-violet);
 }
 
 /* Smooth transitions */
