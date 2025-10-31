@@ -24,7 +24,7 @@
         <div class="relative z-10 min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8">
             <div class="max-w-2xl w-full text-center">
                 <!-- Rotating Gear Icon -->
-                <div class="mb-12">
+                <div class="mb-10">
                     <div class="relative inline-block">
                         <div class="w-32 h-32 mx-auto mb-8">
                             <div class="w-full h-full rounded-full flex items-center justify-center shadow-2xl"
@@ -36,7 +36,7 @@
                 </div>
 
                 <!-- Simple message -->
-                <div class="mb-2 space-y-4">
+                <div class="mb-4 space-y-4">
                     <h2 class="text-3xl sm:text-4xl font-bold text-white">
                         {{ $t('comingSoon.title') }}
                     </h2>
