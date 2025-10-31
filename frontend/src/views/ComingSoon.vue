@@ -68,7 +68,7 @@
                     <!-- Back to home -->
                     <div class="flex justify-center">
                         <router-link to="/"
-                            class="button text-white/80 hover:text-white bg-white/10 font-medium py-4 px-8 rounded-lg hover:bg-white/20 transition-colors inline-flex items-center">
+                            class="button text-white/80 hover:text-white font-medium py-4 px-8 rounded-lg hover:bg-white/10 transition-colors inline-flex items-center">
                             <ArrowLeftIcon class="w-6 h-6 mr-2" />
                             {{ $t('comingSoon.backToHome') }}
                         </router-link>
