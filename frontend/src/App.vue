@@ -28,6 +28,7 @@
 import { onMounted } from 'vue'
 import { XMarkIcon } from '@heroicons/vue/24/outline'
 import { useAuthStore } from './stores/auth'
+import { setupGlobalPageTitles } from './composables/usePageTitle'
 
 const authStore = useAuthStore()
 
@@ -35,6 +36,9 @@ onMounted(async () => {
     try {
         // Initialize auth store - interceptors are already set up in the axios plugin
         await authStore.checkAuth()
+
+        // Setup global page titles within Vue context
+        setupGlobalPageTitles()
     } catch (error) {
         console.error('Failed to initialize app:', error)
     }
