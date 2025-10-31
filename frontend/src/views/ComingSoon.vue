@@ -1,5 +1,5 @@
 <template>
-    <div class="min-h-screen bg-gradient-to-br from-slate-900 via-[#0284c7] to-[#0369a1] relative overflow-hidden">
+    <div class="min-h-screen bg-gradient-to-br from-[#0f172a] via-[#312e81] to-[#0c4a6e] relative overflow-hidden">
         <!-- Subtle Background Elements -->
         <div class="absolute inset-0">
             <!-- Clean floating orbs -->
@@ -104,9 +104,10 @@ watch(locale, updatePageTitle, { immediate: false })
 <style scoped>
 /* Grid Pattern Background */
 .bg-grid-pattern {
-    background-image:
+    background-image: linear-gradient(to right, #0f172a, #312e81, #0c4a6e);
+    /* background-image:
         linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px); */
     background-size: 40px 40px;
 }
 
