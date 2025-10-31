@@ -228,7 +228,7 @@ watch(locale, updatePageTitle, { immediate: false })
 
 /* Fancy logo styling */
 .logo-fancy {
-    background: linear-gradient(135deg, #0284c7 0%, #0369a1 50%, #0284c7 100%);
+    background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 50%, var(--primary) 100%);
     background-size: 200% 200%;
     -webkit-background-clip: text;
     background-clip: text;

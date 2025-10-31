@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --primary: #0284c7;
+  --accent: #0369a1;
+}
+
 /* Global transition base - applied to base state, not hover */
 @layer base {
     * {
