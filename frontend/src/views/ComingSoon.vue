@@ -54,7 +54,7 @@
                         <button @click="window.open('https://instagram.com/atabai.official', '_blank')"
                             class="text-white/80 hover:text-white font-medium py-3 px-6 rounded-lg hover:bg-white/10 transition-colors inline-flex items-center justify-center">
                             <InstagramIcon size="20" className="mr-2" />
-                            Instagram
+                            {{ $t('comingSoon.instagram') }}
                         </button>
                     </div>
 
@@ -70,28 +70,9 @@
 
                 <!-- Footer -->
                 <footer
-                    class="flex w-full max-w-4xl flex-col md:flex-row items-center gap-6 md:gap-10 justify-between mt-15 py-4 px-8 mb-8 rounded-47 md:mt-5 mx-auto">
+                    class="flex w-full max-w-4xl flex-col md:flex-row items-center gap-6 md:gap-10 justify-center mt-15 py-4 px-8 mb-8 rounded-47 md:mt-5 mx-auto">
                     <div class="order-1 md:order-none">
                         <div class="text-2xl font-bold text-primary">ATABAI</div>
-                    </div>
-                    <div class="flex items-center gap-3 order-2 md:order-none">
-                        <!-- Telegram Button -->
-                        <button @click="window.open('https://t.me/atabai_official', '_blank')"
-                            class="btn-ghost hover-glow p-3 rounded-full" title="Telegram">
-                            <TelegramIcon size="20" />
-                        </button>
-
-                        <!-- Mail Button -->
-                        <button @click="window.open('mailto:contact@atabai.uz', '_blank')"
-                            class="btn-ghost hover-glow p-3 rounded-full" title="Email">
-                            <MailIcon size="20" />
-                        </button>
-
-                        <!-- Instagram Button -->
-                        <button @click="window.open('https://instagram.com/atabai.official', '_blank')"
-                            class="btn-ghost hover-glow p-3 rounded-full" title="Instagram">
-                            <InstagramIcon size="20" />
-                        </button>
                     </div>
                 </footer>
             </div>

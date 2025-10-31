@@ -132,7 +132,8 @@
     "contactTitle": "Остались вопросы?",
     "contactDescription": "Свяжитесь с нами для получения дополнительной информации или уведомления о запуске.",
     "telegram": "Написать в Telegram",
-    "email": "Отправить email",
+    "email": "Отправить Email",
+    "instagram": "Подпишитесь в Instagram",
     "backToHome": "Вернуться на главную"
   },
   "auth": {

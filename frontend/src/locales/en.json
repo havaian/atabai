@@ -132,7 +132,8 @@
     "contactTitle": "Have questions?",
     "contactDescription": "Contact us for more information or to be notified about the launch.",
     "telegram": "Message on Telegram",
-    "email": "Send email",
+    "email": "Send us an Email",
+    "instagram": "Follow us on Instagram",
     "backToHome": "Back to home"
   },
   "auth": {
