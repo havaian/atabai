@@ -99,11 +99,6 @@ const updatePageTitle = () => {
 
 // Watch for locale changes and update title
 watch(locale, updatePageTitle, { immediate: false })
-
-// onMounted(() => {
-//     // Small delay to ensure i18n is fully loaded
-//     setTimeout(updatePageTitle, 100)
-// })
 </script>
 
 <style scoped>
