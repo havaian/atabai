@@ -8,6 +8,7 @@
     -webkit-mask-position: 0 0;
     mask-position: 0 0;
   }
+
   to {
     -webkit-mask-position: 100% 0;
     mask-position: 100% 0;
@@ -19,24 +20,55 @@
     -webkit-mask-position: 100% 0;
     mask-position: 100% 0;
   }
+
   to {
     -webkit-mask-position: 0 0;
     mask-position: 0 0;
   }
 }
 
+/* Button with mask overlay technique */
+.btn-mask-container {
+  position: relative;
+  display: inline-block;
+}
+
+/* Overlay text that stays visible */
+.btn-mask-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 500;
+  pointer-events: none;
+  z-index: 2;
+  transition: color 0.3s ease;
+}
+
+.btn-mask-container:hover .btn-mask-overlay {
+  color: black;
+}
+
 /* Base mask animation class - can be applied to any button */
 .btn-mask-1 {
   position: relative;
   overflow: hidden;
-  transition: all 0.3s ease;
-  
+  background: black;
+  color: transparent !important;
+  /* Hide button text, use overlay instead */
+  border: 1px solid black;
+
   /* Apply mask properties */
-  -webkit-mask: url("/images/masks/1.png");
-  mask: url("/images/masks/1.png");
+  -webkit-mask: url("https://raw.githubusercontent.com/robin-dela/css-mask-animation/master/img/nature-sprite.png");
+  mask: url("https://raw.githubusercontent.com/robin-dela/css-mask-animation/master/img/nature-sprite.png");
   -webkit-mask-size: 2300% 100%;
   mask-size: 2300% 100%;
-  
+
   /* Initial animation state */
   -webkit-animation: maskReset 0.7s steps(22) forwards;
   animation: maskReset 0.7s steps(22) forwards;
@@ -51,13 +83,15 @@
 .btn-mask-2 {
   position: relative;
   overflow: hidden;
-  transition: all 0.3s ease;
-  
-  -webkit-mask: url("/images/masks/2.png");
-  mask: url("/images/masks/2.png");
+  background: black;
+  color: transparent !important;
+  border: 1px solid black;
+
+  -webkit-mask: url("https://raw.githubusercontent.com/robin-dela/css-mask-animation/master/img/urban-sprite.png");
+  mask: url("https://raw.githubusercontent.com/robin-dela/css-mask-animation/master/img/urban-sprite.png");
   -webkit-mask-size: 3000% 100%;
   mask-size: 3000% 100%;
-  
+
   -webkit-animation: maskReset 0.7s steps(29) forwards;
   animation: maskReset 0.7s steps(29) forwards;
 }
@@ -70,13 +104,15 @@
 .btn-mask-3 {
   position: relative;
   overflow: hidden;
-  transition: all 0.3s ease;
-  
-  -webkit-mask: url("/images/masks/3.png");
-  mask: url("/images/masks/3.png");
+  background: black;
+  color: transparent !important;
+  border: 1px solid black;
+
+  -webkit-mask: url("https://raw.githubusercontent.com/pizza3/asset/master/natureSmaller.png");
+  mask: url("https://raw.githubusercontent.com/pizza3/asset/master/natureSmaller.png");
   -webkit-mask-size: 7100% 100%;
   mask-size: 7100% 100%;
-  
+
   -webkit-animation: maskReset 0.7s steps(70) forwards;
   animation: maskReset 0.7s steps(70) forwards;
 }

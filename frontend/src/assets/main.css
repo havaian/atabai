@@ -10,15 +10,18 @@
     * {
         @apply transition-all duration-300 ease-out;
     }
-    
+
     /* Override for elements that shouldn't have transitions */
-    img, svg, video {
+    img,
+    svg,
+    video {
         @apply transition-none;
     }
 }
 
 /* Button styles with innovative hover animations */
 @layer components {
+
     /* Primary button base styles */
     .btn-primary {
         @apply bg-white text-black font-medium px-6 py-3 rounded-lg transition-all duration-300 ease-out relative overflow-hidden;
@@ -32,15 +35,21 @@
     }
 
     /* When mask is applied: Override for mask effect */
-    .btn-primary.btn-mask-1 {
-        background-color: white;
-        color: black;
+    .btn-primary.btn-mask-1,
+    .btn-primary.btn-mask-2,
+    .btn-primary.btn-mask-3 {
+        background-color: black !important;
+        color: transparent !important;
+        border: 1px solid black;
     }
 
     /* Disable regular hover when mask is active */
-    .btn-primary.btn-mask-1:hover {
-        background-color: black;
-        color: white;
+    .btn-primary.btn-mask-1:hover,
+    .btn-primary.btn-mask-2:hover,
+    .btn-primary.btn-mask-3:hover {
+        background-color: black !important;
+        color: transparent !important;
+        box-shadow: none !important;
     }
 
     /* Secondary button - alternative style */
@@ -141,16 +150,16 @@
 
     /* When mask 3 (nature) is applied: Override for mask effect */
     .btn-ghost.btn-mask-3 {
-        background-color: #f3f4f6;
-        /* gray-700 */
-        color: #374151;
+        background-color: black !important;
+        color: transparent !important;
+        border: 1px solid black;
     }
 
     /* Disable regular hover when mask is active */
     .btn-ghost.btn-mask-3:hover {
-        background-color: #111827;
-        color: #111827;
-        box-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.15);
+        background-color: black !important;
+        color: transparent !important;
+        box-shadow: none !important;
     }
 
     /* Auth button - Google style */
