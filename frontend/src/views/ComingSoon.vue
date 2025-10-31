@@ -94,16 +94,16 @@ const { t, locale } = useI18n()
 
 // Function to update page title
 const updatePageTitle = () => {
-    document.title = t('comingSoon.pageTitle')
+    document.title = `${t('comingSoon.pageTitle')} | ATABAI`
 }
 
 // Watch for locale changes and update title
 watch(locale, updatePageTitle, { immediate: false })
 
-onMounted(() => {
-    // Small delay to ensure i18n is fully loaded
-    setTimeout(updatePageTitle, 100)
-})
+// onMounted(() => {
+//     // Small delay to ensure i18n is fully loaded
+//     setTimeout(updatePageTitle, 100)
+// })
 </script>
 
 <style scoped>
