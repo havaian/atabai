@@ -248,7 +248,7 @@
                       <span class="font-medium">85</span>
                     </div>
                   </div>
-                  <button class="btn-primary border-1 text-white bg-black border-black w-full">
+                  <button class="btn-primary bg-black text-white border-black hover:bg-white hover:text-black hover:border-black w-full">
                     {{ $t('common.download') }}
                   </button>
                 </div>
@@ -271,7 +271,7 @@
                 <!-- Fixed mask button structure -->
                 <div class="btn-mask-container mt-12 md:mt-10">
                   <button @click="authStore.isAuthenticated ? $router.push('/dashboard') : authStore.login()"
-                    class="btn-primary bg-white text-black border-1 border-white hover:bg-transparent hover:text-white min-w-60 min-h-14 px-7">
+                     class="btn-primary bg-white text-black border-white hover:bg-black hover:text-white hover:border-white min-w-60 min-h-14 px-7">
                     {{ $t('cta.button') }}
                   </button>
                 </div>
