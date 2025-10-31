@@ -13,6 +13,11 @@
 
             <!-- Minimal grid -->
             <div class="absolute inset-0 bg-grid-pattern opacity-3"></div>
+            
+            <!-- Large ATABAI background text -->
+            <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div class="text-background-atabai select-none font-bold logo-fancy">ATABAI</div>
+            </div>
         </div>
 
         <!-- Main Content -->
@@ -69,14 +74,6 @@
                         </router-link>
                     </div>
                 </div>
-
-                <!-- Footer -->
-                <footer
-                    class="flex w-full max-w-4xl flex-col md:flex-row items-center gap-6 md:gap-10 justify-center mt-15 py-4 px-8 mb-8 rounded-47 md:mt-5 mx-auto">
-                    <div class="order-1 md:order-none">
-                        <div class="text-5xl font-bold logo-fancy">ATABAI</div>
-                    </div>
-                </footer>
             </div>
         </div>
     </div>
@@ -224,6 +221,15 @@ watch(locale, updatePageTitle, { immediate: false })
 .hover-glow:hover {
     box-shadow: 0 0 50px rgba(2, 132, 199, 0.4), 0 30px 60px -15px rgba(2, 132, 199, 0.3);
     filter: brightness(1.1);
+}
+
+/* Large background ATABAI text */
+.text-background-atabai {
+    font-size: clamp(8rem, 20vw, 24rem);
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -0.05em;
+    white-space: nowrap;
 }
 
 /* Fancy logo styling */
