@@ -33,43 +33,14 @@
                     <h2 class="text-3xl sm:text-4xl font-bold text-white">
                         {{ $t('comingSoon.title') }}
                     </h2>
-
-                    <p class="text-lg sm:text-xl text-white/80 max-w-md mx-auto">
-                        {{ $t('comingSoon.description') }}
-                    </p>
-                </div>
-
-                <!-- Features Preview -->
-                <div class="mb-8 bg-white/10 backdrop-blur-sm rounded-2xl p-6 max-w-lg mx-auto">
-                    <h3 class="text-lg font-semibold text-white mb-4">
-                        {{ $t('comingSoon.featuresTitle') }}
-                    </h3>
-                    <ul class="space-y-3 text-left">
-                        <li class="flex items-center text-white/90">
-                            <CheckCircleIcon class="w-5 h-5 text-green-400 mr-3 flex-shrink-0" />
-                            {{ $t('comingSoon.feature1') }}
-                        </li>
-                        <li class="flex items-center text-white/90">
-                            <CheckCircleIcon class="w-5 h-5 text-green-400 mr-3 flex-shrink-0" />
-                            {{ $t('comingSoon.feature2') }}
-                        </li>
-                        <li class="flex items-center text-white/90">
-                            <CheckCircleIcon class="w-5 h-5 text-green-400 mr-3 flex-shrink-0" />
-                            {{ $t('comingSoon.feature3') }}
-                        </li>
-                        <li class="flex items-center text-white/90">
-                            <CheckCircleIcon class="w-5 h-5 text-green-400 mr-3 flex-shrink-0" />
-                            {{ $t('comingSoon.feature4') }}
-                        </li>
-                    </ul>
                 </div>
 
                 <!-- Clean actions -->
                 <div class="space-y-4">
                     <!-- Contact buttons -->
-                    <div class="flex flex-col sm:flex-row gap-3 justify-center max-w-sm mx-auto mb-6">
+                    <div class="flex flex-col sm:flex-row gap-3 justify-center max-w-lg mx-auto mb-6">
                         <button @click="window.open('https://t.me/atabai_official', '_blank')"
-                            class="bg-primary hover:bg-primary-dark text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 shadow-lg inline-flex items-center justify-center">
+                            class="text-white/80 hover:text-white font-medium py-3 px-6 rounded-lg hover:bg-white/10 transition-colors inline-flex items-center justify-center">
                             <TelegramIcon size="20" className="mr-2" />
                             {{ $t('comingSoon.telegram') }}
                         </button>
@@ -78,6 +49,12 @@
                             class="text-white/80 hover:text-white font-medium py-3 px-6 rounded-lg hover:bg-white/10 transition-colors inline-flex items-center justify-center">
                             <MailIcon size="20" className="mr-2" />
                             {{ $t('comingSoon.email') }}
+                        </button>
+
+                        <button @click="window.open('https://instagram.com/atabai.official', '_blank')"
+                            class="text-white/80 hover:text-white font-medium py-3 px-6 rounded-lg hover:bg-white/10 transition-colors inline-flex items-center justify-center">
+                            <InstagramIcon size="20" className="mr-2" />
+                            Instagram
                         </button>
                     </div>
 
@@ -92,15 +69,31 @@
                 </div>
 
                 <!-- Footer -->
-                <div class="mt-16 text-center">
-                    <div
-                        class="mx-auto w-16 h-16 bg-primary rounded-full flex items-center justify-center mb-4 animate-float">
-                        <div class="text-2xl font-bold text-white">A</div>
+                <footer
+                    class="flex w-full max-w-4xl flex-col md:flex-row items-center gap-6 md:gap-10 justify-between mt-15 py-4 px-8 mb-8 rounded-47 md:mt-5 mx-auto">
+                    <div class="order-1 md:order-none">
+                        <div class="text-2xl font-bold text-primary">ATABAI</div>
                     </div>
-                    <div class="text-white/40 text-sm font-medium">
-                        ATABAI
+                    <div class="flex items-center gap-3 order-2 md:order-none">
+                        <!-- Telegram Button -->
+                        <button @click="window.open('https://t.me/atabai_official', '_blank')"
+                            class="btn-ghost hover-glow p-3 rounded-full" title="Telegram">
+                            <TelegramIcon size="20" />
+                        </button>
+
+                        <!-- Mail Button -->
+                        <button @click="window.open('mailto:contact@atabai.uz', '_blank')"
+                            class="btn-ghost hover-glow p-3 rounded-full" title="Email">
+                            <MailIcon size="20" />
+                        </button>
+
+                        <!-- Instagram Button -->
+                        <button @click="window.open('https://instagram.com/atabai.official', '_blank')"
+                            class="btn-ghost hover-glow p-3 rounded-full" title="Instagram">
+                            <InstagramIcon size="20" />
+                        </button>
                     </div>
-                </div>
+                </footer>
             </div>
         </div>
     </div>
@@ -109,9 +102,10 @@
 <script setup>
 import { onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { CogIcon, CheckCircleIcon, ArrowLeftIcon } from '@heroicons/vue/24/outline'
+import { CogIcon, ArrowLeftIcon } from '@heroicons/vue/24/outline'
 import TelegramIcon from '@/components/icons/TelegramIcon.vue'
 import MailIcon from '@/components/icons/MailIcon.vue'
+import InstagramIcon from '@/components/icons/InstagramIcon.vue'
 
 const { t } = useI18n()
 
@@ -207,6 +201,49 @@ onMounted(() => {
     transition-property: all;
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
     transition-duration: 200ms;
+}
+
+/* Custom utility classes using proper CSS */
+.mt-15 {
+    margin-top: 3.75rem;
+}
+
+.rounded-47 {
+    border-radius: 2.9375rem;
+}
+
+/* Button styles inherited from main.css */
+.btn-ghost {
+    border: thin solid transparent;
+    background-color: rgba(243, 244, 246, 1);
+    color: rgba(55, 65, 81, 1);
+    font-weight: 500;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    transition: all 0.3s ease-out;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-ghost:hover {
+    background-color: rgba(229, 231, 235, 1);
+    color: rgba(17, 24, 39, 1);
+}
+
+.hover-glow {
+    transition: all 0.5s;
+}
+
+.hover-glow:hover {
+    box-shadow: 0 0 50px rgba(149, 0, 255, 0.4), 0 30px 60px -15px rgba(149, 0, 255, 0.3);
+    filter: brightness(1.1);
+}
+
+/* Responsive breakpoint adjustments */
+@media (max-width: 768px) {
+    .mt-15 {
+        margin-top: 1.25rem;
+    }
 }
 
 /* Reduced motion support */
