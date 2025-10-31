@@ -1,4 +1,14 @@
 {
+  "pageTitles": {
+    "/": "Bosh sahifa",
+    "/dashboard": "Boshqaruv paneli",
+    "/templates": "Shablonlar",
+    "/profile": "Profil",
+    "/history": "Fayllar tarixi",
+    "/processing": "Faylni qayta ishlash",
+    "/results": "Qayta ishlash natijalari",
+    "/coming-soon": "Tez orada"
+  },
   "nav": {
     "home": "Bosh sahifa",
     "dashboard": "Boshqaruv paneli",

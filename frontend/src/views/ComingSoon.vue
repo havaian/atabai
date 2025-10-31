@@ -80,19 +80,11 @@
 </template>
 
 <script setup>
-import { watch, onMounted } from 'vue'
-import { useI18n } from 'vue-i18n'
 import { CogIcon, ArrowLeftIcon } from '@heroicons/vue/24/outline'
 import TelegramIcon from '@/components/icons/TelegramIcon.vue'
 import MailIcon from '@/components/icons/MailIcon.vue'
 import InstagramIcon from '@/components/icons/InstagramIcon.vue'
-
-const { t, locale } = useI18n()
-
-// Function to update page title
-const updatePageTitle = () => {
-    document.title = `${t('comingSoon.pageTitle')} | ATABAI`
-}
+import { usePageTitle } from '@/composables/usePageTitle'
 
 const openTelegram = () => {
     window.open('https://t.me/atabai_official', '_blank');
@@ -104,8 +96,7 @@ const openInstagram = () => {
     window.open('https://instagram.com/atabai.official', '_blank');
 }
 
-// Watch for locale changes and update title
-watch(locale, updatePageTitle, { immediate: false })
+usePageTitle()
 </script>
 
 <style scoped>

@@ -1,4 +1,14 @@
 {
+  "pageTitles": {
+    "/": "Home",
+    "/dashboard": "Dashboard",
+    "/templates": "Templates", 
+    "/profile": "Profile",
+    "/history": "File History",
+    "/processing": "Processing File",
+    "/results": "Processing Results",
+    "/coming-soon": "Coming Soon"
+  },
   "nav": {
     "home": "Home",
     "dashboard": "Dashboard",
