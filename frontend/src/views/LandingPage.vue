@@ -17,11 +17,11 @@
                 {{ $t('nav.features') }}
               </a>
               <a href="#how-it-works"
-                class="text-gray-900 hover:text-primary px-3 py-2 text-sm font-medium transition-colors">
+                class="text-gray-900 hover:text-primary px-3 py-2 text-sm font-medium">
                 {{ $t('nav.howItWorks') }}
               </a>
               <a href="#pricing"
-                class="text-gray-900 hover:text-primary px-3 py-2 text-sm font-medium transition-colors">
+                class="text-gray-900 hover:text-primary px-3 py-2 text-sm font-medium">
                 {{ $t('nav.pricing') }}
               </a>
             </div>
@@ -33,7 +33,7 @@
             <div class="relative">
               <Menu as="div" class="relative inline-block text-left">
                 <MenuButton
-                  class="flex items-center gap-1 bg-gray-100 px-3 py-2 rounded-full hover:bg-gray-200 transition-colors">
+                  class="flex items-center gap-1 bg-gray-100 px-3 py-2 rounded-full hover:bg-gray-200">
                   <GlobeAltIcon class="w-4 h-4" />
                   <span class="text-sm font-medium">{{ currentLocale.code.toUpperCase() }}</span>
                   <ChevronDownIcon class="w-4 h-4" />
@@ -53,7 +53,7 @@
 
             <!-- Auth Buttons -->
             <div v-if="!authStore.isAuthenticated" class="flex items-center space-x-4">
-              <button @click="authStore.login" class="btn-auth inline-flex items-center">
+              <button @click="authStore.login" class="btn-auth hover-glow inline-flex items-center">
                 <GoogleIcon size="16" className="mr-2" />
                 {{ $t('auth.signInWithGoogle') }}
               </button>
@@ -248,7 +248,7 @@
                       <span class="font-medium">85</span>
                     </div>
                   </div>
-                  <button class="btn-primary btn-mask-1 w-full">
+                  <button class="btn-primary w-full">
                     {{ $t('common.download') }}
                   </button>
                 </div>
@@ -269,7 +269,7 @@
                   </p>
                 </div>
                 <button @click="authStore.isAuthenticated ? $router.push('/dashboard') : authStore.login()"
-                  class="btn-primary mt-12 min-w-60 min-h-14 px-7 hover-glow md:mt-10">
+                  class="btn-primary btn-mask-1 mt-12 min-w-60 min-h-14 px-7 hover-glow md:mt-10">
                   {{ $t('cta.button') }}
                 </button>
               </div>
@@ -334,17 +334,17 @@
             </div>
           </div>
 
-          <div class="self-center flex justify-center mt-13 md:mt-10">
+          <!-- <div class="self-center flex justify-center mt-13 md:mt-10">
             <button @click="authStore.isAuthenticated ? $router.push('/dashboard') : authStore.login()"
               class="btn-rounded min-w-60 min-h-14 flex items-center gap-2 justify-center md:px-5">
               {{ $t('hero.tryFree') }}
             </button>
-          </div>
+          </div> -->
         </section>
       </div>
 
       <!-- Pricing Section -->
-      <div id="pricing" class="animate-fade-in [animation-delay:800ms]">
+      <!-- <div id="pricing" class="animate-fade-in [animation-delay:800ms]">
         <section
           class="bg-white flex flex-col overflow-hidden items-center justify-center px-4 md:px-20 py-20 md:py-31">
           <div class="max-w-4xl">
@@ -353,7 +353,7 @@
             </h1>
           </div>
           <div class="flex flex-col md:flex-row w-full gap-5 mt-8 max-w-4xl">
-            <!-- Basic Plan -->
+            <!-- Basic Plan
             <div
               class="bg-card text-card-foreground shadow-sm flex-1 relative overflow-hidden rounded-3xl border-2 border-gray-200">
               <div class="relative">
@@ -361,7 +361,7 @@
                   <div class="flex flex-col items-start text-center">
                     <div class="flex items-center justify-between w-full">
                       <div
-                        class="inline-flex items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary hover:bg-secondary text-secondary-foreground px-3 py-1 text-xl font-semibold mb-6 border-0">
+                        class="inline-flex items-center rounded-full focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary hover:bg-secondary text-secondary-foreground px-3 py-1 text-xl font-semibold mb-6 border-0">
                         {{ $t('pricing.basic.title') }}
                       </div>
                     </div>
@@ -404,7 +404,7 @@
               </div>
             </div>
 
-            <!-- Enterprise Plan -->
+            <!-- Enterprise Plan
             <div
               class="bg-card text-card-foreground shadow-sm flex-1 relative overflow-hidden rounded-3xl border-2 border-gray-200">
               <div class="relative">
@@ -412,7 +412,7 @@
                   <div class="flex flex-col items-start text-center">
                     <div class="flex items-center justify-between w-full">
                       <div
-                        class="inline-flex items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary hover:bg-secondary text-secondary-foreground px-3 py-1 text-xl font-semibold mb-6 border-0">
+                        class="inline-flex items-center rounded-full focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary hover:bg-secondary text-secondary-foreground px-3 py-1 text-xl font-semibold mb-6 border-0">
                         {{ $t('pricing.enterprise.title') }}
                       </div>
                     </div>
@@ -448,7 +448,7 @@
             </div>
           </div>
         </section>
-      </div>
+      </div> -->
 
       <!-- Final CTA Section -->
       <div class="animate-fade-in [animation-delay:1000ms]">
@@ -484,7 +484,7 @@
         <!-- Telegram Button -->
         <button 
           @click="window.open('https://t.me/atabai_official', '_blank')"
-          class="btn-ghost p-3 rounded-full transition-colors"
+          class="btn-ghost hover-glow p-3 rounded-full"
           title="Telegram"
         >
           <TelegramIcon size="20" />
@@ -493,7 +493,7 @@
         <!-- Mail Button -->
         <button 
           @click="window.open('mailto:contact@atabai.uz', '_blank')"
-          class="btn-ghost p-3 rounded-full transition-colors"
+          class="btn-ghost hover-glow p-3 rounded-full"
           title="Email"
         >
           <MailIcon size="20" />
@@ -502,7 +502,7 @@
         <!-- Instagram Button -->
         <button 
           @click="window.open('https://instagram.com/atabai.official', '_blank')"
-          class="btn-ghost p-3 rounded-full transition-colors"
+          class="btn-ghost hover-glow p-3 rounded-full"
           title="Instagram"
         >
           <InstagramIcon size="20" />

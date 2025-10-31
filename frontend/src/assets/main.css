@@ -47,7 +47,6 @@
     .btn-secondary {
         @apply bg-black text-white font-medium px-6 py-3 rounded-lg transition-all duration-500 ease-out relative;
         @apply focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2;
-        transform-style: preserve-3d;
     }
 
     .btn-secondary::after {
@@ -102,7 +101,6 @@
     .btn-circle {
         @apply bg-white text-black font-medium rounded-full transition-all duration-700 ease-out relative;
         @apply focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2;
-        transform-style: preserve-3d;
     }
 
     .btn-circle::before {
@@ -224,12 +222,6 @@
         border-radius: 40% 60% 40% 60% / 60% 40% 60% 40%;
         box-shadow: 0 25px 50px rgba(149, 0, 255, 0.4);
     }
-}
-
-/* Enhanced button hover effects for all buttons */
-button {
-    @apply transition-all duration-300 ease-out;
-    transform-style: preserve-3d;
 }
 
 button:active {
