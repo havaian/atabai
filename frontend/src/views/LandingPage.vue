@@ -149,7 +149,7 @@
         <div class="animate-fade-in [animation-delay:200ms] mt-27 md:mt-15">
           <section class="flex w-full max-w-4xl gap-5 text-black flex-wrap justify-center mx-auto px-4 md:px-4">
             <div class="bg-neutral-100 min-w-60 grow shrink basis-80 px-7 py-8 rounded-32 md:px-5">
-              <div class="text-44 font-semibold leading-none tracking-tight">~ 1 {{ $t('stats.minute') }}</div>
+              <div class="text-44 font-semibold leading-none tracking-tight">~ 15 {{ $t('stats.seconds') }}</div>
               <div class="w-full text-2xl font-medium leading-8 mt-6">{{ $t('stats.analysisTime') }}</div>
             </div>
             <div class="bg-neutral-100 min-w-60 grow shrink basis-80 px-7 py-8 rounded-32 md:px-5">
@@ -157,7 +157,7 @@
               <div class="w-full text-2xl font-medium leading-8 mt-6">{{ $t('stats.accuracy') }}</div>
             </div>
             <div class="bg-neutral-100 min-w-60 grow shrink basis-80 px-7 py-8 rounded-32 md:px-5">
-              <div class="text-44 font-semibold leading-none tracking-tight">24/7</div>
+              <div class="text-44 font-semibold leading-none tracking-tight">24 / 7</div>
               <div class="w-full text-2xl font-medium leading-8 mt-6">{{ $t('stats.availability') }}</div>
             </div>
             <div class="bg-neutral-100 min-w-60 grow shrink basis-80 px-7 py-8 rounded-32 md:px-5">

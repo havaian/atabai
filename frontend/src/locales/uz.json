@@ -17,11 +17,11 @@
     "loginGoogle": "Google orqali kirish"
   },
   "stats": {
-    "minute": "daq.",
-    "analysisTime": "1000+ Excel fayllarini tahlil qilish vaqti",
+    "seconds": "soniya",
+    "analysisTime": "Excel fayllarini tahlil qilish vaqti",
     "accuracy": "Hisob-kitob aniqligi",
     "availability": "Tanaffussiz ishlaydi",
-    "timeSaving": "Avtomatlashtirish orqali vaqt tejash"
+    "timeSaving": "Vaqt tejash"
   },
   "howItWorks": {
     "title": "Qanday ishlaydi",

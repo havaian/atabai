@@ -17,11 +17,11 @@
     "loginGoogle": "Войти через Google"
   },
   "stats": {
-    "minute": "мин.",
-    "analysisTime": "Время анализа 1000+ Excel файлов",
+    "seconds": "секунд",
+    "analysisTime": "Время анализа Excel файлов",
     "accuracy": "Точность расчетов",
     "availability": "Работает без перерывов",
-    "timeSaving": "Экономия времени через автоматизацию"
+    "timeSaving": "Экономия времени"
   },
   "howItWorks": {
     "title": "Как это работает",

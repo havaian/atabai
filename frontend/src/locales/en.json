@@ -17,11 +17,11 @@
     "loginGoogle": "Sign in with Google"
   },
   "stats": {
-    "minute": "min.",
-    "analysisTime": "Time to analyze 1000+ Excel files",
+    "seconds": "seconds",
+    "analysisTime": "Time to analyze Excel file",
     "accuracy": "Calculation accuracy",
     "availability": "Works without breaks",
-    "timeSaving": "Time savings through automation"
+    "timeSaving": "Time savings"
   },
   "howItWorks": {
     "title": "How it works",
