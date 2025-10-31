@@ -117,10 +117,12 @@ onMounted(async () => {
 ::-webkit-scrollbar-thumb {
     background: var(--primary-dark);
     border-radius: 3px;
+    transition: all 0.3 ease-in-out;
 }
 
 ::-webkit-scrollbar-thumb:hover {
     background: var(--atabai-violet);
+    transition: all 0.3 ease-in-out;
 }
 
 /* Smooth transitions */
