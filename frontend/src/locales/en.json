@@ -11,7 +11,7 @@
     "pricing": "Pricing"
   },
   "hero": {
-    "title": "Powerful platform for automating Excel calculations according to IFRS",
+    "title": "Powerful platform for automating Excel calculations in accordance with IFRS",
     "subtitle": "With ATABAI, financial reporting will be tens of times cheaper and faster",
     "tryFree": "Try for free",
     "loginGoogle": "Sign in with Google"
@@ -27,7 +27,7 @@
     "title": "How it works",
     "step1": {
       "title": "Upload Excel files",
-      "description": "Upload your financial Excel files for processing according to IFRS requirements",
+      "description": "Upload your financial Excel files for processing per IFRS requirements",
       "uploadText": "Drag files here or click to select",
       "supportedFormats": "Supported formats: .xlsx, .xls, .csv"
     },
