@@ -48,19 +48,19 @@
                     <div class="flex flex-col sm:flex-row gap-3 justify-center max-w-lg mx-auto mb-12">
                         <button @click="openTelegram"
                             class="text-white/80 hover:text-white font-medium py-3 px-6 rounded-lg hover:bg-white/10 transition-colors inline-flex items-center justify-center">
-                            <TelegramIcon size="40" className="mr-2" />
+                            <TelegramIcon size="20" className="mr-2" />
                             {{ $t('comingSoon.telegram') }}
                         </button>
 
                         <button @click="openMail"
                             class="text-white/80 hover:text-white font-medium py-3 px-6 rounded-lg hover:bg-white/10 transition-colors inline-flex items-center justify-center">
-                            <MailIcon size="50" className="mr-2" />
+                            <MailIcon size="30" className="mr-2" />
                             {{ $t('comingSoon.email') }}
                         </button>
 
                         <button @click="openInstagram"
                             class="text-white/80 hover:text-white font-medium py-3 px-6 rounded-lg hover:bg-white/10 transition-colors inline-flex items-center justify-center">
-                            <InstagramIcon size="40" className="mr-2" />
+                            <InstagramIcon size="20" className="mr-2" />
                             {{ $t('comingSoon.instagram') }}
                         </button>
                     </div>
@@ -68,7 +68,7 @@
                     <!-- Back to home -->
                     <div class="flex justify-center">
                         <router-link to="/"
-                            class="text-white/80 hover:text-white font-medium py-4 px-8 rounded-lg hover:bg-white/10 transition-colors inline-flex items-center">
+                            class="button text-white/80 hover:text-white bg-white/10 font-medium py-4 px-8 rounded-lg hover:bg-white/20 transition-colors inline-flex items-center">
                             <ArrowLeftIcon class="w-6 h-6 mr-2" />
                             {{ $t('comingSoon.backToHome') }}
                         </router-link>
@@ -117,7 +117,7 @@ watch(locale, updatePageTitle, { immediate: false })
     background-size: 40px 40px;
 }
 
-button {
+button, .button {
     border: thin solid rgb(255 255 255 / 0.1);
 }
 
