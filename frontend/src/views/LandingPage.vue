@@ -146,7 +146,7 @@
         </div>
 
         <!-- Statistics Section -->
-        <div class="animate-fade-in [animation-delay:200ms] mt-21 md:mt-10">
+        <div class="animate-fade-in [animation-delay:200ms] mt-27 md:mt-15">
           <section class="flex w-full max-w-4xl gap-5 text-black flex-wrap justify-center mx-auto px-4 md:px-4">
             <div class="bg-neutral-100 min-w-60 grow shrink basis-80 px-7 py-8 rounded-32 md:px-5">
               <div class="text-44 font-semibold leading-none tracking-tight">~ 1 {{ $t('stats.minute') }}</div>
