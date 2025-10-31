@@ -131,9 +131,9 @@
     "feature4": "Детальные отчеты и экспорт результатов",
     "contactTitle": "Остались вопросы?",
     "contactDescription": "Свяжитесь с нами для получения дополнительной информации или уведомления о запуске.",
-    "telegram": "Написать в Telegram",
-    "email": "Отправить Email",
-    "instagram": "Подпишитесь в Instagram",
+    "telegram": "Telegram",
+    "email": "Email",
+    "instagram": "Instagram",
     "backToHome": "Вернуться на главную"
   },
   "auth": {

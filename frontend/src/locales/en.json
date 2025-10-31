@@ -131,9 +131,9 @@
     "feature4": "Detailed reports and result exports",
     "contactTitle": "Have questions?",
     "contactDescription": "Contact us for more information or to be notified about the launch.",
-    "telegram": "Message on Telegram",
-    "email": "Send us an Email",
-    "instagram": "Follow us on Instagram",
+    "telegram": "Telegram",
+    "email": "Email",
+    "instagram": "Instagram",
     "backToHome": "Back to home"
   },
   "auth": {

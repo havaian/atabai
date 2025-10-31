@@ -131,9 +131,9 @@
     "feature4": "Batafsil hisobotlar va natijalarni eksport qilish",
     "contactTitle": "Savollaringiz bormi?",
     "contactDescription": "Qo'shimcha ma'lumot olish yoki ishga tushirish haqida xabardor bo'lish uchun biz bilan bog'laning.",
-    "telegram": "Telegramda yozish",
-    "email": "Email yuborish",
-    "instagram": "Instagramda kuzatish",
+    "telegram": "Telegram",
+    "email": "Email",
+    "instagram": "Instagram",
     "backToHome": "Bosh sahifaga qaytish"
   },
   "auth": {
