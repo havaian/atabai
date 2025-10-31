@@ -20,6 +20,7 @@
 @layer components {
     /* Primary button base styles */
     .btn-primary {
+        border: thin solid transparent;
         @apply bg-white text-black font-medium px-6 py-3 rounded-lg transition-all duration-300 ease-out relative overflow-hidden;
         @apply focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2;
     }
@@ -31,6 +32,7 @@
 
     /* Secondary button - alternative style */
     .btn-secondary {
+        border: thin solid transparent;
         @apply bg-black text-white font-medium px-6 py-3 rounded-lg transition-all duration-500 ease-out relative;
         @apply focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2;
     }
@@ -52,6 +54,7 @@
 
     /* Rounded button - for special CTAs */
     .btn-rounded {
+        border: thin solid transparent;
         @apply bg-black text-white font-medium px-8 py-4 rounded-full transition-all duration-700 ease-out relative;
         @apply focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2;
         background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
@@ -77,6 +80,7 @@
 
     /* Circle button - for the final CTA */
     .btn-circle {
+        border: thin solid transparent;
         @apply bg-white text-black font-medium rounded-full transition-all duration-700 ease-out relative;
         @apply focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2;
     }
@@ -107,6 +111,7 @@
 
     /* Ghost button base styles */
     .btn-ghost {
+        border: thin solid transparent;
         @apply bg-gray-100 text-gray-700 font-medium px-6 py-3 rounded-lg transition-all duration-300 ease-out relative overflow-hidden;
         @apply focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2;
     }
