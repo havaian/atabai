@@ -18,6 +18,7 @@
 
 /* Button styles with innovative hover animations */
 @layer components {
+
     /* Primary button base styles */
     .btn-primary {
         border: thin solid transparent;
@@ -52,30 +53,44 @@
         opacity: 1;
     }
 
-    /* Rounded button - for special CTAs */
+    /* Rounded button - for special CTAs with improved animation */
     .btn-rounded {
         border: thin solid transparent;
         @apply bg-black text-white font-medium px-8 py-4 rounded-full transition-all duration-700 ease-out relative;
         @apply focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2;
         background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+        z-index: 10;
+        /* Ensure button is above other elements */
     }
 
     .btn-rounded::before {
         content: '';
         position: absolute;
-        inset: -2px;
-        padding: 2px;
-        background: linear-gradient(45deg, #9500FF, #7c3aed, #9500FF);
+        inset: -4px;
+        /* Increased from -2px for better visibility */
+        background: conic-gradient(from 0deg, #9500FF, #7c3aed, #5b21b6, #9500FF);
         border-radius: inherit;
+        padding: 4px;
+        /* Increased from 2px to match inset */
         mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
         mask-composite: xor;
         opacity: 0;
-        transition: opacity 0.5s ease-out;
+        transition: opacity 0.6s ease-out;
+        z-index: -1;
+        /* Behind the button content but above background */
     }
 
     .btn-rounded:hover::before {
         opacity: 1;
-        animation: borderRotate 2s linear infinite;
+        animation: improvedBorderRotate 3s linear infinite;
+    }
+
+    .btn-rounded:hover {
+        box-shadow:
+            0 25px 50px -12px rgba(149, 0, 255, 0.4),
+            inset 0 0 20px rgba(149, 0, 255, 0.05);
+        z-index: 20;
+        /* Even higher on hover */
     }
 
     /* Circle button - for the final CTA */
@@ -83,6 +98,8 @@
         border: thin solid transparent;
         @apply bg-white text-black font-medium rounded-full transition-all duration-700 ease-out relative;
         @apply focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2;
+        z-index: 10;
+        /* Ensure button is above other elements */
     }
 
     .btn-circle::before {
@@ -96,6 +113,8 @@
         mask-composite: xor;
         opacity: 0;
         transition: opacity 0.6s ease-out;
+        z-index: -1;
+        /* Behind the button content but above background */
     }
 
     .btn-circle:hover::before {
@@ -107,6 +126,8 @@
         box-shadow:
             0 50px 100px -25px rgba(149, 0, 255, 0.5),
             inset 0 0 30px rgba(149, 0, 255, 0.1);
+        z-index: 20;
+        /* Even higher on hover */
     }
 
     /* Ghost button base styles */
@@ -143,7 +164,62 @@
     }
 }
 
-/* Keyframe animations */
+/* Improved keyframe animations */
+@keyframes improvedBorderRotate {
+    0% {
+        transform: rotate(0deg) scale(1);
+        filter: brightness(1);
+    }
+
+    25% {
+        transform: rotate(90deg) scale(1.02);
+        filter: brightness(1.1);
+    }
+
+    50% {
+        transform: rotate(180deg) scale(1.04);
+        filter: brightness(1.2);
+    }
+
+    75% {
+        transform: rotate(270deg) scale(1.02);
+        filter: brightness(1.1);
+    }
+
+    100% {
+        transform: rotate(360deg) scale(1);
+        filter: brightness(1);
+    }
+}
+
+@keyframes spinGlow {
+    0% {
+        transform: rotate(0deg) scale(1);
+        filter: brightness(1);
+    }
+
+    25% {
+        transform: rotate(90deg) scale(1.02);
+        filter: brightness(1.1);
+    }
+
+    50% {
+        transform: rotate(180deg) scale(1.05);
+        filter: brightness(1.2);
+    }
+
+    75% {
+        transform: rotate(270deg) scale(1.02);
+        filter: brightness(1.1);
+    }
+
+    100% {
+        transform: rotate(360deg) scale(1);
+        filter: brightness(1);
+    }
+}
+
+/* Legacy animation kept for backwards compatibility */
 @keyframes borderRotate {
     0% {
         transform: rotate(0deg);
@@ -151,20 +227,6 @@
 
     100% {
         transform: rotate(360deg);
-    }
-}
-
-@keyframes spinGlow {
-    0% {
-        transform: rotate(0deg) scale(1);
-    }
-
-    50% {
-        transform: rotate(180deg) scale(1.05);
-    }
-
-    100% {
-        transform: rotate(360deg) scale(1);
     }
 }
 
@@ -200,33 +262,36 @@ button.rounded-full {
     @apply transition-all duration-700 ease-out;
 }
 
-button.rounded-full:hover {
-    animation: morphShadow 4s ease-in-out infinite;
-}
-
-/* Pulse animation for important CTAs */
+/* Pulse animation for important CTAs with improved z-index */
 @keyframes pulseGlow {
     0%,
     100% {
         box-shadow:
             0 0 0 0 rgba(149, 0, 255, 0.7),
             0 20px 40px -10px rgba(149, 0, 255, 0.3);
+        filter: brightness(1);
     }
 
     50% {
         box-shadow:
             0 0 30px 15px rgba(149, 0, 255, 0.1),
             0 25px 50px -12px rgba(149, 0, 255, 0.5);
+        filter: brightness(1.05);
     }
 }
 
 .pulse-glow {
     animation: pulseGlow 3s ease-in-out infinite;
+    z-index: 15;
+    /* High z-index for pulse glow elements */
+    position: relative;
 }
 
-/* Hover glow effect */
+/* Hover glow effect with improved z-index */
 .hover-glow {
     @apply transition-all duration-500;
+    position: relative;
+    z-index: 10;
 }
 
 .hover-glow:hover {
@@ -234,9 +299,20 @@ button.rounded-full:hover {
         0 0 50px rgba(149, 0, 255, 0.4),
         0 30px 60px -15px rgba(149, 0, 255, 0.3);
     filter: brightness(1.1);
+    z-index: 20;
 }
 
 /* Micro interactions for buttons */
 .btn-micro {
     @apply transform transition-all duration-300 ease-out;
+}
+
+/* High z-index utility for animated elements */
+.z-animation {
+    z-index: 50 !important;
+    position: relative;
+}
+
+.z-animation:hover {
+    z-index: 100 !important;
 }
