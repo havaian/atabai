@@ -1,11 +1,13 @@
 <template>
-    <div class="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-indigo-900 relative overflow-hidden">
+    <div class="min-h-screen bg-gradient-to-br from-slate-900 via-[#0284c7] to-[#0369a1] relative overflow-hidden">
         <!-- Subtle Background Elements -->
         <div class="absolute inset-0">
             <!-- Clean floating orbs -->
-            <div class="absolute top-1/4 left-1/4 w-32 h-32 bg-primary/10 rounded-full blur-xl animate-float-slow">
+            <div class="absolute top-1/4 left-1/4 w-32 h-32 rounded-full blur-xl animate-float-slow"
+                style="background-color: rgba(2, 132, 199, 0.1);">
             </div>
-            <div class="absolute top-3/4 right-1/4 w-48 h-48 bg-accent/8 rounded-full blur-2xl animate-float-slower">
+            <div class="absolute top-3/4 right-1/4 w-48 h-48 rounded-full blur-2xl animate-float-slower"
+                style="background-color: rgba(3, 105, 161, 0.08);">
             </div>
             <div class="absolute top-1/2 left-3/4 w-24 h-24 bg-cyan-400/12 rounded-full blur-lg animate-float"></div>
 
@@ -20,8 +22,8 @@
                 <div class="mb-12">
                     <div class="relative inline-block">
                         <div class="w-32 h-32 mx-auto mb-8">
-                            <div
-                                class="w-full h-full bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center shadow-2xl">
+                            <div class="w-full h-full rounded-full flex items-center justify-center shadow-2xl"
+                                style="background: linear-gradient(to bottom right, #0284c7, #0369a1);">
                                 <CogIcon class="w-16 h-16 text-white animate-spin-slow" />
                             </div>
                         </div>
@@ -72,7 +74,7 @@
                 <footer
                     class="flex w-full max-w-4xl flex-col md:flex-row items-center gap-6 md:gap-10 justify-center mt-15 py-4 px-8 mb-8 rounded-47 md:mt-5 mx-auto">
                     <div class="order-1 md:order-none">
-                        <div class="text-2xl font-bold text-primary">ATABAI</div>
+                        <div class="text-5xl font-bold" style="color: #0284c7;">ATABAI</div>
                     </div>
                 </footer>
             </div>
@@ -81,17 +83,26 @@
 </template>
 
 <script setup>
-import { onMounted } from 'vue'
+import { watch, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { CogIcon, ArrowLeftIcon } from '@heroicons/vue/24/outline'
 import TelegramIcon from '@/components/icons/TelegramIcon.vue'
 import MailIcon from '@/components/icons/MailIcon.vue'
 import InstagramIcon from '@/components/icons/InstagramIcon.vue'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
+
+// Function to update page title
+const updatePageTitle = () => {
+    document.title = `${t('comingSoon.pageTitle')} | ATABAI`
+}
+
+// Watch for locale changes and update title
+watch(locale, updatePageTitle, { immediate: false })
 
 onMounted(() => {
-    document.title = `${t('comingSoon.pageTitle')} | ATABAI`
+    // Small delay to ensure i18n is fully loaded
+    setTimeout(updatePageTitle, 100)
 })
 </script>
 
@@ -216,7 +227,7 @@ onMounted(() => {
 }
 
 .hover-glow:hover {
-    box-shadow: 0 0 50px rgba(149, 0, 255, 0.4), 0 30px 60px -15px rgba(149, 0, 255, 0.3);
+    box-shadow: 0 0 50px rgba(2, 132, 199, 0.4), 0 30px 60px -15px rgba(2, 132, 199, 0.3);
     filter: brightness(1.1);
 }
 
