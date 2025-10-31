@@ -47,19 +47,19 @@
                     <!-- Contact buttons -->
                     <div class="flex flex-col sm:flex-row gap-3 justify-center max-w-lg mx-auto mb-6">
                         <button @click="window.open('https://t.me/atabai_official', '_blank')"
-                            class="text-white/80 hover:text-white font-medium py-3 px-6 rounded-lg hover:bg-white/10 transition-colors inline-flex items-center justify-center">
+                            class="text-white/80 hover:text-white bg-white/10 font-medium py-3 px-6 rounded-lg hover:bg-white/20 transition-colors inline-flex items-center justify-center">
                             <TelegramIcon size="20" className="mr-2" />
                             {{ $t('comingSoon.telegram') }}
                         </button>
 
                         <button @click="window.open('mailto:contact@atabai.uz', '_blank')"
-                            class="text-white/80 hover:text-white font-medium py-3 px-6 rounded-lg hover:bg-white/10 transition-colors inline-flex items-center justify-center">
+                            class="text-white/80 hover:text-white bg-white/10 font-medium py-3 px-6 rounded-lg hover:bg-white/20 transition-colors inline-flex items-center justify-center">
                             <MailIcon size="20" className="mr-2" />
                             {{ $t('comingSoon.email') }}
                         </button>
 
                         <button @click="window.open('https://instagram.com/atabai.official', '_blank')"
-                            class="text-white/80 hover:text-white font-medium py-3 px-6 rounded-lg hover:bg-white/10 transition-colors inline-flex items-center justify-center">
+                            class="text-white/80 hover:text-white bg-white/10 font-medium py-3 px-6 rounded-lg hover:bg-white/20 transition-colors inline-flex items-center justify-center">
                             <InstagramIcon size="20" className="mr-2" />
                             {{ $t('comingSoon.instagram') }}
                         </button>
@@ -68,7 +68,7 @@
                     <!-- Back to home -->
                     <div class="flex justify-center">
                         <router-link to="/"
-                            class="text-white/80 hover:text-white font-medium py-2 px-4 rounded-lg hover:bg-white/10 transition-colors inline-flex items-center">
+                            class="text-white/80 hover:text-white bg-white/10 font-medium py-2 px-4 rounded-lg hover:bg-white/20 transition-colors inline-flex items-center">
                             <ArrowLeftIcon class="w-5 h-5 mr-2" />
                             {{ $t('comingSoon.backToHome') }}
                         </router-link>
