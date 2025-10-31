@@ -16,10 +16,12 @@
                 class="text-gray-900 hover:text-primary px-3 py-2 text-sm font-medium transition-colors">
                 {{ $t('nav.features') }}
               </a>
-              <a href="#how-it-works" class="text-gray-900 hover:text-primary px-3 py-2 text-sm font-medium">
+              <a href="#how-it-works"
+                class="text-gray-900 hover:text-primary px-3 py-2 text-sm font-medium">
                 {{ $t('nav.howItWorks') }}
               </a>
-              <a href="#pricing" class="text-gray-900 hover:text-primary px-3 py-2 text-sm font-medium">
+              <a href="#pricing"
+                class="text-gray-900 hover:text-primary px-3 py-2 text-sm font-medium">
                 {{ $t('nav.pricing') }}
               </a>
             </div>
@@ -30,7 +32,8 @@
             <!-- Language Selector -->
             <div class="relative">
               <Menu as="div" class="relative inline-block text-left">
-                <MenuButton class="flex items-center gap-1 bg-gray-100 px-3 py-2 rounded-full hover:bg-gray-200">
+                <MenuButton
+                  class="flex items-center gap-1 bg-gray-100 px-3 py-2 rounded-full hover:bg-gray-200 transition-colors">
                   <GlobeAltIcon class="w-4 h-4" />
                   <span class="text-sm font-medium">{{ currentLocale.code.toUpperCase() }}</span>
                   <ChevronDownIcon class="w-4 h-4" />
@@ -245,7 +248,7 @@
                       <span class="font-medium">85</span>
                     </div>
                   </div>
-                  <button class="btn-primary bg-black text-white border-black hover:bg-white hover:text-black hover:border-black w-full">
+                  <button class="btn-primary border-1 text-white bg-black border-black w-full">
                     {{ $t('common.download') }}
                   </button>
                 </div>
@@ -268,8 +271,7 @@
                 <!-- Fixed mask button structure -->
                 <div class="btn-mask-container mt-12 md:mt-10">
                   <button @click="authStore.isAuthenticated ? $router.push('/dashboard') : authStore.login()"
-                    class="btn-primary bg-white text-black border-white hover:bg-transparent hover:text-white hover:border-white min-w-60 min-h-14 px-7">
-                    <!-- Hidden text for mask button -->
+                    class="btn-primary bg-white text-black border-1 border-white hover:bg-transparent hover:text-white min-w-60 min-h-14 px-7">
                     {{ $t('cta.button') }}
                   </button>
                 </div>
@@ -291,7 +293,7 @@
               <div class="w-full">
                 <h3 class="text-2xl font-bold leading-none tracking-tight">{{ $t('features.automation.title') }}</h3>
                 <p class="text-base font-medium leading-6 tracking-tight mt-2">{{ $t('features.automation.description')
-                }}</p>
+                  }}</p>
               </div>
             </div>
             <div class="bg-neutral-100 self-stretch min-w-60 grow shrink basis-80 my-auto px-7 py-8 rounded-32 md:px-5">
@@ -299,7 +301,7 @@
               <div class="w-full">
                 <h3 class="text-2xl font-bold leading-none tracking-tight">{{ $t('features.compliance.title') }}</h3>
                 <p class="text-base font-medium leading-6 tracking-tight mt-2">{{ $t('features.compliance.description')
-                }}</p>
+                  }}</p>
               </div>
             </div>
             <div class="bg-neutral-100 self-stretch min-w-60 grow shrink basis-80 my-auto px-7 py-8 rounded-32 md:px-5">
@@ -330,7 +332,7 @@
               <div class="w-full">
                 <h3 class="text-2xl font-bold leading-none tracking-tight">{{ $t('features.universal.title') }}</h3>
                 <p class="text-base font-medium leading-6 tracking-tight mt-2">{{ $t('features.universal.description')
-                }}</p>
+                  }}</p>
               </div>
             </div>
           </div>
@@ -483,20 +485,29 @@
       </div>
       <div class="flex items-center gap-3 order-2 md:order-none">
         <!-- Telegram Button -->
-        <button @click="window.open('https://t.me/atabai_official', '_blank')"
-          class="btn-ghost hover-glow p-3 rounded-full" title="Telegram">
+        <button 
+          @click="window.open('https://t.me/atabai_official', '_blank')"
+          class="btn-ghost hover-glow p-3 rounded-full"
+          title="Telegram"
+        >
           <TelegramIcon size="20" />
         </button>
-
+        
         <!-- Mail Button -->
-        <button @click="window.open('mailto:contact@atabai.uz', '_blank')" class="btn-ghost hover-glow p-3 rounded-full"
-          title="Email">
+        <button 
+          @click="window.open('mailto:contact@atabai.uz', '_blank')"
+          class="btn-ghost hover-glow p-3 rounded-full"
+          title="Email"
+        >
           <MailIcon size="20" />
         </button>
-
+        
         <!-- Instagram Button -->
-        <button @click="window.open('https://instagram.com/atabai.official', '_blank')"
-          class="btn-ghost hover-glow p-3 rounded-full" title="Instagram">
+        <button 
+          @click="window.open('https://instagram.com/atabai.official', '_blank')"
+          class="btn-ghost hover-glow p-3 rounded-full"
+          title="Instagram"
+        >
           <InstagramIcon size="20" />
         </button>
       </div>
