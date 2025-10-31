@@ -19,6 +19,10 @@
     video {
         @apply transition-none;
     }
+
+    a {
+        text-decoration: none;
+    }
 }
 
 /* Button styles with innovative hover animations */

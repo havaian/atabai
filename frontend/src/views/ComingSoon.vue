@@ -36,7 +36,7 @@
                 </div>
 
                 <!-- Simple message -->
-                <div class="mb-12 space-y-4">
+                <div class="mb-6 space-y-4">
                     <h2 class="text-3xl sm:text-4xl font-bold text-white">
                         {{ $t('comingSoon.title') }}
                     </h2>
@@ -45,20 +45,20 @@
                 <!-- Clean actions -->
                 <div class="space-y-4">
                     <!-- Contact buttons -->
-                    <div class="flex flex-col sm:flex-row gap-3 justify-center max-w-lg mx-auto mb-6">
-                        <button @click="window.open('https://t.me/atabai_official', '_blank')"
+                    <div class="flex flex-col sm:flex-row gap-3 justify-center max-w-lg mx-auto mb-12">
+                        <button @click="openTelegram"
                             class="text-white/80 hover:text-white bg-white/10 font-medium py-3 px-6 rounded-lg hover:bg-white/20 transition-colors inline-flex items-center justify-center">
                             <TelegramIcon size="20" className="mr-2" />
                             {{ $t('comingSoon.telegram') }}
                         </button>
 
-                        <button @click="window.open('mailto:contact@atabai.uz', '_blank')"
+                        <button @click="openMail"
                             class="text-white/80 hover:text-white bg-white/10 font-medium py-3 px-6 rounded-lg hover:bg-white/20 transition-colors inline-flex items-center justify-center">
                             <MailIcon size="20" className="mr-2" />
                             {{ $t('comingSoon.email') }}
                         </button>
 
-                        <button @click="window.open('https://instagram.com/atabai.official', '_blank')"
+                        <button @click="openInstagram"
                             class="text-white/80 hover:text-white bg-white/10 font-medium py-3 px-6 rounded-lg hover:bg-white/20 transition-colors inline-flex items-center justify-center">
                             <InstagramIcon size="20" className="mr-2" />
                             {{ $t('comingSoon.instagram') }}
@@ -92,6 +92,16 @@ const { t, locale } = useI18n()
 // Function to update page title
 const updatePageTitle = () => {
     document.title = `${t('comingSoon.pageTitle')} | ATABAI`
+}
+
+const openTelegram = () => {
+    window.open('https://t.me/atabai_official', '_blank');
+}
+const openMail = () => {
+    window.open('mailto:contact@atabai.uz', '_blank');
+}
+const openInstagram = () => {
+    window.open('https://instagram.com/atabai.official', '_blank');
 }
 
 // Watch for locale changes and update title
