@@ -245,7 +245,7 @@
                       <span class="font-medium">85</span>
                     </div>
                   </div>
-                  <button class="btn-primary text-white bg-black w-full">
+                  <button class="btn-primary  bg-black text-white border-black hover:bg-white hover:text-black w-full">
                     {{ $t('common.download') }}
                   </button>
                 </div>
