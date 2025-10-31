@@ -74,7 +74,7 @@
                 <footer
                     class="flex w-full max-w-4xl flex-col md:flex-row items-center gap-6 md:gap-10 justify-center mt-15 py-4 px-8 mb-8 rounded-47 md:mt-5 mx-auto">
                     <div class="order-1 md:order-none">
-                        <div class="text-5xl font-bold" style="color: #0284c7;">ATABAI</div>
+                        <div class="text-5xl font-bold logo-fancy">ATABAI</div>
                     </div>
                 </footer>
             </div>
@@ -94,7 +94,7 @@ const { t, locale } = useI18n()
 
 // Function to update page title
 const updatePageTitle = () => {
-    document.title = `${t('comingSoon.pageTitle')} | ATABAI`
+    document.title = t('comingSoon.pageTitle')
 }
 
 // Watch for locale changes and update title
@@ -229,6 +229,43 @@ onMounted(() => {
 .hover-glow:hover {
     box-shadow: 0 0 50px rgba(2, 132, 199, 0.4), 0 30px 60px -15px rgba(2, 132, 199, 0.3);
     filter: brightness(1.1);
+}
+
+/* Fancy logo styling */
+.logo-fancy {
+    background: linear-gradient(135deg, #0284c7 0%, #0369a1 50%, #0284c7 100%);
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    mix-blend-mode: difference;
+    filter: drop-shadow(0 0 20px rgba(2, 132, 199, 0.6)) drop-shadow(0 0 40px rgba(2, 132, 199, 0.3));
+    animation: logoGlow 3s ease-in-out infinite alternate, gradientShift 4s ease-in-out infinite;
+}
+
+@keyframes logoGlow {
+    0% {
+        filter: drop-shadow(0 0 20px rgba(2, 132, 199, 0.6)) drop-shadow(0 0 40px rgba(2, 132, 199, 0.3));
+    }
+
+    100% {
+        filter: drop-shadow(0 0 30px rgba(2, 132, 199, 0.8)) drop-shadow(0 0 60px rgba(2, 132, 199, 0.5));
+    }
+}
+
+@keyframes gradientShift {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
 }
 
 /* Responsive breakpoint adjustments */
