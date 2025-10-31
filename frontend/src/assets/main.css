@@ -26,7 +26,7 @@
 
     /* Default hover: Real color transitions (smooth bg/text change) */
     .btn-primary:hover {
-        @apply bg-black text-white shadow-2xl;
+        @apply bg-black text-white;
     }
 
     /* Secondary button - alternative style */

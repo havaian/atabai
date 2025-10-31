@@ -261,7 +261,7 @@
                     class="text-white text-5xl font-extrabold leading-tight md:max-w-full md:text-4xl md:leading-tight whitespace-pre-line">
                     {{ $t('cta.title') }}
                   </h2>
-                  <p class="text-white/60 text-xl font-medium leading-7 tracking-tight max-w-md mt-5 md:text-base">
+                  <p class="text-white/80 text-xl font-medium leading-7 tracking-tight max-w-md mt-5 md:text-base">
                     {{ $t('cta.subtitle') }}
                   </p>
                 </div>
