@@ -13,7 +13,7 @@
             <!-- Navigation Links -->
             <div class="hidden md:ml-12 md:flex md:space-x-8">
               <a href="#features"
-                class="text-gray-900 hover:text-primary px-3 py-2 text-sm font-medium transition-colors">
+                class="text-gray-900 hover:text-primary px-3 py-2 text-sm font-medium">
                 {{ $t('nav.features') }}
               </a>
               <a href="#how-it-works"
@@ -33,7 +33,7 @@
             <div class="relative">
               <Menu as="div" class="relative inline-block text-left">
                 <MenuButton
-                  class="flex items-center gap-1 bg-gray-100 px-3 py-2 rounded-full hover:bg-gray-200 transition-colors">
+                  class="flex items-center gap-1 bg-gray-100 px-3 py-2 rounded-full hover:bg-gray-200">
                   <GlobeAltIcon class="w-4 h-4" />
                   <span class="text-sm font-medium">{{ currentLocale.code.toUpperCase() }}</span>
                   <ChevronDownIcon class="w-4 h-4" />

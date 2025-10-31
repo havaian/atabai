@@ -200,10 +200,6 @@ button.rounded-full {
     @apply transition-all duration-700 ease-out;
 }
 
-button.rounded-full:hover {
-    animation: morphShadow 4s ease-in-out infinite;
-}
-
 /* Pulse animation for important CTAs */
 @keyframes pulseGlow {
     0%,
