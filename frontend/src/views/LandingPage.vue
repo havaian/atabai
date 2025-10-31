@@ -476,7 +476,7 @@
 
     <!-- Footer -->
     <footer
-      class="bg-white flex w-full max-w-4xl flex-col md:flex-row items-center gap-6 md:gap-10 justify-between mt-27 py-4 px-4 rounded-47 md:mt-10 mx-auto">
+      class="flex w-full max-w-4xl flex-col md:flex-row items-center gap-6 md:gap-10 justify-between mt-27 py-4 px-8 rounded-47 md:mt-10 mx-auto">
       <div class="order-1 md:order-none">
         <div class="text-2xl font-bold text-primary">ATABAI</div>
       </div>

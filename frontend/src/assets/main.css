@@ -5,8 +5,21 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Global transition base - applied to base state, not hover */
+@layer base {
+    * {
+        @apply transition-all duration-300 ease-out;
+    }
+    
+    /* Override for elements that shouldn't have transitions */
+    img, svg, video {
+        @apply transition-none;
+    }
+}
+
 /* Button styles with innovative hover animations */
 @layer components {
+
     /* Primary button base styles */
     .btn-primary {
         @apply bg-white text-black font-medium px-6 py-3 rounded-lg transition-all duration-300 ease-out relative overflow-hidden;
@@ -150,7 +163,7 @@
     }
 
     .btn-auth:hover {
-        @apply border-violet-700;
+        @apply border-violet-700 transition-all duration-300 ease-out;
     }
 }
 
