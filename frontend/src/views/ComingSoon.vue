@@ -36,7 +36,7 @@
                 </div>
 
                 <!-- Simple message -->
-                <div class="mb-4 space-y-4">
+                <div class="mb-2 space-y-4">
                     <h2 class="text-3xl sm:text-4xl font-bold text-white">
                         {{ $t('comingSoon.title') }}
                     </h2>
@@ -45,7 +45,7 @@
                 <!-- Clean actions -->
                 <div class="space-y-4">
                     <!-- Contact buttons -->
-                    <div class="flex flex-col sm:flex-row gap-3 justify-center max-w-lg mx-auto mb-16">
+                    <div class="flex flex-col sm:flex-row gap-3 justify-center max-w-lg mx-auto mb-14">
                         <button @click="openTelegram"
                             class="text-white/80 hover:text-white font-medium py-3 px-6 rounded-lg hover:bg-white/10 transition-colors inline-flex items-center justify-center">
                             <TelegramIcon size="20" className="mr-2" />
