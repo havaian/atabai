@@ -17,8 +17,10 @@
             <!-- Large ATABAI background text with logo -->
             <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
                 <div class="flex items-center justify-center">
-                    <img src="/images/icons/logo.svg" alt="ATABAI" class="logo-background-svg select-none" />
-                    <div class="text-background-atabai select-none font-bold logo-fancy ml-8">ATABAI</div>
+                    <div class="w-full justify-between text-background-atabai select-none font-bold logo-fancy">
+                        <img src="/images/icons/logo.svg" alt="ATABAI"/>
+                        <div>ATABAI</div>
+                    </div>
                 </div>
             </div>
         </div>
