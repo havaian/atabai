@@ -16,9 +16,14 @@
 
             <!-- Large ATABAI background text with logo -->
             <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div class="flex items-center justify-center">
-                    <img src="/images/icons/logo.svg" alt="ATABAI" class="logo-background-svg select-none" />
-                    <div class="text-background-atabai select-none font-bold logo-fancy ml-8">ATABAI</div>
+                <div class="flex items-center justify-center h-full">
+                    <div class="flex items-center justify-center logo-background-height">
+                        <img src="/images/icons/logo.svg" alt="ATABAI"
+                            class="logo-background-svg select-none logo-fancy" />
+                    </div>
+                    <div class="ml-8 logo-background-height flex items-center">
+                        <p class="text-background-atabai select-none font-bold logo-fancy">ATABAI</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -241,26 +246,40 @@ button,
     white-space: nowrap;
 }
 
+/* Height matching for logo and text */
+.logo-background-height {
+    height: clamp(8rem, 20vw, 24rem);
+}
+
 /* Large background logo SVG */
 .logo-background-svg {
     width: clamp(6rem, 15vw, 18rem);
     height: clamp(6rem, 15vw, 18rem);
-    filter: drop-shadow(0 0 20px rgba(2, 132, 199, 0.6)) drop-shadow(0 0 40px rgba(2, 132, 199, 0.3));
-    animation: logoGlow 3s ease-in-out infinite alternate;
-    opacity: 0.8;
 }
 
-/* Fancy logo styling */
+/* Fancy logo styling - shared gradient and animation effects */
 .logo-fancy {
     background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 50%, var(--primary) 100%);
     background-size: 200% 200%;
+    filter: drop-shadow(0 0 20px rgba(2, 132, 199, 0.6)) drop-shadow(0 0 40px rgba(2, 132, 199, 0.3));
+    animation: logoGlow 3s ease-in-out infinite alternate, gradientShift 4s ease-in-out infinite;
+}
+
+/* Text-specific styling */
+.logo-fancy.text-background-atabai {
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
     color: transparent;
     mix-blend-mode: difference;
-    filter: drop-shadow(0 0 20px rgba(2, 132, 199, 0.6)) drop-shadow(0 0 40px rgba(2, 132, 199, 0.3));
-    animation: logoGlow 3s ease-in-out infinite alternate, gradientShift 4s ease-in-out infinite;
+}
+
+/* SVG-specific styling */
+.logo-fancy.logo-background-svg {
+    -webkit-mask: url('/images/icons/logo.svg') no-repeat center;
+    mask: url('/images/icons/logo.svg') no-repeat center;
+    -webkit-mask-size: contain;
+    mask-size: contain;
 }
 
 @keyframes logoGlow {
