@@ -16,12 +16,12 @@
 
             <!-- Large ATABAI background text with logo -->
             <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div class="flex items-center justify-center h-full">
-                    <div class="flex items-center justify-center logo-background-height">
+                <div class="grid items-center justify-center w-full mb-8">
+                    <div class="w-full flex items-center justify-center logo-background-height">
                         <img src="/images/icons/logo.svg" alt="ATABAI"
                             class="logo-background-svg select-none logo-fancy" />
                     </div>
-                    <div class="ml-8 logo-background-height flex items-center">
+                    <div class="w-full logo-background-height flex items-center">
                         <p class="text-background-atabai select-none font-bold logo-fancy">ATABAI</p>
                     </div>
                 </div>
@@ -31,18 +31,6 @@
         <!-- Main Content -->
         <div class="relative z-10 min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8">
             <div class="max-w-2xl w-full text-center">
-                <!-- Rotating Gear Icon -->
-                <div class="mb-8">
-                    <div class="relative inline-block">
-                        <div class="w-32 h-32 mx-auto mb-8">
-                            <div class="w-full h-full rounded-full flex items-center justify-center shadow-2xl"
-                                style="background: linear-gradient(to bottom right, #0284c7, #0369a1);">
-                                <CogIcon class="w-16 h-16 text-white animate-spin-slow" />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- Simple message -->
                 <div class="mb-4 space-y-4">
                     <h2 class="text-3xl sm:text-4xl font-bold text-white">
