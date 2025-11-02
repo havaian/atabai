@@ -5,9 +5,12 @@
             <div class="flex justify-between h-16">
                 <div class="flex items-center">
                     <!-- Logo -->
-                    <router-link to="/" class="flex-shrink-0 flex items-center logo-hover-group">
-                        <div class="navbar-logo-svg mr-3"></div>
-                        <div class="text-2xl font-bold text-primary navbar-logo-text">ATABAI</div>
+                    <router-link to="/" class="flex-shrink-0 flex items-center justify-center h-full">
+                        <LogoComponent 
+                            size="large" 
+                            :clickable="true"
+                            @click="$router.push('/')"
+                        />
                     </router-link>
 
                     <!-- Navigation Links -->
@@ -127,6 +130,7 @@ import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
+import LogoComponent from '@/components/Logo.vue'
 import GoogleIcon from '@/components/icons/GoogleIcon.vue'
 import {
     ChevronDownIcon,
@@ -160,76 +164,3 @@ function goToComingSoon() {
     router.push('/coming-soon')
 }
 </script>
-
-<style scoped>
-/* LOGO SVG - BASE STATE */
-.navbar-logo-svg {
-    width: 2rem;
-    height: 2rem;
-    background-color: #65399a;
-    -webkit-mask: url('/images/icons/logo.svg') no-repeat center;
-    mask: url('/images/icons/logo.svg') no-repeat center;
-    -webkit-mask-size: contain;
-    mask-size: contain;
-    transition: all 0.3s ease;
-}
-
-/* LOGO TEXT - BASE STATE */
-.navbar-logo-text {
-    color: #65399a;
-    transition: all 0.3s ease;
-}
-
-/* HOVER EFFECTS */
-.logo-hover-group:hover .navbar-logo-svg {
-    background: linear-gradient(135deg, #65399a 0%, #9333ea 50%, #65399a 100%);
-    background-size: 200% 200%;
-    filter: drop-shadow(0 0 20px rgba(101, 57, 154, 0.6)) drop-shadow(0 0 40px rgba(101, 57, 154, 0.3));
-    animation: logoGlow 3s ease-in-out infinite alternate, gradientShift 4s ease-in-out infinite;
-}
-
-.logo-hover-group:hover .navbar-logo-text {
-    background: linear-gradient(135deg, #65399a 0%, #9333ea 50%, #65399a 100%);
-    background-size: 200% 200%;
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    color: transparent;
-    filter: drop-shadow(0 0 20px rgba(101, 57, 154, 0.6)) drop-shadow(0 0 40px rgba(101, 57, 154, 0.3));
-    animation: logoGlow 3s ease-in-out infinite alternate, gradientShift 4s ease-in-out infinite;
-}
-
-/* ANIMATIONS */
-@keyframes logoGlow {
-    0% {
-        filter: drop-shadow(0 0 20px rgba(101, 57, 154, 0.6)) drop-shadow(0 0 40px rgba(101, 57, 154, 0.3));
-    }
-
-    100% {
-        filter: drop-shadow(0 0 30px rgba(101, 57, 154, 0.8)) drop-shadow(0 0 60px rgba(101, 57, 154, 0.5));
-    }
-}
-
-@keyframes gradientShift {
-    0% {
-        background-position: 0% 50%;
-    }
-
-    50% {
-        background-position: 100% 50%;
-    }
-
-    100% {
-        background-position: 0% 50%;
-    }
-}
-
-/* ACCESSIBILITY */
-@media (prefers-reduced-motion: reduce) {
-
-    .logo-hover-group:hover .navbar-logo-svg,
-    .logo-hover-group:hover .navbar-logo-text {
-        animation: none;
-    }
-}
-</style>
