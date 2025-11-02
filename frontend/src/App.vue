@@ -37,6 +37,7 @@ import { onMounted, nextTick, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { XMarkIcon } from '@heroicons/vue/24/outline'
 import { useAuthStore } from '@/stores/auth'
+import { setupGlobalPageTitles } from '@/composables/usePageTitle.js'
 import Navbar from '@/components/layout/Navbar.vue'
 import Footer from '@/components/layout/Footer.vue'
 
@@ -54,24 +55,26 @@ const showFooter = computed(() => {
 
 onMounted(async () => {
     try {
+        console.log('App.vue: Starting initialization...')
+
         // Initialize auth store first
         await authStore.checkAuth()
+        console.log('App.vue: Auth check completed')
 
-        // Setup page titles after everything is initialized
-        await nextTick(() => {
-            try {
-                // Dynamically import the composable to ensure i18n is ready
-                import('./composables/usePageTitle.js').then(({ setupGlobalPageTitles }) => {
-                    setupGlobalPageTitles()
-                }).catch(error => {
-                    console.warn('Could not setup page titles:', error)
-                })
-            } catch (error) {
-                console.warn('Page title setup error:', error)
-            }
-        })
+        // Wait for next tick to ensure DOM is ready
+        await nextTick()
+        console.log('App.vue: DOM ready, setting up page titles...')
+
+        // Setup page titles - now using direct import instead of dynamic import
+        try {
+            const pageTitleSetup = setupGlobalPageTitles()
+            console.log('App.vue: Page titles setup completed', pageTitleSetup)
+        } catch (error) {
+            console.warn('App.vue: Could not setup page titles:', error)
+        }
+
     } catch (error) {
-        console.error('Failed to initialize app:', error)
+        console.error('App.vue: Failed to initialize app:', error)
     }
 })
 </script>
@@ -82,53 +85,59 @@ onMounted(async () => {
     --primary: #65399a;
     --primary-light: #8b7ed8;
     --primary-dark: #5d4a9e;
-    --secondary: #10B981;
-    --danger: #EF4444;
-    --warning: #F59E0B;
-    --success: #10B981;
-    --gray-50: #F9FAFB;
-    --gray-100: #F3F4F6;
-    --gray-500: #6B7280;
-    --gray-900: #111827;
-    --accent: #9333ea;
+    --secondary: #f8fafc;
+    --accent: #e2e8f0;
+    --text: #1a202c;
+    --text-light: #4a5568;
+    --success: #48bb78;
+    --warning: #ed8936;
+    --error: #f56565;
+    --border: #e2e8f0;
 }
 
-/* Apply custom colors */
-.text-primary {
-    color: var(--primary);
+/* Global styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-.bg-primary {
-    background-color: var(--primary);
+html {
+    scroll-behavior: smooth;
 }
 
-.bg-primary-dark {
-    background-color: var(--primary-dark);
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    line-height: 1.6;
+    color: var(--text);
+    background-color: var(--secondary);
 }
 
-.border-primary {
-    border-color: var(--primary);
+/* Button styles */
+.btn-primary {
+    @apply bg-primary text-white px-6 py-3 rounded-lg font-medium hover:bg-primary-dark transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl;
 }
 
-.ring-primary {
-    --tw-ring-color: var(--primary);
+.btn-secondary {
+    @apply bg-white text-primary border-2 border-primary px-6 py-3 rounded-lg font-medium hover:bg-primary hover:text-white transition-all duration-300;
 }
 
-.focus\:ring-primary:focus {
-    --tw-ring-color: var(--primary);
+.btn-auth {
+    @apply bg-white text-gray-700 border border-gray-300 px-4 py-2 rounded-lg font-medium hover:bg-gray-50 transition-all duration-200 shadow-sm hover:shadow-md;
 }
 
-.hover\:bg-primary-dark:hover {
-    background-color: var(--primary-dark);
+.btn-circle {
+    @apply bg-primary text-white rounded-full font-medium hover:bg-primary-dark transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl;
 }
 
-.hover\:text-primary:hover {
-    color: var(--primary);
+/* Animation classes */
+.hover-glow:hover {
+    box-shadow: 0 0 20px rgba(101, 57, 154, 0.3);
 }
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {
-    width: 6px;
+    width: 8px;
 }
 
 ::-webkit-scrollbar-track {
@@ -136,28 +145,44 @@ onMounted(async () => {
 }
 
 ::-webkit-scrollbar-thumb {
-    background: var(--primary-dark);
-    border-radius: 3px;
-    transition: all 0.3 ease-in-out;
+    background: var(--primary);
+    border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: var(--atabai-violet);
-    transition: all 0.3 ease-in-out;
+    background: var(--primary-dark);
 }
 
-/* Smooth transitions */
-* {
-    transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+/* Loading animation */
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
-/* Typography */
-body {
-    font-family: 'Inter', 'Montserrat', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+.animate-spin {
+    animation: spin 1s linear infinite;
 }
 
-/* Smooth scrolling */
-html {
-    scroll-behavior: smooth;
+/* Focus styles for accessibility */
+button:focus,
+input:focus,
+textarea:focus,
+select:focus {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+/* Responsive utilities */
+@media (max-width: 768px) {
+
+    .btn-primary,
+    .btn-secondary {
+        @apply px-4 py-2 text-sm;
+    }
 }
 </style>

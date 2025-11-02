@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import i18n from '@/utils/i18n' // Import the i18n instance
 
 // Import views
 import LandingPage from '@/views/LandingPage.vue'
@@ -15,7 +16,11 @@ const routes = [
     {
         path: '/',
         name: 'Landing',
-        component: LandingPage
+        component: LandingPage,
+        meta: {
+            titleKey: 'pageTitles./',
+            descriptionKey: 'pageDescriptions./'
+        }
     },
     {
         path: '/coming-soon',
@@ -23,7 +28,9 @@ const routes = [
         component: ComingSoon,
         meta: {
             showNavbar: false,
-            showFooter: false
+            showFooter: false,
+            titleKey: 'pageTitles./coming-soon',
+            descriptionKey: 'pageDescriptions./coming-soon'
         }
     },
     // {
@@ -31,7 +38,9 @@ const routes = [
     //     name: 'Dashboard',
     //     component: Dashboard,
     //     meta: {
-    //         requiresAuth: true
+    //         requiresAuth: true,
+    //         titleKey: 'pageTitles./dashboard',
+    //         descriptionKey: 'pageDescriptions./dashboard'
     //     }
     // },
     // {
@@ -39,7 +48,9 @@ const routes = [
     //     name: 'Templates',
     //     component: TemplatesPage,
     //     meta: {
-    //         requiresAuth: true
+    //         requiresAuth: true,
+    //         titleKey: 'pageTitles./templates',
+    //         descriptionKey: 'pageDescriptions./templates'
     //     }
     // },
     // {
@@ -47,7 +58,9 @@ const routes = [
     //     name: 'Processing',
     //     component: ProcessingPage,
     //     meta: {
-    //         requiresAuth: true
+    //         requiresAuth: true,
+    //         titleKey: 'pageTitles./processing',
+    //         descriptionKey: 'pageDescriptions./processing'
     //     }
     // },
     // {
@@ -55,7 +68,9 @@ const routes = [
     //     name: 'Results',
     //     component: ResultsPage,
     //     meta: {
-    //         requiresAuth: true
+    //         requiresAuth: true,
+    //         titleKey: 'pageTitles./results',
+    //         descriptionKey: 'pageDescriptions./results'
     //     }
     // },
     // {
@@ -63,7 +78,9 @@ const routes = [
     //     name: 'Profile',
     //     component: ProfilePage,
     //     meta: {
-    //         requiresAuth: true
+    //         requiresAuth: true,
+    //         titleKey: 'pageTitles./profile',
+    //         descriptionKey: 'pageDescriptions./profile'
     //     }
     // },
     // {
@@ -71,7 +88,9 @@ const routes = [
     //     name: 'History',
     //     component: HistoryPage,
     //     meta: {
-    //         requiresAuth: true
+    //         requiresAuth: true,
+    //         titleKey: 'pageTitles./history',
+    //         descriptionKey: 'pageDescriptions./history'
     //     }
     // },
     {
@@ -98,19 +117,114 @@ const router = createRouter({
     }
 })
 
+// Helper function to update meta description
+function updateMetaDescription(description) {
+    if (!description) return
+
+    let metaDescription = document.querySelector('meta[name="description"]')
+    if (metaDescription) {
+        metaDescription.content = description
+    } else {
+        metaDescription = document.createElement('meta')
+        metaDescription.name = 'description'
+        metaDescription.content = description
+        document.head.appendChild(metaDescription)
+    }
+}
+
 // Navigation guards
 router.beforeEach(async (to, from, next) => {
-    const authStore = useAuthStore()
+    console.log('Router: Navigating from', from.path, 'to', to.path)
 
-    // Meta descriptions are now handled automatically by the global composable
-    // No need to manually set them here
+    // Wait for i18n to be ready
+    try {
+        await i18n.global.$waitForI18n?.() || Promise.resolve()
+    } catch (error) {
+        console.warn('Router: i18n not ready, using fallback titles')
+    }
+
+    // Update page title and description
+    updatePageTitleAndDescription(to)
 
     // Check authentication
+    const authStore = useAuthStore()
     if (to.meta.requiresAuth && !authStore.isAuthenticated) {
         next({ name: 'Landing', query: { redirect: to.fullPath } })
     } else {
         next()
     }
 })
+
+// Function to update page title and description
+function updatePageTitleAndDescription(route) {
+    // Set page title
+    if (route.meta.titleKey) {
+        try {
+            const title = i18n.global.t(route.meta.titleKey)
+            if (title && title !== route.meta.titleKey) {
+                document.title = `${title} | ATABAI`
+                console.log('Router: Set title to:', document.title)
+            } else {
+                // Fallback if translation not found
+                document.title = 'ATABAI - Excel Automation for IFRS'
+                console.log('Router: Used fallback title')
+            }
+        } catch (error) {
+            console.warn('Router: Error setting title:', error)
+            document.title = 'ATABAI'
+        }
+    } else {
+        // Default title
+        document.title = 'ATABAI'
+        console.log('Router: Used default title')
+    }
+
+    // Set meta description
+    if (route.meta.descriptionKey) {
+        try {
+            const description = i18n.global.t(route.meta.descriptionKey)
+            if (description && description !== route.meta.descriptionKey) {
+                updateMetaDescription(description)
+                console.log('Router: Set description to:', description)
+            }
+        } catch (error) {
+            console.warn('Router: Error setting description:', error)
+        }
+    }
+}
+
+// Watch for locale changes and update current page title
+let localeWatcher = null
+router.afterEach((to) => {
+    // Set up locale watcher only once
+    if (!localeWatcher) {
+        console.log('Router: Setting up locale watcher')
+        localeWatcher = i18n.global.locale
+
+        // Use Vue's watch if available, otherwise use a simple approach
+        if (typeof window !== 'undefined' && window.Vue?.watch) {
+            window.Vue.watch(() => i18n.global.locale.value, (newLocale, oldLocale) => {
+                console.log('Router: Locale changed from', oldLocale, 'to', newLocale)
+                updatePageTitleAndDescription(router.currentRoute.value)
+            })
+        } else {
+            // Fallback: check for locale changes periodically
+            let lastLocale = i18n.global.locale.value
+            setInterval(() => {
+                const currentLocale = i18n.global.locale.value
+                if (currentLocale !== lastLocale) {
+                    console.log('Router: Locale changed from', lastLocale, 'to', currentLocale)
+                    updatePageTitleAndDescription(router.currentRoute.value)
+                    lastLocale = currentLocale
+                }
+            }, 100) // Check every 100ms
+        }
+    }
+})
+
+// Make router globally accessible for i18n utility
+if (typeof window !== 'undefined') {
+    window.__VUE_ROUTER__ = router
+}
 
 export default router

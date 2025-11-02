@@ -4,10 +4,10 @@
     "/dashboard": "Dashboard",
     "/templates": "Templates", 
     "/profile": "Profile",
-    "/history": "File History",
-    "/processing": "Processing File",
-    "/results": "Processing Results",
-    "/coming-soon": "Coming Soon"
+    "/history": "File history",
+    "/processing": "Processing file",
+    "/results": "Processing results",
+    "/coming-soon": "Coming soon"
   },
   "pageDescriptions": {
     "/": "Powerful platform for automating Excel calculations according to IFRS. With ATABAI, financial reporting will be tens of times cheaper and faster.",

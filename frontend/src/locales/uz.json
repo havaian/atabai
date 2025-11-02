@@ -5,8 +5,8 @@
     "/templates": "Shablonlar",
     "/profile": "Profil",
     "/history": "Fayllar tarixi",
-    "/processing": "Faylni qayta ishlash",
-    "/results": "Qayta ishlash natijalari",
+    "/processing": "Qayta ishlash",
+    "/results": "Natijalar",
     "/coming-soon": "Tez orada"
   },
   "pageDescriptions": {
