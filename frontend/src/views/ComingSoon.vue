@@ -18,10 +18,10 @@
             <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
                 <div class="flex items-center justify-center h-full">
                     <div class="flex items-center justify-center logo-background-height">
-                        <div class="logo-background-svg text-background-atabai logo-fancy select-none"></div>
+                        <div class="logo-background-svg select-none logo-fancy"></div>
                     </div>
                     <div class="ml-8 logo-background-height flex items-center">
-                        <p class="text-background-atabai logo-fancy select-none font-bold">ATABAI</p>
+                        <p class="text-background-atabai select-none font-bold logo-fancy">ATABAI</p>
                     </div>
                 </div>
             </div>
@@ -270,6 +270,11 @@ button,
     mask: url('/images/icons/logo.svg') no-repeat center;
     -webkit-mask-size: contain;
     mask-size: contain;
+    color: transparent;
+    mix-blend-mode: difference;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 50%, var(--primary) 100%);
+    background-size: 200% 200%;
+    filter: drop-shadow(0 0 20px rgba(2, 132, 199, 0.6)) drop-shadow(0 0 40px rgba(2, 132, 199, 0.3));
 }
 
 @keyframes logoGlow {
