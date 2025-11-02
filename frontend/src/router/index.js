@@ -20,7 +20,11 @@ const routes = [
     {
         path: '/coming-soon',
         name: 'ComingSoon',
-        component: ComingSoon
+        component: ComingSoon,
+        meta: {
+            showNavbar: false,
+            showFooter: false
+        }
     },
     // {
     //     path: '/dashboard',
@@ -72,7 +76,11 @@ const routes = [
     // },
     {
         path: '/:pathMatch(.*)*',
-        redirect: '/'
+        redirect: '/',
+        meta: {
+            showNavbar: false,
+            showFooter: false
+        }
     }
 ]
 

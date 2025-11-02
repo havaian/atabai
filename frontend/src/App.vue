@@ -1,7 +1,15 @@
 <template>
     <div id="app" class="min-h-screen bg-gray-50">
-        <!-- Router View -->
-        <router-view />
+        <!-- Navigation -->
+        <Navbar v-if="showNavbar" />
+
+        <!-- Main Content with conditional padding -->
+        <div :class="{ 'pt-16': showNavbar }">
+            <router-view />
+        </div>
+
+        <!-- Footer -->
+        <Footer v-if="showFooter" />
 
         <!-- Loading Overlay -->
         <div v-if="authStore.isLoading"
@@ -25,11 +33,24 @@
 </template>
 
 <script setup>
-import { onMounted, nextTick } from 'vue'
+import { onMounted, nextTick, computed } from 'vue'
+import { useRoute } from 'vue-router'
 import { XMarkIcon } from '@heroicons/vue/24/outline'
 import { useAuthStore } from './stores/auth'
+import Navbar from './components/layout/Navbar.vue'
+import Footer from './components/layout/Footer.vue'
 
 const authStore = useAuthStore()
+const route = useRoute()
+
+// Computed properties to determine if navbar/footer should be shown
+const showNavbar = computed(() => {
+    return route.meta?.showNavbar !== false // Default to true unless explicitly false
+})
+
+const showFooter = computed(() => {
+    return route.meta?.showFooter !== false // Default to true unless explicitly false
+})
 
 onMounted(async () => {
     try {
