@@ -35,7 +35,7 @@
                     <div class="relative inline-block">
                         <div class="w-32 h-32 mx-auto mb-8">
                             <div class="w-full h-full rounded-full flex items-center justify-center shadow-2xl"
-                                style="background: linear-gradient(to bottom right, #0284c7, #0369a1);">
+                                style="background: linear-gradient(to bottom right, #9500ff, #65399a);">
                                 <CogIcon class="w-16 h-16 text-white animate-spin-slow" />
                             </div>
                         </div>
