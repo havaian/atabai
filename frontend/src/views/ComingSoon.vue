@@ -281,6 +281,7 @@ button,
     mask-size: contain;
     background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 50%, var(--primary) 100%);
     background-size: 200% 200%;
+    filter: drop-shadow(0 0 20px rgba(2, 132, 199, 0.6)) drop-shadow(0 0 40px rgba(2, 132, 199, 0.3));
 }
 
 @keyframes logoGlow {
