@@ -58,7 +58,7 @@ onMounted(async () => {
 <style>
 /* Custom CSS Variables for ATABAI theme */
 :root {
-    --primary: #765fc6;
+    --primary: #65399a;
     --primary-light: #8b7ed8;
     --primary-dark: #5d4a9e;
     --secondary: #10B981;

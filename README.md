@@ -635,7 +635,7 @@ TTL: 1 hour
 #### 5.1.1 Цветовая палитра
 ```css
 :root {
-  --primary: #765fc6;        /* Violet primary */
+  --primary: #65399a;        /* Violet primary */
   --primary-light: #8b7ed8;  /* Lighter violet */
   --primary-dark: #5d4a9e;   /* Darker violet */
   --secondary: #10B981;      /* Emerald-500 */
