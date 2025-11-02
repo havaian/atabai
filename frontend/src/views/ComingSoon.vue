@@ -17,10 +17,8 @@
             <!-- Large ATABAI background text with logo -->
             <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
                 <div class="flex items-center justify-center">
-                    <div class="w-full justify-between text-background-atabai select-none font-bold logo-fancy">
-                        <img src="/images/icons/logo.svg" alt="Logo" class="logo-background-svg"/>
-                        <div>ATABAI</div>
-                    </div>
+                    <img src="/images/icons/logo.svg" alt="ATABAI" class="logo-background-svg select-none" />
+                    <div class="text-background-atabai select-none font-bold logo-fancy ml-8">ATABAI</div>
                 </div>
             </div>
         </div>
@@ -247,6 +245,9 @@ button,
 .logo-background-svg {
     width: clamp(6rem, 15vw, 18rem);
     height: clamp(6rem, 15vw, 18rem);
+    filter: drop-shadow(0 0 20px rgba(2, 132, 199, 0.6)) drop-shadow(0 0 40px rgba(2, 132, 199, 0.3));
+    animation: logoGlow 3s ease-in-out infinite alternate;
+    opacity: 0.8;
 }
 
 /* Fancy logo styling */
@@ -260,7 +261,17 @@ button,
     mix-blend-mode: difference;
     filter: drop-shadow(0 0 20px rgba(2, 132, 199, 0.6)) drop-shadow(0 0 40px rgba(2, 132, 199, 0.3));
     animation: logoGlow 3s ease-in-out infinite alternate, gradientShift 4s ease-in-out infinite;
-} 
+}
+
+@keyframes logoGlow {
+    0% {
+        filter: drop-shadow(0 0 20px rgba(2, 132, 199, 0.6)) drop-shadow(0 0 40px rgba(2, 132, 199, 0.3));
+    }
+
+    100% {
+        filter: drop-shadow(0 0 30px rgba(2, 132, 199, 0.8)) drop-shadow(0 0 60px rgba(2, 132, 199, 0.5));
+    }
+}
 
 @keyframes gradientShift {
     0% {
