@@ -6,11 +6,7 @@
                 <div class="flex items-center">
                     <!-- Logo -->
                     <router-link to="/" class="flex-shrink-0 flex items-center justify-center h-full">
-                        <LogoComponent 
-                            size="large" 
-                            :clickable="true"
-                            @click="$router.push('/')"
-                        />
+                        <LogoComponent size="large" :clickable="true" @click="$router.push('/')" />
                     </router-link>
 
                     <!-- Navigation Links -->
