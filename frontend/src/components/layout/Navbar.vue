@@ -5,9 +5,11 @@
             <div class="flex justify-between h-16">
                 <div class="flex items-center">
                     <!-- Logo -->
-                    <router-link to="/" class="flex-shrink-0 flex items-center">
-                        <img src="/images/icons/logo.svg" alt="ATABAI" class="h-8 w-8 mr-3" />
-                        <div class="text-2xl font-bold text-primary">ATABAI</div>
+                    <router-link to="/" class="flex-shrink-0 flex items-center group">
+                        <div class="navbar-logo-svg mr-3 group-hover:logo-fancy transition-all duration-300"></div>
+                        <div
+                            class="text-2xl font-bold text-primary group-hover:navbar-logo-text transition-all duration-300">
+                            ATABAI</div>
                     </router-link>
 
                     <!-- Navigation Links -->
@@ -161,3 +163,79 @@ function goToComingSoon() {
     router.push('/coming-soon')
 }
 </script>
+
+<style scoped>
+/* Navbar logo SVG styling */
+.navbar-logo-svg {
+    width: 2rem;
+    /* h-8 */
+    height: 2rem;
+    /* w-8 */
+    background: url('/images/icons/logo.svg') no-repeat center;
+    background-size: contain;
+    -webkit-mask: url('/images/icons/logo.svg') no-repeat center;
+    mask: url('/images/icons/logo.svg') no-repeat center;
+    -webkit-mask-size: contain;
+    mask-size: contain;
+    background-color: var(--primary);
+}
+
+/* Navbar logo text styling */
+.navbar-logo-text {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 50%, var(--primary) 100%);
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    filter: drop-shadow(0 0 10px rgba(2, 132, 199, 0.4)) drop-shadow(0 0 20px rgba(2, 132, 199, 0.2));
+    animation: logoGlow 3s ease-in-out infinite alternate, gradientShift 4s ease-in-out infinite;
+}
+
+/* Shared fancy logo styling - same as in ComingSoon.vue */
+.logo-fancy {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 50%, var(--primary) 100%);
+    background-size: 200% 200%;
+    filter: drop-shadow(0 0 20px rgba(2, 132, 199, 0.6)) drop-shadow(0 0 40px rgba(2, 132, 199, 0.3));
+    animation: logoGlow 3s ease-in-out infinite alternate, gradientShift 4s ease-in-out infinite;
+}
+
+/* Apply logo-fancy to SVG specifically */
+.navbar-logo-svg.logo-fancy {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 50%, var(--primary) 100%);
+    background-size: 200% 200%;
+}
+
+@keyframes logoGlow {
+    0% {
+        filter: drop-shadow(0 0 20px rgba(2, 132, 199, 0.6)) drop-shadow(0 0 40px rgba(2, 132, 199, 0.3));
+    }
+
+    100% {
+        filter: drop-shadow(0 0 30px rgba(2, 132, 199, 0.8)) drop-shadow(0 0 60px rgba(2, 132, 199, 0.5));
+    }
+}
+
+@keyframes gradientShift {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+
+    .navbar-logo-text,
+    .logo-fancy {
+        animation: none;
+    }
+}
+</style>
