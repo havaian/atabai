@@ -5,11 +5,9 @@
             <div class="flex justify-between h-16">
                 <div class="flex items-center">
                     <!-- Logo -->
-                    <router-link to="/" class="flex-shrink-0 flex items-center group">
-                        <div class="navbar-logo-svg mr-3 group-hover:logo-fancy transition-all duration-300"></div>
-                        <div
-                            class="text-2xl font-bold text-primary group-hover:navbar-logo-text transition-all duration-300">
-                            ATABAI</div>
+                    <router-link to="/" class="flex-shrink-0 flex items-center logo-hover-group">
+                        <div class="navbar-logo-svg mr-3"></div>
+                        <div class="text-2xl font-bold text-primary navbar-logo-text">ATABAI</div>
                     </router-link>
 
                     <!-- Navigation Links -->
@@ -20,10 +18,9 @@
                         <a href="#how-it-works" class="text-gray-900 hover:text-primary px-3 py-2 text-sm font-medium">
                             {{ $t('nav.howItWorks') }}
                         </a>
-                        <!-- <a href="#pricing"
-              class="text-gray-900 hover:text-primary px-3 py-2 text-sm font-medium">
-              {{ $t('nav.pricing') }}
-            </a> -->
+                        <!-- <a href="#pricing" class="text-gray-900 hover:text-primary px-3 py-2 text-sm font-medium">
+                            {{ $t('nav.pricing') }}
+                        </a> -->
                     </div>
                 </div>
 
@@ -117,9 +114,9 @@
                     {{ $t('nav.howItWorks') }}
                 </a>
                 <!-- <a href="#pricing"
-          class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">
-          {{ $t('nav.pricing') }}
-        </a> -->
+                    class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">
+                    {{ $t('nav.pricing') }}
+                </a> -->
             </div>
         </div>
     </nav>
@@ -165,54 +162,51 @@ function goToComingSoon() {
 </script>
 
 <style scoped>
-/* Navbar logo SVG styling */
+/* LOGO SVG - BASE STATE */
 .navbar-logo-svg {
     width: 2rem;
-    /* h-8 */
     height: 2rem;
-    /* w-8 */
-    background: url('/images/icons/logo.svg') no-repeat center;
-    background-size: contain;
+    background-color: #65399a;
     -webkit-mask: url('/images/icons/logo.svg') no-repeat center;
     mask: url('/images/icons/logo.svg') no-repeat center;
     -webkit-mask-size: contain;
     mask-size: contain;
-    background-color: var(--primary);
+    transition: all 0.3s ease;
 }
 
-/* Navbar logo text styling */
+/* LOGO TEXT - BASE STATE */
 .navbar-logo-text {
-    background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 50%, var(--primary) 100%);
+    color: #65399a;
+    transition: all 0.3s ease;
+}
+
+/* HOVER EFFECTS */
+.logo-hover-group:hover .navbar-logo-svg {
+    background: linear-gradient(135deg, #65399a 0%, #9333ea 50%, #65399a 100%);
+    background-size: 200% 200%;
+    filter: drop-shadow(0 0 20px rgba(101, 57, 154, 0.6)) drop-shadow(0 0 40px rgba(101, 57, 154, 0.3));
+    animation: logoGlow 3s ease-in-out infinite alternate, gradientShift 4s ease-in-out infinite;
+}
+
+.logo-hover-group:hover .navbar-logo-text {
+    background: linear-gradient(135deg, #65399a 0%, #9333ea 50%, #65399a 100%);
     background-size: 200% 200%;
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
     color: transparent;
-    filter: drop-shadow(0 0 10px rgba(2, 132, 199, 0.4)) drop-shadow(0 0 20px rgba(2, 132, 199, 0.2));
+    filter: drop-shadow(0 0 20px rgba(101, 57, 154, 0.6)) drop-shadow(0 0 40px rgba(101, 57, 154, 0.3));
     animation: logoGlow 3s ease-in-out infinite alternate, gradientShift 4s ease-in-out infinite;
 }
 
-/* Shared fancy logo styling - same as in ComingSoon.vue */
-.logo-fancy {
-    background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 50%, var(--primary) 100%);
-    background-size: 200% 200%;
-    filter: drop-shadow(0 0 20px rgba(2, 132, 199, 0.6)) drop-shadow(0 0 40px rgba(2, 132, 199, 0.3));
-    animation: logoGlow 3s ease-in-out infinite alternate, gradientShift 4s ease-in-out infinite;
-}
-
-/* Apply logo-fancy to SVG specifically */
-.navbar-logo-svg.logo-fancy {
-    background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 50%, var(--primary) 100%);
-    background-size: 200% 200%;
-}
-
+/* ANIMATIONS */
 @keyframes logoGlow {
     0% {
-        filter: drop-shadow(0 0 20px rgba(2, 132, 199, 0.6)) drop-shadow(0 0 40px rgba(2, 132, 199, 0.3));
+        filter: drop-shadow(0 0 20px rgba(101, 57, 154, 0.6)) drop-shadow(0 0 40px rgba(101, 57, 154, 0.3));
     }
 
     100% {
-        filter: drop-shadow(0 0 30px rgba(2, 132, 199, 0.8)) drop-shadow(0 0 60px rgba(2, 132, 199, 0.5));
+        filter: drop-shadow(0 0 30px rgba(101, 57, 154, 0.8)) drop-shadow(0 0 60px rgba(101, 57, 154, 0.5));
     }
 }
 
@@ -230,11 +224,11 @@ function goToComingSoon() {
     }
 }
 
-/* Reduced motion support */
+/* ACCESSIBILITY */
 @media (prefers-reduced-motion: reduce) {
 
-    .navbar-logo-text,
-    .logo-fancy {
+    .logo-hover-group:hover .navbar-logo-svg,
+    .logo-hover-group:hover .navbar-logo-text {
         animation: none;
     }
 }
