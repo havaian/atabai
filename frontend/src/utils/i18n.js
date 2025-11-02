@@ -51,9 +51,7 @@ export function setLocale(locale) {
 // Async function to load locale messages
 async function loadLocaleMessages(locale) {
     try {
-        console.log(`Loading locale messages for: ${locale}`)
         const messages = await import(`../locales/${locale}.json`)
-        console.log(`Successfully loaded ${locale} messages`)
         return messages.default
     } catch (error) {
         console.warn(`Failed to load locale ${locale}, falling back to ${DEFAULT_LOCALE}`)
@@ -100,7 +98,6 @@ async function initializeI18n() {
 
     initializationPromise = (async () => {
         try {
-            console.log('Initializing i18n...')
             const locale = getStoredLocale()
             const messages = await loadLocaleMessages(locale)
             i18n.global.setLocaleMessage(locale, messages)
@@ -112,7 +109,6 @@ async function initializeI18n() {
             }
 
             isInitialized = true
-            console.log('i18n initialization completed successfully')
             return i18n
         } catch (error) {
             console.error('Failed to initialize i18n:', error)
@@ -141,7 +137,6 @@ export async function changeLocale(newLocale) {
 
         // Set locale
         setLocale(validLocale)
-        console.log(`Locale changed to: ${validLocale}`)
 
         // Update page title for current route when locale changes
         if (typeof window !== 'undefined' && window.__VUE_ROUTER__) {
@@ -153,7 +148,6 @@ export async function changeLocale(newLocale) {
                     const title = i18n.global.t(currentRoute.meta.titleKey)
                     if (title && title !== currentRoute.meta.titleKey) {
                         document.title = `${title} | ATABAI`
-                        console.log('i18n: Updated title after locale change:', document.title)
                     }
                 } catch (error) {
                     console.warn('i18n: Error updating title after locale change:', error)
@@ -169,7 +163,6 @@ export async function changeLocale(newLocale) {
                         if (metaDescription) {
                             metaDescription.content = description
                         }
-                        console.log('i18n: Updated description after locale change:', description)
                     }
                 } catch (error) {
                     console.warn('i18n: Error updating description after locale change:', error)

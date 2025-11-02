@@ -91,7 +91,6 @@ import { CogIcon, ArrowLeftIcon } from '@heroicons/vue/24/outline'
 import TelegramIcon from '@/components/icons/TelegramIcon.vue'
 import MailIcon from '@/components/icons/MailIcon.vue'
 import InstagramIcon from '@/components/icons/InstagramIcon.vue'
-import { usePageTitle } from '@/composables/usePageTitle'
 
 const openTelegram = () => {
     window.open('https://t.me/atabai_official', '_blank');
@@ -102,8 +101,6 @@ const openMail = () => {
 const openInstagram = () => {
     window.open('https://instagram.com/atabai.official', '_blank');
 }
-
-usePageTitle()
 </script>
 
 <style scoped>

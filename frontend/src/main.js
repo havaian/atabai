@@ -10,11 +10,8 @@ import './assets/main.css'
 // Async initialization function
 async function initializeApp() {
     try {
-        console.log('Starting app initialization...')
-
         // Wait for i18n to be ready before creating app
         await waitForI18n()
-        console.log('i18n is ready')
 
         // Create Pinia store
         const pinia = createPinia()
@@ -31,19 +28,13 @@ async function initializeApp() {
         // Initialize language from localStorage
         const storedLocale = getStoredLocale()
         setLocale(storedLocale)
-        console.log(`Locale set to: ${storedLocale}`)
 
         // Global error handler
-        app.config.errorHandler = (err, instance, info) => {
-            console.error('Global error:', err)
-            console.error('Error info:', info)
-            // You can add error reporting service here
+        app.config.errorHandler = (err, instance, info) => {// You can add error reporting service here
         }
 
         // Mount app
         app.mount('#app')
-        console.log('App mounted successfully')
-
     } catch (error) {
         console.error('Failed to initialize app:', error)
 
@@ -57,7 +48,6 @@ async function initializeApp() {
         app.use(axiosPlugin)
 
         app.mount('#app')
-        console.log('App mounted with fallback setup')
     }
 }
 

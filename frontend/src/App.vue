@@ -33,11 +33,10 @@
 </template>
 
 <script setup>
-import { onMounted, nextTick, computed } from 'vue'
+import { onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { XMarkIcon } from '@heroicons/vue/24/outline'
 import { useAuthStore } from '@/stores/auth'
-import { setupGlobalPageTitles } from '@/composables/usePageTitle.js'
 import Navbar from '@/components/layout/Navbar.vue'
 import Footer from '@/components/layout/Footer.vue'
 
@@ -55,24 +54,8 @@ const showFooter = computed(() => {
 
 onMounted(async () => {
     try {
-        console.log('App.vue: Starting initialization...')
-
-        // Initialize auth store first
+        // Initialize auth store
         await authStore.checkAuth()
-        console.log('App.vue: Auth check completed')
-
-        // Wait for next tick to ensure DOM is ready
-        await nextTick()
-        console.log('App.vue: DOM ready, setting up page titles...')
-
-        // Setup page titles - now using direct import instead of dynamic import
-        try {
-            const pageTitleSetup = setupGlobalPageTitles()
-            console.log('App.vue: Page titles setup completed', pageTitleSetup)
-        } catch (error) {
-            console.warn('App.vue: Could not setup page titles:', error)
-        }
-
     } catch (error) {
         console.error('App.vue: Failed to initialize app:', error)
     }

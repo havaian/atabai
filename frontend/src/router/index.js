@@ -134,8 +134,6 @@ function updateMetaDescription(description) {
 
 // Navigation guards
 router.beforeEach(async (to, from, next) => {
-    console.log('Router: Navigating from', from.path, 'to', to.path)
-
     // Wait for i18n to be ready
     try {
         await i18n.global.$waitForI18n?.() || Promise.resolve()
@@ -163,11 +161,9 @@ function updatePageTitleAndDescription(route) {
             const title = i18n.global.t(route.meta.titleKey)
             if (title && title !== route.meta.titleKey) {
                 document.title = `${title} | ATABAI`
-                console.log('Router: Set title to:', document.title)
             } else {
                 // Fallback if translation not found
                 document.title = 'ATABAI - Excel Automation for IFRS'
-                console.log('Router: Used fallback title')
             }
         } catch (error) {
             console.warn('Router: Error setting title:', error)
@@ -176,7 +172,6 @@ function updatePageTitleAndDescription(route) {
     } else {
         // Default title
         document.title = 'ATABAI'
-        console.log('Router: Used default title')
     }
 
     // Set meta description
@@ -185,7 +180,6 @@ function updatePageTitleAndDescription(route) {
             const description = i18n.global.t(route.meta.descriptionKey)
             if (description && description !== route.meta.descriptionKey) {
                 updateMetaDescription(description)
-                console.log('Router: Set description to:', description)
             }
         } catch (error) {
             console.warn('Router: Error setting description:', error)
@@ -198,13 +192,11 @@ let localeWatcher = null
 router.afterEach((to) => {
     // Set up locale watcher only once
     if (!localeWatcher) {
-        console.log('Router: Setting up locale watcher')
         localeWatcher = i18n.global.locale
 
         // Use Vue's watch if available, otherwise use a simple approach
         if (typeof window !== 'undefined' && window.Vue?.watch) {
             window.Vue.watch(() => i18n.global.locale.value, (newLocale, oldLocale) => {
-                console.log('Router: Locale changed from', oldLocale, 'to', newLocale)
                 updatePageTitleAndDescription(router.currentRoute.value)
             })
         } else {
@@ -213,7 +205,6 @@ router.afterEach((to) => {
             setInterval(() => {
                 const currentLocale = i18n.global.locale.value
                 if (currentLocale !== lastLocale) {
-                    console.log('Router: Locale changed from', lastLocale, 'to', currentLocale)
                     updatePageTitleAndDescription(router.currentRoute.value)
                     lastLocale = currentLocale
                 }
