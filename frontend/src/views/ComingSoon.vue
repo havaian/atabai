@@ -13,10 +13,13 @@
 
             <!-- Minimal grid -->
             <div class="absolute inset-0 bg-grid-pattern opacity-3"></div>
-            
-            <!-- Large ATABAI background text -->
+
+            <!-- Large ATABAI background text with logo -->
             <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div class="text-background-atabai select-none font-bold logo-fancy">ATABAI</div>
+                <div class="flex items-center justify-center">
+                    <img src="/images/icons/logo.svg" alt="ATABAI" class="logo-background-svg select-none" />
+                    <div class="text-background-atabai select-none font-bold logo-fancy ml-8">ATABAI</div>
+                </div>
             </div>
         </div>
 
@@ -108,7 +111,8 @@ usePageTitle()
     background-size: 40px 40px;
 }
 
-button, .button {
+button,
+.button {
     border: thin solid rgb(255 255 255 / 0.1);
 }
 
@@ -235,6 +239,15 @@ button, .button {
     line-height: 1;
     letter-spacing: -0.05em;
     white-space: nowrap;
+}
+
+/* Large background logo SVG */
+.logo-background-svg {
+    width: clamp(6rem, 15vw, 18rem);
+    height: clamp(6rem, 15vw, 18rem);
+    filter: drop-shadow(0 0 20px rgba(2, 132, 199, 0.6)) drop-shadow(0 0 40px rgba(2, 132, 199, 0.3));
+    animation: logoGlow 3s ease-in-out infinite alternate;
+    opacity: 0.8;
 }
 
 /* Fancy logo styling */
