@@ -2,7 +2,7 @@
   "pageTitles": {
     "/": "Home",
     "/dashboard": "Dashboard",
-    "/templates": "Templates", 
+    "/templates": "Templates",
     "/profile": "Profile",
     "/history": "File history",
     "/processing": "Processing file",
@@ -62,6 +62,140 @@
       "processed": "File processed",
       "changes": "Changes",
       "formulas": "Formulas applied"
+    },
+    "step4": {
+      "title": "4. See the transformation",
+      "description": "Watch how your local format transforms into international IFRS standards",
+      "before": "Before (NSBU Format)",
+      "after": "After (IFRS Format)",
+      "transformation": "Transformation",
+      "compliant": "IFRS Compliant",
+      "keyChanges": "✨ Key Transformations Applied:",
+      "changes": {
+        "depreciation": "IAS 16 depreciation methods",
+        "discounts": "IFRS 15 revenue recognition",
+        "impairment": "IAS 36 impairment testing",
+        "translation": "English translations",
+        "standards": "Standard references"
+      },
+      "spreadsheet": {
+        "depreciation": {
+          "before": {
+            "headers": {
+              "code": "Account Code",
+              "item": "Item Name",
+              "amount": "Amount"
+            },
+            "data": {
+              "ppe": "Property, Plant & Equipment",
+              "depreciation": "PPE Depreciation",
+              "manual": "Manual calc",
+              "calculation": "Manual calculation",
+              "error": "Error prone"
+            }
+          },
+          "after": {
+            "headers": {
+              "assets": "Assets",
+              "standard": "Standard",
+              "amount": "Amount"
+            },
+            "data": {
+              "ppe": "Property, plant and equipment",
+              "accumulated": "Accumulated depreciation",
+              "automated": "Automated",
+              "compliant": "IAS 16 compliant",
+              "accurate": "✓ Accurate"
+            }
+          }
+        },
+        "discounts": {
+          "before": {
+            "headers": {
+              "code": "Code",
+              "revenue": "Revenue",
+              "amount": "Amount"
+            },
+            "data": {
+              "sales": "Sales revenue",
+              "returns": "Returns and discounts",
+              "simple": "Simple",
+              "basic": "Basic discounts",
+              "nonifrs": "Non-IFRS"
+            }
+          },
+          "after": {
+            "headers": {
+              "revenue": "Revenue",
+              "standard": "Standard",
+              "amount": "Amount"
+            },
+            "data": {
+              "contracts": "Revenue from contracts",
+              "liabilities": "Contract liabilities",
+              "performance": "Performance obligations",
+              "method": "IFRS 15 method",
+              "compliant": "✓ Compliant"
+            }
+          }
+        },
+        "impairment": {
+          "before": {
+            "headers": {
+              "asset": "Asset",
+              "carrying": "Carrying Amount",
+              "status": "Status"
+            },
+            "data": {
+              "equipment": "Equipment",
+              "buildings": "Buildings",
+              "untested": "Not tested",
+              "notesting": "No testing",
+              "noias36": "No IAS 36 tests",
+              "risk": "Risk"
+            }
+          },
+          "after": {
+            "headers": {
+              "asset": "Asset",
+              "carrying": "Carrying Amount",
+              "status": "Status"
+            },
+            "data": {
+              "equipment": "Equipment (CGU 1)",
+              "buildings": "Buildings (CGU 2)",
+              "impaired": "Impaired",
+              "noimpairment": "No impairment",
+              "tested": "IAS 36 tested",
+              "recoverable": "Recoverable amount",
+              "validated": "✓ Validated"
+            }
+          }
+        }
+      }
+    },
+    "templates": {
+      "depreciation": {
+        "processed": "Asset schedules processed",
+        "changesLabel": "Depreciation entries",
+        "changes": "156",
+        "formulasLabel": "Asset calculations",
+        "formulas": "42"
+      },
+      "discounts": {
+        "processed": "Revenue analyzed",
+        "changesLabel": "Discount adjustments",
+        "changes": "293",
+        "formulasLabel": "Revenue formulas",
+        "formulas": "67"
+      },
+      "impairment": {
+        "processed": "Impairment tests completed",
+        "changesLabel": "Value adjustments",
+        "changes": "84",
+        "formulasLabel": "Impairment calculations",
+        "formulas": "28"
+      }
     }
   },
   "features": {

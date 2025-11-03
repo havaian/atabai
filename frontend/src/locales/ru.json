@@ -62,6 +62,140 @@
       "processed": "Файл обработан",
       "changes": "Изменений",
       "formulas": "Формул применено"
+    },
+    "step4": {
+      "title": "4. Посмотрите на трансформацию",
+      "description": "Увидьте, как ваш локальный формат преобразуется в международные стандарты МСФО",
+      "before": "До (формат НСБУ)",
+      "after": "После (формат МСФО)",
+      "transformation": "Трансформация",
+      "compliant": "Соответствует МСФО",
+      "keyChanges": "✨ Ключевые преобразования:",
+      "changes": {
+        "depreciation": "Методы амортизации МСФО 16",
+        "discounts": "Признание выручки МСФО 15",
+        "impairment": "Тестирование обесценения МСФО 36",
+        "translation": "Перевод на английский",
+        "standards": "Ссылки на стандарты"
+      },
+      "spreadsheet": {
+        "depreciation": {
+          "before": {
+            "headers": {
+              "code": "Код счета",
+              "item": "Наименование статьи",
+              "amount": "Сумма"
+            },
+            "data": {
+              "ppe": "Основные средства",
+              "depreciation": "Амортизация ОС",
+              "manual": "Ручной расчет",
+              "calculation": "Ручной расчет",
+              "error": "Есть ошибки"
+            }
+          },
+          "after": {
+            "headers": {
+              "assets": "Активы",
+              "standard": "Стандарт",
+              "amount": "Сумма"
+            },
+            "data": {
+              "ppe": "Основные средства",
+              "accumulated": "Накопленная амортизация",
+              "automated": "Автоматизировано",
+              "compliant": "Соответствует МСФО 16",
+              "accurate": "✓ Точно"
+            }
+          }
+        },
+        "discounts": {
+          "before": {
+            "headers": {
+              "code": "Код",
+              "revenue": "Выручка",
+              "amount": "Сумма"
+            },
+            "data": {
+              "sales": "Выручка от продаж",
+              "returns": "Возвраты и скидки",
+              "simple": "Простые",
+              "basic": "Базовые скидки",
+              "nonifrs": "Не МСФО"
+            }
+          },
+          "after": {
+            "headers": {
+              "revenue": "Выручка",
+              "standard": "Стандарт",
+              "amount": "Сумма"
+            },
+            "data": {
+              "contracts": "Выручка по договорам",
+              "liabilities": "Обязательства по договорам",
+              "performance": "Обязательства к исполнению",
+              "method": "Метод МСФО 15",
+              "compliant": "✓ Соответствует"
+            }
+          }
+        },
+        "impairment": {
+          "before": {
+            "headers": {
+              "asset": "Актив",
+              "carrying": "Балансовая стоимость",
+              "status": "Статус"
+            },
+            "data": {
+              "equipment": "Оборудование",
+              "buildings": "Здания",
+              "untested": "Без проверки",
+              "notesting": "Нет тестирования",
+              "noias36": "Без тестов МСФО 36",
+              "risk": "Риск"
+            }
+          },
+          "after": {
+            "headers": {
+              "asset": "Актив",
+              "carrying": "Балансовая стоимость",
+              "status": "Статус"
+            },
+            "data": {
+              "equipment": "Оборудование (ЕГДС 1)",
+              "buildings": "Здания (ЕГДС 2)",
+              "impaired": "Обесценен",
+              "noimpairment": "Без обесценения",
+              "tested": "Протестировано МСФО 36",
+              "recoverable": "Возмещаемая стоимость",
+              "validated": "✓ Проверено"
+            }
+          }
+        }
+      }
+    },
+    "templates": {
+      "depreciation": {
+        "processed": "Графики активов обработаны",
+        "changesLabel": "Записи амортизации",
+        "changes": "156",
+        "formulasLabel": "Расчеты по активам",
+        "formulas": "42"
+      },
+      "discounts": {
+        "processed": "Доходы проанализированы",
+        "changesLabel": "Корректировки скидок",
+        "changes": "293",
+        "formulasLabel": "Формулы доходов",
+        "formulas": "67"
+      },
+      "impairment": {
+        "processed": "Тесты на обесценение завершены",
+        "changesLabel": "Корректировки стоимости",
+        "changes": "84",
+        "formulasLabel": "Расчеты обесценения",
+        "formulas": "28"
+      }
     }
   },
   "features": {

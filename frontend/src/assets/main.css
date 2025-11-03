@@ -31,7 +31,7 @@
 
     /* Primary button base styles */
     .btn-primary {
-        border: thin solid transparent;
+        border: thick solid transparent;
         @apply bg-white text-black font-medium px-6 py-3 rounded-lg transition-all duration-300 ease-out relative overflow-hidden;
         @apply focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2;
     }
@@ -71,22 +71,10 @@
         background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
     }
 
-    .btn-rounded::before {
-        content: '';
-        position: absolute;
-        inset: -2px;
-        padding: 2px;
-        background: linear-gradient(45deg, #9500FF, #7c3aed, #9500FF);
-        border-radius: inherit;
-        mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-        mask-composite: xor;
-        opacity: 0;
-        transition: opacity 0.5s ease-out;
-    }
-
-    .btn-rounded:hover::before {
-        opacity: 1;
-        animation: borderRotate 2s linear infinite;
+    .btn-rounded:hover {
+        border: thin solid #9500FF;
+        @apply bg-transparent text-black;
+        background: transparent;
     }
 
     /* Circle button - for the final CTA */
@@ -151,6 +139,19 @@
 
     .bg-gradient-hero-alt {
         background: linear-gradient(to bottom, #9500FF, #000000);
+    }
+
+    /* Custom gradient-inspired shadow */
+    .shadow-gradient-hero {
+    box-shadow: 0 10px 25px -3px rgba(149, 0, 255, 0.3), 
+                0 4px 6px -2px rgba(124, 58, 237, 0.2),
+                0 20px 40px -4px rgba(91, 33, 182, 0.15);
+    }
+
+    .shadow-gradient-hero:hover {
+    box-shadow: 0 15px 35px -3px rgba(149, 0, 255, 0.4), 
+                0 8px 12px -2px rgba(124, 58, 237, 0.3),
+                0 25px 50px -4px rgba(91, 33, 182, 0.2);
     }
 }
 

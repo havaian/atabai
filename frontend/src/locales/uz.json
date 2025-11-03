@@ -62,6 +62,140 @@
       "processed": "Fayl qayta ishlandi",
       "changes": "O'zgarishlar",
       "formulas": "Formula qo'llanildi"
+    },
+    "step4": {
+      "title": "4. O'zgarishni ko'ring",
+      "description": "Mahalliy formatingiz xalqaro IFRS standartlariga qanday aylanishini kuzating",
+      "before": "Oldin (NSBU formati)",
+      "after": "Keyin (IFRS formati)",
+      "transformation": "O'zgartirish",
+      "compliant": "IFRS muvofiq",
+      "keyChanges": "✨ Asosiy o'zgarishlar:",
+      "changes": {
+        "depreciation": "IAS 16 amortizatsiya usullari",
+        "discounts": "IFRS 15 daromadni tan olish",
+        "impairment": "IAS 36 qadrsizlanish sinovlari",
+        "translation": "Ingliz tiliga tarjima",
+        "standards": "Standart havolalar"
+      },
+      "spreadsheet": {
+        "depreciation": {
+          "before": {
+            "headers": {
+              "code": "Hisob kodi",
+              "item": "Bandning nomi",
+              "amount": "Miqdor"
+            },
+            "data": {
+              "ppe": "Asosiy vositalar",
+              "depreciation": "AV amortizatsiyasi",
+              "manual": "Qo'lda hisob",
+              "calculation": "Qo'lda hisoblash",
+              "error": "Xatoli"
+            }
+          },
+          "after": {
+            "headers": {
+              "assets": "Aktivlar",
+              "standard": "Standart",
+              "amount": "Miqdor"
+            },
+            "data": {
+              "ppe": "Moddiy asosiy vositalar",
+              "accumulated": "To'plangan amortizatsiya",
+              "automated": "Avtomatlashtirilgan",
+              "compliant": "IAS 16 muvofiq",
+              "accurate": "✓ Aniq"
+            }
+          }
+        },
+        "discounts": {
+          "before": {
+            "headers": {
+              "code": "Kod",
+              "revenue": "Daromad",
+              "amount": "Miqdor"
+            },
+            "data": {
+              "sales": "Sotish daromadi",
+              "returns": "Qaytarishlar va chegirmalar",
+              "simple": "Oddiy",
+              "basic": "Asosiy chegirmalar",
+              "nonifrs": "IFRS emas"
+            }
+          },
+          "after": {
+            "headers": {
+              "revenue": "Daromad",
+              "standard": "Standart",
+              "amount": "Miqdor"
+            },
+            "data": {
+              "contracts": "Shartnomalardan daromad",
+              "liabilities": "Shartnoma majburiyatlari",
+              "performance": "Ijro majburiyatlari",
+              "method": "IFRS 15 usuli",
+              "compliant": "✓ Muvofiq"
+            }
+          }
+        },
+        "impairment": {
+          "before": {
+            "headers": {
+              "asset": "Aktiv",
+              "carrying": "Balans qiymati",
+              "status": "Holat"
+            },
+            "data": {
+              "equipment": "Uskunalar",
+              "buildings": "Binolar",
+              "untested": "Tekshirilmagan",
+              "notesting": "Tekshiruv yo'q",
+              "noias36": "IAS 36 sinovlari yo'q",
+              "risk": "Xavf"
+            }
+          },
+          "after": {
+            "headers": {
+              "asset": "Aktiv",
+              "carrying": "Balans qiymati",
+              "status": "Holat"
+            },
+            "data": {
+              "equipment": "Uskunalar (NGB 1)",
+              "buildings": "Binolar (NGB 2)",
+              "impaired": "Qadrsizlangan",
+              "noimpairment": "Qadrsizlanish yo'q",
+              "tested": "IAS 36 tekshirilgan",
+              "recoverable": "Qaytar qiymat",
+              "validated": "✓ Tasdiqlangan"
+            }
+          }
+        }
+      }
+    },
+    "templates": {
+      "depreciation": {
+        "processed": "Aktiv jadvallari qayta ishlandi",
+        "changesLabel": "Amortizatsiya yozuvlari",
+        "changes": "156",
+        "formulasLabel": "Aktiv hisob-kitoblari",
+        "formulas": "42"
+      },
+      "discounts": {
+        "processed": "Daromad tahlil qilindi",
+        "changesLabel": "Chegirma tuzatishlari",
+        "changes": "293",
+        "formulasLabel": "Daromad formulalari",
+        "formulas": "67"
+      },
+      "impairment": {
+        "processed": "Qadrsizlanish testlari yakunlandi",
+        "changesLabel": "Qiymat tuzatishlari",
+        "changes": "84",
+        "formulasLabel": "Qadrsizlanish hisob-kitoblari",
+        "formulas": "28"
+      }
     }
   },
   "features": {
@@ -92,7 +226,7 @@
     }
   },
   "templates": {
-    "depreciation": "Asosiy vositalarning amortizatsiyasi",
+    "depreciation": "Vositalarning amortizatsiyasi",
     "discounts": "Chegirmalar hisob-kitobi",
     "impairment": "Aktivlarning qadrsizlanishi",
     "reports": "Moliyaviy hisobotlar"

@@ -110,30 +110,12 @@ body {
 }
 
 .btn-circle {
-    @apply bg-primary text-white rounded-full font-medium hover:bg-primary-dark transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl;
+    @apply bg-primary text-white rounded-full font-medium transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl;
 }
 
 /* Animation classes */
 .hover-glow:hover {
     box-shadow: 0 0 20px rgba(101, 57, 154, 0.3);
-}
-
-/* Custom scrollbar */
-::-webkit-scrollbar {
-    width: 8px;
-}
-
-::-webkit-scrollbar-track {
-    background: #f1f1f1;
-}
-
-::-webkit-scrollbar-thumb {
-    background: var(--primary);
-    border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: var(--primary-dark);
 }
 
 /* Loading animation */
