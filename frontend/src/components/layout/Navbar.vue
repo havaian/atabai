@@ -11,11 +11,11 @@
 
                     <!-- Navigation Links -->
                     <div class="hidden md:ml-12 md:flex md:space-x-8">
-                        <a href="#features" class="text-gray-900 hover:text-primary px-3 py-2 text-sm font-medium">
-                            {{ $t('nav.features') }}
-                        </a>
                         <a href="#how-it-works" class="text-gray-900 hover:text-primary px-3 py-2 text-sm font-medium">
                             {{ $t('nav.howItWorks') }}
+                        </a>
+                        <a href="#features" class="text-gray-900 hover:text-primary px-3 py-2 text-sm font-medium">
+                            {{ $t('nav.features') }}
                         </a>
                         <!-- <a href="#pricing" class="text-gray-900 hover:text-primary px-3 py-2 text-sm font-medium">
                             {{ $t('nav.pricing') }}
