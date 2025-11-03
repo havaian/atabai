@@ -242,7 +242,7 @@
                 <!-- Key Changes Summary -->
                 <div class="bg-gradient-to-r from-primary/5 to-green-50 p-4 rounded-lg">
                   <h5 class="font-semibold text-sm mb-2">{{ $t('howItWorks.step4.keyChanges') }}</h5>
-                  <div class="grid grid-cols-1 md:grid-cols-3 gap-2 text-xs">
+                  <div class="grid grid-cols-1 md:grid-cols-3 gap-2 text-xs text-center">
                     <div>
                       <span class="text-primary">•</span> {{ $t(`howItWorks.step4.changes.${selectedTemplate}`) }}
                     </div>
