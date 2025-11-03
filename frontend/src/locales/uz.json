@@ -58,7 +58,7 @@
     },
     "step3": {
       "title": "Tayyor natijalarni oling",
-      "description": "IFRS formulalari qo'llanilgan va o'zgarishlar haqida batafsil hisoboti bilan qayta ishlangan fayllarni yuklab oling",
+      "description": "IFRS formulalari qo'llanilgan va o'zgarishlar haqida batafsil hisobotlarni yuklab oling",
       "processed": "Fayl qayta ishlandi",
       "changes": "O'zgarishlar",
       "formulas": "Formula qo'llanildi"

@@ -73,74 +73,77 @@
             </div>
 
             <!-- Step 2: Select Template -->
-            <div
-              class="bg-neutral-100 min-w-60 basis-96 px-7 py-8 rounded-32 md:px-5 md:w-full transition-shadow duration-300">
-              <div class="mb-8">
-                <h3 class="text-black text-2xl font-semibold leading-none tracking-tight">
-                  {{ $t('howItWorks.step2.title') }}
-                </h3>
-                <p class="text-black text-base font-medium leading-6 tracking-tight mt-2 whitespace-pre-line">
-                  {{ $t('howItWorks.step2.description') }}
-                </p>
+            <div class="flex w-full gap-5 flex-wrap">
+              <div
+                class="bg-neutral-100 flex-1 basis-96 px-7 py-8 rounded-32 md:px-5 md:w-full transition-shadow duration-300">
+                <div class="mb-8">
+                  <h3 class="text-black text-2xl font-semibold leading-none tracking-tight">
+                    {{ $t('howItWorks.step2.title') }}
+                  </h3>
+                  <p class="text-black text-base font-medium leading-6 tracking-tight mt-2 whitespace-pre-line">
+                    {{ $t('howItWorks.step2.description') }}
+                  </p>
+                </div>
+                <div class="bg-white p-6 rounded-20">
+                  <div class="space-y-3">
+                    <div @click="selectTemplate('depreciation')"
+                      :class="['p-3 rounded-lg flex items-center justify-between cursor-pointer transition-colors duration-200',
+                        selectedTemplate === 'depreciation' ? 'bg-primary/10 border border-primary' : 'bg-gray-50 hover:bg-gray-100']">
+                      <span class="text-sm font-medium">{{ $t('templates.depreciation') }}</span>
+                      <span class="text-xs bg-primary text-white px-2 py-1 rounded">IAS 16</span>
+                    </div>
+                    <div @click="selectTemplate('discounts')"
+                      :class="['p-3 rounded-lg flex items-center justify-between cursor-pointer transition-colors duration-200',
+                        selectedTemplate === 'discounts' ? 'bg-primary/10 border border-primary' : 'bg-gray-50 hover:bg-gray-100']">
+                      <span class="text-sm font-medium">{{ $t('templates.discounts') }}</span>
+                      <span class="text-xs bg-primary text-white px-2 py-1 rounded">IFRS 15</span>
+                    </div>
+                    <div @click="selectTemplate('impairment')"
+                      :class="['p-3 rounded-lg flex items-center justify-between cursor-pointer transition-colors duration-200',
+                        selectedTemplate === 'impairment' ? 'bg-primary/10 border border-primary' : 'bg-gray-50 hover:bg-gray-100']">
+                      <span class="text-sm font-medium">{{ $t('templates.impairment') }}</span>
+                      <span class="text-xs bg-primary text-white px-2 py-1 rounded">IAS 36</span>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div class="bg-white p-6 rounded-20">
-                <div class="space-y-3">
-                  <div @click="selectTemplate('depreciation')"
-                    :class="['p-3 rounded-lg flex items-center justify-between cursor-pointer transition-colors duration-200',
-                      selectedTemplate === 'depreciation' ? 'bg-primary/10 border border-primary' : 'bg-gray-50 hover:bg-gray-100']">
-                    <span class="text-sm font-medium">{{ $t('templates.depreciation') }}</span>
-                    <span class="text-xs bg-primary text-white px-2 py-1 rounded">IAS 16</span>
-                  </div>
-                  <div @click="selectTemplate('discounts')"
-                    :class="['p-3 rounded-lg flex items-center justify-between cursor-pointer transition-colors duration-200',
-                      selectedTemplate === 'discounts' ? 'bg-primary/10 border border-primary' : 'bg-gray-50 hover:bg-gray-100']">
-                    <span class="text-sm font-medium">{{ $t('templates.discounts') }}</span>
-                    <span class="text-xs bg-primary text-white px-2 py-1 rounded">IFRS 15</span>
-                  </div>
-                  <div @click="selectTemplate('impairment')"
-                    :class="['p-3 rounded-lg flex items-center justify-between cursor-pointer transition-colors duration-200',
-                      selectedTemplate === 'impairment' ? 'bg-primary/10 border border-primary' : 'bg-gray-50 hover:bg-gray-100']">
-                    <span class="text-sm font-medium">{{ $t('templates.impairment') }}</span>
-                    <span class="text-xs bg-primary text-white px-2 py-1 rounded">IAS 36</span>
+
+              <!-- Step 3: Get Results -->
+              <div
+                class="bg-neutral-100 flex-1 basis-96 px-7 py-8 rounded-32 md:px-5 md:w-full transition-shadow duration-300">
+                <div class="mb-8">
+                  <h3 class="text-black text-2xl font-semibold leading-none tracking-tight">
+                    {{ $t('howItWorks.step3.title') }}
+                  </h3>
+                  <p class="text-black text-base font-medium leading-6 tracking-tight mt-2 whitespace-pre-line">
+                    {{ $t('howItWorks.step3.description') }}
+                  </p>
+                </div>
+                <div class="bg-white p-6 rounded-20">
+                  <div class="space-y-4">
+                    <div class="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                      <span class="text-sm">{{ $t(`howItWorks.templates.${selectedTemplate}.processed`) }}</span>
+                      <CheckCircleIcon class="h-5 w-5 text-green-500" />
+                    </div>
+                    <div class="text-sm text-gray-600">
+                      <div class="flex justify-between">
+                        <span>{{ $t(`howItWorks.templates.${selectedTemplate}.changesLabel`) }}:</span>
+                        <span class="font-medium">{{ $t(`howItWorks.templates.${selectedTemplate}.changes`) }}</span>
+                      </div>
+                      <div class="flex justify-between">
+                        <span>{{ $t(`howItWorks.templates.${selectedTemplate}.formulasLabel`) }}:</span>
+                        <span class="font-medium">{{ $t(`howItWorks.templates.${selectedTemplate}.formulas`) }}</span>
+                      </div>
+                    </div>
+                    <button
+                      class="btn-primary bg-black text-white border-black hover:bg-transparent hover:text-black hover:border-black w-full">
+                      {{ $t('common.download') }}
+                    </button>
                   </div>
                 </div>
               </div>
             </div>
 
-            <!-- Step 3: Get Results -->
-            <div
-              class="bg-neutral-100 min-w-60 basis-96 px-7 py-8 rounded-32 md:px-5 md:w-full transition-shadow duration-300">
-              <div class="mb-8">
-                <h3 class="text-black text-2xl font-semibold leading-none tracking-tight">
-                  {{ $t('howItWorks.step3.title') }}
-                </h3>
-                <p class="text-black text-base font-medium leading-6 tracking-tight mt-2 whitespace-pre-line">
-                  {{ $t('howItWorks.step3.description') }}
-                </p>
-              </div>
-              <div class="bg-white p-6 rounded-20">
-                <div class="space-y-4">
-                  <div class="flex items-center justify-between p-3 bg-green-50 rounded-lg">
-                    <span class="text-sm">{{ $t(`howItWorks.templates.${selectedTemplate}.processed`) }}</span>
-                    <CheckCircleIcon class="h-5 w-5 text-green-500" />
-                  </div>
-                  <div class="text-sm text-gray-600">
-                    <div class="flex justify-between">
-                      <span>{{ $t(`howItWorks.templates.${selectedTemplate}.changesLabel`) }}:</span>
-                      <span class="font-medium">{{ $t(`howItWorks.templates.${selectedTemplate}.changes`) }}</span>
-                    </div>
-                    <div class="flex justify-between">
-                      <span>{{ $t(`howItWorks.templates.${selectedTemplate}.formulasLabel`) }}:</span>
-                      <span class="font-medium">{{ $t(`howItWorks.templates.${selectedTemplate}.formulas`) }}</span>
-                    </div>
-                  </div>
-                  <button
-                    class="btn-primary bg-black text-white border-black hover:bg-transparent hover:text-black hover:border-black w-full">
-                    {{ $t('common.download') }}
-                  </button>
-                </div>
-              </div>
-            </div>
 
             <!-- Step 4: Before/After Preview -->
             <div
@@ -294,7 +297,7 @@
               <div class="w-full">
                 <h3 class="text-2xl font-bold leading-none tracking-tight">{{ $t('features.automation.title') }}</h3>
                 <p class="text-base font-medium leading-6 tracking-tight mt-2">{{ $t('features.automation.description')
-                  }}</p>
+                }}</p>
               </div>
             </div>
             <div
@@ -303,7 +306,7 @@
               <div class="w-full">
                 <h3 class="text-2xl font-bold leading-none tracking-tight">{{ $t('features.compliance.title') }}</h3>
                 <p class="text-base font-medium leading-6 tracking-tight mt-2">{{ $t('features.compliance.description')
-                  }}</p>
+                }}</p>
               </div>
             </div>
             <div
@@ -338,7 +341,7 @@
               <div class="w-full">
                 <h3 class="text-2xl font-bold leading-none tracking-tight">{{ $t('features.universal.title') }}</h3>
                 <p class="text-base font-medium leading-6 tracking-tight mt-2">{{ $t('features.universal.description')
-                  }}</p>
+                }}</p>
               </div>
             </div>
           </div>
