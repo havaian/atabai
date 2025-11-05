@@ -20,26 +20,24 @@
 
         <!-- Statistics Section -->
         <div class="animate-fade-in [animation-delay:200ms] mt-27 md:mt-15">
-          <section class="flex w-full max-w-4xl gap-5 text-black flex-wrap justify-center mx-auto px-4 md:px-4">
-            <div
-              class="bg-neutral-100 min-w-60 grow shrink basis-80 px-7 py-8 rounded-32 md:px-5 hover:shadow-lg transition-shadow duration-300 cursor-pointer">
-              <div class="text-44 font-semibold leading-none tracking-tight">~ 15 {{ $t('stats.seconds') }}</div>
-              <div class="w-full text-2xl font-medium leading-8 mt-6">{{ $t('stats.analysisTime') }}</div>
-            </div>
-            <div
-              class="bg-neutral-100 min-w-60 grow shrink basis-80 px-7 py-8 rounded-32 md:px-5 hover:shadow-lg transition-shadow duration-300 cursor-pointer">
-              <div class="text-44 font-semibold leading-none tracking-tight">99.9%</div>
-              <div class="w-full text-2xl font-medium leading-8 mt-6">{{ $t('stats.accuracy') }}</div>
-            </div>
-            <div
-              class="bg-neutral-100 min-w-60 grow shrink basis-80 px-7 py-8 rounded-32 md:px-5 hover:shadow-lg transition-shadow duration-300 cursor-pointer">
-              <div class="text-44 font-semibold leading-none tracking-tight">24 / 7</div>
-              <div class="w-full text-2xl font-medium leading-8 mt-6">{{ $t('stats.availability') }}</div>
-            </div>
-            <div
-              class="bg-neutral-100 min-w-60 grow shrink basis-80 px-7 py-8 rounded-32 md:px-5 hover:shadow-lg transition-shadow duration-300 cursor-pointer">
-              <div class="text-44 font-semibold leading-none tracking-tight">60%</div>
-              <div class="w-full text-2xl font-medium leading-8 mt-6">{{ $t('stats.timeSaving') }}</div>
+          <section class="w-full max-w-4xl mx-auto px-4 text-black">
+            <div class="stats-grid">
+              <div class="stat-card">
+                <div class="stat-number">~ 15 {{ $t('stats.seconds') }}</div>
+                <div class="stat-description">{{ $t('stats.analysisTime') }}</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-number">99.9%</div>
+                <div class="stat-description">{{ $t('stats.accuracy') }}</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-number">24 / 7</div>
+                <div class="stat-description">{{ $t('stats.availability') }}</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-number">60%</div>
+                <div class="stat-description">{{ $t('stats.timeSaving') }}</div>
+              </div>
             </div>
           </section>
         </div>
@@ -730,6 +728,121 @@ html {
 
 .tracking-tight {
   letter-spacing: -0.025em;
+}
+
+.stats-grid, #features section > div {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+}
+
+@media (min-width: 512px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+  }
+}
+
+@media (min-width: 640px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .stats-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.25rem;
+  }
+}
+
+.stat-card {
+  background: #f5f5f5;
+  padding: 1.5rem 1rem;
+  border-radius: 2rem;
+  transition: box-shadow 0.3s ease;
+  cursor: pointer;
+}
+
+.stat-card:hover {
+  box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+@media (min-width: 512px) {
+  main {
+    padding: 0 2%;
+  }
+}
+
+@media (min-width: 640px) {
+  .stat-card {
+    padding: 2rem 1.75rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .stat-card {
+    padding: 2rem 1.25rem;
+  }
+}
+
+.stat-number {
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.025em;
+}
+
+@media (min-width: 512px) {
+  .stat-number {
+    font-size: 2.75rem;
+  }
+}
+
+
+@media (min-width: 640px) {
+  .stat-number {
+    font-size: 2.75rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .stat-number {
+    font-size: 1.875rem;
+  }
+}
+
+.stat-description {
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.5;
+  letter-spacing: -0.025em;
+  margin-top: 1rem;
+}
+
+@media (min-width: 510px) {
+  .stat-description {
+    font-size: 1.5rem;
+    line-height: 2;
+    margin-top: 1.5rem;
+  }
+}
+
+@media (min-width: 640px) {
+  .stat-description {
+    font-size: 1.5rem;
+    line-height: 2;
+    margin-top: 1.5rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .stat-description {
+    font-size: 1.125rem;
+    line-height: 1.5;
+    margin-top: 1rem;
+  }
 }
 
 /* Responsive breakpoint adjustments */

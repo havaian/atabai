@@ -28,7 +28,8 @@
     "logout": "Chiqish",
     "features": "Imkoniyatlar",
     "howItWorks": "Qanday ishlaydi",
-    "pricing": "Tariflar"
+    "pricing": "Tariflar",
+    "language": "Til"
   },
   "hero": {
     "title": "IFRS bo'yicha Excel hisob-kitoblarini avtomatlashtirishning kuchli platformasi",
@@ -39,10 +40,10 @@
   "stats": {
     "seconds": "son.",
     "minute": "daq.",
-    "analysisTime": "Excel fayllarini tahlil qilish vaqti",
-    "accuracy": "Hisob-kitob aniqligi",
-    "availability": "Tanaffussiz ishlaydi",
-    "timeSaving": "Avtomatlashtirish orqali vaqt tejash"
+    "analysisTime": "Analiz vaqti",
+    "accuracy": "Aniqligi",
+    "availability": "Tanaffussiz",
+    "timeSaving": "Vaqt tejash"
   },
   "howItWorks": {
     "title": "Qanday ishlaydi",

@@ -28,7 +28,8 @@
     "logout": "Выйти",
     "features": "Возможности",
     "howItWorks": "Как это работает",
-    "pricing": "Тарифы"
+    "pricing": "Тарифы",
+    "language": "Язык"
   },
   "hero": {
     "title": "Мощная платформа для автоматизации Excel расчетов по МСФО",
@@ -39,9 +40,9 @@
   "stats": {
     "seconds": "сек.",
     "minute": "мин.",
-    "analysisTime": "Время анализа Excel файлов",
+    "analysisTime": "Время анализа",
     "accuracy": "Точность расчетов",
-    "availability": "Работает без перерывов",
+    "availability": "Без перерывов",
     "timeSaving": "Экономия времени"
   },
   "howItWorks": {

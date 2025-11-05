@@ -1,6 +1,6 @@
 <template>
     <div :class="[
-        'logo-container relative transition-all duration-300 ease-in-out',
+        'logo-container flex w-full h-full items-center relative transition-all duration-300 ease-in-out',
         containerClass,
         { 'cursor-pointer': clickable }
     ]" @click="handleClick">

@@ -28,7 +28,8 @@
     "logout": "Sign Out",
     "features": "Features",
     "howItWorks": "How It Works",
-    "pricing": "Pricing"
+    "pricing": "Pricing",
+    "language": "Language"
   },
   "hero": {
     "title": "Powerful platform for automating Excel calculations according to IFRS",
@@ -39,10 +40,10 @@
   "stats": {
     "seconds": "sec.",
     "minute": "min.",
-    "analysisTime": "Excel file analysis time",
+    "analysisTime": "Analysis time",
     "accuracy": "Calculation accuracy",
-    "availability": "Works without breaks",
-    "timeSaving": "Time savings through automation"
+    "availability": "Available",
+    "timeSaving": "Time savings"
   },
   "howItWorks": {
     "title": "How it works",

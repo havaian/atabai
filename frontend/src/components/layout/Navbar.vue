@@ -23,8 +23,8 @@
                     </div>
                 </div>
 
-                <!-- User Menu -->
-                <div class="flex items-center space-x-4">
+                <!-- Desktop User Menu -->
+                <div class="hidden md:flex items-center space-x-4">
                     <!-- Language Selector -->
                     <div class="relative group">
                         <div
@@ -62,7 +62,7 @@
                                 <img class="h-8 w-8 rounded-full"
                                     :src="authStore.user?.picture || '/images/default-avatar.png'"
                                     :alt="authStore.user?.name || 'User'" />
-                                <span class="hidden md:block text-gray-700">{{ authStore.user?.name }}</span>
+                                <span class="hidden lg:block text-gray-700">{{ authStore.user?.name }}</span>
                                 <ChevronDownIcon class="h-4 w-4 text-gray-400" />
                             </MenuButton>
                             <MenuItems
@@ -88,15 +88,15 @@
                             </MenuItems>
                         </Menu>
                     </div>
+                </div>
 
-                    <!-- Mobile menu button -->
-                    <div class="md:hidden">
-                        <button @click="mobileMenuOpen = !mobileMenuOpen"
-                            class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary">
-                            <Bars3Icon v-if="!mobileMenuOpen" class="block h-6 w-6" />
-                            <XMarkIcon v-else class="block h-6 w-6" />
-                        </button>
-                    </div>
+                <!-- Mobile menu button -->
+                <div class="flex md:hidden">
+                    <button @click="mobileMenuOpen = !mobileMenuOpen"
+                        class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary">
+                        <Bars3Icon v-if="!mobileMenuOpen" class="block h-6 w-6" />
+                        <XMarkIcon v-else class="block h-6 w-6" />
+                    </button>
                 </div>
             </div>
         </div>
@@ -104,18 +104,73 @@
         <!-- Mobile menu -->
         <div v-show="mobileMenuOpen" class="md:hidden border-t border-gray-200">
             <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white">
-                <a href="#features"
+                <!-- Navigation Links -->
+                <a href="#features" @click="mobileMenuOpen = false"
                     class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">
                     {{ $t('nav.features') }}
                 </a>
-                <a href="#how-it-works"
+                <a href="#how-it-works" @click="mobileMenuOpen = false"
                     class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">
                     {{ $t('nav.howItWorks') }}
                 </a>
-                <!-- <a href="#pricing"
+                <!-- <a href="#pricing" @click="mobileMenuOpen = false"
                     class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">
                     {{ $t('nav.pricing') }}
                 </a> -->
+
+                <!-- Language Selector for Mobile -->
+                <div class="px-3 py-2">
+                    <div class="text-sm font-medium text-gray-500 mb-2">{{ $t('nav.language') }}</div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button v-for="locale in availableLocales" :key="locale.code"
+                            @click="changeLanguage(locale.code)" :class="[
+                                'flex items-center px-3 py-2 text-sm rounded-md transition-colors duration-150',
+                                locale.code === currentLocale.code
+                                    ? 'bg-primary text-white'
+                                    : 'text-gray-700 hover:bg-gray-100'
+                            ]">
+                            <span class="mr-2">{{ locale.flag }}</span>
+                            {{ locale.name }}
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Mobile Auth Section -->
+                <div class="border-t border-gray-200 pt-3">
+                    <!-- Not Authenticated -->
+                    <div v-if="!authStore.isAuthenticated" class="px-3 py-2">
+                        <button @click="true ? goToComingSoon() : authStore.login; mobileMenuOpen = false"
+                            class="w-full btn-auth hover-glow inline-flex items-center justify-center">
+                            <GoogleIcon size="16" className="mr-2" />
+                            {{ $t('auth.signInWithGoogle') }}
+                        </button>
+                    </div>
+
+                    <!-- Authenticated User Menu -->
+                    <div v-if="authStore.isAuthenticated" class="px-3 py-2">
+                        <!-- User Info -->
+                        <div class="flex items-center space-x-3 px-3 py-2 mb-2">
+                            <img class="h-8 w-8 rounded-full"
+                                :src="authStore.user?.picture || '/images/default-avatar.png'"
+                                :alt="authStore.user?.name || 'User'" />
+                            <span class="text-gray-700 font-medium">{{ authStore.user?.name }}</span>
+                        </div>
+
+                        <!-- User Menu Items -->
+                        <router-link to="/dashboard" @click="mobileMenuOpen = false"
+                            class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md">
+                            {{ $t('nav.dashboard') }}
+                        </router-link>
+                        <router-link to="/profile" @click="mobileMenuOpen = false"
+                            class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md">
+                            {{ $t('nav.profile') }}
+                        </router-link>
+                        <button @click="authStore.logout; mobileMenuOpen = false"
+                            class="block w-full text-left px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md">
+                            {{ $t('nav.logout') }}
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </nav>
