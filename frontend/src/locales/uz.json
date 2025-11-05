@@ -67,10 +67,10 @@
     "step4": {
       "title": "4. O'zgarishni ko'ring",
       "description": "Mahalliy formatingiz xalqaro IFRS standartlariga qanday aylanishini kuzating",
-      "before": "Oldin (NSBU formati)",
-      "after": "Keyin (IFRS formati)",
-      "transformation": "O'zgartirish",
-      "compliant": "IFRS muvofiq",
+      "before": "Oldin (NSBU format)",
+      "after": "Keyin (IFRS format)",
+      "transformation": "Transformatsiya",
+      "compliant": "IFRSga muvofiq",
       "keyChanges": "✨ Asosiy o'zgarishlar:",
       "changes": {
         "depreciation": "IAS 16 amortizatsiya usullari",
@@ -90,7 +90,7 @@
             "data": {
               "ppe": "Asosiy vositalar",
               "depreciation": "AV amortizatsiyasi",
-              "manual": "Qo'lda hisob",
+              "manual": "Qo'lda hisoblash",
               "calculation": "Qo'lda hisoblash",
               "error": "Xatoli"
             }
@@ -105,7 +105,7 @@
               "ppe": "Moddiy asosiy vositalar",
               "accumulated": "To'plangan amortizatsiya",
               "automated": "Avtomatlashtirilgan",
-              "compliant": "IAS 16 muvofiq",
+              "compliant": "IAS 16ga muvofiq",
               "accurate": "✓ Aniq"
             }
           }
@@ -135,7 +135,7 @@
               "contracts": "Shartnomalardan daromad",
               "liabilities": "Shartnoma majburiyatlari",
               "performance": "Ijro majburiyatlari",
-              "method": "IFRS 15 usuli",
+              "method": "IFRS 15 format",
               "compliant": "✓ Muvofiq"
             }
           }

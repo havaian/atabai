@@ -90,7 +90,7 @@
             "data": {
               "ppe": "Property, Plant & Equipment",
               "depreciation": "PPE Depreciation",
-              "manual": "Manual calc",
+              "manual": "Manual calculation",
               "calculation": "Manual calculation",
               "error": "Error prone"
             }
