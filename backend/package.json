@@ -91,6 +91,7 @@
     "stripe": "^19.1.0",
     "uuid": "^13.0.0",
     "winston": "^3.18.3",
+    "winston-daily-rotate-file": "^5.0.0",
     "xss-clean": "^0.1.4"
   },
   "devDependencies": {

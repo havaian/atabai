@@ -7,7 +7,8 @@
     "/history": "Fayllar tarixi",
     "/processing": "Qayta ishlash",
     "/results": "Natijalar",
-    "/coming-soon": "Tez orada"
+    "/coming-soon": "Tez orada",
+    "/auth/callback": "Tizimga kirish..."
   },
   "pageDescriptions": {
     "/": "IFRS bo'yicha Excel hisob-kitoblarini avtomatlashtirishning kuchli platformasi. ATABAI bilan hisobot tayyorlash o'n marta arzonroq va tezroq bo'ladi.",
@@ -17,7 +18,8 @@
     "/history": "ATABAI da fayllarni qayta ishlash tarixi - natijalarni ko'rish, qayta ishlangan hujjatlarni yuklab olish va statistika.",
     "/processing": "IFRS standartlariga muvofiq Excel fayllarini qayta ishlash - avtomatlashtirish formulalarini qo'llash va hisobotlar yaratish.",
     "/results": "ATABAI fayllarni qayta ishlash natijalari - o'zgarishlarni solishtirish, batafsil hisobotlar va tayyor hujjatlarni eksport qilish.",
-    "/coming-soon": "ATABAI tez orada mavjud bo'ladi. IFRS uchun Excel hisob-kitoblarini avtomatlashtirish platformasi ishlab chiqilmoqda."
+    "/coming-soon": "ATABAI tez orada mavjud bo'ladi. IFRS uchun Excel hisob-kitoblarini avtomatlashtirish platformasi ishlab chiqilmoqda.",
+    "/auth/callback": "Tizimga kirishingizni qayta ishlamoqda..."
   },
   "nav": {
     "home": "Bosh sahifa",
@@ -292,11 +294,20 @@
     "backToHome": "Bosh sahifaga qaytish"
   },
   "auth": {
-    "signIn": "Kirish",
+    "signInWithGoogle": "Google orqali kirish",
     "signOut": "Chiqish",
-    "signInWithGoogle": "Google orqali kirish"
+    "welcome": "Xush kelibsiz",
+    "processingLogin": "Kirish jarayoni...",
+    "pleaseWait": "Iltimos, sizni tizimga kiritish paytida kuting",
+    "loginFailed": "Kirish amalga oshmadi",
+    "loginSuccessful": "Muvaffaqiyatli kirish",
+    "redirectingToDashboard": "Boshqaruv paneliga yo'naltirish...",
+    "oauthCancelled": "Kirish bekor qilindi",
+    "invalidOauthResponse": "Yaroqsiz OAuth javobi",
+    "unexpectedError": "Kutilmagan xato yuz berdi"
   },
   "common": {
+    "goHome": "Bosh sahifaga",
     "loading": "Yuklanmoqda...",
     "error": "Xato",
     "success": "Muvaffaqiyatli",

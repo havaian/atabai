@@ -47,7 +47,7 @@
 
                     <!-- Auth Buttons -->
                     <div v-if="!authStore.isAuthenticated" class="flex items-center space-x-4">
-                        <button @click="true ? goToComingSoon() : authStore.login"
+                        <button @click="authStore.login"
                             class="btn-auth hover-glow inline-flex items-center">
                             <GoogleIcon size="16" className="mr-2" />
                             {{ $t('auth.signInWithGoogle') }}
@@ -139,7 +139,7 @@
                 <div class="border-t border-gray-200 pt-3">
                     <!-- Not Authenticated -->
                     <div v-if="!authStore.isAuthenticated" class="px-3 py-2">
-                        <button @click="true ? goToComingSoon() : authStore.login; mobileMenuOpen = false"
+                        <button @click="goToComingSoon() || authStore.login; mobileMenuOpen = false"
                             class="w-full btn-auth hover-glow inline-flex items-center justify-center">
                             <GoogleIcon size="16" className="mr-2" />
                             {{ $t('auth.signInWithGoogle') }}

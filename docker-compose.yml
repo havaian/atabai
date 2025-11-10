@@ -43,45 +43,45 @@ services:
   #     timeout: 10s
   #     retries: 3
 
-  # # Backend API Server
-  # backend:
-  #   build:
-  #     context: ./backend
-  #     dockerfile: Dockerfile
-  #     target: production
-  #   container_name: ${PROJECT_NAME:-atabai}-backend
-  #   restart: unless-stopped
-  #   environment:
-  #     - NODE_ENV=${NODE_ENV:-production}
-  #     - PORT=${BACKEND_PORT:-3000}
-  #     - MONGODB_URI=mongodb://${MONGO_ROOT_USERNAME:-admin}:${MONGO_ROOT_PASSWORD:-password}@mongodb:27017/${MONGO_DATABASE:-aitable}?authSource=admin
-  #     - REDIS_URI=redis://:${REDIS_PASSWORD:-password}@redis:6379
-  #     - RABBITMQ_URI=amqp://${RABBITMQ_USER:-admin}:${RABBITMQ_PASSWORD:-password}@rabbitmq:5672
-  #     - JWT_SECRET=${JWT_SECRET:-your_jwt_secret_key_here}
-  #     - JWT_EXPIRES_IN=${JWT_EXPIRES_IN:-7d}
-  #     - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
-  #     - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
-  #     - FRONTEND_URL=${FRONTEND_URL:-http://localhost:8080}
-  #   volumes:
-  #     - ./uploads:/app/uploads
-  #     - ./logs:/app/logs
-  #   ports:
-  #     - "${BACKEND_EXPOSE:-127.0.0.1:3000}:${BACKEND_PORT}"
-  #   # depends_on:
-  #   #   mongodb:
-  #   #     condition: service_healthy
-  #   #   redis:
-  #   #     condition: service_healthy
-  #   #   rabbitmq:
-  #   #     condition: service_healthy
-  #   networks:
-  #     - atabai-network
-  #   healthcheck:
-  #     test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
-  #     interval: 30s
-  #     timeout: 10s
-  #     retries: 3
-  #     start_period: 30s
+  # Backend API Server
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: production
+    container_name: ${PROJECT_NAME:-atabai}-backend
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=${NODE_ENV:-production}
+      - PORT=${BACKEND_PORT:-3000}
+      - MONGO_URI=${MONGO_URI}
+      - REDIS_URI=redis://:${REDIS_PASSWORD:-password}@redis:6379
+      - RABBITMQ_URI=amqp://${RABBITMQ_USER:-admin}:${RABBITMQ_PASSWORD:-password}@rabbitmq:5672
+      - JWT_SECRET=${JWT_SECRET:-your_jwt_secret_key_here}
+      - JWT_EXPIRES_IN=${JWT_EXPIRES_IN:-7d}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:8080}
+    volumes:
+      - ./uploads:/app/uploads
+      - ./logs:/app/logs
+    ports:
+      - "${BACKEND_EXPOSE:-127.0.0.1:3000}:${BACKEND_PORT}"
+    # depends_on:
+    #   mongodb:
+    #     condition: service_healthy
+    #   redis:
+    #     condition: service_healthy
+    #   rabbitmq:
+    #     condition: service_healthy
+    networks:
+      - atabai-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 
   # # Frontend Development Server
   # frontend-dev:

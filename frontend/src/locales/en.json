@@ -1,4 +1,17 @@
 {
+  "auth": {
+    "signInWithGoogle": "Sign in with Google",
+    "signOut": "Sign Out",
+    "welcome": "Welcome",
+    "processingLogin": "Processing login...",
+    "pleaseWait": "Please wait while we sign you in",
+    "loginFailed": "Login Failed",
+    "loginSuccessful": "Login Successful",
+    "redirectingToDashboard": "Redirecting to dashboard...",
+    "oauthCancelled": "Login was cancelled",
+    "invalidOauthResponse": "Invalid OAuth response",
+    "unexpectedError": "An unexpected error occurred"
+  },
   "pageTitles": {
     "/": "Home",
     "/dashboard": "Dashboard",
@@ -7,7 +20,8 @@
     "/history": "File history",
     "/processing": "Processing file",
     "/results": "Processing results",
-    "/coming-soon": "Coming soon"
+    "/coming-soon": "Coming soon",
+    "/auth/callback": "Signing in..."
   },
   "pageDescriptions": {
     "/": "Powerful platform for automating Excel calculations according to IFRS. With ATABAI, financial reporting will be tens of times cheaper and faster.",
@@ -17,7 +31,8 @@
     "/history": "File processing history in ATABAI - view results, download processed documents and statistics.",
     "/processing": "Processing Excel files according to IFRS standards - applying automation formulas and generating reports.",
     "/results": "ATABAI file processing results - compare changes, detailed reports and export ready documents.",
-    "/coming-soon": "ATABAI will be available soon. The Excel calculation automation platform for IFRS is under development."
+    "/coming-soon": "ATABAI will be available soon. The Excel calculation automation platform for IFRS is under development.",
+    "/auth/callback": "Processing your login..."
   },
   "nav": {
     "home": "Home",
@@ -291,12 +306,8 @@
     "instagram": "Instagram",
     "backToHome": "Back to home"
   },
-  "auth": {
-    "signIn": "Sign In",
-    "signOut": "Sign Out",
-    "signInWithGoogle": "Sign in with Google"
-  },
   "common": {
+    "goHome": "Go Home",
     "loading": "Loading...",
     "error": "Error",
     "success": "Success",

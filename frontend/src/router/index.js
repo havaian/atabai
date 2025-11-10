@@ -5,6 +5,7 @@ import i18n from '@/utils/i18n' // Import the i18n instance
 // Import views
 import LandingPage from '@/views/LandingPage.vue'
 import ComingSoon from '@/views/ComingSoon.vue'
+import OAuthCallback from '@/views/OAuthCallback.vue'
 // import Dashboard from '@/views/Dashboard.vue'
 // import ProcessingPage from '@/views/ProcessingPage.vue'
 // import ResultsPage from '@/views/ResultsPage.vue'
@@ -31,6 +32,17 @@ const routes = [
             showFooter: false,
             titleKey: 'pageTitles./coming-soon',
             descriptionKey: 'pageDescriptions./coming-soon'
+        }
+    },
+    {
+        path: '/auth/callback',
+        name: 'OAuthCallback',
+        component: OAuthCallback,
+        meta: {
+            showNavbar: false,
+            showFooter: false,
+            titleKey: 'pageTitles./auth/callback',
+            descriptionKey: 'pageDescriptions./auth/callback'
         }
     },
     // {

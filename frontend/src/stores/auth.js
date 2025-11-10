@@ -19,14 +19,23 @@ export const useAuthStore = defineStore('auth', () => {
     const canProcessFiles = computed(() => filesProcessedThisMonth.value < monthlyLimit.value)
 
     // Actions
+    // Actions
     async function login() {
         try {
             isLoading.value = true
             error.value = null
 
+            // Redirect directly to Google OAuth
+            const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
+                `client_id=${import.meta.env.VITE_GOOGLE_CLIENT_ID}&` +
+                `redirect_uri=${encodeURIComponent(window.location.origin)}/auth/callback&` +
+                `response_type=code&` +
+                `scope=profile email&` +
+                `access_type=offline&` +
+                `prompt=consent`
+
             // Redirect to Google OAuth
-            const response = await apiClient.get('/auth/google')
-            window.location.href = response.data.authUrl
+            window.location.href = googleAuthUrl
         } catch (err) {
             error.value = err.response?.data?.message || 'Failed to initiate login'
             console.error('Login error:', err)

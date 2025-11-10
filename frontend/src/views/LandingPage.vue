@@ -11,7 +11,7 @@
           <!-- Centered first CTA button -->
           <div class="flex justify-center mt-15 md:mt-10 md:mb-15">
             <button
-              @click="true ? goToComingSoon() : (authStore.isAuthenticated ? $router.push('/dashboard') : authStore.login())"
+              @click="authStore.isAuthenticated ? $router.push('/dashboard') : authStore.login()"
               class="btn-rounded pulse-glow min-w-60 min-h-14 flex items-center gap-2 justify-center md:px-5">
               {{ $t('hero.tryFree') }}
             </button>
@@ -271,7 +271,7 @@
                 <!-- Fixed mask button structure -->
                 <div class="btn-mask-container mt-12 md:mt-10">
                   <button
-                    @click="true ? goToComingSoon() : (authStore.isAuthenticated ? $router.push('/dashboard') : authStore.login())"
+                    @click="authStore.isAuthenticated ? $router.push('/dashboard') : authStore.login()"
                     class="btn-primary bg-white text-black border-white hover:bg-transparent hover:text-white hover:border-white min-w-60 min-h-14 px-7">
                     {{ $t('cta.button') }}
                   </button>
@@ -361,7 +361,7 @@
           </div>
           <div class="flex md:flex-col md:mt-10 md:items-center mt-10">
             <button
-              @click="true ? goToComingSoon() : (authStore.isAuthenticated ? $router.push('/dashboard') : authStore.login())"
+              @click="authStore.isAuthenticated ? $router.push('/dashboard') : authStore.login()"
               class="btn-circle w-65 h-65 flex justify-center items-center flex-col gap-5 text-xl font-medium whitespace-pre-line leading-tight text-center">
               <ArrowRightIcon class="w-12 h-12 text-black" />
               {{ $t('finalCta.button') }}

@@ -1,0 +1,383 @@
+const User = require('../user/model');
+const authService = require('../services/auth');
+const logger = require('../utils/logger');
+const axios = require('axios');
+
+class AuthController {
+    /**
+     * Initiate Google OAuth login
+     * GET /api/auth/google
+     */
+    async initiateGoogleLogin(req, res) {
+        try {
+            // Generate auth URL for Google OAuth
+            const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
+                `client_id=${process.env.GOOGLE_CLIENT_ID}&` +
+                `redirect_uri=${encodeURIComponent(process.env.FRONTEND_URL || 'http://localhost:8080')}/api/auth/google/callback&` +
+                `response_type=code&` +
+                `scope=profile email&` +
+                `access_type=offline&` +
+                `prompt=consent`;
+
+            res.json({
+                success: true,
+                authUrl,
+                message: 'Redirect to Google OAuth'
+            });
+        } catch (error) {
+            logger.error('Error initiating Google login:', error);
+            res.status(500).json({
+                error: 'OAUTH_INITIATION_FAILED',
+                message: 'Failed to initiate Google login'
+            });
+        }
+    }
+    
+    async createUserSession(user, accessToken, refreshToken) {
+        try {
+            logger.info(`User logged in successfully: ${user.email}`);
+
+            res.json({
+                success: true,
+                message: 'Login successful',
+                ...sessionData
+            });
+
+        } catch (error) {
+            logger.error('Google OAuth callback error:', error);
+            res.status(500).json({
+                error: 'OAUTH_CALLBACK_FAILED',
+                message: 'OAuth callback failed'
+            });
+        }
+    }
+    /**
+     * Handle Google OAuth callback
+     * POST /api/auth/google/callback
+     */
+    async handleGoogleCallback(req, res) {
+        console.log('🔧 OAuth callback received');
+        console.log('🔧 Request body:', req.body);
+        
+        try {
+            const { code } = req.body;
+            
+            if (!code) {
+                console.log('❌ No OAuth code provided');
+                return res.status(400).json({
+                    error: 'OAUTH_CODE_MISSING',
+                    message: 'OAuth authorization code is required'
+                });
+            }
+
+            console.log('🔧 OAuth code received:', code.substring(0, 10) + '...');
+
+            // Exchange authorization code for access token
+            console.log('🔧 Exchanging code for tokens...');
+            const tokenResponse = await axios.post('https://oauth2.googleapis.com/token', {
+                client_id: process.env.GOOGLE_CLIENT_ID,
+                client_secret: process.env.GOOGLE_CLIENT_SECRET,
+                code: code,
+                grant_type: 'authorization_code',
+                redirect_uri: `${process.env.FRONTEND_URL}/auth/callback`
+            });
+
+            const { access_token } = tokenResponse.data;
+            console.log('🔧 Access token received');
+
+            // Get user profile from Google
+            console.log('🔧 Fetching user profile from Google...');
+            const profileResponse = await axios.get('https://www.googleapis.com/oauth2/v2/userinfo', {
+                headers: {
+                    Authorization: `Bearer ${access_token}`
+                }
+            });
+
+            const googleProfile = profileResponse.data;
+            console.log('🔧 Google profile received:', { 
+                id: googleProfile.id, 
+                email: googleProfile.email,
+                name: googleProfile.name 
+            });
+
+            // Find or create user
+            const user = await User.findOrCreateFromGoogle({
+                id: googleProfile.id,
+                emails: [{ value: googleProfile.email }],
+                displayName: googleProfile.name,
+                photos: [{ value: googleProfile.picture }]
+            });
+            
+            console.log('🔧 User found/created:', user.email);
+            await user.updateLastLogin();
+
+            // Generate tokens
+            console.log('🔧 Generating JWT tokens...');
+            const { accessToken: jwtToken, refreshToken } = await authService.generateTokenPair(user);
+
+            // Create session data
+            const sessionData = authService.createUserSession(user, jwtToken, refreshToken);
+
+            logger.logInfo(`User logged in successfully: ${user.email}`, { category: 'auth' });
+
+            res.json({
+                success: true,
+                message: 'Login successful',
+                ...sessionData
+            });
+
+        } catch (error) {
+            console.error('❌ DETAILED OAuth callback error:', error);
+            console.error('❌ Error name:', error.name);
+            console.error('❌ Error message:', error.message);
+            
+            if (error.response) {
+                console.error('❌ API Error response:', {
+                    status: error.response.status,
+                    data: error.response.data
+                });
+            }
+            
+            logger.logError('Google OAuth callback error', { 
+                error: error.message,
+                stack: error.stack,
+                apiError: error.response?.data,
+                category: 'auth-error' 
+            });
+            
+            res.status(500).json({
+                error: 'OAUTH_CALLBACK_FAILED',
+                message: 'OAuth callback failed: ' + error.message
+            });
+        }
+    }
+
+    /**
+     * Refresh access token
+     * POST /api/auth/refresh
+     */
+    async refreshToken(req, res) {
+        try {
+            const { refreshToken } = req.body;
+
+            if (!refreshToken) {
+                return res.status(400).json({
+                    error: 'REFRESH_TOKEN_REQUIRED',
+                    message: 'Refresh token is required'
+                });
+            }
+
+            // Verify refresh token
+            const decoded = await authService.verifyRefreshToken(refreshToken);
+
+            // Find user
+            const user = await User.findById(decoded.userId);
+            if (!user || !user.isActive) {
+                return res.status(401).json({
+                    error: 'USER_NOT_FOUND',
+                    message: 'User not found or inactive'
+                });
+            }
+
+            // Reset monthly counter if needed
+            await user.resetMonthlyCounterIfNeeded();
+
+            // Generate new access token
+            const newAccessToken = await authService.generateAccessToken(user);
+
+            logger.info(`Access token refreshed for user: ${user.email}`);
+
+            res.json({
+                success: true,
+                accessToken: newAccessToken,
+                message: 'Token refreshed successfully'
+            });
+
+        } catch (error) {
+            logger.warn(`Token refresh failed: ${error.message}`);
+
+            if (error.message === 'REFRESH_TOKEN_EXPIRED') {
+                return res.status(401).json({
+                    error: 'REFRESH_TOKEN_EXPIRED',
+                    message: 'Refresh token has expired. Please login again.'
+                });
+            }
+
+            if (error.message === 'INVALID_REFRESH_TOKEN') {
+                return res.status(401).json({
+                    error: 'INVALID_REFRESH_TOKEN',
+                    message: 'Invalid refresh token'
+                });
+            }
+
+            res.status(500).json({
+                error: 'TOKEN_REFRESH_FAILED',
+                message: 'Failed to refresh token'
+            });
+        }
+    }
+
+    /**
+     * Get current user profile
+     * GET /api/auth/profile
+     */
+    async getProfile(req, res) {
+        try {
+            // User is already attached to request by auth middleware
+            const user = req.user;
+
+            res.json({
+                success: true,
+                user: {
+                    id: user._id,
+                    email: user.email,
+                    name: user.name,
+                    picture: user.picture,
+                    subscriptionType: user.subscriptionType,
+                    filesProcessedThisMonth: user.filesProcessedThisMonth,
+                    monthlyLimit: user.subscriptionType === 'basic' ? 5 : 'unlimited',
+                    canProcessFiles: user.canProcessFiles(),
+                    preferences: user.preferences,
+                    lastLoginAt: user.lastLoginAt,
+                    createdAt: user.createdAt
+                }
+            });
+
+        } catch (error) {
+            logger.error('Error fetching user profile:', error);
+            res.status(500).json({
+                error: 'PROFILE_FETCH_FAILED',
+                message: 'Failed to fetch user profile'
+            });
+        }
+    }
+
+    /**
+     * Update user profile
+     * PUT /api/auth/profile
+     */
+    async updateProfile(req, res) {
+        try {
+            const user = req.user;
+            const { name, preferences } = req.body;
+
+            // Update allowed fields
+            if (name && typeof name === 'string') {
+                user.name = name.trim();
+            }
+
+            if (preferences && typeof preferences === 'object') {
+                // Update language preference
+                if (preferences.language && ['ru', 'uz', 'en'].includes(preferences.language)) {
+                    user.preferences.language = preferences.language;
+                }
+
+                // Update notification preferences
+                if (preferences.notifications && typeof preferences.notifications === 'object') {
+                    if (typeof preferences.notifications.email === 'boolean') {
+                        user.preferences.notifications.email = preferences.notifications.email;
+                    }
+                    if (typeof preferences.notifications.browser === 'boolean') {
+                        user.preferences.notifications.browser = preferences.notifications.browser;
+                    }
+                }
+
+                // Update default template
+                if (preferences.defaultTemplate) {
+                    user.preferences.defaultTemplate = preferences.defaultTemplate;
+                }
+            }
+
+            await user.save();
+
+            logger.info(`Profile updated for user: ${user.email}`);
+
+            res.json({
+                success: true,
+                message: 'Profile updated successfully',
+                user: {
+                    id: user._id,
+                    email: user.email,
+                    name: user.name,
+                    picture: user.picture,
+                    subscriptionType: user.subscriptionType,
+                    preferences: user.preferences
+                }
+            });
+
+        } catch (error) {
+            logger.error('Error updating user profile:', error);
+            res.status(500).json({
+                error: 'PROFILE_UPDATE_FAILED',
+                message: 'Failed to update profile'
+            });
+        }
+    }
+
+    /**
+     * Logout user
+     * POST /api/auth/logout
+     */
+    async logout(req, res) {
+        try {
+            const token = req.token;
+            const user = req.user;
+
+            // Revoke the current access token
+            if (token) {
+                // Calculate token expiration time for blacklist
+                const decoded = await authService.verifyAccessToken(token);
+                const expiresIn = decoded.exp - Math.floor(Date.now() / 1000);
+                
+                if (expiresIn > 0) {
+                    await authService.revokeToken(token, expiresIn);
+                }
+            }
+
+            logger.info(`User logged out: ${user?.email || 'Unknown'}`);
+
+            res.json({
+                success: true,
+                message: 'Logged out successfully'
+            });
+
+        } catch (error) {
+            logger.error('Error during logout:', error);
+            // Don't fail logout even if token revocation fails
+            res.json({
+                success: true,
+                message: 'Logged out successfully'
+            });
+        }
+    }
+
+    /**
+     * Health check for auth service
+     * GET /api/auth/health
+     */
+    async healthCheck(req, res) {
+        try {
+            res.json({
+                success: true,
+                service: 'auth',
+                status: 'healthy',
+                timestamp: new Date().toISOString(),
+                features: {
+                    googleOAuth: !!process.env.GOOGLE_CLIENT_ID,
+                    jwtAuth: !!process.env.JWT_SECRET,
+                    tokenRefresh: !!process.env.JWT_REFRESH_SECRET
+                }
+            });
+        } catch (error) {
+            logger.error('Auth health check failed:', error);
+            res.status(500).json({
+                success: false,
+                service: 'auth',
+                status: 'unhealthy',
+                error: error.message
+            });
+        }
+    }
+}
+
+module.exports = new AuthController();

@@ -10,19 +10,19 @@ const xss = require('xss-clean');
 const cookieParser = require('cookie-parser');
 
 // Import configurations
-const connectDB = require('./config/database');
-const connectRedis = require('./config/redis');
+require('./config/database');
+const { connectRedis } = require('./config/redis');
 const logger = require('./utils/logger');
 
 // Import middleware
-const errorHandler = require('./middleware/errorHandler');
+const { errorHandler } = require('./middleware/errorHandler');
 const notFound = require('./middleware/notFound');
 
 // Import routes
-const authRoutes = require('./routes/auth');
-const userRoutes = require('./routes/users');
-const fileRoutes = require('./routes/files');
-const templateRoutes = require('./routes/templates');
+const authRoutes = require('./auth/routes');
+const userRoutes = require('./user/routes');
+const fileRoutes = require('./files/routes');
+const templateRoutes = require('./templates/routes');
 
 const app = express();
 
@@ -62,7 +62,8 @@ app.use(cors({
         const allowedOrigins = [
             process.env.FRONTEND_URL || 'http://localhost:8080',
             'http://localhost:3000',
-            'http://localhost:80'
+            'http://localhost:80',
+            'http://localhost:7777'  // Added for development
         ];
 
         // Allow requests with no origin (mobile apps, etc.)
@@ -90,14 +91,14 @@ app.use(xss());
 // Compression middleware
 app.use(compression());
 
-// Logging middleware
+// Logging middleware with enhanced Morgan integration
 if (process.env.NODE_ENV === 'development') {
-    app.use(morgan('dev'));
+    app.use(morgan(logger.http.devFormat, {
+        stream: logger.http.stream
+    }));
 } else {
-    app.use(morgan('combined', {
-        stream: {
-            write: (message) => logger.info(message.trim())
-        }
+    app.use(morgan(logger.http.prodFormat, {
+        stream: logger.http.stream
     }));
 }
 
@@ -133,27 +134,31 @@ app.use(notFound);
 app.use(errorHandler);
 
 // Initialize database connections
-const initializeApp = async () => {
+const initializeApp = async () => {    
     try {
-        // Connect to MongoDB
-        await connectDB();
-        logger.info('MongoDB connected successfully');
+        // await connectRedis();
+        // logger.logInfo('Redis connected successfully', { category: 'startup' });
 
-        // Connect to Redis
-        await connectRedis();
-        logger.info('Redis connected successfully');
-
-        // Start server
-        const PORT = process.env.PORT || 3000;
+        const PORT = process.env.BACKEND_PORT || 3000;
         const server = app.listen(PORT, '0.0.0.0', () => {
-            logger.info(`🚀 Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
+            console.log(`🚀 Server listening on port ${PORT}`);
+            logger.logInfo(`🚀 Server running in ${process.env.NODE_ENV} mode on port ${PORT}`, {
+                port: PORT,
+                environment: process.env.NODE_ENV,
+                category: 'startup'
+            });
         });
 
         // Graceful shutdown
         const gracefulShutdown = (signal) => {
-            logger.info(`Received ${signal}. Graceful shutdown initiated...`);
+            console.log(`📡 Received ${signal}. Graceful shutdown initiated...`);
+            logger.logInfo(`Received ${signal}. Graceful shutdown initiated...`, { 
+                signal,
+                category: 'shutdown' 
+            });
             server.close(() => {
-                logger.info('HTTP server closed');
+                console.log('🔴 HTTP server closed');
+                logger.logInfo('HTTP server closed', { category: 'shutdown' });
                 process.exit(0);
             });
         };
@@ -162,14 +167,18 @@ const initializeApp = async () => {
         process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
     } catch (error) {
-        logger.error('Failed to initialize application:', error);
+        console.error('❌ INITIALIZATION ERROR:', error);
+        console.error('❌ Error message:', error.message);
+        console.error('❌ Error stack:', error.stack);
+        logger.logError('Failed to initialize application', { 
+            error: error.message,
+            stack: error.stack,
+            category: 'startup' 
+        });
         process.exit(1);
     }
 };
 
-// Start the application
-if (require.main === module) {
-    initializeApp();
-}
+initializeApp();
 
 module.exports = app;
