@@ -10,7 +10,11 @@
     "redirectingToDashboard": "Redirecting to dashboard...",
     "oauthCancelled": "Login was cancelled",
     "invalidOauthResponse": "Invalid OAuth response",
-    "unexpectedError": "An unexpected error occurred"
+    "unexpectedError": "An unexpected error occurred",
+    "completingLogin": "Completing login...",
+    "authenticationFailed": "Authentication failed. Please try again.",
+    "invalidAuthParams": "Invalid authentication parameters.",
+    "tryAgain": "Try Again"
   },
   "pageTitles": {
     "/": "Home",
@@ -21,7 +25,8 @@
     "/processing": "Processing file",
     "/results": "Processing results",
     "/coming-soon": "Coming soon",
-    "/auth/callback": "Signing in..."
+    "/auth/callback": "Signing in...",
+    "/auth/success": "Login Successful"
   },
   "pageDescriptions": {
     "/": "Powerful platform for automating Excel calculations according to IFRS. With ATABAI, financial reporting will be tens of times cheaper and faster.",
@@ -32,7 +37,8 @@
     "/processing": "Processing Excel files according to IFRS standards - applying automation formulas and generating reports.",
     "/results": "ATABAI file processing results - compare changes, detailed reports and export ready documents.",
     "/coming-soon": "ATABAI will be available soon. The Excel calculation automation platform for IFRS is under development.",
-    "/auth/callback": "Processing your login..."
+    "/auth/callback": "Processing your login...",
+    "/auth/success": "Completing your authentication to ATABAI platform"
   },
   "nav": {
     "home": "Home",

@@ -24,6 +24,14 @@ const validateRefreshToken = [
         .withMessage('Invalid refresh token format'),
 ];
 
+const validateGoogleCallback = [
+    body('code')
+        .notEmpty()
+        .withMessage('OAuth authorization code is required')
+        .isLength({ min: 10 })
+        .withMessage('Invalid authorization code format'),
+];
+
 const validateProfileUpdate = [
     body('name')
         .optional()
@@ -42,14 +50,6 @@ const validateProfileUpdate = [
         .optional()
         .isBoolean()
         .withMessage('Browser notification preference must be boolean'),
-];
-
-const validateGoogleCallback = [
-    body('code')
-        .notEmpty()
-        .withMessage('OAuth authorization code is required')
-        .isLength({ min: 10 })
-        .withMessage('Invalid authorization code format'),
 ];
 
 // Middleware to handle validation errors

@@ -17,7 +17,7 @@ if (missingEnvVars.length > 0) {
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: "/api/auth/google/callback",
+    callbackURL: "/api/auth/google/callback", // This is correct now
     scope: ['profile', 'email']
 }, async (accessToken, refreshToken, profile, done) => {
     try {
@@ -81,7 +81,7 @@ passport.deserializeUser(async (id, done) => {
 const OAUTH_CONFIG = {
     GOOGLE_SCOPE: ['profile', 'email'],
     SESSION_MAX_AGE: 24 * 60 * 60 * 1000, // 24 hours
-    CALLBACK_SUCCESS_REDIRECT: process.env.FRONTEND_URL || 'http://localhost:8080',
+    CALLBACK_SUCCESS_REDIRECT: `${process.env.FRONTEND_URL || 'http://localhost:8080'}/auth/success`,
     CALLBACK_FAILURE_REDIRECT: `${process.env.FRONTEND_URL || 'http://localhost:8080'}/login?error=oauth_failed`
 };
 

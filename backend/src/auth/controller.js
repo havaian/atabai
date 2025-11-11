@@ -32,7 +32,7 @@ class AuthController {
             });
         }
     }
-    
+
     async createUserSession(user, accessToken, refreshToken) {
         try {
             logger.info(`User logged in successfully: ${user.email}`);
@@ -58,10 +58,10 @@ class AuthController {
     async handleGoogleCallback(req, res) {
         console.log('🔧 OAuth callback received');
         console.log('🔧 Request body:', req.body);
-        
+
         try {
             const { code } = req.body;
-            
+
             if (!code) {
                 console.log('❌ No OAuth code provided');
                 return res.status(400).json({
@@ -94,10 +94,10 @@ class AuthController {
             });
 
             const googleProfile = profileResponse.data;
-            console.log('🔧 Google profile received:', { 
-                id: googleProfile.id, 
+            console.log('🔧 Google profile received:', {
+                id: googleProfile.id,
                 email: googleProfile.email,
-                name: googleProfile.name 
+                name: googleProfile.name
             });
 
             // Find or create user
@@ -107,7 +107,7 @@ class AuthController {
                 displayName: googleProfile.name,
                 photos: [{ value: googleProfile.picture }]
             });
-            
+
             console.log('🔧 User found/created:', user.email);
             await user.updateLastLogin();
 
@@ -130,25 +130,107 @@ class AuthController {
             console.error('❌ DETAILED OAuth callback error:', error);
             console.error('❌ Error name:', error.name);
             console.error('❌ Error message:', error.message);
-            
+
             if (error.response) {
                 console.error('❌ API Error response:', {
                     status: error.response.status,
                     data: error.response.data
                 });
             }
-            
-            logger.logError('Google OAuth callback error', { 
+
+            logger.logError('Google OAuth callback error', {
                 error: error.message,
                 stack: error.stack,
                 apiError: error.response?.data,
-                category: 'auth-error' 
+                category: 'auth-error'
             });
-            
+
             res.status(500).json({
                 error: 'OAUTH_CALLBACK_FAILED',
                 message: 'OAuth callback failed: ' + error.message
             });
+        }
+    }
+
+    /**
+ * Handle Passport Google OAuth callback
+ * This method is called after passport.authenticate('google') succeeds
+ */
+    async handlePassportCallback(req, res) {
+        try {
+            console.log('🔧 Passport OAuth callback received');
+
+            if (!req.user) {
+                console.log('❌ No user from Passport authentication');
+                return res.redirect(`${process.env.FRONTEND_URL}/login?error=oauth_failed`);
+            }
+
+            console.log('🔧 User authenticated via Passport:', req.user.email);
+
+            // Update last login
+            await req.user.updateLastLogin();
+
+            // Generate JWT tokens
+            console.log('🔧 Generating JWT tokens...');
+            const { accessToken, refreshToken } = await authService.generateTokenPair(req.user);
+
+            // Create session data
+            const sessionData = authService.createUserSession(req.user, accessToken, refreshToken);
+
+            // Redirect to frontend with tokens as URL parameters (for SPA)
+            const redirectUrl = `${process.env.FRONTEND_URL}/auth/success?` +
+                `access_token=${encodeURIComponent(accessToken)}&` +
+                `refresh_token=${encodeURIComponent(refreshToken)}&` +
+                `user=${encodeURIComponent(JSON.stringify({
+                    id: req.user._id,
+                    email: req.user.email,
+                    name: req.user.name,
+                    subscriptionType: req.user.subscriptionType
+                }))}`;
+
+            console.log('🔧 Redirecting to:', `${process.env.FRONTEND_URL}/auth/success`);
+
+            logger.logInfo(`User logged in successfully via Passport: ${req.user.email}`, { category: 'auth' });
+
+            res.redirect(redirectUrl);
+
+        } catch (error) {
+            console.error('❌ Passport OAuth callback error:', error);
+
+            logger.logError('Passport OAuth callback error', {
+                error: error.message,
+                stack: error.stack,
+                category: 'auth-error'
+            });
+
+            res.redirect(`${process.env.FRONTEND_URL}/login?error=oauth_failed`);
+        }
+    }
+
+    /**
+     * Handle manual Google OAuth callback (rename existing method)
+     * POST /api/auth/google/callback
+     */
+    async handleManualCallback(req, res) {
+        // This is your existing handleGoogleCallback method
+        // Just rename it to handleManualCallback
+        console.log('🔧 Manual OAuth callback received');
+        console.log('🔧 Request body:', req.body);
+
+        try {
+            const { code } = req.body;
+
+            if (!code) {
+                console.log('❌ No OAuth code provided');
+                return res.status(400).json({
+                    error: 'OAUTH_CODE_MISSING',
+                    message: 'OAuth authorization code is required'
+                });
+            }
+
+            // ... rest of your existing handleGoogleCallback logic
+        } catch (error) {
+            // ... existing error handling
         }
     }
 
@@ -328,7 +410,7 @@ class AuthController {
                 // Calculate token expiration time for blacklist
                 const decoded = await authService.verifyAccessToken(token);
                 const expiresIn = decoded.exp - Math.floor(Date.now() / 1000);
-                
+
                 if (expiresIn > 0) {
                     await authService.revokeToken(token, expiresIn);
                 }

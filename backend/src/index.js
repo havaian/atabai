@@ -10,7 +10,7 @@ const xss = require('xss-clean');
 const cookieParser = require('cookie-parser');
 
 // Import configurations
-require('./config/database');
+const { connect: connectDatabase } = require('./config/database');
 const { connectRedis } = require('./config/redis');
 const logger = require('./utils/logger');
 
@@ -85,8 +85,8 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(cookieParser());
 
 // Data sanitization middleware
-app.use(mongoSanitize());
-app.use(xss());
+// app.use(mongoSanitize());
+// app.use(xss());
 
 // Compression middleware
 app.use(compression());
@@ -131,11 +131,15 @@ app.get('/', (req, res) => {
 
 // Error handling middleware (must be last)
 app.use(notFound);
-app.use(errorHandler);
+// app.use(errorHandler);
 
 // Initialize database connections
 const initializeApp = async () => {    
     try {
+        // Connect to MongoDB
+        await connectDatabase(process.env.MONGO_URI);
+        console.log('✅ Database connected successfully');
+
         // await connectRedis();
         // logger.logInfo('Redis connected successfully', { category: 'startup' });
 

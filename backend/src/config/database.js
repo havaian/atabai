@@ -16,8 +16,8 @@ class DatabaseConnection {
     /**
      * Initialize database connection with retry logic
      */
-    async connect() {
-        const mongoUri = this.buildConnectionString();
+    async connect(MONGO_URI = '') {
+        const mongoUri = MONGO_URI || this.buildConnectionString();
         const options = this.getConnectionOptions();
 
         try {
@@ -101,9 +101,9 @@ class DatabaseConnection {
             retryWrites: true,               // Retry failed writes
             retryReads: true,                // Retry failed reads
 
-            // Buffer settings
-            bufferMaxEntries: 0,            // Disable mongoose buffering
-            bufferCommands: false,          // Disable mongoose buffering
+            // // Buffer settings
+            // bufferMaxEntries: 0,            // Disable mongoose buffering
+            // bufferCommands: false,          // Disable mongoose buffering
         };
     }
 
@@ -230,7 +230,7 @@ const dbConnection = new DatabaseConnection();
 
 // Export connection methods
 module.exports = {
-    connect: () => dbConnection.connect(),
+    connect: (MONGO_URI) => dbConnection.connect(MONGO_URI),
     healthCheck: () => dbConnection.healthCheck(),
     getStatus: () => dbConnection.getStatus(),
     mongoose: mongoose // Export mongoose for model creation

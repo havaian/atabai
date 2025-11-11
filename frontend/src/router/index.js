@@ -6,6 +6,7 @@ import i18n from '@/utils/i18n' // Import the i18n instance
 import LandingPage from '@/views/LandingPage.vue'
 import ComingSoon from '@/views/ComingSoon.vue'
 import OAuthCallback from '@/views/OAuthCallback.vue'
+import AuthSuccess from '@/views/AuthSuccess.vue'
 // import Dashboard from '@/views/Dashboard.vue'
 // import ProcessingPage from '@/views/ProcessingPage.vue'
 // import ResultsPage from '@/views/ResultsPage.vue'
@@ -43,6 +44,18 @@ const routes = [
             showFooter: false,
             titleKey: 'pageTitles./auth/callback',
             descriptionKey: 'pageDescriptions./auth/callback'
+        }
+    },
+    {
+        path: '/auth/success',
+        name: 'AuthSuccess',
+        component: AuthSuccess,
+        meta: {
+            showNavbar: false,
+            showFooter: false,
+            requiresGuest: true,
+            titleKey: 'pageTitles./auth/success',
+            descriptionKey: 'pageDescriptions./auth/success'
         }
     },
     // {

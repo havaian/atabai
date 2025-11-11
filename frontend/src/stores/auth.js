@@ -19,13 +19,12 @@ export const useAuthStore = defineStore('auth', () => {
     const canProcessFiles = computed(() => filesProcessedThisMonth.value < monthlyLimit.value)
 
     // Actions
-    // Actions
     async function login() {
         try {
             isLoading.value = true
             error.value = null
 
-            // Redirect directly to Google OAuth
+            // Redirect directly to Google OAuth (ORIGINAL WORKING VERSION)
             const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
                 `client_id=${import.meta.env.VITE_GOOGLE_CLIENT_ID}&` +
                 `redirect_uri=${encodeURIComponent(window.location.origin)}/auth/callback&` +
@@ -33,6 +32,8 @@ export const useAuthStore = defineStore('auth', () => {
                 `scope=profile email&` +
                 `access_type=offline&` +
                 `prompt=consent`
+
+            console.log('🔧 Redirecting to Google OAuth:', googleAuthUrl)
 
             // Redirect to Google OAuth
             window.location.href = googleAuthUrl
@@ -55,6 +56,9 @@ export const useAuthStore = defineStore('auth', () => {
             user.value = userData
             accessToken.value = access
             refreshToken.value = refresh
+
+            // Persist tokens to localStorage
+            persistTokens()
 
             return userData
         } catch (err) {
@@ -79,87 +83,77 @@ export const useAuthStore = defineStore('auth', () => {
             const { accessToken: newAccessToken } = response.data
             accessToken.value = newAccessToken
 
+            // Persist the new token
+            persistTokens()
+
             return newAccessToken
         } catch (err) {
-            console.error('Token refresh failed:', err)
+            // Clear tokens on refresh failure
             await logout()
             throw err
         }
     }
 
+    // Check authentication status on app initialization
     async function checkAuth() {
-        const storedToken = localStorage.getItem('accessToken')
-        const storedRefreshToken = localStorage.getItem('refreshToken')
-        const storedUser = localStorage.getItem('user')
+        try {
+            // Check if we have tokens in localStorage or sessionStorage
+            const storedAccessToken = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken')
+            const storedRefreshToken = localStorage.getItem('refreshToken') || sessionStorage.getItem('refreshToken')
+            const storedUser = localStorage.getItem('user') || sessionStorage.getItem('user')
 
-        if (storedToken && storedRefreshToken && storedUser) {
-            try {
-                accessToken.value = storedToken
+            if (storedAccessToken && storedUser) {
+                accessToken.value = storedAccessToken
                 refreshToken.value = storedRefreshToken
                 user.value = JSON.parse(storedUser)
 
-                // Verify token validity by fetching user profile
-                await fetchProfile()
-            } catch (err) {
-                console.error('Token validation failed:', err)
-                await logout()
+                // Verify token is still valid by fetching user profile
+                const response = await apiClient.get('/auth/profile')
+                if (response.data.success) {
+                    user.value = response.data.user
+                    return true
+                }
             }
+        } catch (err) {
+            // Clear invalid tokens
+            await logout()
+            console.log('No valid authentication found')
         }
+        return false
     }
 
-    async function fetchProfile() {
-        try {
-            const response = await apiClient.get('/auth/profile')
-            user.value = response.data
-            localStorage.setItem('user', JSON.stringify(response.data))
-            return response.data
-        } catch (err) {
-            if (err.response?.status === 401) {
-                // The axios interceptor will handle token refresh automatically
-                throw err
+    // Store tokens to localStorage
+    function persistTokens() {
+        if (accessToken.value) {
+            localStorage.setItem('accessToken', accessToken.value)
+            localStorage.setItem('user', JSON.stringify(user.value))
+            if (refreshToken.value) {
+                localStorage.setItem('refreshToken', refreshToken.value)
             }
-            throw err
         }
     }
 
     async function logout() {
         try {
-            // Call logout endpoint if we have a token
             if (accessToken.value) {
                 await apiClient.post('/auth/logout')
             }
         } catch (err) {
-            console.error('Logout API call failed:', err)
-            // Continue with local logout even if API call fails
-        }
-
-        // Clear state
-        user.value = null
-        accessToken.value = null
-        refreshToken.value = null
-        error.value = null
-
-        // Clear localStorage
-        localStorage.removeItem('accessToken')
-        localStorage.removeItem('refreshToken')
-        localStorage.removeItem('user')
-
-        // Redirect to home page
-        window.location.href = '/'
-    }
-
-    async function updateProfile(profileData) {
-        try {
-            isLoading.value = true
-            const response = await apiClient.put('/auth/profile', profileData)
-            user.value = response.data
-            localStorage.setItem('user', JSON.stringify(response.data))
-            return response.data
-        } catch (err) {
-            error.value = err.response?.data?.message || 'Failed to update profile'
-            throw err
+            console.error('Logout error:', err)
         } finally {
-            isLoading.value = false
+            // Clear state
+            user.value = null
+            accessToken.value = null
+            refreshToken.value = null
+            error.value = null
+
+            // Clear localStorage
+            localStorage.removeItem('accessToken')
+            localStorage.removeItem('refreshToken')
+            localStorage.removeItem('user')
+            sessionStorage.removeItem('accessToken')
+            sessionStorage.removeItem('refreshToken')
+            sessionStorage.removeItem('user')
         }
     }
 
@@ -170,7 +164,6 @@ export const useAuthStore = defineStore('auth', () => {
         refreshToken,
         isLoading,
         error,
-
         // Getters
         isAuthenticated,
         subscriptionType,
@@ -178,20 +171,12 @@ export const useAuthStore = defineStore('auth', () => {
         filesProcessedThisMonth,
         monthlyLimit,
         canProcessFiles,
-
         // Actions
         login,
+        handleOAuthCallback,
+        refreshAccessToken,
         logout,
         checkAuth,
-        fetchProfile,
-        updateProfile,
-        handleOAuthCallback,
-        refreshAccessToken
-    }
-}, {
-    persist: {
-        key: 'atabai-auth',
-        storage: localStorage,
-        paths: ['user', 'accessToken', 'refreshToken']
+        persistTokens
     }
 })

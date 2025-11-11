@@ -1,25 +1,44 @@
 {
+  "auth": {
+    "signInWithGoogle": "Google orqali kirish",
+    "signOut": "Chiqish",
+    "welcome": "Xush kelibsiz",
+    "processingLogin": "Tizimga kirish jarayonida...",
+    "pleaseWait": "Sizni tizimga kiritish paytida biroz kuting",
+    "loginFailed": "Tizimga kirish xatosi",
+    "loginSuccessful": "Muvaffaqiyatli kirdingiz",
+    "redirectingToDashboard": "Boshqaruv paneliga yo'naltirilmoqda...",
+    "oauthCancelled": "Tizimga kirish bekor qilindi",
+    "invalidOauthResponse": "Noto'g'ri OAuth javobi",
+    "unexpectedError": "Kutilmagan xatolik yuz berdi",
+    "completingLogin": "Tizimga kirishni yakunlash...",
+    "authenticationFailed": "Autentifikatsiya xatosi. Iltimos, qaytadan urinib ko'ring.",
+    "invalidAuthParams": "Autentifikatsiya parametrlari noto'g'ri.",
+    "tryAgain": "Qaytadan urinish"
+  },
   "pageTitles": {
     "/": "Bosh sahifa",
     "/dashboard": "Boshqaruv paneli",
     "/templates": "Shablonlar",
     "/profile": "Profil",
     "/history": "Fayllar tarixi",
-    "/processing": "Qayta ishlash",
-    "/results": "Natijalar",
+    "/processing": "Faylni qayta ishlash",
+    "/results": "Qayta ishlash natijalari",
     "/coming-soon": "Tez orada",
-    "/auth/callback": "Tizimga kirish..."
+    "/auth/callback": "Tizimga kirish...",
+    "/auth/success": "Muvaffaqiyatli kirildi"
   },
   "pageDescriptions": {
-    "/": "IFRS bo'yicha Excel hisob-kitoblarini avtomatlashtirishning kuchli platformasi. ATABAI bilan hisobot tayyorlash o'n marta arzonroq va tezroq bo'ladi.",
-    "/dashboard": "ATABAI boshqaruv paneli - fayllar, IFRS shablonlari va moliyaviy hujjatlarni qayta ishlash jarayonini boshqarish.",
-    "/templates": "Amortizatsiya hisob-kitoblari, chegirmalar, aktivlarning qadrsizlanishi va moliyaviy hisobotlarni avtomatlashtirish uchun IFRS shablonlari.",
-    "/profile": "ATABAI foydalanuvchi profili sozlamalari - obuna, afzalliklar va shaxsiy ma'lumotlarni boshqarish.",
-    "/history": "ATABAI da fayllarni qayta ishlash tarixi - natijalarni ko'rish, qayta ishlangan hujjatlarni yuklab olish va statistika.",
-    "/processing": "IFRS standartlariga muvofiq Excel fayllarini qayta ishlash - avtomatlashtirish formulalarini qo'llash va hisobotlar yaratish.",
-    "/results": "ATABAI fayllarni qayta ishlash natijalari - o'zgarishlarni solishtirish, batafsil hisobotlar va tayyor hujjatlarni eksport qilish.",
-    "/coming-soon": "ATABAI tez orada mavjud bo'ladi. IFRS uchun Excel hisob-kitoblarini avtomatlashtirish platformasi ishlab chiqilmoqda.",
-    "/auth/callback": "Tizimga kirishingizni qayta ishlamoqda..."
+    "/": "XMHS bo'yicha Excel hisob-kitoblarini avtomatlashtirish uchun kuchli platforma. ATABAI bilan moliyaviy hisobot o'n marta arzon va tezroq bo'ladi.",
+    "/dashboard": "ATABAI boshqaruv paneli - fayllarni, XMHS shablonlarini boshqaring va moliyaviy hujjatlar qayta ishlashini kuzatib boring.",
+    "/templates": "XMHS shablonlari amortizatsiya hisob-kitoblari, chegirmalar, aktivlar qadrsizlanishi va moliyaviy hisobotlarni avtomatlashtirish uchun.",
+    "/profile": "ATABAI foydalanuvchi profili sozlamalari - obuna, afzalliklar va shaxsiy ma'lumotlarni boshqaring.",
+    "/history": "ATABAI-da fayllar qayta ishlash tarixi - natijalarni ko'ring, qayta ishlangan hujjatlar va statistikalarni yuklab oling.",
+    "/processing": "XMHS standartlari bo'yicha Excel fayllarni qayta ishlash - avtomatlashtirish formulalarini qo'llash va hisobotlar yaratish.",
+    "/results": "ATABAI fayl qayta ishlash natijalari - o'zgarishlarni solishtiring, batafsil hisobotlar va tayyor hujjatlarni eksport qiling.",
+    "/coming-soon": "ATABAI tez orada mavjud bo'ladi. XMHS uchun Excel hisob-kitoblar avtomatlashtirish platformasi ishlab chiqilmoqda.",
+    "/auth/callback": "Tizimga kirishingizni qayta ishlamoqda...",
+    "/auth/success": "ATABAI platformasiga autentifikatsiyangizni yakunlamoqda"
   },
   "nav": {
     "home": "Bosh sahifa",
@@ -30,55 +49,55 @@
     "logout": "Chiqish",
     "features": "Imkoniyatlar",
     "howItWorks": "Qanday ishlaydi",
-    "pricing": "Tariflar",
+    "pricing": "Narxlar",
     "language": "Til"
   },
   "hero": {
-    "title": "IFRS bo'yicha Excel hisob-kitoblarini avtomatlashtirishning kuchli platformasi",
-    "subtitle": "ATABAI bilan hisobot tayyorlash o'n marta arzonroq va tezroq bo'ladi",
+    "title": "XMHS bo'yicha Excel hisob-kitoblarini avtomatlashtirish uchun kuchli platforma",
+    "subtitle": "ATABAI bilan moliyaviy hisobot o'n marta arzon va tezroq bo'ladi",
     "tryFree": "Bepul sinab ko'ring",
     "loginGoogle": "Google orqali kirish"
   },
   "stats": {
     "seconds": "son.",
     "minute": "daq.",
-    "analysisTime": "Analiz vaqti",
-    "accuracy": "Aniqligi",
-    "availability": "Tanaffussiz",
+    "analysisTime": "Tahlil vaqti",
+    "accuracy": "Hisob-kitob aniqligi",
+    "availability": "Mavjud",
     "timeSaving": "Vaqt tejash"
   },
   "howItWorks": {
     "title": "Qanday ishlaydi",
     "step1": {
-      "title": "Excel fayllarini yuklang",
-      "description": "IFRS talablariga muvofiq qayta ishlash uchun moliyaviy Excel fayllaringizni yuklang",
-      "uploadText": "Fayllarni bu yerga torting yoki tanlash uchun bosing",
+      "title": "Excel fayllarni yuklang",
+      "description": "XMHS talablariga muvofiq qayta ishlash uchun moliyaviy Excel fayllaringizni yuklang",
+      "uploadText": "Fayllarni bu yerga sudrab oling yoki tanlash uchun bosing",
       "supportedFormats": "Qo'llab-quvvatlanadigan formatlar: .xlsx, .xls, .csv"
     },
     "step2": {
-      "title": "IFRS shablonini tanlang",
-      "description": "Xalqaro moliyaviy hisobot standartlariga muvofiq mos hisob-kitob shablonini tanlang"
+      "title": "XMHS shablonini tanlang",
+      "description": "XMHS ga muvofiq tegishli hisob-kitob shablonini tanlang"
     },
     "step3": {
       "title": "Tayyor natijalarni oling",
-      "description": "IFRS formulalari qo'llanilgan va o'zgarishlar haqida batafsil hisobotlarni yuklab oling",
+      "description": "XMHS formulalari qo'llanilgan va batafsil o'zgarishlar hisobotlari bilan qayta ishlangan fayllarni yuklab oling",
       "processed": "Fayl qayta ishlandi",
       "changes": "O'zgarishlar",
-      "formulas": "Formula qo'llanildi"
+      "formulas": "Formulalar qo'llanildi"
     },
     "step4": {
-      "title": "4. O'zgarishni ko'ring",
-      "description": "Mahalliy formatingiz xalqaro IFRS standartlariga qanday aylanishini kuzating",
-      "before": "Oldin (NSBU format)",
-      "after": "Keyin (IFRS format)",
+      "title": "4. Transformatsiyani ko'ring",
+      "description": "Mahalliy formatingiz XMHS xalqaro standartlariga qanday aylanayotganini ko'ring",
+      "before": "Oldin (NSBH Format)",
+      "after": "Keyin (XMHS Format)",
       "transformation": "Transformatsiya",
-      "compliant": "IFRSga muvofiq",
-      "keyChanges": "✨ Asosiy o'zgarishlar:",
+      "compliant": "XMHS ga mos",
+      "keyChanges": "✨ Asosiy transformatsiyalar qo'llanildi:",
       "changes": {
-        "depreciation": "IAS 16 amortizatsiya usullari",
-        "discounts": "IFRS 15 daromadni tan olish",
-        "impairment": "IAS 36 qadrsizlanish sinovlari",
-        "translation": "Ingliz tiliga tarjima",
+        "depreciation": "XAS 16 amortizatsiya usullari",
+        "discounts": "XMHS 15 daromadni e'tirof etish",
+        "impairment": "XAS 36 qadrsizlanish testlari",
+        "translation": "Ingliz tiliga tarjimalar",
         "standards": "Standart havolalar"
       },
       "spreadsheet": {
@@ -86,7 +105,7 @@
           "before": {
             "headers": {
               "code": "Hisob kodi",
-              "item": "Bandning nomi",
+              "item": "Nomi",
               "amount": "Miqdor"
             },
             "data": {
@@ -94,7 +113,7 @@
               "depreciation": "AV amortizatsiyasi",
               "manual": "Qo'lda hisoblash",
               "calculation": "Qo'lda hisoblash",
-              "error": "Xatoli"
+              "error": "Xatolar bor"
             }
           },
           "after": {
@@ -104,10 +123,10 @@
               "amount": "Miqdor"
             },
             "data": {
-              "ppe": "Moddiy asosiy vositalar",
+              "ppe": "Mulk, zavod va jihozlar",
               "accumulated": "To'plangan amortizatsiya",
               "automated": "Avtomatlashtirilgan",
-              "compliant": "IAS 16ga muvofiq",
+              "compliant": "XAS 16 ga mos",
               "accurate": "✓ Aniq"
             }
           }
@@ -120,11 +139,11 @@
               "amount": "Miqdor"
             },
             "data": {
-              "sales": "Sotish daromadi",
-              "returns": "Qaytarishlar va chegirmalar",
+              "sales": "Sotuv daromadi",
+              "returns": "Qaytarib berish va chegirmalar",
               "simple": "Oddiy",
               "basic": "Asosiy chegirmalar",
-              "nonifrs": "IFRS emas"
+              "nonifrs": "XMHS emas"
             }
           },
           "after": {
@@ -136,9 +155,9 @@
             "data": {
               "contracts": "Shartnomalardan daromad",
               "liabilities": "Shartnoma majburiyatlari",
-              "performance": "Ijro majburiyatlari",
-              "method": "IFRS 15 format",
-              "compliant": "✓ Muvofiq"
+              "performance": "Bajarish majburiyatlari",
+              "method": "XMHS 15 usuli",
+              "compliant": "✓ Mos keladi"
             }
           }
         },
@@ -147,14 +166,14 @@
             "headers": {
               "asset": "Aktiv",
               "carrying": "Balans qiymati",
-              "status": "Holat"
+              "status": "Status"
             },
             "data": {
-              "equipment": "Uskunalar",
+              "equipment": "Jihozlar",
               "buildings": "Binolar",
-              "untested": "Tekshirilmagan",
-              "notesting": "Tekshiruv yo'q",
-              "noias36": "IAS 36 sinovlari yo'q",
+              "untested": "Sinovdan o'tmagan",
+              "notesting": "Sinov yo'q",
+              "noias36": "XAS 36 testlari yo'q",
               "risk": "Xavf"
             }
           },
@@ -162,15 +181,15 @@
             "headers": {
               "asset": "Aktiv",
               "carrying": "Balans qiymati",
-              "status": "Holat"
+              "status": "Status"
             },
             "data": {
-              "equipment": "Uskunalar (NGB 1)",
-              "buildings": "Binolar (NGB 2)",
+              "equipment": "Jihozlar (NPB 1)",
+              "buildings": "Binolar (NPB 2)",
               "impaired": "Qadrsizlangan",
               "noimpairment": "Qadrsizlanish yo'q",
-              "tested": "IAS 36 tekshirilgan",
-              "recoverable": "Qaytar qiymat",
+              "tested": "XAS 36 sinovdan o'tgan",
+              "recoverable": "Qaytarib olinadigan qiymat",
               "validated": "✓ Tasdiqlangan"
             }
           }
@@ -202,25 +221,25 @@
     }
   },
   "features": {
-    "title": "Nima uchun ATABAI zo'r",
+    "title": "ATABAI nima uchun ajoyib",
     "automation": {
       "title": "To'liq avtomatlashtirish",
-      "description": "Excel fayllaringizga IFRS formulalarini avtomatik qo'llash"
+      "description": "Excel fayllaringizga XMHS formulalarini avtomatik qo'llash"
     },
     "compliance": {
-      "title": "IFRS talablariga muvofiqlik",
-      "description": "Xalqaro moliyaviy hisobot standartlari talablariga rioya qilish"
+      "title": "XMHS ga muvofiqlik",
+      "description": "Xalqaro moliyaviy hisobot standartlariga muvofiqlik"
     },
     "accuracy": {
       "title": "Yuqori aniqlik",
-      "description": "Moliyaviy hisob-kitoblardagi xatolarni minimallash"
+      "description": "Moliyaviy hisob-kitoblardagi xatolarni minimallashtirish"
     },
     "speed": {
-      "title": "Tez ishlov berish",
-      "description": "Katta fayllarni bir necha daqiqada qayta ishlash"
+      "title": "Tez qayta ishlash",
+      "description": "Katta fayllarni daqiqalar ichida qayta ishlash"
     },
     "easy": {
-      "title": "Foydalanish osonligi",
+      "title": "Foydalanish oson",
       "description": "Intuitiv interfeys maxsus o'qitishni talab qilmaydi"
     },
     "universal": {
@@ -229,13 +248,13 @@
     }
   },
   "templates": {
-    "depreciation": "Vositalarning amortizatsiyasi",
-    "discounts": "Chegirmalar hisob-kitobi",
-    "impairment": "Aktivlarning qadrsizlanishi",
+    "depreciation": "Asosiy vositalar amortizatsiyasi",
+    "discounts": "Chegirma hisob-kitoblari",
+    "impairment": "Aktiv qadrsizlanishi",
     "reports": "Moliyaviy hisobotlar"
   },
   "pricing": {
-    "title": "ATABAI vaqt va pulni tejashga yordam beradi",
+    "title": "ATABAI sizga vaqt va pulni tejashga yordam beradi",
     "popular": "Mashhur",
     "getStarted": "Boshlash",
     "contactUs": "Biz bilan bog'laning",
@@ -243,74 +262,61 @@
       "title": "Asosiy",
       "price": "Bepul",
       "files": "Oyiga 5 ta fayl",
-      "templates": "Asosiy IFRS shablonlari",
-      "history": "Oxirgi 10 ta fayl tarixi",
+      "templates": "Asosiy XMHS shablonlari",
+      "history": "So'nggi 10 ta fayl tarixi",
       "export": "Qayta ishlangan fayllarni eksport qilish"
     },
     "premium": {
       "title": "Premium",
       "price": "So'rov bo'yicha",
-      "perMonth": "Individual narx",
-      "files": "Cheksiz fayllar soni",
-      "templates": "Barcha IFRS shablonlari",
+      "perMonth": "Shaxsiy narx",
+      "files": "Cheksiz fayllar",
+      "templates": "Barcha XMHS shablonlari",
       "priority": "Ustuvor qayta ishlash",
       "history": "To'liq qayta ishlash tarixi",
       "support": "Texnik yordam",
-      "api": "API kirish"
+      "api": "API ruxsati"
     },
     "enterprise": {
       "title": "Korporativ",
-      "price": "Individual",
-      "custom": "Ehtiyojlaringizga moslash",
+      "price": "Maxsus",
+      "custom": "Ehtiyojlaringizga moslashing",
       "dedicated": "Maxsus server",
-      "sla": "SLA shartnoma",
+      "sla": "Xizmat darajasi kelishuvi",
       "training": "Jamoa o'qitish"
     }
   },
   "cta": {
     "title": "Hozir bepul sinab ko'ring",
-    "subtitle": "Har qanday vazifangiz uchun va ATABAI samaradorligiga ishonch hosil qiling",
+    "subtitle": "Har qanday vazifalaringiz uchun va ATABAI samaradorligini ko'ring",
     "button": "Hozir sinab ko'ring"
   },
   "finalCta": {
     "title": "Boshlashga tayyormisiz?",
-    "subtitle": "IFRS hisob-kitoblaringizni bugundan boshlab avtomatlashtiring",
-    "button": "Ishni boshlash"
+    "subtitle": "XMHS hisob-kitoblaringizni avtomatlashtirishni bugun boshlang",
+    "button": "Boshlash"
   },
   "comingSoon": {
     "pageTitle": "Tez orada",
     "title": "Tez orada ishga tushadi!",
-    "description": "Biz IFRS hisob-kitoblarini avtomatlashtirish uchun eng yaxshi platformani yaratish ustida qattiq ishlayapmiz. Jamoa sizga ajoyib tajriba taqdim etish uchun barcha xususiyatlarni yakunlayapti.",
-    "featuresTitle": "Sizni nima kutmoqda:",
-    "feature1": "Amortizatsiya va qadrsizlanish hisob-kitoblarini avtomatlashtirish",
-    "feature2": "IFRS standartlariga to'liq muvofiqlik",
-    "feature3": "Intuitiv interfeys va tez ishlov berish",
+    "description": "Biz XMHS hisob-kitoblarini avtomatlashtirish uchun eng yaxshi platformani yaratish ustida qattiq ishlayapmiz. Jamoamiz sizga ajoyib tajriba taqdim etish uchun barcha funksiyalarni yakunlayapti.",
+    "featuresTitle": "Nimalar tayyorlanmoqda:",
+    "feature1": "Avtomatlashtirilgan amortizatsiya va qadrsizlanish hisob-kitoblari",
+    "feature2": "XMHS standartlariga to'liq muvofiqlik",
+    "feature3": "Intuitiv interfeys va tez qayta ishlash",
     "feature4": "Batafsil hisobotlar va natijalarni eksport qilish",
     "contactTitle": "Savollaringiz bormi?",
-    "contactDescription": "Qo'shimcha ma'lumot olish yoki ishga tushirish haqida xabardor bo'lish uchun biz bilan bog'laning.",
+    "contactDescription": "Qo'shimcha ma'lumot olish yoki ishga tushirish haqida xabarnoma olish uchun biz bilan bog'laning.",
     "telegram": "Telegram",
     "email": "Email",
     "instagram": "Instagram",
     "backToHome": "Bosh sahifaga qaytish"
   },
-  "auth": {
-    "signInWithGoogle": "Google orqali kirish",
-    "signOut": "Chiqish",
-    "welcome": "Xush kelibsiz",
-    "processingLogin": "Kirish jarayoni...",
-    "pleaseWait": "Iltimos, sizni tizimga kiritish paytida kuting",
-    "loginFailed": "Kirish amalga oshmadi",
-    "loginSuccessful": "Muvaffaqiyatli kirish",
-    "redirectingToDashboard": "Boshqaruv paneliga yo'naltirish...",
-    "oauthCancelled": "Kirish bekor qilindi",
-    "invalidOauthResponse": "Yaroqsiz OAuth javobi",
-    "unexpectedError": "Kutilmagan xato yuz berdi"
-  },
   "common": {
     "goHome": "Bosh sahifaga",
     "loading": "Yuklanmoqda...",
-    "error": "Xato",
-    "success": "Muvaffaqiyatli",
+    "error": "Xatolik",
+    "success": "Muvaffaqiyat",
     "cancel": "Bekor qilish",
     "save": "Saqlash",
     "delete": "O'chirish",
