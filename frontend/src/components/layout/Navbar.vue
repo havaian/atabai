@@ -28,14 +28,14 @@
                     <!-- Language Selector -->
                     <div class="relative group">
                         <div
-                            class="flex items-center gap-1 bg-gray-100 px-3 py-2 rounded-full hover:bg-gray-200 cursor-pointer transition-colors duration-200">
+                            class="flex items-center gap-1 bg-gray-100 px-3 py-2 rounded-md hover:bg-gray-200 cursor-pointer transition-colors duration-200">
                             <GlobeAltIcon class="w-4 h-4" />
                             <span class="text-sm font-medium">{{ currentLocale.code.toUpperCase() }}</span>
                             <ChevronDownIcon class="w-4 h-4 transition-transform duration-200 group-hover:rotate-180" />
                         </div>
                         <!-- Dropdown Menu -->
                         <div
-                            class="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 ease-out transform translate-y-1 group-hover:translate-y-0">
+                            class="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 ease-out transform translate-y-1 group-hover:translate-y-0">
                             <button v-for="locale in availableLocales" :key="locale.code"
                                 @click="changeLanguage(locale.code)"
                                 class="flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150">
@@ -55,18 +55,17 @@
                     </div>
 
                     <!-- User Dropdown -->
-                    <div v-if="authStore.isAuthenticated" class="relative">
+                    <div v-if="authStore.isAuthenticated" class="relative group">
                         <Menu as="div" class="relative inline-block text-left">
                             <MenuButton
-                                class="flex items-center space-x-3 text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                                class="flex items-center space-x-3 text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary btn-auth hover-glow">
                                 <img class="h-8 w-8 rounded-full"
                                     :src="authStore.user?.picture || '/images/default-avatar.png'"
                                     :alt="authStore.user?.name || 'User'" />
                                 <span class="hidden lg:block text-gray-700">{{ authStore.user?.name }}</span>
-                                <ChevronDownIcon class="h-4 w-4 text-gray-400" />
                             </MenuButton>
                             <MenuItems
-                                class="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                                class="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                                 <MenuItem v-slot="{ active }">
                                 <router-link to="/dashboard"
                                     :class="[active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700']">
@@ -150,7 +149,7 @@
                     <div v-if="authStore.isAuthenticated" class="px-3 py-2">
                         <!-- User Info -->
                         <div class="flex items-center space-x-3 px-3 py-2 mb-2">
-                            <img class="h-8 w-8 rounded-full"
+                            <img class="h-8 w-8"
                                 :src="authStore.user?.picture || '/images/default-avatar.png'"
                                 :alt="authStore.user?.name || 'User'" />
                             <span class="text-gray-700 font-medium">{{ authStore.user?.name }}</span>

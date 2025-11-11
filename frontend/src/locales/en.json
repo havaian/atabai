@@ -52,6 +52,26 @@
     "pricing": "Pricing",
     "language": "Language"
   },
+  "dashboard": {
+    "welcome": "Welcome back, {name}!",
+    "subtitle": "Choose a template to start processing your financial documents",
+    "newProject": "New Project",
+    "recentFiles": "Recent Files",
+    "noFiles": "No files processed yet",
+    "settings": "Settings",
+    "help": "Get help",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "usageStats": "Usage Statistics",
+    "filesThisMonth": "Files this month",
+    "limit": "{current} of {total}",
+    "subscription": "Current Plan",
+    "upgrade": "Upgrade Plan",
+    "totalProcessed": "Total Processed",
+    "accuracy": "Accuracy",
+    "avgTime": "Avg Time",
+    "usage": "Usage"
+  },
   "hero": {
     "title": "Powerful platform for automating Excel calculations according to IFRS",
     "subtitle": "With ATABAI, financial reporting will be tens of times cheaper and faster",
@@ -249,9 +269,13 @@
   },
   "templates": {
     "depreciation": "Fixed Asset Depreciation",
+    "depreciationDescription": "Automate depreciation calculations according to IAS 16 standards with high precision and compliance",
     "discounts": "Discount Calculations",
+    "discountsDescription": "Calculate revenue discounts and adjustments per IFRS 15 with automatic recognition rules",
     "impairment": "Asset Impairment",
-    "reports": "Financial Reports"
+    "impairmentDescription": "Perform comprehensive impairment testing and calculations according to IAS 36 requirements",
+    "reports": "Financial Reports",
+    "reportsDescription": "Generate comprehensive IFRS-compliant financial reports with automated compliance checks"
   },
   "pricing": {
     "title": "ATABAI helps you save time and money",

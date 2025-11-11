@@ -12,7 +12,7 @@
           <div class="flex justify-center mt-15 md:mt-10 md:mb-15">
             <button
               @click="authStore.isAuthenticated ? $router.push('/dashboard') : authStore.login()"
-              class="btn-rounded pulse-glow min-w-60 min-h-14 flex items-center gap-2 justify-center md:px-5">
+              class="btn-secondary pulse-glow min-w-60 min-h-14 flex items-center gap-2 justify-center md:px-5">
               {{ $t('hero.tryFree') }}
             </button>
           </div>

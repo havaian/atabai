@@ -133,15 +133,6 @@ body {
     animation: spin 1s linear infinite;
 }
 
-/* Focus styles for accessibility */
-button:focus,
-input:focus,
-textarea:focus,
-select:focus {
-    outline: 2px solid var(--primary);
-    outline-offset: 2px;
-}
-
 /* Responsive utilities */
 @media (max-width: 768px) {
 

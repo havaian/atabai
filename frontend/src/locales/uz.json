@@ -37,8 +37,8 @@
     "/processing": "XMHS standartlari bo'yicha Excel fayllarni qayta ishlash - avtomatlashtirish formulalarini qo'llash va hisobotlar yaratish.",
     "/results": "ATABAI fayl qayta ishlash natijalari - o'zgarishlarni solishtiring, batafsil hisobotlar va tayyor hujjatlarni eksport qiling.",
     "/coming-soon": "ATABAI tez orada mavjud bo'ladi. XMHS uchun Excel hisob-kitoblar avtomatlashtirish platformasi ishlab chiqilmoqda.",
-    "/auth/callback": "Tizimga kirishingizni qayta ishlamoqda...",
-    "/auth/success": "ATABAI platformasiga autentifikatsiyangizni yakunlamoqda"
+    "/auth/callback": "Tizimga kirishingiz qayta ishlanmoqda...",
+    "/auth/success": "ATABAI platformasida autentifikatsiyangiz yakunlanmoqda"
   },
   "nav": {
     "home": "Bosh sahifa",
@@ -52,6 +52,26 @@
     "pricing": "Narxlar",
     "language": "Til"
   },
+  "dashboard": {
+    "welcome": "Qaytib kelganingiz bilan, {name}!",
+    "subtitle": "Moliyaviy hujjatlaringizni qayta ishlashni boshlash uchun shablonni tanlang",
+    "newProject": "Yangi loyiha",
+    "recentFiles": "Oxirgi fayllar",
+    "noFiles": "Hali hech qanday fayl qayta ishlanmagan",
+    "settings": "Sozlamalar",
+    "help": "Yordam olish",
+    "today": "Bugun",
+    "yesterday": "Kecha",
+    "usageStats": "Foydalanish statistikasi",
+    "filesThisMonth": "Bu oydagi fayllar",
+    "limit": "{current} dan {total}",
+    "subscription": "Joriy reja",
+    "upgrade": "Rejani yangilash",
+    "totalProcessed": "Jami qayta ishlangan",
+    "accuracy": "Aniqlik",
+    "avgTime": "O'rtacha vaqt",
+    "usage": "Foydalanish"
+  },
   "hero": {
     "title": "XMHS bo'yicha Excel hisob-kitoblarini avtomatlashtirish uchun kuchli platforma",
     "subtitle": "ATABAI bilan moliyaviy hisobot o'n marta arzon va tezroq bo'ladi",
@@ -63,15 +83,15 @@
     "minute": "daq.",
     "analysisTime": "Tahlil vaqti",
     "accuracy": "Hisob-kitob aniqligi",
-    "availability": "Mavjud",
+    "availability": "Mavjudlik",
     "timeSaving": "Vaqt tejash"
   },
   "howItWorks": {
     "title": "Qanday ishlaydi",
     "step1": {
-      "title": "Excel fayllarni yuklang",
+      "title": "Excel fayllarini yuklang",
       "description": "XMHS talablariga muvofiq qayta ishlash uchun moliyaviy Excel fayllaringizni yuklang",
-      "uploadText": "Fayllarni bu yerga sudrab oling yoki tanlash uchun bosing",
+      "uploadText": "Fayllarni bu yerga sudrab olib keling yoki tanlash uchun bosing",
       "supportedFormats": "Qo'llab-quvvatlanadigan formatlar: .xlsx, .xls, .csv"
     },
     "step2": {
@@ -80,10 +100,10 @@
     },
     "step3": {
       "title": "Tayyor natijalarni oling",
-      "description": "XMHS formulalari qo'llanilgan va batafsil o'zgarishlar hisobotlari bilan qayta ishlangan fayllarni yuklab oling",
+      "description": "Qo'llanilgan XMHS formulalari va batafsil o'zgarishlar hisobotlari bilan qayta ishlangan fayllarni yuklab oling",
       "processed": "Fayl qayta ishlandi",
       "changes": "O'zgarishlar",
-      "formulas": "Formulalar qo'llanildi"
+      "formulas": "Qo'llanilgan formulalar"
     },
     "step4": {
       "title": "4. Transformatsiyani ko'ring",
@@ -188,8 +208,8 @@
               "buildings": "Binolar (NPB 2)",
               "impaired": "Qadrsizlangan",
               "noimpairment": "Qadrsizlanish yo'q",
-              "tested": "XAS 36 sinovdan o'tgan",
-              "recoverable": "Qaytarib olinadigan qiymat",
+              "tested": "XAS 36 sinovi o'tdi",
+              "recoverable": "Qoplash mumkin bo'lgan qiymat",
               "validated": "✓ Tasdiqlangan"
             }
           }
@@ -198,10 +218,10 @@
     },
     "templates": {
       "depreciation": {
-        "processed": "Aktiv jadvallari qayta ishlandi",
+        "processed": "Aktivlar jadvallari qayta ishlandi",
         "changesLabel": "Amortizatsiya yozuvlari",
         "changes": "156",
-        "formulasLabel": "Aktiv hisob-kitoblari",
+        "formulasLabel": "Aktivlar hisob-kitoblari",
         "formulas": "42"
       },
       "discounts": {
@@ -232,14 +252,14 @@
     },
     "accuracy": {
       "title": "Yuqori aniqlik",
-      "description": "Moliyaviy hisob-kitoblardagi xatolarni minimallashtirish"
+      "description": "Moliyaviy hisob-kitoblardagi xatolarni minimallash"
     },
     "speed": {
       "title": "Tez qayta ishlash",
       "description": "Katta fayllarni daqiqalar ichida qayta ishlash"
     },
     "easy": {
-      "title": "Foydalanish oson",
+      "title": "Ishlatish oson",
       "description": "Intuitiv interfeys maxsus o'qitishni talab qilmaydi"
     },
     "universal": {
@@ -249,12 +269,16 @@
   },
   "templates": {
     "depreciation": "Asosiy vositalar amortizatsiyasi",
+    "depreciationDescription": "IAS 16 standartlariga muvofiq yuqori aniqlik va talablar bajarilishi bilan amortizatsiya hisob-kitoblarini avtomatlashtirish",
     "discounts": "Chegirma hisob-kitoblari",
-    "impairment": "Aktiv qadrsizlanishi",
-    "reports": "Moliyaviy hisobotlar"
+    "discountsDescription": "IFRS 15 bo'yicha avtomatik tan etish qoidalari bilan daromad chegirmalari va tuzatishlarini hisoblash",
+    "impairment": "Aktivlar qadrsizlanishi",
+    "impairmentDescription": "IAS 36 talablariga muvofiq kompleks qadrsizlanish testlari va hisob-kitoblarini o'tkazish",
+    "reports": "Moliyaviy hisobotlar",
+    "reportsDescription": "Avtomatik muvofiqlik tekshiruvlari bilan XMHS ga mos kompleks moliyaviy hisobotlarni yaratish"
   },
   "pricing": {
-    "title": "ATABAI sizga vaqt va pulni tejashga yordam beradi",
+    "title": "ATABAI vaqt va pulni tejashga yordam beradi",
     "popular": "Mashhur",
     "getStarted": "Boshlash",
     "contactUs": "Biz bilan bog'laning",
@@ -263,43 +287,43 @@
       "price": "Bepul",
       "files": "Oyiga 5 ta fayl",
       "templates": "Asosiy XMHS shablonlari",
-      "history": "So'nggi 10 ta fayl tarixi",
+      "history": "Oxirgi 10 ta fayl tarixi",
       "export": "Qayta ishlangan fayllarni eksport qilish"
     },
     "premium": {
       "title": "Premium",
       "price": "So'rov bo'yicha",
-      "perMonth": "Shaxsiy narx",
+      "perMonth": "Shaxsiy narxlash",
       "files": "Cheksiz fayllar",
       "templates": "Barcha XMHS shablonlari",
       "priority": "Ustuvor qayta ishlash",
       "history": "To'liq qayta ishlash tarixi",
       "support": "Texnik yordam",
-      "api": "API ruxsati"
+      "api": "API ga kirish"
     },
     "enterprise": {
       "title": "Korporativ",
-      "price": "Maxsus",
-      "custom": "Ehtiyojlaringizga moslashing",
-      "dedicated": "Maxsus server",
-      "sla": "Xizmat darajasi kelishuvi",
-      "training": "Jamoa o'qitish"
+      "price": "Shaxsiy",
+      "custom": "Ehtiyojlaringizga moslash",
+      "dedicated": "Ajratilgan server",
+      "sla": "SLA kelishuvi",
+      "training": "Jamoani o'qitish"
     }
   },
   "cta": {
-    "title": "Hozir bepul sinab ko'ring",
-    "subtitle": "Har qanday vazifalaringiz uchun va ATABAI samaradorligini ko'ring",
-    "button": "Hozir sinab ko'ring"
+    "title": "Hoziroq bepul sinab ko'ring",
+    "subtitle": "Har qanday vazifalaringiz uchun va ATABAI samaradorligini baholang",
+    "button": "Hoziroq sinab ko'ring"
   },
   "finalCta": {
     "title": "Boshlashga tayyormisiz?",
-    "subtitle": "XMHS hisob-kitoblaringizni avtomatlashtirishni bugun boshlang",
+    "subtitle": "XMHS hisob-kitoblaringizni bugundan avtomatlashtirni boshlang",
     "button": "Boshlash"
   },
   "comingSoon": {
     "pageTitle": "Tez orada",
     "title": "Tez orada ishga tushadi!",
-    "description": "Biz XMHS hisob-kitoblarini avtomatlashtirish uchun eng yaxshi platformani yaratish ustida qattiq ishlayapmiz. Jamoamiz sizga ajoyib tajriba taqdim etish uchun barcha funksiyalarni yakunlayapti.",
+    "description": "Biz XMHS hisob-kitoblarini avtomatlashtirish uchun eng yaxshi platformani yaratish ustida qattiq ishlamoqdamiz. Jamoamiz sizga ajoyib tajriba taqdim etish uchun barcha funksiyalarni yakunlayapti.",
     "featuresTitle": "Nimalar tayyorlanmoqda:",
     "feature1": "Avtomatlashtirilgan amortizatsiya va qadrsizlanish hisob-kitoblari",
     "feature2": "XMHS standartlariga to'liq muvofiqlik",

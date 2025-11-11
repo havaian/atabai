@@ -2,19 +2,26 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import i18n from '@/utils/i18n' // Import the i18n instance
 
+// Import layouts
+import UserLayout from '@/layouts/UserLayout.vue'
+
 // Import views
 import LandingPage from '@/views/LandingPage.vue'
 import ComingSoon from '@/views/ComingSoon.vue'
 import OAuthCallback from '@/views/OAuthCallback.vue'
 import AuthSuccess from '@/views/AuthSuccess.vue'
-// import Dashboard from '@/views/Dashboard.vue'
+import Dashboard from '@/views/Dashboard.vue'
+// Future views
+// import FileUpload from '@/views/FileUpload.vue'
+// import FileProcessor from '@/views/FileProcessor.vue'
+// import FileResults from '@/views/FileResults.vue'
 // import ProcessingPage from '@/views/ProcessingPage.vue'
-// import ResultsPage from '@/views/ResultsPage.vue'
 // import ProfilePage from '@/views/ProfilePage.vue'
 // import HistoryPage from '@/views/HistoryPage.vue'
 // import TemplatesPage from '@/views/TemplatesPage.vue'
 
 const routes = [
+    // Public routes (no layout)
     {
         path: '/',
         name: 'Landing',
@@ -58,66 +65,97 @@ const routes = [
             descriptionKey: 'pageDescriptions./auth/success'
         }
     },
-    // {
-    //     path: '/dashboard',
-    //     name: 'Dashboard',
-    //     component: Dashboard,
-    //     meta: {
-    //         requiresAuth: true,
-    //         titleKey: 'pageTitles./dashboard',
-    //         descriptionKey: 'pageDescriptions./dashboard'
-    //     }
-    // },
-    // {
-    //     path: '/templates',
-    //     name: 'Templates',
-    //     component: TemplatesPage,
-    //     meta: {
-    //         requiresAuth: true,
-    //         titleKey: 'pageTitles./templates',
-    //         descriptionKey: 'pageDescriptions./templates'
-    //     }
-    // },
-    // {
-    //     path: '/processing/:jobId?',
-    //     name: 'Processing',
-    //     component: ProcessingPage,
-    //     meta: {
-    //         requiresAuth: true,
-    //         titleKey: 'pageTitles./processing',
-    //         descriptionKey: 'pageDescriptions./processing'
-    //     }
-    // },
-    // {
-    //     path: '/results/:jobId',
-    //     name: 'Results',
-    //     component: ResultsPage,
-    //     meta: {
-    //         requiresAuth: true,
-    //         titleKey: 'pageTitles./results',
-    //         descriptionKey: 'pageDescriptions./results'
-    //     }
-    // },
-    // {
-    //     path: '/profile',
-    //     name: 'Profile',
-    //     component: ProfilePage,
-    //     meta: {
-    //         requiresAuth: true,
-    //         titleKey: 'pageTitles./profile',
-    //         descriptionKey: 'pageDescriptions./profile'
-    //     }
-    // },
-    // {
-    //     path: '/history',
-    //     name: 'History',
-    //     component: HistoryPage,
-    //     meta: {
-    //         requiresAuth: true,
-    //         titleKey: 'pageTitles./history',
-    //         descriptionKey: 'pageDescriptions./history'
-    //     }
-    // },
+
+    // User routes (with UserLayout)
+    {
+        path: '/app',
+        component: UserLayout,
+        meta: {
+            requiresAuth: true,
+            showNavbar: false,
+            showFooter: false
+        },
+        children: [
+            {
+                path: '',
+                redirect: '/app/dashboard'
+            },
+            {
+                path: 'dashboard',
+                name: 'Dashboard',
+                component: Dashboard,
+                meta: {
+                    titleKey: 'pageTitles./dashboard',
+                    descriptionKey: 'pageDescriptions./dashboard'
+                }
+            },
+            // Future routes will go here
+            // {
+            //     path: 'upload',
+            //     name: 'FileUpload',
+            //     component: FileUpload,
+            //     meta: {
+            //         titleKey: 'pageTitles./upload',
+            //         descriptionKey: 'pageDescriptions./upload'
+            //     }
+            // },
+            // {
+            //     path: 'files/:fileId',
+            //     name: 'FileProcessor',
+            //     component: FileProcessor,
+            //     props: true,
+            //     meta: {
+            //         titleKey: 'pageTitles./processing',
+            //         descriptionKey: 'pageDescriptions./processing'
+            //     }
+            // },
+            // {
+            //     path: 'results/:fileId',
+            //     name: 'FileResults',
+            //     component: FileResults,
+            //     props: true,
+            //     meta: {
+            //         titleKey: 'pageTitles./results',
+            //         descriptionKey: 'pageDescriptions./results'
+            //     }
+            // },
+            // {
+            //     path: 'templates',
+            //     name: 'Templates',
+            //     component: TemplatesPage,
+            //     meta: {
+            //         titleKey: 'pageTitles./templates',
+            //         descriptionKey: 'pageDescriptions./templates'
+            //     }
+            // },
+            // {
+            //     path: 'history',
+            //     name: 'History',
+            //     component: HistoryPage,
+            //     meta: {
+            //         titleKey: 'pageTitles./history',
+            //         descriptionKey: 'pageDescriptions./history'
+            //     }
+            // },
+            // {
+            //     path: 'profile',
+            //     name: 'Profile',
+            //     component: ProfilePage,
+            //     meta: {
+            //         titleKey: 'pageTitles./profile',
+            //         descriptionKey: 'pageDescriptions./profile'
+            //     }
+            // }
+        ]
+    },
+
+    // Legacy redirect for existing /dashboard route
+    {
+        path: '/dashboard',
+        redirect: '/app/dashboard'
+    },
+
+    // 404 redirect
     {
         path: '/:pathMatch(.*)*',
         redirect: '/',
@@ -161,86 +199,52 @@ function updateMetaDescription(description) {
 router.beforeEach(async (to, from, next) => {
     // Wait for i18n to be ready
     try {
-        await i18n.global.$waitForI18n?.() || Promise.resolve()
+        await i18n.global.$waitForI18n?.()
     } catch (error) {
-        console.warn('Router: i18n not ready, using fallback titles')
+        console.warn('i18n not ready, continuing anyway:', error)
     }
 
-    // Update page title and description
-    updatePageTitleAndDescription(to)
-
-    // Check authentication
+    // Initialize auth store if not already done
     const authStore = useAuthStore()
-    if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-        next({ name: 'Landing', query: { redirect: to.fullPath } })
-    } else {
-        next()
+
+    // Check authentication for protected routes
+    if (to.meta?.requiresAuth && !authStore.isAuthenticated) {
+        // Save the intended destination
+        sessionStorage.setItem('redirectAfterLogin', to.fullPath)
+        return next('/')
     }
+
+    // Prevent authenticated users from accessing guest-only routes
+    if (to.meta?.requiresGuest && authStore.isAuthenticated) {
+        return next('/app/dashboard')
+    }
+
+    // Continue to the route
+    next()
 })
 
-// Function to update page title and description
-function updatePageTitleAndDescription(route) {
-    // Set page title
-    if (route.meta.titleKey) {
-        try {
-            const title = i18n.global.t(route.meta.titleKey)
-            if (title && title !== route.meta.titleKey) {
-                document.title = `${title} | ATABAI`
-            } else {
-                // Fallback if translation not found
-                document.title = 'ATABAI - Excel Automation for IFRS'
-            }
-        } catch (error) {
-            console.warn('Router: Error setting title:', error)
-            document.title = 'ATABAI'
-        }
-    } else {
-        // Default title
-        document.title = 'ATABAI'
-    }
-
-    // Set meta description
-    if (route.meta.descriptionKey) {
-        try {
-            const description = i18n.global.t(route.meta.descriptionKey)
-            if (description && description !== route.meta.descriptionKey) {
-                updateMetaDescription(description)
-            }
-        } catch (error) {
-            console.warn('Router: Error setting description:', error)
-        }
-    }
-}
-
-// Watch for locale changes and update current page title
-let localeWatcher = null
 router.afterEach((to) => {
-    // Set up locale watcher only once
-    if (!localeWatcher) {
-        localeWatcher = i18n.global.locale
+    // Update page title and meta description after navigation
+    const titleKey = to.meta?.titleKey
+    const descriptionKey = to.meta?.descriptionKey
 
-        // Use Vue's watch if available, otherwise use a simple approach
-        if (typeof window !== 'undefined' && window.Vue?.watch) {
-            window.Vue.watch(() => i18n.global.locale.value, (newLocale, oldLocale) => {
-                updatePageTitleAndDescription(router.currentRoute.value)
-            })
-        } else {
-            // Fallback: check for locale changes periodically
-            let lastLocale = i18n.global.locale.value
-            setInterval(() => {
-                const currentLocale = i18n.global.locale.value
-                if (currentLocale !== lastLocale) {
-                    updatePageTitleAndDescription(router.currentRoute.value)
-                    lastLocale = currentLocale
-                }
-            }, 100) // Check every 100ms
+    if (titleKey) {
+        try {
+            const title = i18n.global.t(titleKey)
+            document.title = `${title} - ATABAI`
+        } catch (error) {
+            document.title = 'ATABAI - IFRS Automation Platform'
+        }
+    }
+
+    if (descriptionKey) {
+        try {
+            const description = i18n.global.t(descriptionKey)
+            updateMetaDescription(description)
+        } catch (error) {
+            // Ignore translation errors for meta description
         }
     }
 })
-
-// Make router globally accessible for i18n utility
-if (typeof window !== 'undefined') {
-    window.__VUE_ROUTER__ = router
-}
 
 export default router

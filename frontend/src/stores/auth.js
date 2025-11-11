@@ -70,6 +70,38 @@ export const useAuthStore = defineStore('auth', () => {
         }
     }
 
+    // Handle auth success from URL parameters (for AuthSuccess component)
+    function handleAuthSuccess(urlParams) {
+        try {
+            const accessTokenParam = urlParams.get('access_token')
+            const refreshTokenParam = urlParams.get('refresh_token')
+            const userParam = urlParams.get('user')
+
+            if (!accessTokenParam || !userParam) {
+                console.error('Missing required auth parameters')
+                return false
+            }
+
+            // Parse user data
+            const userData = JSON.parse(decodeURIComponent(userParam))
+
+            // Set authentication state
+            user.value = userData
+            accessToken.value = accessTokenParam
+            refreshToken.value = refreshTokenParam
+
+            // Persist tokens
+            persistTokens()
+
+            console.log('✅ Auth success handled successfully for user:', userData.email)
+            return true
+        } catch (err) {
+            console.error('Error handling auth success:', err)
+            error.value = 'Failed to process authentication'
+            return false
+        }
+    }
+
     async function refreshAccessToken() {
         if (!refreshToken.value) {
             throw new Error('No refresh token available')
@@ -174,6 +206,7 @@ export const useAuthStore = defineStore('auth', () => {
         // Actions
         login,
         handleOAuthCallback,
+        handleAuthSuccess,
         refreshAccessToken,
         logout,
         checkAuth,
