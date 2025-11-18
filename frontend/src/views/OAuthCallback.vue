@@ -37,16 +37,6 @@
                                 {{ $t('auth.pleaseWait') }}
                             </p>
                         </div>
-
-                        <!-- Loading progress dots -->
-                        <div class="flex justify-center space-x-2">
-                            <div class="w-2 h-2 bg-primary/60 rounded-full animate-pulse" style="animation-delay: 0ms;">
-                            </div>
-                            <div class="w-2 h-2 bg-primary/60 rounded-full animate-pulse"
-                                style="animation-delay: 200ms;"></div>
-                            <div class="w-2 h-2 bg-primary/60 rounded-full animate-pulse"
-                                style="animation-delay: 400ms;"></div>
-                        </div>
                     </div>
 
                     <!-- Error State -->

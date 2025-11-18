@@ -13,7 +13,7 @@ export const availableLocales = [
         flag: '🇺🇿'
     },
     {
-        code: 'en',
+        code: 'gb',
         name: 'English',
         flag: '🇺🇸'
     }

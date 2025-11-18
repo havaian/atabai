@@ -65,6 +65,7 @@ app.use(cors({
             'http://localhost:80',
             'http://localhost:7777'  // Added for development
         ];
+        // const allowedOrigins = '*';
 
         // Allow requests with no origin (mobile apps, etc.)
         if (!origin) return callback(null, true);
@@ -138,7 +139,7 @@ const initializeApp = async () => {
     try {
         // Connect to MongoDB
         await connectDatabase(process.env.MONGO_URI);
-        console.log('✅ Database connected successfully');
+        console.log('✅ Mongodb connected successfully');
 
         // await connectRedis();
         // logger.logInfo('Redis connected successfully', { category: 'startup' });

@@ -30,32 +30,34 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, watch } from 'vue'
 import Sidebar from '@/components/layout/Sidebar.vue'
 import { Bars3Icon } from '@heroicons/vue/24/outline'
 
 // Responsive state
 const isLargeScreen = ref(window.innerWidth >= 1024)
-const isSidebarOpen = ref(false)
+const isSidebarOpen = ref(true)
 
 // Handle window resize
 const handleResize = () => {
-    const newIsLargeScreen = window.innerWidth >= 1024
-    if (newIsLargeScreen !== isLargeScreen.value) {
-        isLargeScreen.value = newIsLargeScreen
-        if (newIsLargeScreen) {
-            isSidebarOpen.value = false // Auto-close sidebar on large screens
-        }
-    }
+    isLargeScreen.value = window.innerWidth >= 1024
 }
 
 onMounted(() => {
+    const savedState = localStorage.getItem('atabai-sidebar-open')
+    if (savedState !== null) {
+        isSidebarOpen.value = JSON.parse(savedState)
+    }
     window.addEventListener('resize', handleResize)
 })
 
 onUnmounted(() => {
     window.removeEventListener('resize', handleResize)
 })
+
+watch(isSidebarOpen, (newValue) => {
+  localStorage.setItem('atabai-sidebar-open', JSON.stringify(newValue))
+}, { immediate: false })
 
 // Methods
 const toggleSidebar = () => {

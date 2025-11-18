@@ -33,53 +33,7 @@ export const useFilesStore = defineStore('files', () => {
             console.error('Fetch recent files error:', err)
             
             // Mock data for development
-            recentFiles.value = [
-                {
-                    id: '1',
-                    name: 'Q3_Financial_Report.xlsx',
-                    templateName: 'Depreciation Analysis',
-                    status: 'completed',
-                    createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
-                    fileSize: 2048000,
-                    processingTime: 45000
-                },
-                {
-                    id: '2',
-                    name: 'Asset_Impairment_2024.xlsx',
-                    templateName: 'Asset Impairment',
-                    status: 'completed',
-                    createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // 1 day ago
-                    fileSize: 1536000,
-                    processingTime: 32000
-                },
-                {
-                    id: '3',
-                    name: 'Revenue_Recognition.xlsx',
-                    templateName: 'Discount Calculations',
-                    status: 'processing',
-                    createdAt: new Date(Date.now() - 30 * 60 * 1000), // 30 minutes ago
-                    fileSize: 3072000,
-                    processingTime: null
-                },
-                {
-                    id: '4',
-                    name: 'Fixed_Assets_Schedule.xlsx',
-                    templateName: 'Depreciation Analysis',
-                    status: 'completed',
-                    createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3 days ago
-                    fileSize: 4096000,
-                    processingTime: 67000
-                },
-                {
-                    id: '5',
-                    name: 'Quarterly_Impairment_Test.xlsx',
-                    templateName: 'Asset Impairment',
-                    status: 'completed',
-                    createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // 7 days ago
-                    fileSize: 2560000,
-                    processingTime: 51000
-                }
-            ]
+            recentFiles.value = []
         } finally {
             isLoading.value = false
         }

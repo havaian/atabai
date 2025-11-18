@@ -36,27 +36,11 @@
                 <!-- Template Description -->
                 <p class="text-gray-600 text-sm leading-relaxed">{{
                     $t(`templates.${template.key}Description`) }}</p>
-
-                <!-- Template Stats -->
-                <div class="grid grid-cols-3 gap-4 mt-4 pt-4 border-t border-gray-100">
-                    <div class="text-center">
-                        <div class="text-lg font-semibold text-gray-900">{{ template.stats.accuracy }}</div>
-                        <div class="text-xs text-gray-500">{{ $t('dashboard.accuracy') }}</div>
-                    </div>
-                    <div class="text-center">
-                        <div class="text-lg font-semibold text-gray-900">{{ template.stats.time }}</div>
-                        <div class="text-xs text-gray-500">{{ $t('dashboard.avgTime') }}</div>
-                    </div>
-                    <div class="text-center">
-                        <div class="text-lg font-semibold text-gray-900">{{ template.stats.usage }}</div>
-                        <div class="text-xs text-gray-500">{{ $t('dashboard.usage') }}</div>
-                    </div>
-                </div>
             </div>
         </div>
 
         <!-- Usage Stats -->
-        <div class="mt-12 bg-white border border-gray-200 rounded-xl p-6">
+        <!-- <div class="mt-12 bg-white border border-gray-200 rounded-xl p-6">
             <h2 class="text-xl font-semibold text-gray-900 mb-4">{{ $t('dashboard.usageStats') }}</h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div class="text-center">
@@ -83,7 +67,7 @@
                     <div class="text-sm text-gray-500 mt-1">{{ $t('dashboard.totalProcessed') }}</div>
                 </div>
             </div>
-        </div>
+        </div> -->
     </div>
 </template>
 

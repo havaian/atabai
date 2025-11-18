@@ -73,10 +73,10 @@
                                 </router-link>
                                 </MenuItem>
                                 <MenuItem v-slot="{ active }">
-                                <router-link to="/profile"
+                                <!-- <router-link to="/profile"
                                     :class="[active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700']">
                                     {{ $t('nav.profile') }}
-                                </router-link>
+                                </router-link> -->
                                 </MenuItem>
                                 <MenuItem v-slot="{ active }">
                                 <button @click="authStore.logout"
@@ -128,7 +128,7 @@
                                     ? 'bg-primary text-white'
                                     : 'text-gray-700 hover:bg-gray-100'
                             ]">
-                            <span class="mr-2">{{ locale.flag }}</span>
+                            <span class="mr-2"><Flags :country="locale.flag" /></span>
                             {{ locale.name }}
                         </button>
                     </div>
@@ -160,10 +160,10 @@
                             class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md">
                             {{ $t('nav.dashboard') }}
                         </router-link>
-                        <router-link to="/profile" @click="mobileMenuOpen = false"
+                        <!-- <router-link to="/profile" @click="mobileMenuOpen = false"
                             class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md">
                             {{ $t('nav.profile') }}
-                        </router-link>
+                        </router-link> -->
                         <button @click="authStore.logout; mobileMenuOpen = false"
                             class="block w-full text-left px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md">
                             {{ $t('nav.logout') }}
@@ -182,6 +182,7 @@ import { useI18n } from 'vue-i18n'
 import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
 import LogoComponent from '@/components/Logo.vue'
 import GoogleIcon from '@/components/icons/GoogleIcon.vue'
+import Flags from '@/components/icons/Flags.vue'
 import {
     ChevronDownIcon,
     Bars3Icon,

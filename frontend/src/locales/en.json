@@ -26,7 +26,9 @@
     "/results": "Processing results",
     "/coming-soon": "Coming soon",
     "/auth/callback": "Signing in...",
-    "/auth/success": "Login Successful"
+    "/auth/success": "Login Successful",
+    "/settings": "Settings",
+    "/help": "Help"
   },
   "pageDescriptions": {
     "/": "Powerful platform for automating Excel calculations according to IFRS. With ATABAI, financial reporting will be tens of times cheaper and faster.",
@@ -38,7 +40,9 @@
     "/results": "ATABAI file processing results - compare changes, detailed reports and export ready documents.",
     "/coming-soon": "ATABAI will be available soon. The Excel calculation automation platform for IFRS is under development.",
     "/auth/callback": "Processing your login...",
-    "/auth/success": "Completing your authentication to ATABAI platform"
+    "/auth/success": "Completing your authentication to ATABAI platform",
+    "/settings": "ATABAI user settings - manage preferences, subscription and account details",
+    "/help": "Get help and support for ATABAI - contact us for questions about IFRS automation"
   },
   "nav": {
     "home": "Home",
@@ -70,7 +74,8 @@
     "totalProcessed": "Total Processed",
     "accuracy": "Accuracy",
     "avgTime": "Avg Time",
-    "usage": "Usage"
+    "usage": "Usage",
+    "emptyState": "Here will be your recent files"
   },
   "hero": {
     "title": "Powerful platform for automating Excel calculations according to IFRS",
@@ -335,6 +340,38 @@
     "email": "Email",
     "instagram": "Instagram",
     "backToHome": "Back to home"
+  },
+  "settings": {
+    "tabs": {
+      "personal": "Personal",
+      "usage": "Usage & Plan",
+      "billing": "Billing",
+      "privacy": "Privacy"
+    },
+    "personal": {
+      "title": "Personal Settings",
+      "description": "Manage your account preferences and display settings",
+      "language": "Language",
+      "languageDescription": "Choose your preferred language for the interface",
+      "theme": "Theme",
+      "themeDescription": "Choose how ATABAI appears to you",
+      "themeLight": "Light",
+      "themeDark": "Dark",
+      "themeSystem": "System"
+    },
+    "saved": "Settings saved successfully",
+    "comingSoon": "Coming Soon",
+    "usageTabDescription": "View your usage statistics and manage your subscription plan",
+    "billingTabDescription": "Manage your billing information and payment methods",
+    "privacyTabDescription": "Control your privacy settings and data preferences"
+  },
+  "help": {
+    "title": "Need Help?",
+    "description": "We're here to assist you with any questions about ATABAI and IFRS automation",
+    "telegram": "Telegram",
+    "email": "Email",
+    "instagram": "Instagram",
+    "backToDashboard": "Back to main page"
   },
   "common": {
     "goHome": "Go Home",

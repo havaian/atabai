@@ -40,4 +40,35 @@ router.get('/stats', authenticateJWT, (req, res) => {
     });
 });
 
+/**
+ * @route   PATCH /api/users/preferences
+ * @desc    Update user preferences
+ * @access  Private
+ */
+router.patch('/preferences', authenticateJWT, async (req, res) => {
+    try {
+        const { preferences } = req.body;
+        
+        // Update preferences
+        if (preferences.language) req.user.preferences.language = preferences.language;
+        if (preferences.theme) req.user.preferences.theme = preferences.theme;
+        if (preferences.defaultTemplate !== undefined) req.user.preferences.defaultTemplate = preferences.defaultTemplate;
+        if (preferences.notifications) Object.assign(req.user.preferences.notifications, preferences.notifications);
+        
+        await req.user.save();
+        
+        res.json({
+            success: true,
+            message: 'Preferences updated successfully',
+            preferences: req.user.preferences
+        });
+    } catch (error) {
+        console.error('Update preferences error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to update preferences'
+        });
+    }
+});
+
 module.exports = router;

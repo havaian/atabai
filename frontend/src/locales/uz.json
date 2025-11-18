@@ -26,7 +26,9 @@
     "/results": "Qayta ishlash natijalari",
     "/coming-soon": "Tez orada",
     "/auth/callback": "Tizimga kirish...",
-    "/auth/success": "Muvaffaqiyatli kirildi"
+    "/auth/success": "Muvaffaqiyatli kirildi",
+    "/settings": "Sozlamalar",
+    "/help": "Yordam"
   },
   "pageDescriptions": {
     "/": "XMHS bo'yicha Excel hisob-kitoblarini avtomatlashtirish uchun kuchli platforma. ATABAI bilan moliyaviy hisobot o'n marta arzon va tezroq bo'ladi.",
@@ -38,7 +40,9 @@
     "/results": "ATABAI fayl qayta ishlash natijalari - o'zgarishlarni solishtiring, batafsil hisobotlar va tayyor hujjatlarni eksport qiling.",
     "/coming-soon": "ATABAI tez orada mavjud bo'ladi. XMHS uchun Excel hisob-kitoblar avtomatlashtirish platformasi ishlab chiqilmoqda.",
     "/auth/callback": "Tizimga kirishingiz qayta ishlanmoqda...",
-    "/auth/success": "ATABAI platformasida autentifikatsiyangiz yakunlanmoqda"
+    "/auth/success": "ATABAI platformasida autentifikatsiyangiz yakunlanmoqda",
+    "/settings": "ATABAI foydalanuvchi sozlamalari - afzalliklar, obuna va hisob ma'lumotlarini boshqaring",
+    "/help": "ATABAI uchun yordam va qo'llab-quvvatlash - XMHS avtomatlashtiruvi haqida savollarda biz bilan bog'laning"
   },
   "nav": {
     "home": "Bosh sahifa",
@@ -70,7 +74,8 @@
     "totalProcessed": "Jami qayta ishlangan",
     "accuracy": "Aniqlik",
     "avgTime": "O'rtacha vaqt",
-    "usage": "Foydalanish"
+    "usage": "Foydalanish",
+    "emptyState": "Bu yerda sizning fayllaringiz ko'rinadi"
   },
   "hero": {
     "title": "XMHS bo'yicha Excel hisob-kitoblarini avtomatlashtirish uchun kuchli platforma",
@@ -335,6 +340,38 @@
     "email": "Email",
     "instagram": "Instagram",
     "backToHome": "Bosh sahifaga qaytish"
+  },
+  "settings": {
+    "tabs": {
+      "personal": "Shaxsiy",
+      "usage": "Foydalanish va reja",
+      "billing": "To'lovlar",
+      "privacy": "Maxfiylik"
+    },
+    "personal": {
+      "title": "Shaxsiy sozlamalar",
+      "description": "Hisob afzalliklaringiz va ko'rsatish sozlamalarini boshqaring",
+      "language": "Til",
+      "languageDescription": "Interfeys uchun afzal ko'rgan tilingizni tanlang",
+      "theme": "Mavzu",
+      "themeDescription": "ATABAI sizga qanday ko'rinishini tanlang",
+      "themeLight": "Yorug'",
+      "themeDark": "Qorong'u",
+      "themeSystem": "Tizim"
+    },
+    "saved": "Sozlamalar muvaffaqiyatli saqlandi",
+    "comingSoon": "Tez orada",
+    "usageTabDescription": "Foydalanish statistikangizni ko'ring va obuna rejangizni boshqaring",
+    "billingTabDescription": "To'lov ma'lumotlari va to'lov usullarini boshqaring",
+    "privacyTabDescription": "Maxfiylik sozlamalaringizni va ma'lumotlar afzalliklaringizni nazorat qiling"
+  },
+  "help": {
+    "title": "Yordam kerakmi?",
+    "description": "ATABAI va XMHS avtomatlashtiruvi haqidagi savollaringizda sizga yordam berishga tayyormiz",
+    "telegram": "Telegram",
+    "email": "Email",
+    "instagram": "Instagram",
+    "backToDashboard": "Bosh sahifaga qaytish"
   },
   "common": {
     "goHome": "Bosh sahifaga",

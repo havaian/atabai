@@ -7,6 +7,9 @@ import axiosPlugin from './plugins/axios'
 import App from './App.vue'
 import './assets/main.css'
 
+// Import your global components
+import globalComponents from './plugins/globalComponents'
+
 // Async initialization function
 async function initializeApp() {
     try {
@@ -18,6 +21,9 @@ async function initializeApp() {
 
         // Create Vue app
         const app = createApp(App)
+
+        // Register global components
+        app.use(globalComponents)
 
         // Use plugins in correct order
         app.use(pinia)

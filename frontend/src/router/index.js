@@ -11,6 +11,8 @@ import ComingSoon from '@/views/ComingSoon.vue'
 import OAuthCallback from '@/views/OAuthCallback.vue'
 import AuthSuccess from '@/views/AuthSuccess.vue'
 import Dashboard from '@/views/Dashboard.vue'
+import Settings from '@/views/Settings.vue'
+import Help from '@/views/Help.vue'
 // Future views
 // import FileUpload from '@/views/FileUpload.vue'
 // import FileProcessor from '@/views/FileProcessor.vue'
@@ -66,6 +68,19 @@ const routes = [
         }
     },
 
+    // Help route
+    {
+        path: '/help',
+        name: 'Help',
+        component: Help,
+        meta: {
+            showNavbar: false,
+            showFooter: false,
+            titleKey: 'pageTitles./help',
+            descriptionKey: 'pageDescriptions./help'
+        }
+    },
+
     // User routes (with UserLayout)
     {
         path: '/app',
@@ -89,6 +104,15 @@ const routes = [
                     descriptionKey: 'pageDescriptions./dashboard'
                 }
             },
+            {
+                path: 'settings',
+                name: 'Settings',
+                component: Settings,
+                meta: {
+                    titleKey: 'pageTitles./settings',
+                    descriptionKey: 'pageDescriptions./settings'
+                }
+            }
             // Future routes will go here
             // {
             //     path: 'upload',
@@ -206,6 +230,11 @@ router.beforeEach(async (to, from, next) => {
 
     // Initialize auth store if not already done
     const authStore = useAuthStore()
+
+    // Redirect authenticated users from landing page to dashboard
+    if (to.path === '/' && authStore.isAuthenticated) {
+        return next('/app/dashboard')
+    }
 
     // Check authentication for protected routes
     if (to.meta?.requiresAuth && !authStore.isAuthenticated) {

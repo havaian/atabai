@@ -52,6 +52,11 @@ const userSchema = new mongoose.Schema({
             enum: ['ru', 'uz', 'en'],
             default: 'ru'
         },
+        theme: {  // ADD THIS
+            type: String,
+            enum: ['light', 'dark', 'system'],
+            default: 'system'
+        },
         defaultTemplate: {
             type: String,
             default: null
