@@ -26,11 +26,6 @@ export const useTemplatesStore = defineStore('templates', () => {
                 standard: 'IAS 16',
                 category: 'Asset Management',
                 icon: CalculatorIcon,
-                stats: {
-                    accuracy: '99.8%',
-                    time: '< 2 min',
-                    usage: 'High'
-                },
                 description: 'Automate depreciation calculations according to IAS 16 standards',
                 subscriptionRequired: 'basic'
             },
@@ -41,11 +36,6 @@ export const useTemplatesStore = defineStore('templates', () => {
                 standard: 'IFRS 15',
                 category: 'Revenue Recognition',
                 icon: CurrencyDollarIcon,
-                stats: {
-                    accuracy: '99.5%',
-                    time: '< 3 min',
-                    usage: 'Medium'
-                },
                 description: 'Calculate revenue discounts and adjustments per IFRS 15',
                 subscriptionRequired: 'basic'
             },
@@ -56,11 +46,6 @@ export const useTemplatesStore = defineStore('templates', () => {
                 standard: 'IAS 36',
                 category: 'Asset Testing',
                 icon: ChartBarIcon,
-                stats: {
-                    accuracy: '99.2%',
-                    time: '< 5 min',
-                    usage: 'Medium'
-                },
                 description: 'Perform impairment testing and calculations according to IAS 36',
                 subscriptionRequired: 'basic'
             },
@@ -71,11 +56,6 @@ export const useTemplatesStore = defineStore('templates', () => {
                 standard: 'IFRS',
                 category: 'Reporting',
                 icon: DocumentTextIcon,
-                stats: {
-                    accuracy: '99.9%',
-                    time: '< 10 min',
-                    usage: 'Low'
-                },
                 description: 'Generate comprehensive IFRS-compliant financial reports',
                 subscriptionRequired: 'premium'
             }

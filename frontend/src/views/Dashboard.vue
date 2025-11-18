@@ -106,6 +106,6 @@ const navigateTo = (path) => {
 
 const selectTemplate = (template) => {
     // Navigate to file upload with template pre-selected
-    router.push(`/upload?template=${template.id}`)
+    router.push(`/app/upload?template=${template.id}`)
 }
 </script>

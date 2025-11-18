@@ -28,7 +28,8 @@
     "/auth/callback": "Signing in...",
     "/auth/success": "Login Successful",
     "/settings": "Settings",
-    "/help": "Help"
+    "/help": "Help",
+    "/upload": "Upload File"
   },
   "pageDescriptions": {
     "/": "Powerful platform for automating Excel calculations according to IFRS. With ATABAI, financial reporting will be tens of times cheaper and faster.",
@@ -42,7 +43,8 @@
     "/auth/callback": "Processing your login...",
     "/auth/success": "Completing your authentication to ATABAI platform",
     "/settings": "ATABAI user settings - manage preferences, subscription and account details",
-    "/help": "Get help and support for ATABAI - contact us for questions about IFRS automation"
+    "/help": "Get help and support for ATABAI - contact us for questions about IFRS automation",
+    "/upload": "Upload your Excel file to transform from NSBU to IFRS format with automated calculations"
   },
   "nav": {
     "home": "Home",
@@ -372,6 +374,130 @@
     "email": "Email",
     "instagram": "Instagram",
     "backToDashboard": "Back to main page"
+  },
+  "upload": {
+    "title": "Upload File for Processing",
+    "backToDashboard": "Back to Dashboard",
+    "uploadSection": "Upload Your File",
+    "expectedFormat": "Expected File Format:",
+    "instructions": {
+      "depreciation": [
+        "Excel file with asset data in NSBU format",
+        "Columns: Asset Name, Original Cost, Purchase Date, Useful Life",
+        "Optional: Depreciation Method, Residual Value",
+        "Each row should represent one asset"
+      ],
+      "discounts": [
+        "Excel file with revenue/discount data in NSBU format",
+        "Columns: Transaction ID, Revenue Amount, Discount Type, Discount Value",
+        "Optional: Customer, Date, Product Category"
+      ],
+      "impairment": [
+        "Excel file with asset carrying values in NSBU format",
+        "Columns: Asset Name, Carrying Value, Fair Value, Cash Flow Data",
+        "Optional: Testing Date, Market Indicators"
+      ]
+    },
+    "dropZone": {
+      "title": "Drop your Excel file here",
+      "subtitle": "or click to browse files",
+      "chooseFile": "Choose File",
+      "supportedFormats": "Supports .xlsx and .xls files up to 10MB"
+    },
+    "selectedFile": {
+      "processFile": "Process File",
+      "processing": "Processing...",
+      "chooseDifferent": "Choose Different File"
+    },
+    "sampleFormat": {
+      "title": "Sample Excel Format",
+      "description": "Your Excel file should have similar column structure. The system will automatically detect columns and apply IFRS transformations."
+    },
+    "sampleHeaders": {
+      "depreciation": [
+        "Asset Name",
+        "Original Cost (UZS)",
+        "Purchase Date",
+        "Useful Life (Years)",
+        "Method"
+      ],
+      "discounts": [
+        "Transaction ID",
+        "Revenue (UZS)",
+        "Discount Type",
+        "Discount %",
+        "Customer"
+      ],
+      "impairment": [
+        "Asset Name",
+        "Carrying Value (UZS)",
+        "Fair Value (UZS)",
+        "Testing Date",
+        "Status"
+      ]
+    },
+    "sampleData": {
+      "depreciation": [
+        [
+          "Office Building",
+          "1,000,000,000",
+          "2020-01-15",
+          "40",
+          "Straight-line"
+        ],
+        [
+          "Manufacturing Equipment",
+          "500,000,000",
+          "2021-06-01",
+          "10",
+          "Declining Balance"
+        ],
+        ["Vehicles", "150,000,000", "2022-03-10", "5", "Straight-line"]
+      ],
+      "discounts": [
+        ["TXN001", "50,000,000", "Volume", "5", "Customer A"],
+        ["TXN002", "25,000,000", "Early Payment", "2", "Customer B"],
+        ["TXN003", "75,000,000", "Seasonal", "10", "Customer C"]
+      ],
+      "impairment": [
+        [
+          "Warehouse",
+          "800,000,000",
+          "750,000,000",
+          "2024-12-01",
+          "Test Required"
+        ],
+        [
+          "Retail Store",
+          "300,000,000",
+          "320,000,000",
+          "2024-12-01",
+          "No Impairment"
+        ],
+        [
+          "Production Line",
+          "600,000,000",
+          "550,000,000",
+          "2024-12-01",
+          "Impaired"
+        ]
+      ]
+    }
+  },
+  "processing": {
+    "title": "Processing Your File",
+    "status": {
+      "pending": "Pending",
+      "processing": "Processing",
+      "completed": "Completed",
+      "failed": "Failed"
+    },
+    "steps": {
+      "upload": "File uploaded successfully",
+      "validation": "Validating file format",
+      "transformation": "Applying IFRS transformations",
+      "completion": "Generating results"
+    }
   },
   "common": {
     "goHome": "Go Home",

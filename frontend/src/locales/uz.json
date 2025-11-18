@@ -25,15 +25,16 @@
     "/processing": "Faylni qayta ishlash",
     "/results": "Qayta ishlash natijalari",
     "/coming-soon": "Tez orada",
-    "/auth/callback": "Tizimga kirish...",
-    "/auth/success": "Muvaffaqiyatli kirildi",
+    "/auth/callback": "Tizimga kirilmoqda...",
+    "/auth/success": "Muvaffaqiyatli kirish",
     "/settings": "Sozlamalar",
-    "/help": "Yordam"
+    "/help": "Yordam",
+    "/upload": "Fayl yuklash"
   },
   "pageDescriptions": {
     "/": "XMHS bo'yicha Excel hisob-kitoblarini avtomatlashtirish uchun kuchli platforma. ATABAI bilan moliyaviy hisobot o'n marta arzon va tezroq bo'ladi.",
-    "/dashboard": "ATABAI boshqaruv paneli - fayllarni, XMHS shablonlarini boshqaring va moliyaviy hujjatlar qayta ishlashini kuzatib boring.",
-    "/templates": "XMHS shablonlari amortizatsiya hisob-kitoblari, chegirmalar, aktivlar qadrsizlanishi va moliyaviy hisobotlarni avtomatlashtirish uchun.",
+    "/dashboard": "ATABAI boshqaruv paneli - fayllar, XMHS shablonlari va moliyaviy hujjatlar qayta ishlashini boshqaring.",
+    "/templates": "Amortizatsiya, chegirmalar, aktivlar qadrsizlanishi va moliyaviy hisobotlar hisob-kitoblarini avtomatlashtirish uchun XMHS shablonlari.",
     "/profile": "ATABAI foydalanuvchi profili sozlamalari - obuna, afzalliklar va shaxsiy ma'lumotlarni boshqaring.",
     "/history": "ATABAI-da fayllar qayta ishlash tarixi - natijalarni ko'ring, qayta ishlangan hujjatlar va statistikalarni yuklab oling.",
     "/processing": "XMHS standartlari bo'yicha Excel fayllarni qayta ishlash - avtomatlashtirish formulalarini qo'llash va hisobotlar yaratish.",
@@ -42,7 +43,8 @@
     "/auth/callback": "Tizimga kirishingiz qayta ishlanmoqda...",
     "/auth/success": "ATABAI platformasida autentifikatsiyangiz yakunlanmoqda",
     "/settings": "ATABAI foydalanuvchi sozlamalari - afzalliklar, obuna va hisob ma'lumotlarini boshqaring",
-    "/help": "ATABAI uchun yordam va qo'llab-quvvatlash - XMHS avtomatlashtiruvi haqida savollarda biz bilan bog'laning"
+    "/help": "ATABAI uchun yordam va qo'llab-quvvatlash - XMHS avtomatlashtiruvi haqida savollarda biz bilan bog'laning",
+    "/upload": "NZBH formatidan XMHS ga avtomatlashtirilgan hisob-kitoblar bilan aylantirish uchun Excel faylingizni yuklang"
   },
   "nav": {
     "home": "Bosh sahifa",
@@ -372,6 +374,87 @@
     "email": "Email",
     "instagram": "Instagram",
     "backToDashboard": "Bosh sahifaga qaytish"
+  },
+  "upload": {
+    "title": "Qayta ishlash uchun fayl yuklash",
+    "backToDashboard": "Boshqaruv paneliga qaytish",
+    "uploadSection": "Faylingizni yuklang",
+    "expectedFormat": "Kutilayotgan fayl formati:",
+    "instructions": {
+      "depreciation": [
+        "NZBH formatidagi aktivlar ma'lumotlari bilan Excel fayl",
+        "Ustunlar: Aktiv nomi, Dastlabki narx, Sotib olish sanasi, Xizmat muddati",
+        "Ixtiyoriy: Amortizatsiya usuli, Qoldiq qiymat",
+        "Har bir qator bitta aktivni ifodalashi kerak"
+      ],
+      "discounts": [
+        "NZBH formatidagi daromad/chegirma ma'lumotlari bilan Excel fayl", 
+        "Ustunlar: Tranzaksiya ID, Daromad summasi, Chegirma turi, Chegirma qiymati",
+        "Ixtiyoriy: Mijoz, Sana, Mahsulot kategoriyasi"
+      ],
+      "impairment": [
+        "NZBH formatidagi aktivlarning balans qiymati bilan Excel fayl",
+        "Ustunlar: Aktiv nomi, Balans qiymati, Adolatli qiymat, Pul oqimi ma'lumotlari",
+        "Ixtiyoriy: Test sanasi, Bozor ko'rsatkichlari"
+      ]
+    },
+    "dropZone": {
+      "title": "Excel faylingizni bu yerga tashlang",
+      "subtitle": "yoki fayllarni tanlash uchun bosing",
+      "chooseFile": "Fayl tanlash",
+      "supportedFormats": "10MB gacha .xlsx va .xls fayllarini qo'llab-quvvatlaydi"
+    },
+    "selectedFile": {
+      "processFile": "Faylni qayta ishlash",
+      "processing": "Qayta ishlanmoqda...",
+      "chooseDifferent": "Boshqa fayl tanlash"
+    },
+    "sampleFormat": {
+      "title": "Namuna Excel formati",
+      "description": "Sizning Excel faylingiz shunga o'xshash ustun tuzilishiga ega bo'lishi kerak. Tizim avtomatik ravishda ustunlarni aniqlaydi va XMHS transformatsiyalarini qo'llaydi."
+    }
+  },
+  "processing": {
+    "title": "Faylingizni qayta ishlash",
+    "progress": "Jarayon",
+    "error": "Qayta ishlash xatosi",
+    "status": {
+      "pending": "Kutilmoqda",
+      "processing": "Qayta ishlanmoqda",
+      "completed": "Yakunlandi",
+      "failed": "Xato"
+    },
+    "statusDescription": {
+      "pending": "Sizning faylingiz qayta ishlash navbatida",
+      "processing": "Ma'lumotlaringizga XMHS transformatsiyalarini qo'llayapmiz",
+      "completed": "Fayl muvaffaqiyatli qayta ishland va yuklab olishga tayyor",
+      "failed": "Faylni qayta ishlashda xato yuz berdi"
+    },
+    "steps": {
+      "upload": "Fayl muvaffaqiyatli yuklandi",
+      "validation": "Fayl formatini tekshirish",
+      "transformation": "XMHS transformatsiyalarini qo'llash",
+      "completion": "Natijalarni yaratish"
+    },
+    "results": {
+      "title": "Qayta ishlash natijalari",
+      "transformations": "Transformatsiyalar",
+      "changes": "O'zgarishlar",
+      "rows": "Qayta ishlangan qatorlar"
+    },
+    "actions": {
+      "download": "Natijani yuklab olish",
+      "downloading": "Yuklab olinmoqda...",
+      "retry": "Qaytarish",
+      "retrying": "Qaytarilmoqda...",
+      "backToDashboard": "Panelga qaytish",
+      "uploadNew": "Yangi fayl yuklash"
+    },
+    "duration": "Qayta ishlash vaqti: {duration}",
+    "timeFormat": {
+      "seconds": "{count} son",
+      "minutes": "{count} daq"
+    }
   },
   "common": {
     "goHome": "Bosh sahifaga",

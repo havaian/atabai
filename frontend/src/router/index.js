@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import i18n from '@/utils/i18n' // Import the i18n instance
+import i18n from '@/utils/i18n'
 
 // Import layouts
 import UserLayout from '@/layouts/UserLayout.vue'
@@ -13,14 +13,7 @@ import AuthSuccess from '@/views/AuthSuccess.vue'
 import Dashboard from '@/views/Dashboard.vue'
 import Settings from '@/views/Settings.vue'
 import Help from '@/views/Help.vue'
-// Future views
-// import FileUpload from '@/views/FileUpload.vue'
-// import FileProcessor from '@/views/FileProcessor.vue'
-// import FileResults from '@/views/FileResults.vue'
-// import ProcessingPage from '@/views/ProcessingPage.vue'
-// import ProfilePage from '@/views/ProfilePage.vue'
-// import HistoryPage from '@/views/HistoryPage.vue'
-// import TemplatesPage from '@/views/TemplatesPage.vue'
+import UploadPage from '@/views/UploadPage.vue'
 
 const routes = [
     // Public routes (no layout)
@@ -67,8 +60,6 @@ const routes = [
             descriptionKey: 'pageDescriptions./auth/success'
         }
     },
-
-    // Help route
     {
         path: '/help',
         name: 'Help',
@@ -105,6 +96,24 @@ const routes = [
                 }
             },
             {
+                path: 'upload',
+                name: 'Upload',
+                component: UploadPage,
+                meta: {
+                    titleKey: 'pageTitles./upload',
+                    descriptionKey: 'pageDescriptions./upload'
+                }
+            },
+            {
+                path: 'processing/:jobId',
+                name: 'Processing',
+                component: () => import('@/views/ProcessingPage.vue'),
+                meta: {
+                    titleKey: 'pageTitles./processing',
+                    descriptionKey: 'pageDescriptions./processing'
+                }
+            },
+            {
                 path: 'settings',
                 name: 'Settings',
                 component: Settings,
@@ -113,70 +122,18 @@ const routes = [
                     descriptionKey: 'pageDescriptions./settings'
                 }
             }
-            // Future routes will go here
-            // {
-            //     path: 'upload',
-            //     name: 'FileUpload',
-            //     component: FileUpload,
-            //     meta: {
-            //         titleKey: 'pageTitles./upload',
-            //         descriptionKey: 'pageDescriptions./upload'
-            //     }
-            // },
-            // {
-            //     path: 'files/:fileId',
-            //     name: 'FileProcessor',
-            //     component: FileProcessor,
-            //     props: true,
-            //     meta: {
-            //         titleKey: 'pageTitles./processing',
-            //         descriptionKey: 'pageDescriptions./processing'
-            //     }
-            // },
-            // {
-            //     path: 'results/:fileId',
-            //     name: 'FileResults',
-            //     component: FileResults,
-            //     props: true,
-            //     meta: {
-            //         titleKey: 'pageTitles./results',
-            //         descriptionKey: 'pageDescriptions./results'
-            //     }
-            // },
-            // {
-            //     path: 'templates',
-            //     name: 'Templates',
-            //     component: TemplatesPage,
-            //     meta: {
-            //         titleKey: 'pageTitles./templates',
-            //         descriptionKey: 'pageDescriptions./templates'
-            //     }
-            // },
-            // {
-            //     path: 'history',
-            //     name: 'History',
-            //     component: HistoryPage,
-            //     meta: {
-            //         titleKey: 'pageTitles./history',
-            //         descriptionKey: 'pageDescriptions./history'
-            //     }
-            // },
-            // {
-            //     path: 'profile',
-            //     name: 'Profile',
-            //     component: ProfilePage,
-            //     meta: {
-            //         titleKey: 'pageTitles./profile',
-            //         descriptionKey: 'pageDescriptions./profile'
-            //     }
-            // }
+            // Future routes will go here as we implement them
         ]
     },
 
-    // Legacy redirect for existing /dashboard route
+    // Legacy redirects
     {
         path: '/dashboard',
         redirect: '/app/dashboard'
+    },
+    {
+        path: '/upload',
+        redirect: '/app/upload'
     },
 
     // 404 redirect
