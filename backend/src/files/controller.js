@@ -625,12 +625,20 @@ async function processFileAsync(fileRecord, processingJob) {
 
         // Update job as failed
         processingJob.status = 'failed';
-        processingJob.error = error.message;
+        processingJob.error = {
+            message: error.message,
+            stack: error.stack,
+            name: error.name
+        };
         await processingJob.save();
 
         // Update file record
         fileRecord.status = 'failed';
-        fileRecord.error = error.message;
+        processingJob.error = {
+            message: error.message,
+            stack: error.stack,
+            name: error.name
+        };
         await fileRecord.save();
     }
 }

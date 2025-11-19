@@ -388,7 +388,7 @@
         "Har bir qator bitta aktivni ifodalashi kerak"
       ],
       "discounts": [
-        "NZBH formatidagi daromad/chegirma ma'lumotlari bilan Excel fayl", 
+        "NZBH formatidagi daromad/chegirma ma'lumotlari bilan Excel fayl",
         "Ustunlar: Tranzaksiya ID, Daromad summasi, Chegirma turi, Chegirma qiymati",
         "Ixtiyoriy: Mijoz, Sana, Mahsulot kategoriyasi"
       ],
@@ -416,10 +416,9 @@
   },
   "processing": {
     "title": "Faylingizni qayta ishlash",
-    "progress": "Jarayon",
-    "error": "Qayta ishlash xatosi",
     "status": {
       "pending": "Kutilmoqda",
+      "uploaded": "Qayta ishlanmoqda",
       "processing": "Qayta ishlanmoqda",
       "completed": "Yakunlandi",
       "failed": "Xato"
@@ -448,12 +447,139 @@
       "retry": "Qaytarish",
       "retrying": "Qaytarilmoqda...",
       "backToDashboard": "Panelga qaytish",
-      "uploadNew": "Yangi fayl yuklash"
+      "uploadNew": "Yangi fayl yuklash",
+      "viewResults": "Natijalarni ko'rish",
+      "retryUpload": "Yana yuklash"
     },
     "duration": "Qayta ishlash vaqti: {duration}",
     "timeFormat": {
       "seconds": "{count} son",
       "minutes": "{count} daq"
+    },
+    "stuck": {
+      "statusTitle": "Qayta ishlash to'xtab qoldi",
+      "statusDescription": "Fayl qayta ishlash to'xtab qolganga o'xshaydi yoki kutilganidan ko'proq vaqt olmoqda.",
+      "title": "Qayta ishlash to'xtab qoldi",
+      "description": "Sizning faylingiz g'ayrioddiy uzoq vaqt qayta ishlanmoqda. Bu ba'zida juda katta fayllar yoki vaqtinchalik server muammolari bilan sodir bo'ladi.",
+      "suggestions": "Faylni yana yuklashga urinib ko'rishingiz yoki agar muammo davom etsa, qo'llab-quvvatlash bilan bog'lanishingiz mumkin.",
+      "pollingInfo": "{duration} daqiqa ichida {attempts} marta tekshirildi",
+      "troubleshooting": {
+        "title": "Muammolarni hal qilish bo'yicha maslahatlar:",
+        "tip1": "Katta fayllar (>10MB) bir necha daqiqa qayta ishlanishi mumkin",
+        "tip2": "Murakkab hisob-kitoblar ko'proq qayta ishlash vaqtini talab qiladi",
+        "tip3": "Server texnik xizmati vaqtincha qayta ishlashni sekinlashtirishi mumkin"
+      }
+    },
+    "progress": "Jarayon",
+    "error": "Qayta ishlash xatosi"
+  },
+  "results": {
+    "title": "Fayl natijalari",
+    "error": {
+      "title": "Faylni yuklashda xatolik",
+      "fetchFailed": "Fayl tafsilotlarini yuklashda xatolik. Iltimos, qayta urinib ko'ring."
+    },
+    "overview": {
+      "title": "Umumiy ko'rinish",
+      "template": "Shablon",
+      "processed": "Qayta ishlangan",
+      "size": "Fayl hajmi"
+    },
+    "transformations": {
+      "title": "Transformatsiyalar",
+      "total": "Jami qo'llanilgan",
+      "changes": "Kiritilgan o'zgarishlar"
+    },
+    "warnings": {
+      "title": "Ogohlantirishlar",
+      "total": "Jami ogohlantirishlar",
+      "details": "Ogohlantirish tafsilotlari",
+      "row": "Qator"
+    },
+    "comparison": {
+      "before": "Avval",
+      "after": "Keyin",
+      "sideBySide": "Yonma-yon",
+      "beforeData": "Dastlabki ma'lumotlar (NZBH formati)",
+      "afterData": "Qayta ishlangan ma'lumotlar (XMHS formati)",
+      "originalFormat": "Yuklangan fayldan asl format",
+      "ifrsFormat": "Qo'llaniladigan transformatsiyalar bilan XMHS mos formati",
+      "showingRows": "{total}dan {shown} qator ko'rsatilmoqda"
+    },
+    "compliance": {
+      "title": "XMHS muvofiqlik eslatmalari",
+      "depreciation": {
+        "1": "Barcha amortizatsiya hisoblari IAS 16 - Asosiy vositalar standartlariga muvofiq",
+        "2": "Hisobiy qiymat dastlabki qiymatdan to'plangan amortizatsiya va qadrsizlanish zararlarini ayirib tashlashni ifodalaydi",
+        "3": "Amortizatsiya stavkalari taxmin qilingan foydali ishlash muddatlari va qoldiq qiymatlariga asoslangan",
+        "4": "Qadrsizlanish belgilari bo'lgan aktivlar uchun qadrsizlanish testlari tavsiya etiladi"
+      },
+      "discounts": {
+        "1": "Barcha daromadlarni tan olish IFRS 15 - Mijozlar bilan shartnomalardan olinadigan daromadga muvofiq",
+        "2": "Bitim narxlari chegirmalarni o'z ichiga olgan o'zgaruvchan to'lovlarga moslashtiriladi",
+        "3": "Daromadni tan olish vaqti bajarilishi shart bo'lgan majburiyatlarning bajarilishiga asoslanadi",
+        "4": "Shartnoma majburiyatlari tovarlar/xizmatlarni o'tkazish majburiyatlarini ifodalaydi"
+      },
+      "impairment": {
+        "1": "Barcha qadrsizlanish testlari IAS 36 - Aktivlarning qadrsizlanishi standartlariga muvofiq",
+        "2": "Qoplanuvchi summa sotish uchun adolatli qiymat minus xarajatlar va foydalanish qiymatining eng yuqorisidan iborat",
+        "3": "Hisobiy qiymat qoplanuvchi summani oshirganda qadrsizlanish zararini tan olish",
+        "4": "Mustaqil naqd oqimlarini yaratmaydigan aktivlar uchun naqd yaratuvchi birliklar (NYB) aniqlanadi"
+      }
+    }
+  },
+  "history": {
+    "title": "Fayllar tarixi",
+    "subtitle": "Barcha qayta ishlangan fayllarni ko'ring va boshqaring",
+    "filters": {
+      "search": "Qidirish",
+      "searchPlaceholder": "Fayl nomi bo'yicha qidirish...",
+      "status": "Holat",
+      "allStatuses": "Barcha holatlar",
+      "template": "Shablon",
+      "allTemplates": "Barcha shablonlar",
+      "dateRange": "Sana oralig'i",
+      "allDates": "Barcha sanalar",
+      "today": "Bugun",
+      "thisWeek": "Shu hafta",
+      "thisMonth": "Shu oy",
+      "thisQuarter": "3 oy ichida",
+      "clearAll": "Barcha filtrlarni tozalash"
+    },
+    "table": {
+      "fileName": "Fayl nomi",
+      "template": "Shablon",
+      "status": "Holat",
+      "processed": "Sana",
+      "actions": "Amallar",
+      "completed": "Tugallangan"
+    },
+    "actions": {
+      "view": "Natijalarni ko'rish",
+      "viewProcessing": "Qayta ishlashni ko'rish",
+      "download": "Yuklash",
+      "retry": "Qayta ishlashni takrorlash",
+      "delete": "O'chirish",
+      "confirmDelete": "'{name}' faylini o'chirishga ishonchingiz komilmi? Bu amalni bekor qilib bo'lmaydi."
+    },
+    "error": {
+      "title": "Fayllarni yuklashda xatolik",
+      "fetchFailed": "Fayllar tarixini yuklashda xatolik. Qayta urinib ko'ring."
+    },
+    "empty": {
+      "title": "Hali fayllar yo'q",
+      "description": "Siz hali qayta ishlash uchun fayllar yuklamagansiz.",
+      "uploadFirst": "Birinchi faylni yuklash"
+    },
+    "noResults": {
+      "title": "Fayllar topilmadi",
+      "description": "Joriy filtrlar bo'yicha hech qanday fayl topilmadi. Qidiruv mezonlarini o'zgartirib ko'ring."
+    },
+    "showingResults": "{total}dan {count} fayl ko'rsatilmoqda",
+    "pagination": {
+      "showing": "{total}dan {start} dan {end} gacha natija ko'rsatilmoqda",
+      "previous": "Oldingi",
+      "next": "Keyingi"
     }
   },
   "common": {
@@ -467,6 +593,8 @@
     "edit": "Tahrirlash",
     "upload": "Yuklash",
     "download": "Yuklab olish",
-    "process": "Qayta ishlash"
+    "process": "Qayta ishlash",
+    "downloading": "Yuklab olinmoqda...",
+    "retry": "Qayta urinish"
   }
 }

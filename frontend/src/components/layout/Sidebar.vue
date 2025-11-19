@@ -11,10 +11,6 @@
                 <div class="flex items-center justify-between">
                     <div v-show="isSidebarOpen" class="flex items-center space-x-2">
                         <LogoComponent class="h-8 w-8" />
-                        <span class="font-semibold text-gray-900 text-lg">ATABAI</span>
-                    </div>
-                    <div v-show="!isSidebarOpen" class="flex items-center justify-center w-full">
-                        <LogoComponent class="h-8 w-8" />
                     </div>
                     <button v-show="isSidebarOpen" @click="$emit('toggle')"
                         class="p-1 rounded-lg hover:bg-gray-100 transition-colors">
@@ -38,12 +34,12 @@
                 </button>
 
                 <!-- Templates Button -->
-                <button @click="navigateTo('/app/dashboard')"
+                <!-- <button @click="navigateTo('/app/dashboard')"
                     class="w-full flex items-center justify-center text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-all duration-200"
                     :class="{ 'px-2 py-2': !isSidebarOpen, 'px-3 py-2': isSidebarOpen }">
                     <DocumentTextIcon class="h-4 w-4" :class="{ 'mr-2': isSidebarOpen }" />
                     <span v-show="isSidebarOpen">{{ $t('nav.templates') }}</span>
-                </button>
+                </button> -->
 
                 <!-- History Button -->
                 <button @click="navigateTo('/app/history')"
@@ -58,7 +54,7 @@
             <div class="flex-1 overflow-y-auto">
                 <!-- File History -->
                 <div v-show="isSidebarOpen" class="px-4 pb-4">
-                    <div class="mb-4">
+                    <div class="my-4">
                         <h3 class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
                             {{ $t('dashboard.recentFiles') }}
                         </h3>
@@ -82,16 +78,18 @@
                         <div v-else class="space-y-1">
                             <div v-for="file in recentFiles" :key="file.id" @click="openFile(file)"
                                 class="flex items-center p-2 rounded-lg hover:bg-gray-100 cursor-pointer group">
-                                <DocumentIcon class="h-4 w-4 text-gray-400 mr-3 flex-shrink-0" />
-                                <div class="flex-1 min-w-0">
-                                    <p class="text-sm font-medium text-gray-900 truncate">{{ file.originalName }}</p>
-                                    <div class="flex items-center justify-between">
-                                        <p class="text-xs text-gray-500">{{ formatDate(file.createdAt) }}</p>
-                                        <span :class="statusClasses(file.status)"
-                                            class="text-xs px-2 py-1 rounded-full">
-                                            {{ $t(`processing.status.${file.status}`) }}
-                                        </span>
+                                <img src="/images/icons/excel.svg" class="h-8 w-8 text-gray-400 mr-3 flex-shrink-0" />
+                                <div class="inline-flex w-full justify-between min-w-0">
+                                    <div class="grid">
+                                        <p class="text-sm font-medium text-gray-900 truncate">{{ file.originalName }}</p>
+                                        <div class="items-center justify-between">
+                                            <p class="text-xs text-gray-500">{{ formatDate(file.createdAt) }}</p>
+                                        </div>
                                     </div>
+                                    <span :class="statusClasses(file.status)"
+                                        class="flex text-xs px-2 my-1 rounded-full items-center">
+                                        {{ $t(`processing.status.${file.status}`) }}
+                                    </span>
                                 </div>
                                 <ChevronRightIcon
                                     class="h-4 w-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -439,6 +437,7 @@ function navigateAndClose(path) {
 
 function openFile(file) {
     if (file.status === 'completed') {
+        console.log(file.id)
         router.push(`/app/files/${file.id}`)
     } else if (file.jobId) {
         router.push(`/app/processing/${file.jobId}`)
@@ -475,9 +474,9 @@ function statusClasses(status) {
         'processing': 'bg-blue-100 text-blue-800',
         'failed': 'bg-red-100 text-red-800',
         'pending': 'bg-yellow-100 text-yellow-800',
-        'uploaded': 'bg-gray-100 text-gray-800'
+        'uploaded': 'bg-violet-100 text-gray-800'
     }
-    return classes[status] || 'bg-gray-100 text-gray-800'
+    return classes[status] || 'bg-violet-100 text-gray-800'
 }
 
 function toggleProfileMenu() {

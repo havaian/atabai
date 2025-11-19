@@ -134,6 +134,9 @@ app.get('/', (req, res) => {
 app.use(notFound);
 // app.use(errorHandler);
 
+// Stuck jobs cleanup middleware
+require('./middleware/jobCleanup');
+
 // Initialize database connections
 const initializeApp = async () => {    
     try {

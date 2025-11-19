@@ -14,6 +14,9 @@ import Dashboard from '@/views/Dashboard.vue'
 import Settings from '@/views/Settings.vue'
 import Help from '@/views/Help.vue'
 import UploadPage from '@/views/UploadPage.vue'
+import ProcessingPage from '@/views/ProcessingPage.vue'
+import FileDetailsPage from  '@/views/FileDetailsPage.vue'
+import FileHistoryPage from '@/views/FileHistoryPage.vue'
 
 const routes = [
     // Public routes (no layout)
@@ -107,10 +110,19 @@ const routes = [
             {
                 path: 'processing/:jobId',
                 name: 'Processing',
-                component: () => import('@/views/ProcessingPage.vue'),
+                component: ProcessingPage,
                 meta: {
                     titleKey: 'pageTitles./processing',
                     descriptionKey: 'pageDescriptions./processing'
+                }
+            },
+            {
+                path: 'files/:fileId',
+                name: 'FileDetails',
+                component: FileDetailsPage,
+                meta: {
+                    titleKey: 'pageTitles./results',
+                    descriptionKey: 'pageDescriptions./results'
                 }
             },
             {
@@ -121,8 +133,16 @@ const routes = [
                     titleKey: 'pageTitles./settings',
                     descriptionKey: 'pageDescriptions./settings'
                 }
+            },
+            {
+                path: 'history',
+                name: 'FileHistory', 
+                component: FileHistoryPage,
+                meta: {
+                    titleKey: 'pageTitles./history',
+                    descriptionKey: 'pageDescriptions./history'
+                }
             }
-            // Future routes will go here as we implement them
         ]
     },
 

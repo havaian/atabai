@@ -18,8 +18,29 @@ async function processDiscountsTemplate(workbook) {
     };
 
     try {
-        // Copy workbook structure
-        result.workbook = workbook.clone();
+        // Copy workbook structure using ExcelJS proper method
+        result.workbook = new ExcelJS.Workbook();
+
+        // Copy each worksheet from source to target
+        workbook.eachSheet((sourceWorksheet, sheetId) => {
+            const targetWorksheet = result.workbook.addWorksheet(sourceWorksheet.name);
+            
+            // Copy all rows and cells
+            sourceWorksheet.eachRow((row, rowNumber) => {
+                const targetRow = targetWorksheet.getRow(rowNumber);
+                row.eachCell((cell, colNumber) => {
+                    targetRow.getCell(colNumber).value = cell.value;
+                    targetRow.getCell(colNumber).style = cell.style;
+                });
+            });
+            
+            // Copy column properties
+            sourceWorksheet.columns.forEach((column, index) => {
+                if (column.width) {
+                    targetWorksheet.getColumn(index + 1).width = column.width;
+                }
+            });
+        });
 
         let totalTransformations = 0;
         let totalChanges = 0;

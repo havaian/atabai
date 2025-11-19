@@ -163,14 +163,12 @@
             "headers": {
               "code": "Code",
               "revenue": "Revenue",
-              "amount": "Amount"
+              "discount": "Discount"
             },
             "data": {
-              "sales": "Sales revenue",
-              "returns": "Returns and discounts",
-              "simple": "Simple",
-              "basic": "Basic discounts",
-              "nonifrs": "Non-IFRS"
+              "simple": "Simple entries",
+              "basic": "Basic calculations",
+              "nonifrs": "Non-IFRS compliant"
             }
           },
           "after": {
@@ -180,11 +178,11 @@
               "amount": "Amount"
             },
             "data": {
-              "contracts": "Revenue from contracts",
-              "liabilities": "Contract liabilities",
-              "performance": "Performance obligations",
-              "method": "IFRS 15 method",
-              "compliant": "✓ Compliant"
+              "contracts": "Contract liabilities",
+              "obligations": "Performance obligations",
+              "automated": "Automated",
+              "compliant": "IFRS 15 compliant",
+              "validated": "✓ Validated"
             }
           }
         },
@@ -192,86 +190,35 @@
           "before": {
             "headers": {
               "asset": "Asset",
-              "carrying": "Carrying Amount",
+              "carrying": "Carrying Value",
               "status": "Status"
             },
             "data": {
               "equipment": "Equipment",
               "buildings": "Buildings",
-              "untested": "Not tested",
-              "notesting": "No testing",
-              "noias36": "No IAS 36 tests",
-              "risk": "Risk"
+              "untested": "Untested",
+              "notesting": "No testing performed",
+              "noias36": "Not IAS 36 compliant",
+              "risk": "Impairment risk unknown"
             }
           },
           "after": {
             "headers": {
               "asset": "Asset",
-              "carrying": "Carrying Amount",
-              "status": "Status"
+              "recoverable": "Recoverable Amount",
+              "status": "Impairment Status"
             },
             "data": {
-              "equipment": "Equipment (CGU 1)",
-              "buildings": "Buildings (CGU 2)",
-              "impaired": "Impaired",
-              "noimpairment": "No impairment",
-              "tested": "IAS 36 tested",
-              "recoverable": "Recoverable amount",
-              "validated": "✓ Validated"
+              "equipment": "Equipment",
+              "buildings": "Buildings",
+              "tested": "Tested",
+              "calculated": "Calculated recoverable amounts",
+              "ias36": "IAS 36 compliant testing",
+              "identified": "Impairment properly identified"
             }
           }
         }
       }
-    },
-    "templates": {
-      "depreciation": {
-        "processed": "Asset schedules processed",
-        "changesLabel": "Depreciation entries",
-        "changes": "156",
-        "formulasLabel": "Asset calculations",
-        "formulas": "42"
-      },
-      "discounts": {
-        "processed": "Revenue analyzed",
-        "changesLabel": "Discount adjustments",
-        "changes": "293",
-        "formulasLabel": "Revenue formulas",
-        "formulas": "67"
-      },
-      "impairment": {
-        "processed": "Impairment tests completed",
-        "changesLabel": "Value adjustments",
-        "changes": "84",
-        "formulasLabel": "Impairment calculations",
-        "formulas": "28"
-      }
-    }
-  },
-  "features": {
-    "title": "Why ATABAI is great",
-    "automation": {
-      "title": "Complete Automation",
-      "description": "Automatic application of IFRS formulas to your Excel files"
-    },
-    "compliance": {
-      "title": "IFRS Compliance",
-      "description": "Compliance with international financial reporting standards"
-    },
-    "accuracy": {
-      "title": "High Accuracy",
-      "description": "Minimizing errors in financial calculations"
-    },
-    "speed": {
-      "title": "Fast Processing",
-      "description": "Processing large files in minutes"
-    },
-    "easy": {
-      "title": "Easy to Use",
-      "description": "Intuitive interface requires no special training"
-    },
-    "universal": {
-      "title": "Universal",
-      "description": "Suitable for any type of calculation and report"
     }
   },
   "templates": {
@@ -338,38 +285,6 @@
     "feature4": "Detailed reports and result exports",
     "contactTitle": "Have questions?",
     "contactDescription": "Contact us for more information or to be notified about the launch.",
-    "telegram": "Telegram",
-    "email": "Email",
-    "instagram": "Instagram",
-    "backToHome": "Back to home"
-  },
-  "settings": {
-    "tabs": {
-      "personal": "Personal",
-      "usage": "Usage & Plan",
-      "billing": "Billing",
-      "privacy": "Privacy"
-    },
-    "personal": {
-      "title": "Personal Settings",
-      "description": "Manage your account preferences and display settings",
-      "language": "Language",
-      "languageDescription": "Choose your preferred language for the interface",
-      "theme": "Theme",
-      "themeDescription": "Choose how ATABAI appears to you",
-      "themeLight": "Light",
-      "themeDark": "Dark",
-      "themeSystem": "System"
-    },
-    "saved": "Settings saved successfully",
-    "comingSoon": "Coming Soon",
-    "usageTabDescription": "View your usage statistics and manage your subscription plan",
-    "billingTabDescription": "Manage your billing information and payment methods",
-    "privacyTabDescription": "Control your privacy settings and data preferences"
-  },
-  "help": {
-    "title": "Need Help?",
-    "description": "We're here to assist you with any questions about ATABAI and IFRS automation",
     "telegram": "Telegram",
     "email": "Email",
     "instagram": "Instagram",
@@ -492,11 +407,163 @@
       "completed": "Completed",
       "failed": "Failed"
     },
+    "statusDescription": {
+      "pending": "Your file is in queue for processing",
+      "processing": "Applying IFRS transformations to your data",
+      "completed": "File successfully processed and ready for download",
+      "failed": "An error occurred while processing the file"
+    },
     "steps": {
       "upload": "File uploaded successfully",
       "validation": "Validating file format",
       "transformation": "Applying IFRS transformations",
       "completion": "Generating results"
+    },
+    "results": {
+      "title": "Processing Results",
+      "transformations": "Transformations",
+      "changes": "Changes",
+      "rows": "Processed Rows"
+    },
+    "actions": {
+      "download": "Download Result",
+      "downloading": "Downloading...",
+      "retry": "Retry",
+      "retrying": "Retrying...",
+      "backToDashboard": "Back to Dashboard",
+      "uploadNew": "Upload New File",
+      "viewResults": "View Results",
+      "retryUpload": "Upload Again"
+    },
+    "duration": "Processing time: {duration}",
+    "timeFormat": {
+      "seconds": "{count} sec",
+      "minutes": "{count} min"
+    },
+    "stuck": {
+      "statusTitle": "Processing Stuck",
+      "statusDescription": "Your file processing appears to be stuck or taking longer than expected.",
+      "title": "Processing Appears Stuck",
+      "description": "Your file has been processing for an unusually long time. This sometimes happens with very large files or temporary server issues.",
+      "suggestions": "You can try uploading the file again, or contact support if this problem continues.",
+      "pollingInfo": "Checked {attempts} times over {duration} minutes",
+      "troubleshooting": {
+        "title": "Troubleshooting Tips:",
+        "tip1": "Large files (>10MB) may take several minutes to process",
+        "tip2": "Complex calculations require more processing time",  
+        "tip3": "Server maintenance may temporarily slow processing"
+      }
+    },
+    "progress": "Progress",
+    "error": "Processing Error"
+  },
+  "results": {
+    "title": "File Results",
+    "error": {
+      "title": "Error Loading File",
+      "fetchFailed": "Failed to load file details. Please try again."
+    },
+    "overview": {
+      "title": "Overview",
+      "template": "Template",
+      "processed": "Processed",
+      "size": "File Size"
+    },
+    "transformations": {
+      "title": "Transformations",
+      "total": "Total Applied",
+      "changes": "Changes Made"
+    },
+    "warnings": {
+      "title": "Warnings",
+      "total": "Total Warnings",
+      "details": "Warning Details",
+      "row": "Row"
+    },
+    "comparison": {
+      "before": "Before",
+      "after": "After",
+      "sideBySide": "Side by Side",
+      "beforeData": "Original Data (NSBU Format)",
+      "afterData": "Processed Data (IFRS Format)",
+      "originalFormat": "Original format from your uploaded file",
+      "ifrsFormat": "IFRS compliant format with applied transformations",
+      "showingRows": "Showing {shown} of {total} rows"
+    },
+    "compliance": {
+      "title": "IFRS Compliance Notes",
+      "depreciation": {
+        "1": "All depreciation calculations follow IAS 16 - Property, Plant and Equipment standards",
+        "2": "Carrying amounts represent cost less accumulated depreciation and impairment losses", 
+        "3": "Depreciation rates are based on estimated useful lives and residual values",
+        "4": "Impairment tests are recommended for assets with indicators of impairment"
+      },
+      "discounts": {
+        "1": "All revenue recognition follows IFRS 15 - Revenue from Contracts with Customers",
+        "2": "Transaction prices are adjusted for variable consideration including discounts",
+        "3": "Revenue recognition timing is determined based on performance obligation satisfaction",
+        "4": "Contract liabilities represent obligations to transfer goods/services"
+      },
+      "impairment": {
+        "1": "All impairment testing follows IAS 36 - Impairment of Assets standards",
+        "2": "Recoverable amount is the higher of fair value less costs to sell and value in use",
+        "3": "Impairment loss is recognized when carrying amount exceeds recoverable amount",
+        "4": "Cash generating units (CGUs) are identified for assets that do not generate independent cash flows"
+      }
+    }
+  },
+  "history": {
+    "title": "File History",
+    "subtitle": "View and manage all your processed files",
+    "filters": {
+      "search": "Search",
+      "searchPlaceholder": "Search by file name...",
+      "status": "Status",
+      "allStatuses": "All Statuses", 
+      "template": "Template",
+      "allTemplates": "All Templates",
+      "dateRange": "Date Range",
+      "allDates": "All Dates",
+      "today": "Today",
+      "thisWeek": "This Week", 
+      "thisMonth": "This Month",
+      "thisQuarter": "Last 3 Months",
+      "clearAll": "Clear All Filters"
+    },
+    "table": {
+      "fileName": "File Name",
+      "template": "Template",
+      "status": "Status", 
+      "processed": "Date",
+      "actions": "Actions",
+      "completed": "Completed"
+    },
+    "actions": {
+      "view": "View Results",
+      "viewProcessing": "View Processing",
+      "download": "Download",
+      "retry": "Retry Processing",
+      "delete": "Delete",
+      "confirmDelete": "Are you sure you want to delete '{name}'? This action cannot be undone."
+    },
+    "error": {
+      "title": "Error Loading Files",
+      "fetchFailed": "Failed to load file history. Please try again."
+    },
+    "empty": {
+      "title": "No Files Yet",
+      "description": "You haven't uploaded any files for processing yet.",
+      "uploadFirst": "Upload Your First File"
+    },
+    "noResults": {
+      "title": "No Files Found", 
+      "description": "No files match your current filters. Try adjusting your search criteria."
+    },
+    "showingResults": "Showing {count} of {total} files",
+    "pagination": {
+      "showing": "Showing {start} to {end} of {total} results",
+      "previous": "Previous",
+      "next": "Next"
     }
   },
   "common": {
@@ -510,6 +577,8 @@
     "edit": "Edit",
     "upload": "Upload",
     "download": "Download",
-    "process": "Process"
+    "process": "Process",
+    "downloading": "Downloading...",
+    "retry": "Retry"
   }
 }

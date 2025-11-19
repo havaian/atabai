@@ -91,9 +91,9 @@ export const useFilesStore = defineStore('files', () => {
             error.value = null
 
             const response = await apiClient.get(`/files/${fileId}`)
-            currentFile.value = response.data.file
+            currentFile.value = response.data
 
-            return response.data.file
+            return response.data
         } catch (err) {
             error.value = err.response?.data?.message || 'Failed to fetch file details'
             console.error('Get file details error:', err)
@@ -180,7 +180,7 @@ export const useFilesStore = defineStore('files', () => {
 
             // Get filename from response headers or use default
             const contentDisposition = response.headers['content-disposition']
-            let filename = 'download.xlsx'
+            let filename = `${fileId}.xlsx`
             if (contentDisposition) {
                 const filenameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/)
                 if (filenameMatch) {

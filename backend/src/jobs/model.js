@@ -93,7 +93,8 @@ const processingJobSchema = new mongoose.Schema({
     error: {
         message: String,
         stack: String,
-        code: String
+        name: String,
+        details: mongoose.Schema.Types.Mixed
     },
     retryCount: {
         type: Number,
