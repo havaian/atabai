@@ -2,11 +2,20 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const { authenticateJWT, checkFileProcessingLimit } = require('../middleware/auth');
+const {
+    uploadAndProcess,
+    getFileHistory,
+    getTemplateFiles,
+    getProcessingStatus,
+    getFileDetails,
+    downloadFile,
+    deleteFile,
+    retryProcessing
+} = require('./controller');
 
-// Simple inline handlers to avoid controller dependency issues for now
 const router = express.Router();
 
-// Configure multer for file uploads
+// Configure multer for file upload
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         // Ensure we get the project root directory regardless of where server is started
@@ -16,35 +25,28 @@ const storage = multer.diskStorage({
     },
     filename: (req, file, cb) => {
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        const ext = path.extname(file.originalname);
-        const name = path.basename(file.originalname, ext);
-        cb(null, `${name}-${uniqueSuffix}${ext}`);
+        const fileExtension = path.extname(file.originalname);
+        const fileName = `${file.fieldname}-${uniqueSuffix}${fileExtension}`;
+        cb(null, fileName);
     }
 });
 
-const fileFilter = (req, file, cb) => {
-    const allowedTypes = [
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        'application/vnd.ms-excel',
-        'application/octet-stream'
-    ];
-    
-    const allowedExtensions = ['.xlsx', '.xls'];
-    const ext = path.extname(file.originalname).toLowerCase();
-    
-    if (allowedTypes.includes(file.mimetype) || allowedExtensions.includes(ext)) {
-        cb(null, true);
-    } else {
-        cb(new Error('Only Excel files (.xlsx, .xls) are allowed'), false);
-    }
-};
-
 const upload = multer({
     storage: storage,
-    fileFilter: fileFilter,
     limits: {
-        fileSize: 10 * 1024 * 1024, // 10MB
-        files: 1
+        fileSize: 50 * 1024 * 1024, // 50MB limit
+    },
+    fileFilter: (req, file, cb) => {
+        // Accept only Excel files and CSV
+        if (file.mimetype.includes('spreadsheet') ||
+            file.mimetype.includes('excel') ||
+            file.originalname.endsWith('.xlsx') ||
+            file.originalname.endsWith('.xls') ||
+            file.originalname.endsWith('.csv')) {
+            cb(null, true);
+        } else {
+            cb(new Error('Only Excel and CSV files are allowed'), false);
+        }
     }
 });
 
@@ -53,196 +55,76 @@ const upload = multer({
  * @desc    Upload and process Excel file
  * @access  Private
  */
-router.post('/upload',
-    authenticateJWT,
-    checkFileProcessingLimit,
-    upload.single('file'),
-    async (req, res) => {
-        try {
-            global.logger.logInfo(`File upload initiated by user: ${req.user.email}`);
-            
-            if (!req.file) {
-                return res.status(400).json({
-                    success: false,
-                    error: 'NO_FILE',
-                    message: 'No file uploaded'
-                });
-            }
-
-            const { template } = req.body;
-            if (!template || !['depreciation', 'discounts', 'impairment'].includes(template)) {
-                return res.status(400).json({
-                    success: false,
-                    error: 'INVALID_TEMPLATE',
-                    message: 'Invalid template type'
-                });
-            }
-
-            // Generate job ID
-            const jobId = require('crypto').randomUUID();
-            
-            // For now, simulate processing without actual file processing
-            // This avoids the need for models and processing services
-            global.logger.logInfo(`File uploaded successfully: ${req.file.originalname} by ${req.user.email}`);
-
-            res.status(200).json({
-                success: true,
-                message: 'File uploaded and processing started',
-                jobId: jobId,
-                templateType: template,
-                fileName: req.file.originalname,
-                fileSize: req.file.size
-            });
-
-        } catch (error) {
-            global.logger.logError('Upload and process error:', error);
-            
-            // Clean up uploaded file if it exists
-            if (req.file?.path) {
-                try {
-                    const fs = require('fs').promises;
-                    await fs.unlink(req.file.path);
-                } catch (unlinkError) {
-                    global.logger.logError('Failed to clean up uploaded file:', unlinkError);
-                }
-            }
-
-            res.status(500).json({
-                success: false,
-                error: 'PROCESSING_ERROR',
-                message: 'Failed to process file'
-            });
-        }
-    }
-);
+router.post('/upload', authenticateJWT, upload.single('file'), uploadAndProcess);
 
 /**
  * @route   GET /api/files/history
  * @desc    Get user's file processing history
  * @access  Private
  */
-router.get('/history', authenticateJWT, async (req, res) => {
-    try {
-        const { limit = 50, offset = 0 } = req.query;
-        
-        // Mock data for now
-        const mockFiles = [
-            {
-                id: 'mock_1',
-                originalName: 'sample_depreciation.xlsx',
-                templateType: 'depreciation',
-                status: 'completed',
-                fileSize: 25600,
-                createdAt: new Date(Date.now() - 86400000), // 1 day ago
-                completedAt: new Date(Date.now() - 86300000),
-                transformations: 15,
-                changes: 42
-            },
-            {
-                id: 'mock_2',
-                originalName: 'revenue_data.xlsx',
-                templateType: 'discounts',
-                status: 'processing',
-                fileSize: 51200,
-                createdAt: new Date(Date.now() - 3600000), // 1 hour ago
-                transformations: 0,
-                changes: 0
-            }
-        ];
+router.get('/history', authenticateJWT, getFileHistory);
 
-        res.status(200).json({
-            success: true,
-            files: mockFiles.map(file => ({
-                id: file.id,
-                originalName: file.originalName,
-                templateType: file.templateType,
-                status: file.status,
-                fileSize: file.fileSize,
-                createdAt: file.createdAt,
-                completedAt: file.completedAt,
-                transformations: file.transformations || 0,
-                changes: file.changes || 0
-            })),
-            totalCount: mockFiles.length,
-            hasMore: false
-        });
-
-    } catch (error) {
-        global.logger.logError('Get file history error:', error);
-        res.status(500).json({
-            success: false,
-            error: 'FETCH_ERROR',
-            message: 'Failed to fetch file history'
-        });
-    }
-});
+/**
+ * @route   GET /api/files/template/:templateType
+ * @desc    Get files processed with specific template
+ * @access  Private
+ */
+router.get('/template/:templateType', authenticateJWT, getTemplateFiles);
 
 /**
  * @route   GET /api/files/status/:jobId
  * @desc    Get file processing status
  * @access  Private
  */
-router.get('/status/:jobId', authenticateJWT, async (req, res) => {
-    try {
-        const { jobId } = req.params;
-        
-        // Mock status data
-        const mockStatus = {
-            id: jobId,
-            status: 'completed',
-            progress: 100,
-            templateType: 'depreciation',
-            fileName: 'sample_file.xlsx',
-            createdAt: new Date(Date.now() - 300000), // 5 minutes ago
-            completedAt: new Date(),
-            result: {
-                transformations: 15,
-                changes: 42,
-                processedRows: 25,
-                warnings: 2
-            }
-        };
+router.get('/status/:jobId', authenticateJWT, getProcessingStatus);
 
-        res.status(200).json({
-            success: true,
-            job: mockStatus
-        });
-
-    } catch (error) {
-        global.logger.logError('Get processing status error:', error);
-        res.status(500).json({
-            success: false,
-            error: 'STATUS_ERROR',
-            message: 'Failed to get processing status'
-        });
-    }
-});
+/**
+ * @route   GET /api/files/:fileId
+ * @desc    Get file details
+ * @access  Private
+ */
+router.get('/:fileId', authenticateJWT, getFileDetails);
 
 /**
  * @route   GET /api/files/:fileId/download
  * @desc    Download processed file
  * @access  Private
  */
-router.get('/:fileId/download', authenticateJWT, async (req, res) => {
-    try {
-        const { fileId } = req.params;
-        const { type = 'processed' } = req.query;
-        
-        // For now, return a simple response
-        res.status(200).json({
-            success: false,
-            error: 'NOT_IMPLEMENTED',
-            message: 'File download not implemented yet - coming in next update'
-        });
+router.get('/:fileId/download', authenticateJWT, downloadFile);
 
-    } catch (error) {
-        global.logger.logError('Download file error:', error);
-        res.status(500).json({
+/**
+ * @route   DELETE /api/files/:fileId
+ * @desc    Delete file and cleanup
+ * @access  Private
+ */
+router.delete('/:fileId', authenticateJWT, deleteFile);
+
+/**
+ * @route   POST /api/files/retry/:jobId
+ * @desc    Retry failed processing
+ * @access  Private
+ */
+router.post('/retry/:jobId', authenticateJWT, retryProcessing);
+
+// Error handling middleware for multer
+router.use((err, req, res, next) => {
+    if (err instanceof multer.MulterError) {
+        if (err.code === 'LIMIT_FILE_SIZE') {
+            return res.status(400).json({
+                success: false,
+                error: 'FILE_TOO_LARGE',
+                message: 'File size exceeds 50MB limit'
+            });
+        }
+    }
+    if (err.message === 'Only Excel and CSV files are allowed') {
+        return res.status(400).json({
             success: false,
-            error: 'DOWNLOAD_ERROR',
-            message: 'Failed to download file'
+            error: 'INVALID_FILE_TYPE',
+            message: 'Only Excel (.xlsx, .xls) and CSV files are allowed'
         });
     }
+    next(err);
 });
 
 module.exports = router;

@@ -51,7 +51,7 @@
                         class="bg-atabai-violet text-white px-6 py-2 rounded-lg hover:bg-atabai-violet/90 transition-colors">
                         Choose File
                     </button>
-                    <p class="text-xs text-gray-400 mt-2">Supports .xlsx and .xls files up to 10MB</p>
+                    <p class="text-xs text-gray-400 mt-2">Supports .xlsx and .xls files up to 50MB</p>
                 </div>
 
                 <!-- Selected File Preview -->
@@ -63,6 +63,14 @@
                             <p class="text-sm text-gray-500">{{ formatFileSize(selectedFile.size) }}</p>
                         </div>
                     </div>
+
+                    <!-- Upload Progress -->
+                    <div v-if="isProcessing" class="w-full bg-gray-200 rounded-full h-2">
+                        <div class="bg-atabai-violet h-2 rounded-full transition-all duration-300"
+                            :style="{ width: uploadProgress + '%' }"></div>
+                    </div>
+                    <p v-if="isProcessing" class="text-sm text-gray-600">{{ uploadProgress }}% uploaded</p>
+
                     <div class="flex space-x-3 justify-center">
                         <button @click="processFile" :disabled="isProcessing"
                             class="bg-atabai-violet text-white px-6 py-2 rounded-lg hover:bg-atabai-violet/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
@@ -72,8 +80,8 @@
                                 Processing...
                             </span>
                         </button>
-                        <button @click="clearFile"
-                            class="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600 transition-colors">
+                        <button @click="clearFile" :disabled="isProcessing"
+                            class="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600 disabled:opacity-50 transition-colors">
                             Choose Different File
                         </button>
                     </div>
@@ -138,6 +146,7 @@ const selectedFile = ref(null)
 const isProcessing = ref(false)
 const isDragOver = ref(false)
 const uploadError = ref('')
+const uploadProgress = computed(() => filesStore.uploadProgress)
 
 // Get template from query params
 const templateId = computed(() => route.query.template)
@@ -233,9 +242,9 @@ function handleFileSelect(event) {
         return
     }
 
-    // Validate file size (10MB max)
-    if (file.size > 10 * 1024 * 1024) {
-        uploadError.value = 'File size must be less than 10MB'
+    // Validate file size (50MB max)
+    if (file.size > 50 * 1024 * 1024) {
+        uploadError.value = 'File size must be less than 50MB'
         return
     }
 
@@ -246,6 +255,8 @@ function handleFileSelect(event) {
 function clearFile() {
     selectedFile.value = null
     uploadError.value = ''
+    // Clear any previous upload progress
+    filesStore.uploadProgress = 0
 }
 
 function formatFileSize(bytes) {
@@ -263,17 +274,15 @@ async function processFile() {
         isProcessing.value = true
         uploadError.value = ''
 
-        // Create FormData
-        const formData = new FormData()
-        formData.append('file', selectedFile.value)
-        formData.append('template', templateId.value)
-
-        // Process file
-        const result = await filesStore.processFile(formData)
+        // Upload file using the correct method name and signature
+        const result = await filesStore.uploadFile(selectedFile.value, templateId.value, (progress) => {
+            // Progress is handled automatically by the store
+            console.log(`Upload progress: ${progress}%`)
+        })
 
         if (result && result.jobId) {
             // Redirect to processing status page
-            router.push(`/processing/${result.jobId}`)
+            router.push(`/app/processing/${result.jobId}`)
         }
 
     } catch (error) {

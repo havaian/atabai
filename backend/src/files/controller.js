@@ -158,6 +158,96 @@ async function getFileHistory(req, res) {
 }
 
 /**
+ * Get files processed with specific template
+ */
+async function getTemplateFiles(req, res) {
+    try {
+        const { templateType } = req.params;
+        const { limit = 20, offset = 0, status } = req.query;
+
+        // Validate template type
+        const validTemplates = ['depreciation', 'discounts', 'impairment'];
+        if (!validTemplates.includes(templateType)) {
+            return res.status(400).json({
+                success: false,
+                error: 'INVALID_TEMPLATE',
+                message: 'Invalid template type'
+            });
+        }
+
+        const query = {
+            userId: req.user._id,
+            templateType: templateType
+        };
+
+        if (status) {
+            query.status = status;
+        }
+
+        const files = await File.find(query)
+            .sort({ createdAt: -1 })
+            .limit(parseInt(limit))
+            .skip(parseInt(offset))
+            .lean();
+
+        const totalCount = await File.countDocuments(query);
+
+        // Get status summary
+        const statusCounts = await File.aggregate([
+            { $match: { userId: req.user._id, templateType: templateType } },
+            { $group: { _id: '$status', count: { $sum: 1 } } }
+        ]);
+
+        const statusSummary = {
+            total: totalCount,
+            completed: 0,
+            processing: 0,
+            failed: 0,
+            pending: 0
+        };
+
+        statusCounts.forEach(item => {
+            if (statusSummary.hasOwnProperty(item._id)) {
+                statusSummary[item._id] = item.count;
+            }
+        });
+
+        res.status(200).json({
+            success: true,
+            templateType,
+            files: files.map(file => ({
+                id: file._id.toString(),
+                originalName: file.originalName,
+                status: file.status,
+                fileSize: file.fileSize,
+                createdAt: file.createdAt,
+                completedAt: file.completedAt,
+                jobId: file.jobId,
+                transformations: file.result?.transformations || 0,
+                changes: file.result?.changes || 0,
+                processedFilePath: file.processedFilePath,
+                hasProcessedFile: !!file.processedFilePath
+            })),
+            statusSummary,
+            pagination: {
+                total: totalCount,
+                limit: parseInt(limit),
+                offset: parseInt(offset),
+                hasMore: offset + files.length < totalCount
+            }
+        });
+
+    } catch (error) {
+        global.logger.logError('Get template files error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'FETCH_ERROR',
+            message: 'Failed to fetch template files'
+        });
+    }
+}
+
+/**
  * Get processing status for a job
  */
 async function getProcessingStatus(req, res) {
@@ -181,14 +271,16 @@ async function getProcessingStatus(req, res) {
             success: true,
             job: {
                 id: job.jobId,
+                fileId: job.fileId?._id?.toString(),
+                fileName: job.fileId?.originalName,
+                templateType: job.templateType,
                 status: job.status,
                 progress: job.progress,
-                templateType: job.templateType,
-                fileName: job.fileId?.originalName || 'Unknown',
+                error: job.error,
+                result: job.result,
                 createdAt: job.createdAt,
                 completedAt: job.completedAt,
-                error: job.error,
-                result: job.result
+                retryCount: job.retryCount || 0
             }
         });
 
@@ -196,14 +288,14 @@ async function getProcessingStatus(req, res) {
         global.logger.logError('Get processing status error:', error);
         res.status(500).json({
             success: false,
-            error: 'STATUS_ERROR',
+            error: 'FETCH_ERROR',
             message: 'Failed to get processing status'
         });
     }
 }
 
 /**
- * Get file details
+ * Get file details with before/after data
  */
 async function getFileDetails(req, res) {
     try {
@@ -212,7 +304,7 @@ async function getFileDetails(req, res) {
         const file = await File.findOne({
             _id: fileId,
             userId: req.user._id
-        });
+        }).lean();
 
         if (!file) {
             return res.status(404).json({
@@ -220,6 +312,32 @@ async function getFileDetails(req, res) {
                 error: 'FILE_NOT_FOUND',
                 message: 'File not found'
             });
+        }
+
+        // Prepare response with before/after data for completed files
+        let beforeData = null;
+        let afterData = null;
+
+        if (file.status === 'completed' && file.processedFilePath) {
+            try {
+                // Read original file for before data
+                const originalWorkbook = new ExcelJS.Workbook();
+                await originalWorkbook.xlsx.readFile(file.filePath);
+
+                // Get first worksheet data (limited to first 20 rows for preview)
+                const originalWs = originalWorkbook.worksheets[0];
+                beforeData = extractWorksheetPreview(originalWs);
+
+                // Read processed file for after data
+                const processedWorkbook = new ExcelJS.Workbook();
+                await processedWorkbook.xlsx.readFile(file.processedFilePath);
+
+                const processedWs = processedWorkbook.worksheets[0];
+                afterData = extractWorksheetPreview(processedWs);
+
+            } catch (fileError) {
+                global.logger.logWarn(`Failed to read file data for preview: ${fileError.message}`);
+            }
         }
 
         res.status(200).json({
@@ -232,8 +350,13 @@ async function getFileDetails(req, res) {
                 fileSize: file.fileSize,
                 createdAt: file.createdAt,
                 completedAt: file.completedAt,
-                result: file.result,
-                jobId: file.jobId
+                jobId: file.jobId,
+                transformations: file.result?.transformations || 0,
+                changes: file.result?.changes || 0,
+                warnings: file.result?.warnings || [],
+                hasProcessedFile: !!file.processedFilePath,
+                beforeData,
+                afterData
             }
         });
 
@@ -253,7 +376,7 @@ async function getFileDetails(req, res) {
 async function downloadFile(req, res) {
     try {
         const { fileId } = req.params;
-        const { type = 'processed' } = req.query;
+        const { type = 'processed' } = req.query; // 'original' or 'processed'
 
         const file = await File.findOne({
             _id: fileId,
@@ -268,39 +391,46 @@ async function downloadFile(req, res) {
             });
         }
 
-        let filePath;
-        let filename;
+        let downloadPath;
+        let downloadName;
 
         if (type === 'original') {
-            filePath = file.filePath;
-            filename = file.originalName;
+            downloadPath = file.filePath;
+            downloadName = file.originalName;
         } else {
             if (!file.processedFilePath) {
                 return res.status(400).json({
                     success: false,
-                    error: 'NOT_PROCESSED',
-                    message: 'File has not been processed yet'
+                    error: 'NO_PROCESSED_FILE',
+                    message: 'Processed file not available'
                 });
             }
-            filePath = file.processedFilePath;
-            filename = `${path.parse(file.originalName).name}_ifrs${path.extname(file.originalName)}`;
+            downloadPath = file.processedFilePath;
+            const ext = path.extname(file.originalName);
+            const name = path.basename(file.originalName, ext);
+            downloadName = `${name}_ifrs${ext}`;
         }
 
         // Check if file exists
         try {
-            await fs.access(filePath);
-        } catch (error) {
+            await fs.access(downloadPath);
+        } catch (err) {
             return res.status(404).json({
                 success: false,
-                error: 'FILE_MISSING',
-                message: 'File not found on disk'
+                error: 'FILE_NOT_ACCESSIBLE',
+                message: 'File not found on server'
             });
         }
 
-        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-        res.setHeader('Content-Type', file.mimeType || 'application/octet-stream');
+        // Set download headers
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', `attachment; filename="${downloadName}"`);
 
-        res.sendFile(path.resolve(filePath));
+        // Stream file
+        const fileStream = require('fs').createReadStream(downloadPath);
+        fileStream.pipe(res);
+
+        global.logger.logInfo(`File downloaded: ${downloadName} by ${req.user.email}`);
 
     } catch (error) {
         global.logger.logError('Download file error:', error);
@@ -313,7 +443,7 @@ async function downloadFile(req, res) {
 }
 
 /**
- * Delete file
+ * Delete file and cleanup
  */
 async function deleteFile(req, res) {
     try {
@@ -332,11 +462,16 @@ async function deleteFile(req, res) {
             });
         }
 
-        // Delete files from disk
-        const filesToDelete = [file.filePath, file.processedFilePath].filter(Boolean);
-        await Promise.all(filesToDelete.map(async (filePath) => {
+        // Delete physical files
+        const filesToDelete = [file.filePath];
+        if (file.processedFilePath) {
+            filesToDelete.push(file.processedFilePath);
+        }
+
+        await Promise.allSettled(filesToDelete.map(async (filePath) => {
             try {
                 await fs.unlink(filePath);
+                global.logger.logInfo(`Deleted file: ${filePath}`);
             } catch (error) {
                 global.logger.logWarn(`Failed to delete file: ${filePath}`, error);
             }
@@ -500,9 +635,42 @@ async function processFileAsync(fileRecord, processingJob) {
     }
 }
 
+/**
+ * Helper function to extract worksheet preview data (first 20 rows)
+ */
+function extractWorksheetPreview(worksheet) {
+    const preview = {
+        headers: [],
+        rows: [],
+        totalRows: worksheet.rowCount
+    };
+
+    // Get headers from first row
+    const headerRow = worksheet.getRow(1);
+    headerRow.eachCell((cell, colNumber) => {
+        preview.headers[colNumber - 1] = cell.value || `Column ${colNumber}`;
+    });
+
+    // Get up to 20 rows of data
+    const maxRows = Math.min(20, worksheet.rowCount);
+    for (let rowNum = 2; rowNum <= maxRows; rowNum++) {
+        const row = worksheet.getRow(rowNum);
+        const rowData = [];
+
+        row.eachCell((cell, colNumber) => {
+            rowData[colNumber - 1] = cell.value;
+        });
+
+        preview.rows.push(rowData);
+    }
+
+    return preview;
+}
+
 module.exports = {
     uploadAndProcess,
     getFileHistory,
+    getTemplateFiles,
     getProcessingStatus,
     getFileDetails,
     downloadFile,

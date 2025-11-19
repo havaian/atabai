@@ -6,6 +6,7 @@ export const useFilesStore = defineStore('files', () => {
     // State
     const files = ref([])
     const recentFiles = ref([])
+    const templateFiles = ref([])
     const currentFile = ref(null)
     const processingJobs = ref([])
     const isLoading = ref(false)
@@ -31,9 +32,35 @@ export const useFilesStore = defineStore('files', () => {
         } catch (err) {
             error.value = err.response?.data?.message || 'Failed to fetch recent files'
             console.error('Fetch recent files error:', err)
-
-            // Mock data for development
             recentFiles.value = []
+            throw err
+        } finally {
+            isLoading.value = false
+        }
+    }
+
+    async function fetchTemplateFiles(templateType, options = {}) {
+        try {
+            isLoading.value = true
+            error.value = null
+
+            const response = await apiClient.get(`/files/template/${templateType}`, {
+                params: options
+            })
+
+            templateFiles.value = response.data.files || []
+
+            return {
+                files: response.data.files || [],
+                statusSummary: response.data.statusSummary || {},
+                pagination: response.data.pagination || {},
+                templateType: response.data.templateType
+            }
+        } catch (err) {
+            error.value = err.response?.data?.message || 'Failed to fetch template files'
+            console.error('Fetch template files error:', err)
+            templateFiles.value = []
+            throw err
         } finally {
             isLoading.value = false
         }
@@ -44,22 +71,21 @@ export const useFilesStore = defineStore('files', () => {
             isLoading.value = true
             error.value = null
 
-            const response = await apiClient.get('/files', { params: options })
+            const response = await apiClient.get('/files/history', { params: options })
             files.value = response.data.files || []
 
             return files.value
         } catch (err) {
             error.value = err.response?.data?.message || 'Failed to fetch files'
             console.error('Fetch files error:', err)
-
-            // Mock data for development
             files.value = []
+            throw err
         } finally {
             isLoading.value = false
         }
     }
 
-    async function getFile(fileId) {
+    async function getFileDetails(fileId) {
         try {
             isLoading.value = true
             error.value = null
@@ -67,52 +93,53 @@ export const useFilesStore = defineStore('files', () => {
             const response = await apiClient.get(`/files/${fileId}`)
             currentFile.value = response.data.file
 
-            return currentFile.value
+            return response.data.file
         } catch (err) {
             error.value = err.response?.data?.message || 'Failed to fetch file details'
-            console.error('Get file error:', err)
-            return null
+            console.error('Get file details error:', err)
+            throw err
         } finally {
             isLoading.value = false
         }
     }
 
-    async function processFile(formData) {
+    async function uploadFile(file, templateType, onProgress) {
         try {
             isLoading.value = true
-            error.value = null
             uploadProgress.value = 0
+            error.value = null
 
-            // Upload and process file in one step
+            const formData = new FormData()
+            formData.append('file', file)
+            formData.append('template', templateType)
+
             const response = await apiClient.post('/files/upload', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 },
                 onUploadProgress: (progressEvent) => {
-                    uploadProgress.value = Math.round(
-                        (progressEvent.loaded * 100) / progressEvent.total
-                    )
+                    const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total)
+                    uploadProgress.value = percentCompleted
+                    if (onProgress) onProgress(percentCompleted)
                 }
             })
 
-            const result = response.data
-
-            // If we get a job ID, add it to processing jobs
-            if (result.jobId) {
-                const job = {
-                    id: result.jobId,
-                    status: 'processing',
-                    templateId: formData.get('template'),
-                    fileName: formData.get('file')?.name || 'Unknown',
-                    createdAt: new Date().toISOString()
-                }
-                processingJobs.value.unshift(job)
+            // Add to processing jobs
+            if (response.data.jobId) {
+                processingJobs.value.push({
+                    id: response.data.jobId,
+                    status: 'pending',
+                    progress: 0,
+                    templateType: templateType,
+                    fileName: file.name,
+                    fileId: response.data.fileId
+                })
             }
 
-            return result
+            return response.data
         } catch (err) {
-            error.value = err.response?.data?.message || 'Failed to process file'
-            console.error('Process file error:', err)
+            error.value = err.response?.data?.message || 'Failed to upload file'
+            console.error('Upload file error:', err)
             throw err
         } finally {
             isLoading.value = false
@@ -135,19 +162,7 @@ export const useFilesStore = defineStore('files', () => {
         } catch (err) {
             error.value = err.response?.data?.message || 'Failed to get processing status'
             console.error('Get processing status error:', err)
-
-            // Return mock status for development
-            return {
-                id: jobId,
-                status: 'completed',
-                progress: 100,
-                result: {
-                    originalFile: 'sample.xlsx',
-                    processedFile: 'sample_ifrs.xlsx',
-                    changes: 42,
-                    transformations: 15
-                }
-            }
+            throw err
         }
     }
 
@@ -167,9 +182,9 @@ export const useFilesStore = defineStore('files', () => {
             const contentDisposition = response.headers['content-disposition']
             let filename = 'download.xlsx'
             if (contentDisposition) {
-                const filenameMatch = contentDisposition.match(/filename="?(.+)"?/)
+                const filenameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/)
                 if (filenameMatch) {
-                    filename = filenameMatch[1]
+                    filename = filenameMatch[1].replace(/['"]/g, '')
                 }
             }
 
@@ -197,6 +212,7 @@ export const useFilesStore = defineStore('files', () => {
             // Remove from local state
             files.value = files.value.filter(file => file.id !== fileId)
             recentFiles.value = recentFiles.value.filter(file => file.id !== fileId)
+            templateFiles.value = templateFiles.value.filter(file => file.id !== fileId)
 
             if (currentFile.value?.id === fileId) {
                 currentFile.value = null
@@ -214,9 +230,6 @@ export const useFilesStore = defineStore('files', () => {
 
     async function retryProcessing(jobId) {
         try {
-            isLoading.value = true
-            error.value = null
-
             const response = await apiClient.post(`/files/retry/${jobId}`)
             const job = response.data.job
 
@@ -224,8 +237,6 @@ export const useFilesStore = defineStore('files', () => {
             const jobIndex = processingJobs.value.findIndex(j => j.id === jobId)
             if (jobIndex !== -1) {
                 processingJobs.value[jobIndex] = job
-            } else {
-                processingJobs.value.unshift(job)
             }
 
             return job
@@ -233,33 +244,25 @@ export const useFilesStore = defineStore('files', () => {
             error.value = err.response?.data?.message || 'Failed to retry processing'
             console.error('Retry processing error:', err)
             throw err
-        } finally {
-            isLoading.value = false
         }
     }
 
-    function clearError() {
+    // Clear store state
+    function clearState() {
+        files.value = []
+        recentFiles.value = []
+        templateFiles.value = []
+        currentFile.value = null
+        processingJobs.value = []
         error.value = null
-    }
-
-    function addMockFile(file) {
-        // Helper method for development
-        const mockFile = {
-            id: `mock_${Date.now()}`,
-            name: file.name,
-            size: file.size,
-            type: file.type,
-            status: 'uploaded',
-            createdAt: new Date().toISOString()
-        }
-        files.value.unshift(mockFile)
-        return mockFile
+        uploadProgress.value = 0
     }
 
     return {
         // State
         files,
         recentFiles,
+        templateFiles,
         currentFile,
         processingJobs,
         isLoading,
@@ -274,14 +277,14 @@ export const useFilesStore = defineStore('files', () => {
 
         // Actions
         fetchRecentFiles,
+        fetchTemplateFiles,
         fetchFiles,
-        getFile,
-        processFile,
+        getFileDetails,
+        uploadFile,
         getProcessingStatus,
         downloadFile,
         deleteFile,
         retryProcessing,
-        clearError,
-        addMockFile
+        clearState
     }
 })
