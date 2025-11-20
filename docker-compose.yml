@@ -48,7 +48,6 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-      target: production
     container_name: ${PROJECT_NAME:-atabai}-backend
     restart: unless-stopped
     env_file: 
