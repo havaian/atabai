@@ -54,7 +54,7 @@ services:
     env_file: 
       - .env
     volumes:
-      - ./uploads:/app/uploads
+      - ./uploads:/app/uploads:rw,Z
       - ./logs:/app/logs
     ports:
       - "${BACKEND_EXPOSE:-127.0.0.1:3000}:${BACKEND_PORT}"
