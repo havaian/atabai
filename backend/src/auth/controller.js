@@ -51,6 +51,7 @@ class AuthController {
             });
         }
     }
+    
     /**
      * Handle Google OAuth callback
      * POST /api/auth/google/callback

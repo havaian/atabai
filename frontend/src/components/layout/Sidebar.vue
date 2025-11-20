@@ -494,7 +494,7 @@ function selectLanguage(langCode) {
 
 async function handleSignOut() {
     try {
-        await authStore.signOut()
+        await authStore.logout()
         router.push('/login')
     } catch (error) {
         console.error('Sign out error:', error)
