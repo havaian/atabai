@@ -187,6 +187,48 @@
                     </div>
                 </div>
 
+                <!-- Pagination Controls for Side-by-Side View -->
+                <div v-if="activeView === 'side-by-side' && maxRows > 0"
+                    class="flex items-center justify-between bg-white rounded-lg border border-gray-200 px-6 py-4">
+                    <div class="flex items-center space-x-4">
+                        <span class="text-sm text-gray-700">{{ $t('results.pagination.rowsPerPage') }}</span>
+                        <select v-model="rowsPerPage" @change="resetToFirstPage"
+                            class="border border-gray-300 rounded-md px-3 py-1 text-sm">
+                            <option :value="10">10</option>
+                            <option :value="25">25</option>
+                            <option :value="50">50</option>
+                            <option :value="100">100</option>
+                        </select>
+                    </div>
+
+                    <div class="flex items-center space-x-4">
+                        <span class="text-sm text-gray-700">
+                            {{ $t('results.pagination.showing', {
+                                start: startRow,
+                                end: endRow,
+                                total: maxRows
+                            }) }}
+                        </span>
+
+                        <div class="flex space-x-2">
+                            <button @click="previousPage" :disabled="currentPage === 1"
+                                class="px-3 py-1 border border-gray-300 rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50">
+                                {{ $t('results.pagination.previous') }}
+                            </button>
+
+                            <span class="px-3 py-1 text-sm text-gray-700">
+                                {{ $t('results.pagination.page') }} {{ currentPage }} {{ $t('results.pagination.of') }}
+                                {{ totalPages }}
+                            </span>
+
+                            <button @click="nextPage" :disabled="currentPage === totalPages"
+                                class="px-3 py-1 border border-gray-300 rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50">
+                                {{ $t('results.pagination.next') }}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Data Tables -->
                 <div class="grid gap-8" :class="{
                     'grid-cols-1': activeView !== 'side-by-side',
@@ -199,9 +241,10 @@
                             <h3 class="text-lg font-medium text-gray-900">{{ $t('results.comparison.beforeData') }}</h3>
                             <p class="text-sm text-gray-500">{{ $t('results.comparison.originalFormat') }}</p>
                         </div>
-                        <div class="overflow-x-auto">
+                        <div ref="beforeTableContainer" class="overflow-x-auto max-h-96 overflow-y-auto"
+                            @scroll="onScrollBefore">
                             <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
+                                <thead class="bg-gray-50 sticky top-0">
                                     <tr>
                                         <th v-for="(header, index) in beforeData.headers"
                                             :key="`before-header-${index}`"
@@ -211,10 +254,14 @@
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
-                                    <tr v-for="(row, rowIndex) in beforeData.rows.slice(0, 10)"
-                                        :key="`before-row-${rowIndex}`">
+                                    <tr v-for="(row, rowIndex) in paginatedBeforeRows"
+                                        :key="`before-row-${startRowIndex + rowIndex}`"
+                                        :data-row-index="startRowIndex + rowIndex"
+                                        @mouseenter="highlightRow(startRowIndex + rowIndex)"
+                                        @mouseleave="unhighlightRow"
+                                        :class="{ 'bg-blue-50': highlightedRowIndex === startRowIndex + rowIndex }">
                                         <td v-for="(cell, cellIndex) in row"
-                                            :key="`before-cell-${rowIndex}-${cellIndex}`"
+                                            :key="`before-cell-${startRowIndex + rowIndex}-${cellIndex}`"
                                             class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                             {{ formatCellValue(cell) }}
                                         </td>
@@ -222,11 +269,13 @@
                                 </tbody>
                             </table>
                         </div>
-                        <div v-if="beforeData.totalRows > 10" class="px-6 py-3 bg-gray-50 border-t border-gray-200">
+                        <div v-if="activeView === 'before' && beforeData.totalRows > 10"
+                            class="px-6 py-3 bg-gray-50 border-t border-gray-200">
                             <p class="text-sm text-gray-500">
                                 {{ $t('results.comparison.showingRows', {
                                     shown: Math.min(10, beforeData.rows.length),
-                                total: beforeData.totalRows }) }}
+                                    total: beforeData.totalRows
+                                }) }}
                             </p>
                         </div>
                     </div>
@@ -238,9 +287,10 @@
                             <h3 class="text-lg font-medium text-gray-900">{{ $t('results.comparison.afterData') }}</h3>
                             <p class="text-sm text-gray-500">{{ $t('results.comparison.ifrsFormat') }}</p>
                         </div>
-                        <div class="overflow-x-auto">
+                        <div ref="afterTableContainer" class="overflow-x-auto max-h-96 overflow-y-auto"
+                            @scroll="onScrollAfter">
                             <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
+                                <thead class="bg-gray-50 sticky top-0">
                                     <tr>
                                         <th v-for="(header, index) in afterData.headers" :key="`after-header-${index}`"
                                             :class="[
@@ -252,10 +302,14 @@
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
-                                    <tr v-for="(row, rowIndex) in afterData.rows.slice(0, 10)"
-                                        :key="`after-row-${rowIndex}`">
+                                    <tr v-for="(row, rowIndex) in paginatedAfterRows"
+                                        :key="`after-row-${startRowIndex + rowIndex}`"
+                                        :data-row-index="startRowIndex + rowIndex"
+                                        @mouseenter="highlightRow(startRowIndex + rowIndex)"
+                                        @mouseleave="unhighlightRow"
+                                        :class="{ 'bg-blue-50': highlightedRowIndex === startRowIndex + rowIndex }">
                                         <td v-for="(cell, cellIndex) in row"
-                                            :key="`after-cell-${rowIndex}-${cellIndex}`" :class="[
+                                            :key="`after-cell-${startRowIndex + rowIndex}-${cellIndex}`" :class="[
                                                 'px-6 py-4 whitespace-nowrap text-sm',
                                                 isIFRSColumn(afterData.headers[cellIndex])
                                                     ? 'text-atabai-violet bg-purple-50 font-medium'
@@ -267,11 +321,13 @@
                                 </tbody>
                             </table>
                         </div>
-                        <div v-if="afterData.totalRows > 10" class="px-6 py-3 bg-gray-50 border-t border-gray-200">
+                        <div v-if="activeView === 'after' && afterData.totalRows > 10"
+                            class="px-6 py-3 bg-gray-50 border-t border-gray-200">
                             <p class="text-sm text-gray-500">
                                 {{ $t('results.comparison.showingRows', {
                                     shown: Math.min(10, afterData.rows.length),
-                                total: afterData.totalRows }) }}
+                                    total: afterData.totalRows
+                                }) }}
                             </p>
                         </div>
                     </div>
@@ -296,7 +352,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useFilesStore } from '@/stores/files'
@@ -327,8 +383,47 @@ const beforeData = ref(null)
 const afterData = ref(null)
 const activeView = ref('after')
 
+// Pagination state
+const currentPage = ref(1)
+const rowsPerPage = ref(25)
+const highlightedRowIndex = ref(null)
+
+// Scroll synchronization state
+const isScrollingSyncBefore = ref(false)
+const isScrollingSyncAfter = ref(false)
+const beforeTableContainer = ref(null)
+const afterTableContainer = ref(null)
+
 // Get file ID from route
 const fileId = computed(() => route.params.fileId)
+
+// Pagination computed properties
+const maxRows = computed(() => {
+    if (!beforeData.value || !afterData.value) return 0
+    return Math.max(beforeData.value.rows?.length || 0, afterData.value.rows?.length || 0)
+})
+
+const totalPages = computed(() => Math.ceil(maxRows.value / rowsPerPage.value))
+
+const startRowIndex = computed(() => (currentPage.value - 1) * rowsPerPage.value)
+
+const startRow = computed(() => startRowIndex.value + 1)
+
+const endRow = computed(() => Math.min(startRowIndex.value + rowsPerPage.value, maxRows.value))
+
+const paginatedBeforeRows = computed(() => {
+    if (!beforeData.value?.rows) return []
+    const start = startRowIndex.value
+    const end = start + rowsPerPage.value
+    return beforeData.value.rows.slice(start, end)
+})
+
+const paginatedAfterRows = computed(() => {
+    if (!afterData.value?.rows) return []
+    const start = startRowIndex.value
+    const end = start + rowsPerPage.value
+    return afterData.value.rows.slice(start, end)
+})
 
 // Methods
 function goBack() {
@@ -411,6 +506,61 @@ function getComplianceNotes(templateType) {
     return notes[templateType] || []
 }
 
+// Pagination methods
+function nextPage() {
+    if (currentPage.value < totalPages.value) {
+        currentPage.value++
+    }
+}
+
+function previousPage() {
+    if (currentPage.value > 1) {
+        currentPage.value--
+    }
+}
+
+function resetToFirstPage() {
+    currentPage.value = 1
+}
+
+// Row highlighting methods
+function highlightRow(rowIndex) {
+    highlightedRowIndex.value = rowIndex
+}
+
+function unhighlightRow() {
+    highlightedRowIndex.value = null
+}
+
+// Scroll synchronization methods
+function onScrollBefore(event) {
+    if (isScrollingSyncBefore.value || activeView.value !== 'side-by-side') return
+
+    isScrollingSyncAfter.value = true
+    if (afterTableContainer.value) {
+        afterTableContainer.value.scrollTop = event.target.scrollTop
+        afterTableContainer.value.scrollLeft = event.target.scrollLeft
+    }
+
+    nextTick(() => {
+        isScrollingSyncAfter.value = false
+    })
+}
+
+function onScrollAfter(event) {
+    if (isScrollingSyncAfter.value || activeView.value !== 'side-by-side') return
+
+    isScrollingSyncBefore.value = true
+    if (beforeTableContainer.value) {
+        beforeTableContainer.value.scrollTop = event.target.scrollTop
+        beforeTableContainer.value.scrollLeft = event.target.scrollLeft
+    }
+
+    nextTick(() => {
+        isScrollingSyncBefore.value = false
+    })
+}
+
 async function fetchFileData() {
     try {
         isLoading.value = true
@@ -419,7 +569,7 @@ async function fetchFileData() {
         console.log('Fetching file details for ID:', fileId.value) // Debug
         const response = await filesStore.getFileDetails(fileId.value)
         console.log('API response:', response) // Debug
-        
+
         if (response.success) {
             fileData.value = response.file
             beforeData.value = response.file.beforeData  // Fixed
