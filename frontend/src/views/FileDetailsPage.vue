@@ -192,13 +192,9 @@
                     class="flex items-center justify-between bg-white rounded-lg border border-gray-200 px-6 py-4">
                     <div class="flex items-center space-x-4">
                         <span class="text-sm text-gray-700">{{ $t('results.pagination.rowsPerPage') }}</span>
-                        <select v-model="rowsPerPage" @change="resetToFirstPage"
-                            class="border border-gray-300 rounded-md px-3 py-1 text-sm">
-                            <option :value="10">10</option>
-                            <option :value="25">25</option>
-                            <option :value="50">50</option>
-                            <option :value="100">100</option>
-                        </select>
+                        <div class="w-24">
+                            <Select v-model="rowsPerPage" :options="rowsPerPageOptions" @change="resetToFirstPage" />
+                        </div>
                     </div>
 
                     <div class="flex items-center space-x-4">
@@ -357,6 +353,9 @@ import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useFilesStore } from '@/stores/files'
 
+// UI Components
+import Select from '@/components/ui/Select.vue'
+
 // Icons
 import {
     ArrowLeftIcon,
@@ -410,6 +409,13 @@ const startRowIndex = computed(() => (currentPage.value - 1) * rowsPerPage.value
 const startRow = computed(() => startRowIndex.value + 1)
 
 const endRow = computed(() => Math.min(startRowIndex.value + rowsPerPage.value, maxRows.value))
+
+const rowsPerPageOptions = computed(() => [
+    { value: 10, label: '10' },
+    { value: 25, label: '25' },
+    { value: 50, label: '50' },
+    { value: 100, label: '100' }
+])
 
 const paginatedBeforeRows = computed(() => {
     if (!beforeData.value?.rows) return []

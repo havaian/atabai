@@ -476,7 +476,15 @@
       "title": "Processing Results",
       "transformations": "Transformations",
       "changes": "Changes",
-      "rows": "Processed Rows"
+      "rows": "Processed Rows",
+      "pagination": {
+        "rowsPerPage": "Rows per page",
+        "showing": "Showing {start}-{end} of {total} rows", 
+        "previous": "Previous",
+        "next": "Next",
+        "page": "Page", 
+        "of": "of"
+      }
     },
     "actions": {
       "download": "Download Result",
