@@ -476,15 +476,7 @@
       "title": "Processing Results",
       "transformations": "Transformations",
       "changes": "Changes",
-      "rows": "Processed Rows",
-      "pagination": {
-        "rowsPerPage": "Rows per page",
-        "showing": "Showing {start}-{end} of {total} rows", 
-        "previous": "Previous",
-        "next": "Next",
-        "page": "Page", 
-        "of": "of"
-      }
+      "rows": "Processed Rows"
     },
     "actions": {
       "download": "Download Result",
@@ -571,6 +563,14 @@
         "3": "Impairment loss is recognized when carrying amount exceeds recoverable amount",
         "4": "Cash generating units (CGUs) are identified for assets that do not generate independent cash flows"
       }
+    },
+    "pagination": {
+      "rowsPerPage": "Rows per page",
+      "showing": "Showing {start}-{end} of {total} rows", 
+      "previous": "Previous",
+      "next": "Next",
+      "page": "Page", 
+      "of": "of"
     }
   },
   "history": {

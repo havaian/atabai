@@ -439,15 +439,7 @@
       "title": "Qayta ishlash natijalari",
       "transformations": "Transformatsiyalar",
       "changes": "O'zgarishlar",
-      "rows": "Qayta ishlangan qatorlar",
-      "pagination": {
-        "rowsPerPage": "Sahifadagi qatorlar",
-        "showing": "{start}-{end} dan {total} ko'rsatilmoqda",
-        "previous": "Oldingi",
-        "next": "Keyingi", 
-        "page": "Sahifa",
-        "of": "dan"
-      }
+      "rows": "Qayta ishlangan qatorlar"
     },
     "actions": {
       "download": "Natijani yuklab olish",
@@ -534,6 +526,14 @@
         "3": "Hisobiy qiymat qoplanuvchi summani oshirganda qadrsizlanish zararini tan olish",
         "4": "Mustaqil naqd oqimlarini yaratmaydigan aktivlar uchun naqd yaratuvchi birliklar (NYB) aniqlanadi"
       }
+    },
+    "pagination": {
+      "rowsPerPage": "Sahifadagi qatorlar",
+      "showing": "{start}-{end} dan {total} ko'rsatilmoqda",
+      "previous": "Oldingi",
+      "next": "Keyingi", 
+      "page": "Sahifa",
+      "of": "dan"
     }
   },
   "history": {
