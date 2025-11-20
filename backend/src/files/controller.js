@@ -45,11 +45,11 @@ async function uploadAndProcess(req, res) {
         // Generate job ID
         const jobId = crypto.randomUUID();
 
-        // Create file record
+        // Create file record - store just filename
         const fileRecord = new File({
             originalName: req.file.originalname,
             fileName: req.file.filename,
-            filePath: req.file.path,
+            filePath: req.file.filename,
             fileSize: req.file.size,
             mimeType: req.file.mimetype,
             templateType: template,
@@ -93,9 +93,9 @@ async function uploadAndProcess(req, res) {
         global.logger.logError('Upload and process error:', error);
 
         // Clean up uploaded file if it exists
-        if (req.file?.path) {
+        if (req.file?.filename) {
             try {
-                await fs.unlink(req.file.path);
+                await fs.unlink(`/uploads/${req.file.filename}`);
             } catch (unlinkError) {
                 global.logger.logError('Failed to clean up uploaded file:', unlinkError);
             }
@@ -320,17 +320,17 @@ async function getFileDetails(req, res) {
 
         if (file.status === 'completed' && file.processedFilePath) {
             try {
-                // Read original file for before data
+                // Read original file
                 const originalWorkbook = new ExcelJS.Workbook();
-                await originalWorkbook.xlsx.readFile(file.filePath);
+                await originalWorkbook.xlsx.readFile(`/uploads/${file.filePath}`);
 
                 // Get first worksheet data (limited to first 20 rows for preview)
                 const originalWs = originalWorkbook.worksheets[0];
                 beforeData = extractWorksheetPreview(originalWs);
 
-                // Read processed file for after data
+                // Read processed file
                 const processedWorkbook = new ExcelJS.Workbook();
-                await processedWorkbook.xlsx.readFile(file.processedFilePath);
+                await processedWorkbook.xlsx.readFile(`/uploads/${file.processedFilePath}`);
 
                 const processedWs = processedWorkbook.worksheets[0];
                 afterData = extractWorksheetPreview(processedWs);
@@ -395,7 +395,7 @@ async function downloadFile(req, res) {
         let downloadName;
 
         if (type === 'original') {
-            downloadPath = file.filePath;
+            downloadPath = `/uploads/${file.filePath}`;
             downloadName = file.originalName;
         } else {
             if (!file.processedFilePath) {
@@ -405,7 +405,7 @@ async function downloadFile(req, res) {
                     message: 'Processed file not available'
                 });
             }
-            downloadPath = file.processedFilePath;
+            downloadPath = `/uploads/${file.processedFilePath}`;
             const ext = path.extname(file.originalName);
             const name = path.basename(file.originalName, ext);
             downloadName = `${name}_ifrs${ext}`;
@@ -463,9 +463,9 @@ async function deleteFile(req, res) {
         }
 
         // Delete physical files
-        const filesToDelete = [file.filePath];
+        const filesToDelete = [`/uploads/${file.filePath}`];
         if (file.processedFilePath) {
-            filesToDelete.push(file.processedFilePath);
+            filesToDelete.push(`/uploads/${file.processedFilePath}`);
         }
 
         await Promise.allSettled(filesToDelete.map(async (filePath) => {
@@ -571,7 +571,7 @@ async function processFileAsync(fileRecord, processingJob) {
 
         // Read Excel file
         const workbook = new ExcelJS.Workbook();
-        await workbook.xlsx.readFile(fileRecord.filePath);
+        await workbook.xlsx.readFile(`/uploads/${fileRecord.filePath}`);
 
         processingJob.progress = 30;
         await processingJob.save();
@@ -597,16 +597,15 @@ async function processFileAsync(fileRecord, processingJob) {
 
         // Save processed file
         const processedFilename = `${path.parse(fileRecord.fileName).name}_ifrs${path.extname(fileRecord.fileName)}`;
-        const processedFilePath = path.join(path.dirname(fileRecord.filePath), processedFilename);
-
-        await result.workbook.xlsx.writeFile(processedFilePath);
+        
+        await result.workbook.xlsx.writeFile(`/uploads/${processedFilename}`);
 
         processingJob.progress = 90;
         await processingJob.save();
 
-        // Update file record
+        // Update file record - store just filename
         fileRecord.status = 'completed';
-        fileRecord.processedFilePath = processedFilePath;
+        fileRecord.processedFilePath = processedFilename;
         fileRecord.result = result.summary;
         fileRecord.completedAt = new Date();
         await fileRecord.save();
