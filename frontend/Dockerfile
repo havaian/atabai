@@ -16,6 +16,18 @@ RUN npm ci && npm cache clean --force
 # Copy source code
 COPY . .
 
+# Define build arguments
+ARG VITE_API_BASE_URL
+ARG VITE_APP_TITLE
+ARG VITE_APP_DESCRIPTION
+ARG VITE_GOOGLE_CLIENT_ID
+
+# Set environment variables from build args
+ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
+ENV VITE_APP_TITLE=$VITE_APP_TITLE
+ENV VITE_APP_DESCRIPTION=$VITE_APP_DESCRIPTION
+ENV VITE_GOOGLE_CLIENT_ID=$VITE_GOOGLE_CLIENT_ID
+
 # Build the application
 RUN npm run build
 
