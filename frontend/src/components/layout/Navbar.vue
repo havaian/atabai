@@ -182,7 +182,6 @@ import { useI18n } from 'vue-i18n'
 import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
 import LogoComponent from '@/components/Logo.vue'
 import GoogleIcon from '@/components/icons/GoogleIcon.vue'
-import Flags from '@/components/icons/Flags.vue'
 import {
     ChevronDownIcon,
     Bars3Icon,

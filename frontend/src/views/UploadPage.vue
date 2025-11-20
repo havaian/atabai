@@ -94,6 +94,94 @@
             </div>
         </div>
 
+        <!-- Previously Processed Files for this Template -->
+        <div v-if="templateId" class="bg-white border border-gray-200 rounded-xl p-6 mb-8">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h2 class="text-xl font-semibold text-gray-900">Recent {{ currentTemplate?.name }} Files</h2>
+                    <p class="text-sm text-gray-500 mt-1">Your recently processed files for this template</p>
+                </div>
+                <button @click="viewAllTemplateFiles"
+                    class="text-sm text-atabai-violet hover:text-atabai-violet/80 transition-colors">
+                    View All →
+                </button>
+            </div>
+
+            <!-- Loading State -->
+            <div v-if="templateFilesLoading" class="flex items-center justify-center py-8">
+                <div class="text-center">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-atabai-violet mx-auto"></div>
+                    <p class="mt-2 text-sm text-gray-500">Loading recent files...</p>
+                </div>
+            </div>
+
+            <!-- Empty State -->
+            <div v-else-if="recentTemplateFiles.length === 0" class="text-center py-8">
+                <DocumentIcon class="h-12 w-12 text-gray-400 mx-auto mb-3" />
+                <h3 class="text-sm font-medium text-gray-900 mb-1">No files processed yet</h3>
+                <p class="text-xs text-gray-500">Process your first {{ currentTemplate?.name }} file above</p>
+            </div>
+
+            <!-- Files List -->
+            <div v-else class="space-y-3">
+                <div v-for="file in recentTemplateFiles" :key="file.id"
+                    class="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                    <div class="flex items-center space-x-3 flex-1 min-w-0">
+                        <DocumentIcon class="h-5 w-5 text-gray-400 flex-shrink-0" />
+                        <div class="min-w-0">
+                            <p class="text-sm font-medium text-gray-900 truncate">{{ file.originalName }}</p>
+                            <div class="flex items-center space-x-3">
+                                <p class="text-xs text-gray-500">{{ formatDate(file.createdAt) }}</p>
+                                <span :class="statusClasses(file.status)"
+                                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium">
+                                    {{ $t(`processing.status.${file.status}`) }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex items-center space-x-2">
+                        <!-- View Results -->
+                        <button v-if="file.status === 'completed'" @click="viewFile(file)"
+                            class="p-1.5 text-atabai-violet hover:bg-atabai-violet/10 rounded-lg transition-colors"
+                            title="View Results">
+                            <EyeIcon class="h-4 w-4" />
+                        </button>
+
+                        <!-- View Processing -->
+                        <button v-else-if="['processing', 'pending'].includes(file.status)"
+                            @click="viewProcessing(file)"
+                            class="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                            title="View Processing Status">
+                            <ClockIcon class="h-4 w-4" />
+                        </button>
+
+                        <!-- Download -->
+                        <button v-if="file.status === 'completed'" @click="downloadFile(file)"
+                            :disabled="file.downloading"
+                            class="p-1.5 text-green-600 hover:bg-green-50 rounded-lg transition-colors disabled:opacity-50"
+                            title="Download Processed File">
+                            <ArrowDownTrayIcon v-if="!file.downloading" class="h-4 w-4" />
+                            <div v-else
+                                class="h-4 w-4 animate-spin border-2 border-green-600 border-t-transparent rounded-full">
+                            </div>
+                        </button>
+
+                        <!-- Retry -->
+                        <button v-if="file.status === 'failed'" @click="retryFile(file)" :disabled="file.retrying"
+                            class="p-1.5 text-yellow-600 hover:bg-yellow-50 rounded-lg transition-colors disabled:opacity-50"
+                            title="Retry Processing">
+                            <ArrowPathIcon v-if="!file.retrying" class="h-4 w-4" />
+                            <div v-else
+                                class="h-4 w-4 animate-spin border-2 border-yellow-600 border-t-transparent rounded-full">
+                            </div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Sample Data Format -->
         <div class="bg-white border border-gray-200 rounded-xl p-6">
             <h2 class="text-xl font-semibold text-gray-900 mb-4">Sample Excel Format</h2>
@@ -128,16 +216,22 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useTemplatesStore } from '@/stores/templates'
 import { useFilesStore } from '@/stores/files'
 import {
     ArrowLeftIcon,
     CloudArrowUpIcon,
-    DocumentIcon
+    DocumentIcon,
+    EyeIcon,
+    ClockIcon,
+    ArrowDownTrayIcon,
+    ArrowPathIcon
 } from '@heroicons/vue/24/outline'
 
 const router = useRouter()
 const route = useRoute()
+const { t } = useI18n()
 const templatesStore = useTemplatesStore()
 const filesStore = useFilesStore()
 
@@ -146,6 +240,7 @@ const selectedFile = ref(null)
 const isProcessing = ref(false)
 const isDragOver = ref(false)
 const uploadError = ref('')
+const templateFilesLoading = ref(false)
 const uploadProgress = computed(() => filesStore.uploadProgress)
 
 // Get template from query params
@@ -153,6 +248,12 @@ const templateId = computed(() => route.query.template)
 const currentTemplate = computed(() => {
     if (!templateId.value) return null
     return templatesStore.availableTemplates.find(t => t.id === templateId.value)
+})
+
+// Get recent files for this template from cache
+const recentTemplateFiles = computed(() => {
+    if (!templateId.value) return []
+    return filesStore.getTemplateFilesFromCache(templateId.value).slice(0, 10)
 })
 
 // Template-specific configurations
@@ -208,16 +309,33 @@ const sampleData = computed(() => {
     return data[templateId.value] || []
 })
 
-onMounted(() => {
+onMounted(async () => {
     // Redirect if no template specified
     if (!templateId.value) {
         router.push('/dashboard')
+        return
     }
+
+    // Load recent files for this template
+    await loadTemplateFiles()
 })
 
 // Methods
 function goBack() {
     router.push('/dashboard')
+}
+
+async function loadTemplateFiles() {
+    if (!templateId.value) return
+
+    try {
+        templateFilesLoading.value = true
+        await filesStore.fetchTemplateFiles(templateId.value, { limit: 10 })
+    } catch (error) {
+        console.error('Failed to load template files:', error)
+    } finally {
+        templateFilesLoading.value = false
+    }
 }
 
 function handleDrop(event) {
@@ -281,6 +399,9 @@ async function processFile() {
         })
 
         if (result && result.jobId) {
+            // Refresh template files after upload
+            await loadTemplateFiles()
+
             // Redirect to processing status page
             router.push(`/app/processing/${result.jobId}`)
         }
@@ -291,5 +412,73 @@ async function processFile() {
     } finally {
         isProcessing.value = false
     }
+}
+
+function viewAllTemplateFiles() {
+    router.push(`/app/history?template=${templateId.value}`)
+}
+
+function viewFile(file) {
+    router.push(`/app/files/${file.id}`)
+}
+
+function viewProcessing(file) {
+    if (file.jobId) {
+        router.push(`/app/processing/${file.jobId}`)
+    }
+}
+
+async function downloadFile(file) {
+    try {
+        file.downloading = true
+        await filesStore.downloadFile(file.id, 'processed')
+    } catch (error) {
+        console.error('Download failed:', error)
+    } finally {
+        file.downloading = false
+    }
+}
+
+async function retryFile(file) {
+    try {
+        file.retrying = true
+        await filesStore.retryProcessing(file.jobId)
+        // Refresh template files after retry
+        await loadTemplateFiles()
+    } catch (error) {
+        console.error('Retry failed:', error)
+    } finally {
+        file.retrying = false
+    }
+}
+
+function formatDate(dateString) {
+    const date = new Date(dateString)
+    const now = new Date()
+    const diffInMinutes = Math.floor((now - date) / (1000 * 60))
+
+    if (diffInMinutes < 1) {
+        return 'Just now'
+    } else if (diffInMinutes < 60) {
+        return `${diffInMinutes}min ago`
+    } else if (diffInMinutes < 1440) {
+        const hours = Math.floor(diffInMinutes / 60)
+        return `${hours}h ago`
+    } else if (diffInMinutes < 2880) {
+        return 'Yesterday'
+    } else {
+        return date.toLocaleDateString()
+    }
+}
+
+function statusClasses(status) {
+    const classes = {
+        'completed': 'bg-green-100 text-green-800',
+        'processing': 'bg-blue-100 text-blue-800',
+        'failed': 'bg-red-100 text-red-800',
+        'pending': 'bg-yellow-100 text-yellow-800',
+        'uploaded': 'bg-gray-100 text-gray-800'
+    }
+    return classes[status] || 'bg-gray-100 text-gray-800'
 }
 </script>

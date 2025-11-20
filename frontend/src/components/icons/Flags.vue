@@ -15,7 +15,7 @@ import { computed, ref } from 'vue'
 const props = defineProps({
     country: {
         type: String,
-        required: true
+        // required: true
     },
     size: {
         type: String,
@@ -30,7 +30,6 @@ const imageError = ref(false)
 // Computed image path
 const flagImagePath = computed(() => {
     const code = props.country?.toLowerCase()?.trim()
-    console.log(code)
     return `/images/country-flags/${code}.svg`
 })
 

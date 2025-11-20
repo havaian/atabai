@@ -6,12 +6,21 @@ export const useFilesStore = defineStore('files', () => {
     // State
     const files = ref([])
     const recentFiles = ref([])
-    const templateFiles = ref([])
+    const templateFiles = ref({}) // Cache by template type
     const currentFile = ref(null)
     const processingJobs = ref([])
     const isLoading = ref(false)
     const error = ref(null)
     const uploadProgress = ref(0)
+
+    // Cache timestamps to avoid unnecessary requests
+    const cacheTimestamps = ref({
+        recentFiles: null,
+        templateFiles: {}
+    })
+
+    // Cache duration in milliseconds (5 minutes)
+    const CACHE_DURATION = 5 * 60 * 1000
 
     // Getters
     const totalFilesProcessed = computed(() => files.value.length)
@@ -19,14 +28,42 @@ export const useFilesStore = defineStore('files', () => {
     const completedJobs = computed(() => processingJobs.value.filter(job => job.status === 'completed'))
     const failedJobs = computed(() => processingJobs.value.filter(job => job.status === 'failed'))
 
+    // Helper function to check if data is fresh
+    function isCacheFresh(timestamp) {
+        if (!timestamp) return false
+        return Date.now() - timestamp < CACHE_DURATION
+    }
+
+    // Helper function to invalidate cache (call after uploads/deletes)
+    function invalidateCache() {
+        cacheTimestamps.value.recentFiles = null
+        cacheTimestamps.value.templateFiles = {}
+    }
+
+    // Get template files for a specific template (with caching)
+    function getTemplateFilesFromCache(templateType) {
+        return templateFiles.value[templateType] || []
+    }
+
     // Actions
-    async function fetchRecentFiles() {
+    async function fetchRecentFiles(forceRefresh = false) {
+        // Return cached data if fresh and not forcing refresh
+        if (!forceRefresh &&
+            isCacheFresh(cacheTimestamps.value.recentFiles) &&
+            recentFiles.value.length > 0) {
+            return recentFiles.value
+        }
+
         try {
             isLoading.value = true
             error.value = null
 
-            const response = await apiClient.get('/files/history')
+            const response = await apiClient.get('/files/history', {
+                params: { limit: 20 } // Get more for sidebar and other uses
+            })
+
             recentFiles.value = response.data.files || []
+            cacheTimestamps.value.recentFiles = Date.now()
 
             return recentFiles.value
         } catch (err) {
@@ -39,16 +76,33 @@ export const useFilesStore = defineStore('files', () => {
         }
     }
 
-    async function fetchTemplateFiles(templateType, options = {}) {
+    async function fetchTemplateFiles(templateType, options = {}, forceRefresh = false) {
+        // Return cached data if fresh and not forcing refresh
+        if (!forceRefresh &&
+            isCacheFresh(cacheTimestamps.value.templateFiles[templateType]) &&
+            templateFiles.value[templateType]?.length > 0) {
+            return {
+                files: templateFiles.value[templateType],
+                statusSummary: {},
+                pagination: {},
+                templateType
+            }
+        }
+
         try {
             isLoading.value = true
             error.value = null
 
             const response = await apiClient.get(`/files/template/${templateType}`, {
-                params: options
+                params: {
+                    limit: options.limit || 10, // Default to 10 for template-specific
+                    ...options
+                }
             })
 
-            templateFiles.value = response.data.files || []
+            // Cache the results
+            templateFiles.value[templateType] = response.data.files || []
+            cacheTimestamps.value.templateFiles[templateType] = Date.now()
 
             return {
                 files: response.data.files || [],
@@ -59,7 +113,7 @@ export const useFilesStore = defineStore('files', () => {
         } catch (err) {
             error.value = err.response?.data?.message || 'Failed to fetch template files'
             console.error('Fetch template files error:', err)
-            templateFiles.value = []
+            templateFiles.value[templateType] = []
             throw err
         } finally {
             isLoading.value = false
@@ -103,11 +157,11 @@ export const useFilesStore = defineStore('files', () => {
         }
     }
 
-    async function uploadFile(file, templateType, onProgress) {
+    async function uploadFile(file, templateType, progressCallback) {
         try {
             isLoading.value = true
-            uploadProgress.value = 0
             error.value = null
+            uploadProgress.value = 0
 
             const formData = new FormData()
             formData.append('file', file)
@@ -118,23 +172,18 @@ export const useFilesStore = defineStore('files', () => {
                     'Content-Type': 'multipart/form-data'
                 },
                 onUploadProgress: (progressEvent) => {
-                    const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total)
+                    const percentCompleted = Math.round(
+                        (progressEvent.loaded * 100) / progressEvent.total
+                    )
                     uploadProgress.value = percentCompleted
-                    if (onProgress) onProgress(percentCompleted)
+                    if (progressCallback) {
+                        progressCallback(percentCompleted)
+                    }
                 }
             })
 
-            // Add to processing jobs
-            if (response.data.jobId) {
-                processingJobs.value.push({
-                    id: response.data.jobId,
-                    status: 'pending',
-                    progress: 0,
-                    templateType: templateType,
-                    fileName: file.name,
-                    fileId: response.data.fileId
-                })
-            }
+            // Invalidate cache since we have new data
+            invalidateCache()
 
             return response.data
         } catch (err) {
@@ -212,7 +261,13 @@ export const useFilesStore = defineStore('files', () => {
             // Remove from local state
             files.value = files.value.filter(file => file.id !== fileId)
             recentFiles.value = recentFiles.value.filter(file => file.id !== fileId)
-            templateFiles.value = templateFiles.value.filter(file => file.id !== fileId)
+
+            // Remove from template files cache
+            Object.keys(templateFiles.value).forEach(templateType => {
+                templateFiles.value[templateType] = templateFiles.value[templateType].filter(
+                    file => file.id !== fileId
+                )
+            })
 
             if (currentFile.value?.id === fileId) {
                 currentFile.value = null
@@ -251,11 +306,15 @@ export const useFilesStore = defineStore('files', () => {
     function clearState() {
         files.value = []
         recentFiles.value = []
-        templateFiles.value = []
+        templateFiles.value = {}
         currentFile.value = null
         processingJobs.value = []
         error.value = null
         uploadProgress.value = 0
+        cacheTimestamps.value = {
+            recentFiles: null,
+            templateFiles: {}
+        }
     }
 
     return {
@@ -274,6 +333,7 @@ export const useFilesStore = defineStore('files', () => {
         pendingJobs,
         completedJobs,
         failedJobs,
+        getTemplateFilesFromCache,
 
         // Actions
         fetchRecentFiles,
@@ -285,6 +345,7 @@ export const useFilesStore = defineStore('files', () => {
         downloadFile,
         deleteFile,
         retryProcessing,
+        invalidateCache,
         clearState
     }
 })

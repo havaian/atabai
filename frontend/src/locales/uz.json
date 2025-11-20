@@ -96,9 +96,9 @@
   "howItWorks": {
     "title": "Qanday ishlaydi",
     "step1": {
-      "title": "Excel fayllarini yuklang",
+      "title": "Excel fayllarni yuklang",
       "description": "XMHS talablariga muvofiq qayta ishlash uchun moliyaviy Excel fayllaringizni yuklang",
-      "uploadText": "Fayllarni bu yerga sudrab olib keling yoki tanlash uchun bosing",
+      "uploadText": "Fayllarni bu yerga sudrab oling yoki tanlash uchun bosing",
       "supportedFormats": "Qo'llab-quvvatlanadigan formatlar: .xlsx, .xls, .csv"
     },
     "step2": {
@@ -107,10 +107,10 @@
     },
     "step3": {
       "title": "Tayyor natijalarni oling",
-      "description": "Qo'llanilgan XMHS formulalari va batafsil o'zgarishlar hisobotlari bilan qayta ishlangan fayllarni yuklab oling",
+      "description": "XMHS formulalari qo'llanilgan va batafsil o'zgarishlar hisobotlari bilan qayta ishlangan fayllarni yuklab oling",
       "processed": "Fayl qayta ishlandi",
       "changes": "O'zgarishlar",
-      "formulas": "Qo'llanilgan formulalar"
+      "formulas": "Formulalar qo'llanildi"
     },
     "step4": {
       "title": "4. Transformatsiyani ko'ring",
@@ -215,8 +215,8 @@
               "buildings": "Binolar (NPB 2)",
               "impaired": "Qadrsizlangan",
               "noimpairment": "Qadrsizlanish yo'q",
-              "tested": "XAS 36 sinovi o'tdi",
-              "recoverable": "Qoplash mumkin bo'lgan qiymat",
+              "tested": "XAS 36 sinovdan o'tgan",
+              "recoverable": "Qaytarib olinadigan qiymat",
               "validated": "✓ Tasdiqlangan"
             }
           }
@@ -225,10 +225,10 @@
     },
     "templates": {
       "depreciation": {
-        "processed": "Aktivlar jadvallari qayta ishlandi",
+        "processed": "Aktiv jadvallari qayta ishlandi",
         "changesLabel": "Amortizatsiya yozuvlari",
         "changes": "156",
-        "formulasLabel": "Aktivlar hisob-kitoblari",
+        "formulasLabel": "Aktiv hisob-kitoblari",
         "formulas": "42"
       },
       "discounts": {
@@ -259,14 +259,14 @@
     },
     "accuracy": {
       "title": "Yuqori aniqlik",
-      "description": "Moliyaviy hisob-kitoblardagi xatolarni minimallash"
+      "description": "Moliyaviy hisob-kitoblardagi xatolarni minimallashtirish"
     },
     "speed": {
       "title": "Tez qayta ishlash",
       "description": "Katta fayllarni daqiqalar ichida qayta ishlash"
     },
     "easy": {
-      "title": "Ishlatish oson",
+      "title": "Foydalanish oson",
       "description": "Intuitiv interfeys maxsus o'qitishni talab qilmaydi"
     },
     "universal": {

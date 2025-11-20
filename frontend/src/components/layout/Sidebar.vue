@@ -81,7 +81,8 @@
                                 <img src="/images/icons/excel.svg" class="h-8 w-8 text-gray-400 mr-3 flex-shrink-0" />
                                 <div class="inline-flex w-full justify-between min-w-0">
                                     <div class="grid">
-                                        <p class="text-sm font-medium text-gray-900 truncate">{{ file.originalName }}</p>
+                                        <p class="text-sm font-medium text-gray-900 truncate">{{ file.originalName }}
+                                        </p>
                                         <div class="items-center justify-between">
                                             <p class="text-xs text-gray-500">{{ formatDate(file.createdAt) }}</p>
                                         </div>
@@ -125,8 +126,10 @@
                     </button>
 
                     <!-- Profile Dropdown -->
-                    <div v-if="isProfileMenuOpen"
-                        class="absolute bottom-full left-0 right-0 mb-1 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-50">
+                    <div v-if="isProfileMenuOpen" :class="[
+                        'absolute bottom-full mb-1 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-50',
+                        isSidebarOpen ? 'left-0 right-0' : 'left-0 w-64'
+                    ]">
 
                         <!-- Language Selection -->
                         <div class="px-3 py-2 border-b border-gray-100">
@@ -292,9 +295,9 @@
                                     </span>
                                     <button @click="showLanguageDropdown = !showLanguageDropdown"
                                         class="flex items-center text-xs text-gray-700 hover:text-atabai-violet">
-                                        <Flags :locale="currentLocale.code" class="w-4 h-4 mr-1" />
                                         {{ currentLocale.name }}
-                                        <ChevronDownIcon class="h-3 w-3 ml-1" />
+                                        <ChevronUpIcon v-if="showLanguageDropdown" class="h-3 w-3 ml-1" />
+                                        <ChevronDownIcon v-else-if="!showLanguageDropdown" class="h-3 w-3 ml-1" />
                                     </button>
                                 </div>
 
@@ -304,7 +307,6 @@
                                         @click="selectLanguage(lang.code)"
                                         class="w-full flex items-center justify-between px-2 py-1 rounded hover:bg-gray-100 text-xs">
                                         <div class="flex items-center">
-                                            <Flags :locale="lang.code" class="w-4 h-4 mr-2" />
                                             <span>{{ lang.name }}</span>
                                         </div>
                                         <CheckIcon v-if="locale === lang.code" class="h-3 w-3 text-atabai-violet" />
@@ -346,8 +348,8 @@ import {
     PlusIcon,
     DocumentIcon,
     ChevronRightIcon,
-    ChevronUpIcon,
     UserIcon,
+    ChevronUpIcon,
     ChevronDownIcon,
     Cog6ToothIcon,
     QuestionMarkCircleIcon,
@@ -403,11 +405,11 @@ const currentLocale = computed(() => {
 
 // Profile menu items
 const profileMenuItems = computed(() => [
-    {
-        icon: UserIcon,
-        label: t('nav.profile'),
-        action: () => navigateTo('/app/profile')
-    },
+    // {
+    //     icon: UserIcon,
+    //     label: t('nav.profile'),
+    //     action: () => navigateTo('/app/profile')
+    // },
     {
         icon: Cog6ToothIcon,
         label: t('dashboard.settings'),
@@ -416,7 +418,7 @@ const profileMenuItems = computed(() => [
     {
         icon: QuestionMarkCircleIcon,
         label: t('dashboard.help'),
-        action: () => navigateTo('/app/help')
+        action: () => navigateTo('/help')
     },
     {
         icon: ArrowRightStartOnRectangleIcon,
@@ -499,10 +501,13 @@ async function handleSignOut() {
     }
 }
 
-// Load recent files when component mounts
+// Load recent files when component mounts - use cached data if available
 onMounted(async () => {
     try {
-        await filesStore.fetchRecentFiles()
+        // Only fetch if we don't have cached data
+        if (filesStore.recentFiles.length === 0) {
+            await filesStore.fetchRecentFiles()
+        }
     } catch (error) {
         console.error('Failed to load recent files in sidebar:', error)
     }
