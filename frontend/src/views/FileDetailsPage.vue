@@ -572,18 +572,14 @@ async function fetchFileData() {
         isLoading.value = true
         error.value = null
 
-        console.log('Fetching file details for ID:', fileId.value) // Debug
         const response = await filesStore.getFileDetails(fileId.value)
-        console.log('API response:', response) // Debug
 
         if (response.success) {
             fileData.value = response.file
-            beforeData.value = response.file.beforeData  // Fixed
-            afterData.value = response.file.afterData    // Fixed
-            console.log('Data set successfully') // Debug
+            beforeData.value = response.file.beforeData
+            afterData.value = response.file.afterData
         } else {
             error.value = response.message || t('results.error.fetchFailed')
-            console.log('API returned success: false') // Debug
         }
     } catch (err) {
         console.error('Error fetching file details:', err)
