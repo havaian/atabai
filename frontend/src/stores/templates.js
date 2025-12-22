@@ -20,46 +20,46 @@ export const useTemplatesStore = defineStore('templates', () => {
     const availableTemplates = computed(() => {
         // Return mock data with icons and stats for now
         const mockTemplates = [
-            {
-                id: 'depreciation',
-                key: 'depreciation',
-                name: 'Fixed Asset Depreciation',
-                standard: 'IAS 16',
-                category: 'Asset Management',
-                icon: CalculatorIcon,
-                description: 'Automate depreciation calculations according to IAS 16 standards',
-                subscriptionRequired: 'basic'
-            },
-            {
-                id: 'discounts',
-                key: 'discounts',
-                name: 'Discount Calculations',
-                standard: 'IFRS 15',
-                category: 'Revenue Recognition',
-                icon: CurrencyDollarIcon,
-                description: 'Calculate revenue discounts and adjustments per IFRS 15',
-                subscriptionRequired: 'basic'
-            },
-            {
-                id: 'impairment',
-                key: 'impairment',
-                name: 'Asset Impairment',
-                standard: 'IAS 36',
-                category: 'Asset Testing',
-                icon: ChartBarIcon,
-                description: 'Perform impairment testing and calculations according to IAS 36',
-                subscriptionRequired: 'basic'
-            },
-            {
-                id: 'reports',
-                key: 'reports',
-                name: 'Financial Reports',
-                standard: 'IFRS',
-                category: 'Reporting',
-                icon: DocumentTextIcon,
-                description: 'Generate comprehensive IFRS-compliant financial reports',
-                subscriptionRequired: 'premium'
-            },
+            // {
+            //     id: 'depreciation',
+            //     key: 'depreciation',
+            //     name: 'Fixed Asset Depreciation',
+            //     standard: 'IAS 16',
+            //     category: 'Asset Management',
+            //     icon: CalculatorIcon,
+            //     description: 'Automate depreciation calculations according to IAS 16 standards',
+            //     subscriptionRequired: 'basic'
+            // },
+            // {
+            //     id: 'discounts',
+            //     key: 'discounts',
+            //     name: 'Discount Calculations',
+            //     standard: 'IFRS 15',
+            //     category: 'Revenue Recognition',
+            //     icon: CurrencyDollarIcon,
+            //     description: 'Calculate revenue discounts and adjustments per IFRS 15',
+            //     subscriptionRequired: 'basic'
+            // },
+            // {
+            //     id: 'impairment',
+            //     key: 'impairment',
+            //     name: 'Asset Impairment',
+            //     standard: 'IAS 36',
+            //     category: 'Asset Testing',
+            //     icon: ChartBarIcon,
+            //     description: 'Perform impairment testing and calculations according to IAS 36',
+            //     subscriptionRequired: 'basic'
+            // },
+            // {
+            //     id: 'reports',
+            //     key: 'reports',
+            //     name: 'Financial Reports',
+            //     standard: 'IFRS',
+            //     category: 'Reporting',
+            //     icon: DocumentTextIcon,
+            //     description: 'Generate comprehensive IFRS-compliant financial reports',
+            //     subscriptionRequired: 'premium'
+            // },
             {
                 id: 'balance-sheet',
                 key: 'balance-sheet',
