@@ -194,6 +194,18 @@ function processBalanceSheetWorksheet(sourceWorksheet, targetWorksheet) {
  * Detect the structure of the balance sheet
  */
 function detectBalanceSheetStructure(worksheet) {
+    global.logger.logInfo(`Detecting balance sheet structure. Total rows: ${worksheet.rowCount}, Total columns: ${worksheet.columnCount}`);
+    
+    // Log first 5 rows for debugging
+    for (let i = 1; i <= Math.min(5, worksheet.rowCount); i++) {
+        const row = worksheet.getRow(i);
+        const rowData = [];
+        row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
+            rowData.push(`Col${colNumber}: "${cell.value}"`);
+        });
+        global.logger.logInfo(`Row ${i}: ${rowData.join(' | ')}`);
+    }
+    
     const structure = {
         headerRow: null,
         codeColumn: 2,  // Column B typically contains row codes

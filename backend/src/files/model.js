@@ -79,7 +79,14 @@ const fileSchema = new mongoose.Schema({
             default: 0
         },
         warnings: [{
-            type: String
+            message: String,
+            row: Number,
+            column: String,
+            severity: {
+                type: String,
+                enum: ['info', 'warning', 'error'],
+                default: 'warning'
+            }
         }],
         summary: {
             type: String
