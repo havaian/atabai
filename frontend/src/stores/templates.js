@@ -59,6 +59,16 @@ export const useTemplatesStore = defineStore('templates', () => {
                 description: 'Generate comprehensive IFRS-compliant financial reports',
                 subscriptionRequired: 'premium'
             },
+            {
+                id: 'balance-sheet',
+                key: 'balance-sheet',
+                name: 'Balance Sheet Transformation',
+                standard: 'IAS 1',
+                category: 'Financial Statements',
+                icon: DocumentTextIcon,  // Already imported at top
+                description: 'Transform NSBU balance sheet to IFRS format according to IAS 1 standards',
+                subscriptionRequired: 'basic'
+            },
         ]
 
         // Merge with actual templates from API if available
@@ -253,7 +263,38 @@ export const useTemplatesStore = defineStore('templates', () => {
                     label: 'Testing Date',
                     placeholder: 'Date of impairment test'
                 }
+            ],
+            'balance-sheet': [
+                {
+                    name: 'rowCode',
+                    type: 'text',
+                    required: true,
+                    label: 'Row Code',
+                    placeholder: 'e.g., 010, 220'
+                },
+                {
+                    name: 'description',
+                    type: 'text',
+                    required: true,
+                    label: 'Line Description',
+                    placeholder: 'Asset or liability description'
+                },
+                {
+                    name: 'beginningBalance',
+                    type: 'number',
+                    required: true,
+                    label: 'Beginning Balance',
+                    placeholder: 'Amount at period start'
+                },
+                {
+                    name: 'endingBalance',
+                    type: 'number',
+                    required: true,
+                    label: 'Ending Balance',
+                    placeholder: 'Amount at period end'
+                }
             ]
+
         }
 
         return fields[templateId] || []
@@ -275,6 +316,11 @@ export const useTemplatesStore = defineStore('templates', () => {
                 en: 'Upload asset data for impairment testing. The template will perform IAS 36 compliant impairment calculations.',
                 ru: 'Загрузите данные об активах для тестирования на обесценение. Шаблон выполнит расчеты обесценения в соответствии с IAS 36.',
                 uz: 'Qadrsizlanishni sinash uchun aktiv ma\'lumotlarini yuklang. Shablon IAS 36 ga muvofiq qadrsizlanish hisob-kitoblarini amalga oshiradi.'
+            },
+            'balance-sheet': {
+                en: 'Upload your NSBU balance sheet (Form № 1). The template will map all line items to IFRS classifications according to IAS 1.',
+                ru: 'Загрузите баланс в формате НСБУ (Форма № 1). Шаблон сопоставит все статьи с классификацией МСФО согласно IAS 1.',
+                uz: 'NSBU balansini yuklang (Forma № 1). Shablon barcha qatorlarni IAS 1 ga muvofiq IFRS klassifikatsiyasiga moslaydi.'
             }
         }
 
@@ -311,6 +357,16 @@ export const useTemplatesStore = defineStore('templates', () => {
                 {
                     name: 'CGU Impairment Analysis',
                     description: 'Cash-generating unit impairment assessment'
+                }
+            ],
+            'balance-sheet': [
+                {
+                    name: 'Standard Balance Sheet Mapping',
+                    description: 'Complete NSBU to IFRS transformation for standard Uzbek balance sheet'
+                },
+                {
+                    name: 'Comparative Balance Sheet',
+                    description: 'Side-by-side comparison of NSBU and IFRS presentations'
                 }
             ]
         }
