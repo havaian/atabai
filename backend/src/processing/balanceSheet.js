@@ -194,39 +194,284 @@ function processBalanceSheetWorksheet(sourceWorksheet, targetWorksheet) {
  * Detect the structure of the balance sheet
  */
 function detectBalanceSheetStructure(worksheet) {
-    let dataStartRow = null;
+    let headerRow = null;
     let codeColumn = null;
+    let nameColumn = null;
+    let dataStartRow = null;
     
-    // Search MORE rows - up to row 50
+    // Step 1: Find header row with "Код стр" (code column indicator)
     for (let rowNum = 1; rowNum <= Math.min(50, worksheet.rowCount); rowNum++) {
         const row = worksheet.getRow(rowNum);
         
         row.eachCell((cell, colNumber) => {
             const cellValue = cell.value?.toString().toLowerCase() || '';
             
-            // Look for "код стр" or "актив"
-            if (cellValue.includes('код стр') || cellValue.includes('код стр.')) {
+            // Look for "код стр" or "сатр коди" (Uzbek/Russian for "line code")
+            if (cellValue.includes('код стр') || cellValue.includes('сатр коди')) {
                 codeColumn = colNumber;
-                dataStartRow = rowNum + 1; // Data starts next row
+                headerRow = rowNum;
                 global.logger.logInfo(`Found code column at row ${rowNum}, col ${colNumber}`);
-            }
-            
-            if (cellValue === 'актив' || cellValue.includes('актив')) {
-                if (!dataStartRow) {
-                    dataStartRow = rowNum + 1;
-                }
-                global.logger.logInfo(`Found 'Актив' at row ${rowNum}`);
             }
         });
         
-        if (dataStartRow && codeColumn) break;
+        if (codeColumn) break;
     }
     
-    if (!dataStartRow || !codeColumn) {
-        throw new Error('Could not detect balance sheet structure');
+    if (!codeColumn) {
+        throw new Error('Could not find code column (Код стр)');
     }
     
-    return { dataStartRow, codeColumn };
+    // Step 2: Find "Актив" row (Assets section start)
+    for (let rowNum = headerRow; rowNum <= Math.min(headerRow + 10, worksheet.rowCount); rowNum++) {
+        const row = worksheet.getRow(rowNum);
+        
+        row.eachCell((cell, colNumber) => {
+            const cellValue = cell.value?.toString().trim().toLowerCase() || '';
+            
+            if (cellValue === 'актив' || cellValue === 'aktiv') {
+                dataStartRow = rowNum + 1; // Data starts AFTER "Актив"
+                nameColumn = colNumber; // This column has the names
+                global.logger.logInfo(`Found "Актив" at row ${rowNum}, col ${colNumber}`);
+            }
+        });
+        
+        if (dataStartRow) break;
+    }
+    
+    if (!dataStartRow || !nameColumn) {
+        throw new Error('Could not find Assets section (Актив)');
+    }
+    
+    // Step 3: Find value columns by looking at header row
+    const headerRowData = worksheet.getRow(headerRow);
+    const valueColumns = [];
+    
+    headerRowData.eachCell((cell, colNumber) => {
+        const cellValue = cell.value?.toString().toLowerCase() || '';
+        
+        // Look for period indicators
+        if (cellValue.includes('начало') || cellValue.includes('boshiga')) {
+            valueColumns.push({ type: 'start', column: colNumber });
+            global.logger.logInfo(`Found start period column: ${colNumber}`);
+        }
+        
+        if (cellValue.includes('конец') || cellValue.includes('охирига')) {
+            valueColumns.push({ type: 'end', column: colNumber });
+            global.logger.logInfo(`Found end period column: ${colNumber}`);
+        }
+    });
+    
+    if (valueColumns.length === 0) {
+        throw new Error('Could not find value columns');
+    }
+    
+    return {
+        headerRow,
+        dataStartRow,
+        codeColumn,
+        nameColumn,
+        valueColumns
+    };
+}
+
+function extractBalanceSheetData(worksheet, structure) {
+    const { dataStartRow, codeColumn, nameColumn, valueColumns } = structure;
+    const dataMap = new Map();
+    
+    // Read all rows and build code -> values map
+    for (let rowNum = dataStartRow; rowNum <= worksheet.rowCount; rowNum++) {
+        const row = worksheet.getRow(rowNum);
+        
+        // Get code
+        const codeCell = row.getCell(codeColumn);
+        const code = codeCell.value?.toString().trim();
+        
+        if (!code || code === '' || isNaN(parseInt(code))) {
+            continue; // Skip rows without valid codes
+        }
+        
+        // Get name
+        const nameCell = row.getCell(nameColumn);
+        const name = nameCell.value?.toString().trim() || '';
+        
+        // Get values for each period
+        const values = {};
+        valueColumns.forEach(({ type, column }) => {
+            const valueCell = row.getCell(column);
+            let value = valueCell.value;
+            
+            // Handle different value formats
+            if (typeof value === 'string') {
+                value = value.replace(/,/g, '').replace(/\s/g, '');
+                if (value === '-' || value === '') {
+                    value = 0;
+                } else {
+                    value = parseFloat(value) || 0;
+                }
+            } else if (typeof value === 'number') {
+                value = value;
+            } else {
+                value = 0;
+            }
+            
+            values[type] = value;
+        });
+        
+        dataMap.set(code, {
+            code,
+            name,
+            ...values
+        });
+        
+        global.logger.logInfo(`Extracted code ${code}: ${name} = ${JSON.stringify(values)}`);
+    }
+    
+    return dataMap;
+}
+
+async function transformToIFRS(dataMap) {
+    // NSBU -> IFRS mapping
+    const mapping = {
+        // Assets - Non-current
+        '010': { ifrs: 'PPE_Gross', label: 'PP&E - Gross Book Value' },
+        '011': { ifrs: 'PPE_Depreciation', label: 'Accumulated Depreciation' },
+        '012': { ifrs: 'PPE_Net', label: 'PP&E - Net Book Value' },
+        '020': { ifrs: 'Intangible_Gross', label: 'Intangible Assets - Gross' },
+        '021': { ifrs: 'Intangible_Amortization', label: 'Accumulated Amortization' },
+        '022': { ifrs: 'Intangible_Net', label: 'Intangible Assets - Net' },
+        '090': { ifrs: 'Equipment_Install', label: 'Equipment to be Installed' },
+        '130': { ifrs: 'Total_NonCurrent', label: 'Total Non-Current Assets' },
+        
+        // Assets - Current
+        '140': { ifrs: 'Inventory_Total', label: 'Total Inventories' },
+        '150': { ifrs: 'Inventory_Materials', label: 'Raw Materials & Supplies' },
+        '160': { ifrs: 'Inventory_WIP', label: 'Work in Progress' },
+        '170': { ifrs: 'Inventory_Finished', label: 'Finished Goods' },
+        '180': { ifrs: 'Inventory_Goods', label: 'Goods for Resale' },
+        '210': { ifrs: 'Receivables_Total', label: 'Total Trade Receivables' },
+        '220': { ifrs: 'Receivables_Customers', label: 'Trade Receivables - Customers' },
+        '320': { ifrs: 'Cash_Total', label: 'Cash and Cash Equivalents' },
+        '370': { ifrs: 'Investments_ST', label: 'Short-term Investments' },
+        '390': { ifrs: 'Total_Current', label: 'Total Current Assets' },
+        '400': { ifrs: 'Total_Assets', label: 'TOTAL ASSETS' },
+        
+        // Equity
+        '410': { ifrs: 'Equity_Share', label: 'Share Capital' },
+        '420': { ifrs: 'Equity_Premium', label: 'Share Premium/Additional Capital' },
+        '430': { ifrs: 'Equity_Reserve', label: 'Reserve Capital' },
+        '440': { ifrs: 'Equity_Treasury', label: 'Treasury Shares' },
+        '450': { ifrs: 'Equity_Retained', label: 'Retained Earnings/(Losses)' },
+        '480': { ifrs: 'Total_Equity', label: 'Total Equity' },
+        
+        // Liabilities - Non-current
+        '570': { ifrs: 'LT_BankLoans', label: 'LT Bank Credits/Loans' },
+        '580': { ifrs: 'LT_Borrowings', label: 'LT Other Loans & Borrowings' },
+        '590': { ifrs: 'LT_Other', label: 'LT Other Liabilities' },
+        '490': { ifrs: 'Total_LT_Liabilities', label: 'Total Non-Current Liabilities' },
+        
+        // Liabilities - Current
+        '610': { ifrs: 'ST_Payables', label: 'ST Supplier Payables' },
+        '670': { ifrs: 'ST_Advances', label: 'ST Advances from Customers' },
+        '680': { ifrs: 'ST_Tax', label: 'ST Tax & Duty Payables' },
+        '720': { ifrs: 'ST_Salaries', label: 'ST Payables to Employees' },
+        '740': { ifrs: 'ST_Borrowings', label: 'ST Bank Credits/Loans' },
+        '600': { ifrs: 'Total_ST_Liabilities', label: 'Total Current Liabilities' },
+        '770': { ifrs: 'Total_Liabilities', label: 'Total Liabilities' },
+        '780': { ifrs: 'Total_Equity_Liabilities', label: 'TOTAL EQUITY AND LIABILITIES' }
+    };
+    
+    // Build IFRS structure
+    const ifrsData = {};
+    
+    dataMap.forEach((item, code) => {
+        if (mapping[code]) {
+            const { ifrs, label } = mapping[code];
+            ifrsData[ifrs] = {
+                code,
+                label,
+                start: item.start || 0,
+                end: item.end || 0
+            };
+        }
+    });
+    
+    return ifrsData;
+}
+
+async function processBalanceSheetTemplate(workbook, filePath) {
+    try {
+        const worksheet = workbook.worksheets[0];
+        
+        // Step 1: Detect structure dynamically
+        const structure = detectBalanceSheetStructure(worksheet);
+        global.logger.logInfo(`Detected structure: ${JSON.stringify(structure)}`);
+        
+        // Step 2: Extract all data by code
+        const dataMap = extractBalanceSheetData(worksheet, structure);
+        global.logger.logInfo(`Extracted ${dataMap.size} line items`);
+        
+        // Step 3: Transform to IFRS
+        const ifrsData = await transformToIFRS(dataMap);
+        
+        // Step 4: Create output workbook
+        const outputWorkbook = new ExcelJS.Workbook();
+        const outputSheet = outputWorkbook.addWorksheet('IFRS Balance Sheet');
+        
+        // Add IFRS presentation
+        outputSheet.addRow(['BALANCE SHEET - IFRS PRESENTATION']);
+        outputSheet.addRow(['As of Period End']);
+        outputSheet.addRow([]);
+        outputSheet.addRow(['ASSETS', 'Start Period', 'End Period']);
+        
+        // Non-Current Assets
+        outputSheet.addRow(['NON-CURRENT ASSETS']);
+        if (ifrsData.PPE_Net) {
+            outputSheet.addRow(['Property, Plant and Equipment', ifrsData.PPE_Net.start, ifrsData.PPE_Net.end]);
+        }
+        if (ifrsData.Intangible_Net) {
+            outputSheet.addRow(['Intangible Assets', ifrsData.Intangible_Net.start, ifrsData.Intangible_Net.end]);
+        }
+        if (ifrsData.Total_NonCurrent) {
+            outputSheet.addRow(['Total Non-Current Assets', ifrsData.Total_NonCurrent.start, ifrsData.Total_NonCurrent.end]);
+        }
+        
+        outputSheet.addRow([]);
+        
+        // Current Assets
+        outputSheet.addRow(['CURRENT ASSETS']);
+        if (ifrsData.Inventory_Total) {
+            outputSheet.addRow(['Inventories', ifrsData.Inventory_Total.start, ifrsData.Inventory_Total.end]);
+        }
+        if (ifrsData.Receivables_Total) {
+            outputSheet.addRow(['Trade Receivables', ifrsData.Receivables_Total.start, ifrsData.Receivables_Total.end]);
+        }
+        if (ifrsData.Cash_Total) {
+            outputSheet.addRow(['Cash and Cash Equivalents', ifrsData.Cash_Total.start, ifrsData.Cash_Total.end]);
+        }
+        if (ifrsData.Total_Current) {
+            outputSheet.addRow(['Total Current Assets', ifrsData.Total_Current.start, ifrsData.Total_Current.end]);
+        }
+        
+        if (ifrsData.Total_Assets) {
+            outputSheet.addRow([]);
+            outputSheet.addRow(['TOTAL ASSETS', ifrsData.Total_Assets.start, ifrsData.Total_Assets.end]);
+        }
+        
+        // Save
+        const outputPath = filePath.replace('.xls', '_ifrs.xlsx');
+        await outputWorkbook.xlsx.writeFile(outputPath);
+        
+        return {
+            success: true,
+            outputPath,
+            transformations: dataMap.size,
+            changes: Object.keys(ifrsData).length
+        };
+        
+    } catch (error) {
+        global.logger.logError(`Balance sheet processing error: ${error.message}`);
+        throw new Error(`Failed to process balance sheet: ${error.message}`);
+    }
 }
 
 /**
