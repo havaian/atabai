@@ -1,6 +1,7 @@
 const fs = require('fs').promises;
 const path = require('path');
 const ExcelJS = require('exceljs');
+const XLSX = require('xlsx');
 const crypto = require('crypto');
 const File = require('./model');
 const ProcessingJob = require('../jobs/model');
@@ -571,9 +572,29 @@ async function processFileAsync(fileRecord, processingJob) {
         processingJob.progress = 10;
         await processingJob.save();
 
-        // Read Excel file
+        const filePath = `/uploads/${fileRecord.filePath}`;
+        const fileExt = path.extname(fileRecord.fileName).toLowerCase();
+        
+        let workbookPath = filePath;
+
+        // Convert .xls to .xlsx if needed
+        if (fileExt === '.xls') {
+            global.logger.logInfo(`Converting .xls to .xlsx: ${fileRecord.originalName}`);
+            
+            // Read .xls file
+            const xlsWorkbook = XLSX.readFile(filePath);
+            
+            // Write as .xlsx
+            const xlsxPath = filePath.replace('.xls', '.xlsx');
+            XLSX.writeFile(xlsWorkbook, xlsxPath, { bookType: 'xlsx' });
+            
+            workbookPath = xlsxPath;
+            global.logger.logInfo(`Conversion complete: ${xlsxPath}`);
+        }
+
+        // Read Excel file with ExcelJS
         const workbook = new ExcelJS.Workbook();
-        await workbook.xlsx.readFile(`/uploads/${fileRecord.filePath}`);
+        await workbook.xlsx.readFile(workbookPath);
 
         processingJob.progress = 30;
         await processingJob.save();
@@ -608,7 +629,7 @@ async function processFileAsync(fileRecord, processingJob) {
         processingJob.progress = 90;
         await processingJob.save();
 
-        // Update file record - store just filename
+        // Update file record
         fileRecord.status = 'completed';
         fileRecord.processedFilePath = processedFilename;
         fileRecord.result = result.summary;
@@ -638,11 +659,7 @@ async function processFileAsync(fileRecord, processingJob) {
 
         // Update file record
         fileRecord.status = 'failed';
-        processingJob.error = {
-            message: error.message,
-            stack: error.stack,
-            name: error.name
-        };
+        fileRecord.error = error.message;
         await fileRecord.save();
     }
 }

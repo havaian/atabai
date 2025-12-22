@@ -139,7 +139,6 @@
                                 </span>
                                 <button @click="showLanguageDropdown = !showLanguageDropdown"
                                     class="flex items-center text-xs text-gray-700 hover:text-atabai-violet">
-                                    <Flags :locale="currentLocale.code" class="w-4 h-4 mr-1" />
                                     {{ currentLocale.name }}
                                     <ChevronDownIcon class="h-3 w-3 ml-1" />
                                 </button>
@@ -151,7 +150,6 @@
                                     @click="selectLanguage(lang.code)"
                                     class="w-full flex items-center justify-between px-2 py-1 rounded hover:bg-gray-100 text-xs">
                                     <div class="flex items-center">
-                                        <Flags :locale="lang.code" class="w-4 h-4 mr-2" />
                                         <span>{{ lang.name }}</span>
                                     </div>
                                     <CheckIcon v-if="locale === lang.code" class="h-3 w-3 text-atabai-violet" />
@@ -338,7 +336,6 @@ import { useAuthStore } from '@/stores/auth'
 import { useFilesStore } from '@/stores/files'
 import { onClickOutside } from '@vueuse/core'
 import LogoComponent from '@/components/Logo.vue'
-import Flags from '@/components/icons/Flags.vue'
 import { availableLocales, changeLocale } from '@/utils/i18n'
 
 // Icons

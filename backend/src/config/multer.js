@@ -1,4 +1,5 @@
 const multer = require('multer');
+const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
 
@@ -15,25 +16,20 @@ const storage = multer.diskStorage({
         cb(null, uploadDir);
     },
     filename: function (req, file, cb) {
-        // Generate a unique filename to prevent collisions
-        const uniqueFilename = `file-${Date.now()}-${Math.round(Math.random() * 1E9)}${path.extname(file.originalname)}`;
-        cb(null, uniqueFilename);
+        // Generate UUID filename to avoid encoding issues
+        const uniqueId = crypto.randomUUID();
+        const ext = path.extname(file.originalname);
+        cb(null, `${uniqueId}${ext}`);
     }
 });
 
 // File filter - only allow Excel files
 const fileFilter = (req, file, cb) => {
-    // Allowed Excel file types
-    const allowedTypes = [
-        'application/vnd.ms-excel',
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-    ];
-
-    if (allowedTypes.includes(file.mimetype)) {
-        cb(null, true);
-    } else {
-        cb(new Error('Invalid file type. Only Excel files (.xls, .xlsx) are allowed.'), false);
+    const ext = path.extname(file.originalname).toLowerCase();
+    if (ext !== '.xlsx' && ext !== '.xls') {
+        return cb(new Error('Only .xlsx and .xls files are allowed'), false);
     }
+    cb(null, true);
 };
 
 // Size limits

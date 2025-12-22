@@ -128,7 +128,6 @@
                                     ? 'bg-primary text-white'
                                     : 'text-gray-700 hover:bg-gray-100'
                             ]">
-                            <span class="mr-2"><Flags :country="locale.flag" /></span>
                             {{ locale.name }}
                         </button>
                     </div>
