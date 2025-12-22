@@ -36,7 +36,7 @@ const fileSchema = new mongoose.Schema({
     templateType: {
         type: String,
         required: true,
-        enum: ['depreciation', 'discounts', 'impairment', 'reports']
+        enum: ['depreciation', 'discounts', 'impairment', 'reports', 'balance-sheet']
     },
     status: {
         type: String,
