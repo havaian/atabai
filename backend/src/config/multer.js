@@ -6,7 +6,7 @@ const fs = require('fs');
 // Configure storage
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        const uploadDir = '/uploads';
+        const uploadDir = '/app/uploads';
 
         // Create directory if it doesn't exist
         if (!fs.existsSync(uploadDir)) {
