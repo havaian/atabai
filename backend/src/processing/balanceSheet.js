@@ -199,18 +199,33 @@ function detectBalanceSheetStructure(worksheet) {
     let nameColumn = null;
     let dataStartRow = null;
     
+    global.logger.logInfo(`Searching for structure in worksheet with ${worksheet.rowCount} rows`);
+    
     // Step 1: Find header row with "Код стр" (code column indicator)
     for (let rowNum = 1; rowNum <= Math.min(50, worksheet.rowCount); rowNum++) {
         const row = worksheet.getRow(rowNum);
         
         row.eachCell((cell, colNumber) => {
-            const cellValue = cell.value?.toString().toLowerCase() || '';
+            // Handle different cell value types
+            let cellValue = '';
             
-            // Look for "код стр" or "сатр коди" (Uzbek/Russian for "line code")
+            if (cell.value && typeof cell.value === 'object' && cell.value.richText) {
+                // Rich text cell
+                cellValue = cell.value.richText.map(t => t.text).join(' ');
+            } else if (cell.value) {
+                cellValue = cell.value.toString();
+            }
+            
+            // Normalize: remove extra spaces, newlines, and convert to lowercase
+            cellValue = cellValue.replace(/\s+/g, ' ').trim().toLowerCase();
+            
+            global.logger.logInfo(`Row ${rowNum}, Col ${colNumber}: "${cellValue}"`);
+            
+            // Look for "код стр" or "сатр коди" (with or without period)
             if (cellValue.includes('код стр') || cellValue.includes('сатр коди')) {
                 codeColumn = colNumber;
                 headerRow = rowNum;
-                global.logger.logInfo(`Found code column at row ${rowNum}, col ${colNumber}`);
+                global.logger.logInfo(`✓ Found code column at row ${rowNum}, col ${colNumber}: "${cellValue}"`);
             }
         });
         
@@ -218,20 +233,32 @@ function detectBalanceSheetStructure(worksheet) {
     }
     
     if (!codeColumn) {
+        global.logger.logError('Could not find code column. Searched first 50 rows.');
         throw new Error('Could not find code column (Код стр)');
     }
     
     // Step 2: Find "Актив" row (Assets section start)
+    global.logger.logInfo(`Searching for "Актив" starting from row ${headerRow}`);
+    
     for (let rowNum = headerRow; rowNum <= Math.min(headerRow + 10, worksheet.rowCount); rowNum++) {
         const row = worksheet.getRow(rowNum);
         
         row.eachCell((cell, colNumber) => {
-            const cellValue = cell.value?.toString().trim().toLowerCase() || '';
+            let cellValue = '';
             
+            if (cell.value && typeof cell.value === 'object' && cell.value.richText) {
+                cellValue = cell.value.richText.map(t => t.text).join(' ');
+            } else if (cell.value) {
+                cellValue = cell.value.toString();
+            }
+            
+            cellValue = cellValue.replace(/\s+/g, ' ').trim().toLowerCase();
+            
+            // Look for standalone "актив" or "aktiv"
             if (cellValue === 'актив' || cellValue === 'aktiv') {
                 dataStartRow = rowNum + 1; // Data starts AFTER "Актив"
                 nameColumn = colNumber; // This column has the names
-                global.logger.logInfo(`Found "Актив" at row ${rowNum}, col ${colNumber}`);
+                global.logger.logInfo(`✓ Found "Актив" at row ${rowNum}, col ${colNumber}`);
             }
         });
         
@@ -239,39 +266,54 @@ function detectBalanceSheetStructure(worksheet) {
     }
     
     if (!dataStartRow || !nameColumn) {
+        global.logger.logError('Could not find Assets section (Актив)');
         throw new Error('Could not find Assets section (Актив)');
     }
     
     // Step 3: Find value columns by looking at header row
+    global.logger.logInfo(`Searching for value columns in header row ${headerRow}`);
     const headerRowData = worksheet.getRow(headerRow);
     const valueColumns = [];
     
     headerRowData.eachCell((cell, colNumber) => {
-        const cellValue = cell.value?.toString().toLowerCase() || '';
+        let cellValue = '';
         
-        // Look for period indicators
-        if (cellValue.includes('начало') || cellValue.includes('boshiga')) {
-            valueColumns.push({ type: 'start', column: colNumber });
-            global.logger.logInfo(`Found start period column: ${colNumber}`);
+        if (cell.value && typeof cell.value === 'object' && cell.value.richText) {
+            cellValue = cell.value.richText.map(t => t.text).join(' ');
+        } else if (cell.value) {
+            cellValue = cell.value.toString();
         }
         
-        if (cellValue.includes('конец') || cellValue.includes('охирига')) {
+        cellValue = cellValue.replace(/\s+/g, ' ').trim().toLowerCase();
+        
+        // Look for period indicators
+        if (cellValue.includes('начало') || cellValue.includes('бошига')) {
+            valueColumns.push({ type: 'start', column: colNumber });
+            global.logger.logInfo(`✓ Found start period column: ${colNumber}`);
+        }
+        
+        if (cellValue.includes('конец') || cellValue.includes('охирига') || cellValue.includes('охир')) {
             valueColumns.push({ type: 'end', column: colNumber });
-            global.logger.logInfo(`Found end period column: ${colNumber}`);
+            global.logger.logInfo(`✓ Found end period column: ${colNumber}`);
         }
     });
     
     if (valueColumns.length === 0) {
+        global.logger.logError('Could not find value columns (period columns)');
         throw new Error('Could not find value columns');
     }
     
-    return {
+    const result = {
         headerRow,
         dataStartRow,
         codeColumn,
         nameColumn,
         valueColumns
     };
+    
+    global.logger.logInfo(`Structure detected: ${JSON.stringify(result)}`);
+    
+    return result;
 }
 
 function extractBalanceSheetData(worksheet, structure) {
