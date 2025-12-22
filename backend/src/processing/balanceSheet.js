@@ -492,48 +492,30 @@ async function processBalanceSheetTemplate(workbook, filePath) {
         const outputWorkbook = new ExcelJS.Workbook();
         const outputSheet = outputWorkbook.addWorksheet('IFRS Balance Sheet');
         
-        // Add IFRS presentation
+        // Add IFRS presentation (simplified for now)
         outputSheet.addRow(['BALANCE SHEET - IFRS PRESENTATION']);
         outputSheet.addRow(['As of Period End']);
         outputSheet.addRow([]);
-        outputSheet.addRow(['ASSETS', 'Start Period', 'End Period']);
+        outputSheet.addRow(['Account', 'Start Period', 'End Period']);
         
-        // Non-Current Assets
-        outputSheet.addRow(['NON-CURRENT ASSETS']);
-        if (ifrsData.PPE_Net) {
-            outputSheet.addRow(['Property, Plant and Equipment', ifrsData.PPE_Net.start, ifrsData.PPE_Net.end]);
-        }
-        if (ifrsData.Intangible_Net) {
-            outputSheet.addRow(['Intangible Assets', ifrsData.Intangible_Net.start, ifrsData.Intangible_Net.end]);
-        }
-        if (ifrsData.Total_NonCurrent) {
-            outputSheet.addRow(['Total Non-Current Assets', ifrsData.Total_NonCurrent.start, ifrsData.Total_NonCurrent.end]);
-        }
+        // Add all IFRS data
+        Object.entries(ifrsData).forEach(([key, data]) => {
+            outputSheet.addRow([data.label, data.start, data.end]);
+        });
         
-        outputSheet.addRow([]);
-        
-        // Current Assets
-        outputSheet.addRow(['CURRENT ASSETS']);
-        if (ifrsData.Inventory_Total) {
-            outputSheet.addRow(['Inventories', ifrsData.Inventory_Total.start, ifrsData.Inventory_Total.end]);
-        }
-        if (ifrsData.Receivables_Total) {
-            outputSheet.addRow(['Trade Receivables', ifrsData.Receivables_Total.start, ifrsData.Receivables_Total.end]);
-        }
-        if (ifrsData.Cash_Total) {
-            outputSheet.addRow(['Cash and Cash Equivalents', ifrsData.Cash_Total.start, ifrsData.Cash_Total.end]);
-        }
-        if (ifrsData.Total_Current) {
-            outputSheet.addRow(['Total Current Assets', ifrsData.Total_Current.start, ifrsData.Total_Current.end]);
+        // Step 5: Save output file
+        // FIX: Handle undefined filePath properly
+        let outputPath;
+        if (filePath && typeof filePath === 'string') {
+            // Remove .xls or .xlsx and add _ifrs.xlsx
+            outputPath = filePath.replace(/\.(xls|xlsx)$/i, '_ifrs.xlsx');
+        } else {
+            // Fallback if filePath is not provided
+            const timestamp = Date.now();
+            outputPath = `/tmp/balance_sheet_ifrs_${timestamp}.xlsx`;
         }
         
-        if (ifrsData.Total_Assets) {
-            outputSheet.addRow([]);
-            outputSheet.addRow(['TOTAL ASSETS', ifrsData.Total_Assets.start, ifrsData.Total_Assets.end]);
-        }
-        
-        // Save
-        const outputPath = filePath.replace('.xls', '_ifrs.xlsx');
+        global.logger.logInfo(`Saving output to: ${outputPath}`);
         await outputWorkbook.xlsx.writeFile(outputPath);
         
         return {
