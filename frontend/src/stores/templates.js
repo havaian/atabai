@@ -5,7 +5,8 @@ import {
     CalculatorIcon,
     ChartBarIcon,
     CurrencyDollarIcon,
-    DocumentTextIcon
+    DocumentTextIcon,
+    WalletIcon
 } from '@heroicons/vue/24/outline'
 
 export const useTemplatesStore = defineStore('templates', () => {
@@ -65,7 +66,7 @@ export const useTemplatesStore = defineStore('templates', () => {
                 name: 'Balance Sheet Transformation',
                 standard: 'IAS 1',
                 category: 'Financial Statements',
-                icon: DocumentTextIcon,  // Already imported at top
+                icon: WalletIcon,
                 description: 'Transform NSBU balance sheet to IFRS format according to IAS 1 standards',
                 subscriptionRequired: 'basic'
             },
