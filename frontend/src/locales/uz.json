@@ -282,7 +282,9 @@
     "impairment": "Aktivlar qadrsizlanishi",
     "impairmentDescription": "IAS 36 talablariga muvofiq kompleks qadrsizlanish testlari va hisob-kitoblarini o'tkazish",
     "reports": "Moliyaviy hisobotlar",
-    "reportsDescription": "Avtomatik muvofiqlik tekshiruvlari bilan XMHS ga mos kompleks moliyaviy hisobotlarni yaratish"
+    "reportsDescription": "Avtomatik muvofiqlik tekshiruvlari bilan XMHS ga mos kompleks moliyaviy hisobotlarni yaratish",
+    "balance-sheet": "Balans transformatsiyasi",
+    "balance-sheetDescription": "NSBUdan IFRS formatiga balans transformatsiyasi IAS 1 standartiga muvofiq"
   },
   "pricing": {
     "title": "ATABAI vaqt va pulni tejashga yordam beradi",
@@ -396,6 +398,12 @@
         "NZBH formatidagi aktivlarning balans qiymati bilan Excel fayl",
         "Ustunlar: Aktiv nomi, Balans qiymati, Adolatli qiymat, Pul oqimi ma'lumotlari",
         "Ixtiyoriy: Test sanasi, Bozor ko'rsatkichlari"
+      ],
+      "balance-sheet": [
+        "NSBU formatidagi balans bilan Excel fayl (Forma № 1 - ОКUD 0710001)",
+        "Standart o'zbek balans tuzilishi kutilmoqda",
+        "Ustunlar: Qator kodi, Tavsif, Boshlang'ich balans, Yakuniy balans",
+        "Tizim NSBU kodlarini IFRS klassifikatsiyasiga moslaydi"
       ]
     },
     "dropZone": {
@@ -403,6 +411,99 @@
       "subtitle": "yoki fayllarni tanlash uchun bosing",
       "chooseFile": "Fayl tanlash",
       "supportedFormats": "10MB gacha .xlsx va .xls fayllarini qo'llab-quvvatlaydi"
+    },
+
+    "sampleHeaders": {
+      "depreciation": [
+        "Aktiv nomi",
+        "Dastlabki qiymat (so'm)",
+        "Sotib olish sanasi",
+        "Xizmat muddati (yil)",
+        "Usul"
+      ],
+      "discounts": [
+        "Tranzaksiya ID",
+        "Daromad (so'm)",
+        "Chegirma turi",
+        "Chegirma %",
+        "Mijoz"
+      ],
+      "impairment": [
+        "Aktiv nomi",
+        "Balans qiymati (so'm)",
+        "Adolatli qiymat (so'm)",
+        "Test sanasi",
+        "Holat"
+      ],
+      "balance-sheet": [
+        "Qator kodi",
+        "Nomi",
+        "Davr boshida (so'm)",
+        "Davr oxirida (so'm)"
+      ]
+    },
+    "sampleData": {
+      "depreciation": [
+        [
+          "Ofis binosi",
+          "1,000,000,000",
+          "2020-01-15",
+          "40",
+          "To'g'ri chiziqli"
+        ],
+        [
+          "Ishlab chiqarish jihozi",
+          "500,000,000",
+          "2021-06-01",
+          "10",
+          "Kamayuvchi qoldiq"
+        ],
+        [
+          "Transport vositalari",
+          "150,000,000",
+          "2022-03-10",
+          "5",
+          "To'g'ri chiziqli"
+        ]
+      ],
+      "discounts": [
+        ["TXN001", "50,000,000", "Hajmiy", "5", "Mijoz A"],
+        ["TXN002", "25,000,000", "Erta to'lov", "2", "Mijoz B"],
+        ["TXN003", "75,000,000", "Mavsumiy", "10", "Mijoz C"]
+      ],
+      "impairment": [
+        [
+          "Ombor",
+          "800,000,000",
+          "750,000,000",
+          "2024-12-01",
+          "Test talab qilinadi"
+        ],
+        [
+          "Savdo do'koni",
+          "300,000,000",
+          "320,000,000",
+          "2024-12-01",
+          "Qadrsizlanish yo'q"
+        ],
+        [
+          "Ishlab chiqarish liniyasi",
+          "600,000,000",
+          "550,000,000",
+          "2024-12-01",
+          "Qadrsizlangan"
+        ]
+      ],
+      "balance-sheet": [
+        [
+          "010",
+          "Asosiy vositalar - dastlabki qiymati",
+          "379,046,345",
+          "364,903,106"
+        ],
+        ["011", "To'plangan amortizatsiya", "141,246,647", "147,353,112"],
+        ["220", "Debitorlik qarzlari", "411,581,488", "403,315,404"]
+      ]
     },
     "selectedFile": {
       "processFile": "Faylni qayta ishlash",
@@ -525,13 +626,19 @@
         "2": "Qoplanuvchi summa sotish uchun adolatli qiymat minus xarajatlar va foydalanish qiymatining eng yuqorisidan iborat",
         "3": "Hisobiy qiymat qoplanuvchi summani oshirganda qadrsizlanish zararini tan olish",
         "4": "Mustaqil naqd oqimlarini yaratmaydigan aktivlar uchun naqd yaratuvchi birliklar (NYB) aniqlanadi"
+      },
+      "balance-sheet": {
+        "1": "Balans NSBU formatidan IFRS formatiga IAS 1 - Moliyaviy hisobotlarni taqdim etish standartiga muvofiq o'zgartirildi",
+        "2": "Joriy/uzoq muddatli klassifikatsiya 12 oylik operatsion tsikl testiga amal qiladi",
+        "3": "Barcha NSBU hisob kodlari tegishli IFRS qatorlariga moslashtirilgan",
+        "4": "Ushbu moslashtirish tuzilma moslashuvini ta'minlaydi, lekin to'liq IFRS tuzatishlari va professional auditni almashtirmaydi"
       }
     },
     "pagination": {
       "rowsPerPage": "Sahifadagi qatorlar",
       "showing": "{start}-{end} dan {total} ko'rsatilmoqda",
       "previous": "Oldingi",
-      "next": "Keyingi", 
+      "next": "Keyingi",
       "page": "Sahifa",
       "of": "dan"
     }

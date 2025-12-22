@@ -255,7 +255,9 @@
     "impairment": "Asset Impairment",
     "impairmentDescription": "Perform comprehensive impairment testing and calculations according to IAS 36 requirements",
     "reports": "Financial Reports",
-    "reportsDescription": "Generate comprehensive IFRS-compliant financial reports with automated compliance checks"
+    "reportsDescription": "Generate comprehensive IFRS-compliant financial reports with automated compliance checks",
+    "balance-sheet": "Balance Sheet Transformation",
+    "balance-sheetDescription": "Transform NSBU balance sheet to IFRS format according to IAS 1 standards"
   },
   "features": {
     "title": "Why ATABAI is great",
@@ -364,6 +366,12 @@
         "Excel file with asset carrying values in NSBU format",
         "Columns: Asset Name, Carrying Value, Fair Value, Cash Flow Data",
         "Optional: Testing Date, Market Indicators"
+      ],
+      "balance-sheet": [
+        "Excel file with NSBU balance sheet format (Form № 1 - ОКУД 0710001)",
+        "Standard Uzbek balance sheet structure expected",
+        "Columns: Row Code, Description, Beginning Balance, Ending Balance",
+        "System will map NSBU codes to IFRS classifications"
       ]
     },
     "dropZone": {
@@ -402,6 +410,12 @@
         "Fair Value (UZS)",
         "Testing Date",
         "Status"
+      ],
+      "balance-sheet": [
+        "Row Code",
+        "Description",
+        "Beginning Balance (UZS)",
+        "Ending Balance (UZS)"
       ]
     },
     "sampleData": {
@@ -449,6 +463,11 @@
           "2024-12-01",
           "Impaired"
         ]
+      ],
+      "balance-sheet": [
+        ["010", "Fixed Assets - Gross", "379,046,345", "364,903,106"],
+        ["011", "Accumulated Depreciation", "141,246,647", "147,353,112"],
+        ["220", "Trade Receivables", "411,581,488", "403,315,404"]
       ]
     }
   },
@@ -562,6 +581,12 @@
         "2": "Recoverable amount is the higher of fair value less costs to sell and value in use",
         "3": "Impairment loss is recognized when carrying amount exceeds recoverable amount",
         "4": "Cash generating units (CGUs) are identified for assets that do not generate independent cash flows"
+      },
+      "balance-sheet": {
+        "1": "Balance sheet transformed from NSBU to IFRS format according to IAS 1 - Presentation of Financial Statements",
+        "2": "Current/non-current classification follows the 12-month operating cycle test",
+        "3": "All NSBU account codes have been mapped to appropriate IFRS line items",
+        "4": "This mapping provides structure alignment but does not replace full IFRS adjustments and professional audit"
       }
     },
     "pagination": {

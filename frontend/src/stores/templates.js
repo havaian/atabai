@@ -58,7 +58,7 @@ export const useTemplatesStore = defineStore('templates', () => {
                 icon: DocumentTextIcon,
                 description: 'Generate comprehensive IFRS-compliant financial reports',
                 subscriptionRequired: 'premium'
-            }
+            },
         ]
 
         // Merge with actual templates from API if available

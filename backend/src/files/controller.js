@@ -7,6 +7,7 @@ const ProcessingJob = require('../jobs/model');
 const { processDepreciationTemplate } = require('../processing/depreciation');
 const { processDiscountsTemplate } = require('../processing/discounts');
 const { processImpairmentTemplate } = require('../processing/impairment');
+const { processBalanceSheetTemplate } = require('../processing/balanceSheet');
 
 /**
  * Upload and process Excel file
@@ -33,7 +34,7 @@ async function uploadAndProcess(req, res) {
         }
 
         // Validate template type
-        const validTemplates = ['depreciation', 'discounts', 'impairment'];
+        const validTemplates = ['depreciation', 'discounts', 'impairment', 'balance-sheet'];
         if (!validTemplates.includes(template)) {
             return res.status(400).json({
                 success: false,
@@ -166,7 +167,7 @@ async function getTemplateFiles(req, res) {
         const { limit = 20, offset = 0, status } = req.query;
 
         // Validate template type
-        const validTemplates = ['depreciation', 'discounts', 'impairment'];
+        const validTemplates = ['depreciation', 'discounts', 'impairment', 'balance-sheet'];
         if (!validTemplates.includes(templateType)) {
             return res.status(400).json({
                 success: false,
@@ -587,6 +588,9 @@ async function processFileAsync(fileRecord, processingJob) {
                 break;
             case 'impairment':
                 result = await processImpairmentTemplate(workbook);
+                break;
+            case 'balance-sheet':
+                result = await processBalanceSheetTemplate(workbook);
                 break;
             default:
                 throw new Error(`Unknown template type: ${fileRecord.templateType}`);
