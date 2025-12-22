@@ -3,7 +3,9 @@
     <footer
         class="flex w-full max-w-4xl flex-col md:flex-row items-center gap-6 md:gap-10 justify-between mt-15 py-4 px-8 mb-8 rounded-47 md:mt-5 mx-auto">
         <div class="order-1 md:order-none">
-            <LogoComponent size="medium" />
+            <router-link to="/">
+                <LogoComponent size="medium" />
+            </router-link>
         </div>
         <div class="flex items-center gap-3 order-2 md:order-none">
             <!-- Telegram Button -->

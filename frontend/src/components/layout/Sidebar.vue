@@ -10,7 +10,9 @@
             <div class="p-4 border-b border-gray-200 flex-shrink-0">
                 <div class="flex items-center justify-between">
                     <div v-show="isSidebarOpen" class="flex items-center space-x-2">
-                        <LogoComponent class="h-8 w-8" />
+                        <router-link to="/">
+                            <LogoComponent class="h-8 w-8" />
+                        </router-link>
                     </div>
                     <button v-show="isSidebarOpen" @click="$emit('toggle')"
                         class="p-1 rounded-lg hover:bg-gray-100 transition-colors">
@@ -183,8 +185,10 @@
                 <!-- Header -->
                 <div class="p-4 border-b border-gray-200 flex items-center justify-between">
                     <div class="flex items-center space-x-2">
-                        <LogoComponent class="h-8 w-8" />
-                        <span class="font-semibold text-gray-900 text-lg">ATABAI</span>
+                        <router-link to="/">
+                            <LogoComponent class="h-8 w-8" />
+                            <span class="font-semibold text-gray-900 text-lg">ATABAI</span>
+                        </router-link>
                     </div>
                     <button @click="$emit('close')" class="p-1 rounded-lg hover:bg-gray-100 transition-colors">
                         <XMarkIcon class="h-5 w-5 text-gray-600" />

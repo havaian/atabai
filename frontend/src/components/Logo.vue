@@ -1,52 +1,50 @@
 <template>
-    <router-link to="/">
+    <div :class="[
+        'logo-container flex w-full h-full items-center relative transition-all duration-300 ease-in-out',
+        containerClass,
+        { 'cursor-pointer': clickable }
+    ]" @click="handleClick">
+        <!-- Default logo (visible by default, hidden on hover) -->
+        <div class="default-logo flex items-center transition-opacity duration-300 ease-in-out">
+            <img src="/images/icons/logo.svg" alt="ATABAI" :class="[
+                'mr-2',
+                logoSizeClass
+            ]" />
+            <div :class="[
+                'font-bold text-primary',
+                textSizeClass
+            ]">
+                ATABAI
+            </div>
+        </div>
+
+        <!-- Animated logo (hidden by default, visible on hover) -->
         <div :class="[
-            'logo-container flex w-full h-full items-center relative transition-all duration-300 ease-in-out',
-            containerClass,
-            { 'cursor-pointer': clickable }
-        ]" @click="handleClick">
-            <!-- Default logo (visible by default, hidden on hover) -->
-            <div class="default-logo flex items-center transition-opacity duration-300 ease-in-out">
-                <img src="/images/icons/logo.svg" alt="ATABAI" :class="[
-                    'mr-2',
-                    logoSizeClass
-                ]" />
+            'animated-logo absolute flex items-center opacity-0 transition-opacity duration-300 ease-in-out',
+            positionClass
+        ]">
+            <div :class="[
+                'flex items-center justify-center mr-2',
+                logoHeightClass
+            ]">
                 <div :class="[
-                    'font-bold text-primary',
-                    textSizeClass
+                    'select-none logo-fancy logo-svg',
+                    logoSvgClass
+                ]"></div>
+            </div>
+            <div :class="[
+                'flex items-center',
+                logoHeightClass
+            ]">
+                <div :class="[
+                    'select-none font-bold logo-fancy logo-text',
+                    textAnimatedClass
                 ]">
                     ATABAI
                 </div>
             </div>
-
-            <!-- Animated logo (hidden by default, visible on hover) -->
-            <div :class="[
-                'animated-logo absolute flex items-center opacity-0 transition-opacity duration-300 ease-in-out',
-                positionClass
-            ]">
-                <div :class="[
-                    'flex items-center justify-center mr-2',
-                    logoHeightClass
-                ]">
-                    <div :class="[
-                        'select-none logo-fancy logo-svg',
-                        logoSvgClass
-                    ]"></div>
-                </div>
-                <div :class="[
-                    'flex items-center',
-                    logoHeightClass
-                ]">
-                    <div :class="[
-                        'select-none font-bold logo-fancy logo-text',
-                        textAnimatedClass
-                    ]">
-                        ATABAI
-                    </div>
-                </div>
-            </div>
         </div>
-    </router-link>
+    </div>
 </template>
 
 <script setup>
