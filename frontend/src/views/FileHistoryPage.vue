@@ -142,7 +142,7 @@
                                 <!-- File Name -->
                                 <div class="col-span-4">
                                     <div class="flex items-center">
-                                        <DocumentIcon class="h-5 w-5 text-gray-400 mr-3 flex-shrink-0" />
+                                        <img src="/images/icons/excel.svg" class="h-5 w-5 text-gray-400 mr-3 flex-shrink-0" />
                                         <div class="min-w-0">
                                             <p class="text-sm font-medium text-gray-900 truncate">
                                                 {{ file.originalName }}
