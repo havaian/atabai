@@ -194,57 +194,39 @@ function processBalanceSheetWorksheet(sourceWorksheet, targetWorksheet) {
  * Detect the structure of the balance sheet
  */
 function detectBalanceSheetStructure(worksheet) {
-    global.logger.logInfo(`Detecting balance sheet structure. Total rows: ${worksheet.rowCount}, Total columns: ${worksheet.columnCount}`);
+    let dataStartRow = null;
+    let codeColumn = null;
     
-    // Log first 5 rows for debugging
-    for (let i = 1; i <= Math.min(5, worksheet.rowCount); i++) {
-        const row = worksheet.getRow(i);
-        const rowData = [];
-        row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
-            rowData.push(`Col${colNumber}: "${cell.value}"`);
-        });
-        global.logger.logInfo(`Row ${i}: ${rowData.join(' | ')}`);
-    }
-    
-    const structure = {
-        headerRow: null,
-        codeColumn: 2,  // Column B typically contains row codes
-        descriptionColumn: 1,  // Column A contains descriptions
-        amountColumn: 3,  // Column C and D contain amounts
-        dataStartRow: null
-    };
-
-    // Find the header row by looking for "Сатр коди" or "Код стр"
-    for (let rowNum = 1; rowNum <= Math.min(100, worksheet.rowCount); rowNum++) {
+    // Search MORE rows - up to row 50
+    for (let rowNum = 1; rowNum <= Math.min(50, worksheet.rowCount); rowNum++) {
         const row = worksheet.getRow(rowNum);
-        const codeCell = getCellValue(row.getCell(2));
-
-        if (codeCell && (
-            codeCell.includes('Код стр') ||
-            codeCell.includes('Сатр коди') ||
-            codeCell.includes('коди')
-        )) {
-            structure.headerRow = rowNum;
-            structure.dataStartRow = rowNum + 1;
-            break;
-        }
-    }
-
-    // If not found, look for "Актив" keyword which marks start of data
-    if (!structure.dataStartRow) {
-        for (let rowNum = 1; rowNum <= Math.min(100, worksheet.rowCount); rowNum++) {
-            const row = worksheet.getRow(rowNum);
-            const descCell = getCellValue(row.getCell(1));
-
-            if (descCell && descCell.includes('Актив')) {
-                structure.headerRow = rowNum - 1;
-                structure.dataStartRow = rowNum;
-                break;
+        
+        row.eachCell((cell, colNumber) => {
+            const cellValue = cell.value?.toString().toLowerCase() || '';
+            
+            // Look for "код стр" or "актив"
+            if (cellValue.includes('код стр') || cellValue.includes('код стр.')) {
+                codeColumn = colNumber;
+                dataStartRow = rowNum + 1; // Data starts next row
+                global.logger.logInfo(`Found code column at row ${rowNum}, col ${colNumber}`);
             }
-        }
+            
+            if (cellValue === 'актив' || cellValue.includes('актив')) {
+                if (!dataStartRow) {
+                    dataStartRow = rowNum + 1;
+                }
+                global.logger.logInfo(`Found 'Актив' at row ${rowNum}`);
+            }
+        });
+        
+        if (dataStartRow && codeColumn) break;
     }
-
-    return structure;
+    
+    if (!dataStartRow || !codeColumn) {
+        throw new Error('Could not detect balance sheet structure');
+    }
+    
+    return { dataStartRow, codeColumn };
 }
 
 /**

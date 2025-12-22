@@ -50,7 +50,7 @@ async function uploadAndProcess(req, res) {
 
         // Create file record - store just filename
         const fileRecord = new File({
-            originalName: req.file.originalname,
+            originalName: Buffer.from(req.file.originalname, 'latin1').toString('utf8'),
             fileName: req.file.filename,
             filePath: req.file.filename,
             fileSize: req.file.size,

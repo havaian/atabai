@@ -519,7 +519,7 @@
     "title": "Faylingizni qayta ishlash",
     "status": {
       "pending": "Kutilmoqda",
-      "uploaded": "Qayta ishlanmoqda",
+      "uploaded": "Tizimga yuklangan",
       "processing": "Qayta ishlanmoqda",
       "completed": "Yakunlandi",
       "failed": "Xato"

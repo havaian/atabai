@@ -475,6 +475,7 @@
     "title": "Processing Your File",
     "status": {
       "pending": "Pending",
+      "uploaded": "Uploaded",
       "processing": "Processing",
       "completed": "Completed",
       "failed": "Failed"
