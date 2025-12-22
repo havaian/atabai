@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const templateTypes = require('../utils/templateTypes')
 
 const processingJobSchema = new mongoose.Schema({
     // Job identification
@@ -27,7 +28,7 @@ const processingJobSchema = new mongoose.Schema({
     templateType: {
         type: String,
         required: true,
-        enum: ['depreciation', 'discounts', 'impairment', 'reports']
+        enum: templateTypes
     },
     options: {
         type: Map,

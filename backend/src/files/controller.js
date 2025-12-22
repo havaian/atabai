@@ -8,6 +8,7 @@ const { processDepreciationTemplate } = require('../processing/depreciation');
 const { processDiscountsTemplate } = require('../processing/discounts');
 const { processImpairmentTemplate } = require('../processing/impairment');
 const { processBalanceSheetTemplate } = require('../processing/balanceSheet');
+const templateTypes = require('../utils/templateTypes')
 
 /**
  * Upload and process Excel file
@@ -34,7 +35,7 @@ async function uploadAndProcess(req, res) {
         }
 
         // Validate template type
-        const validTemplates = ['depreciation', 'discounts', 'impairment', 'balance-sheet'];
+        const validTemplates = templateTypes;
         if (!validTemplates.includes(template)) {
             return res.status(400).json({
                 success: false,
@@ -167,7 +168,7 @@ async function getTemplateFiles(req, res) {
         const { limit = 20, offset = 0, status } = req.query;
 
         // Validate template type
-        const validTemplates = ['depreciation', 'discounts', 'impairment', 'balance-sheet'];
+        const validTemplates = templateTypes;
         if (!validTemplates.includes(templateType)) {
             return res.status(400).json({
                 success: false,

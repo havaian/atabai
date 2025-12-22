@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const templateTypes = require('../utils/templateTypes')
 
 const fileSchema = new mongoose.Schema({
     // File metadata
@@ -36,7 +37,7 @@ const fileSchema = new mongoose.Schema({
     templateType: {
         type: String,
         required: true,
-        enum: ['depreciation', 'discounts', 'impairment', 'reports', 'balance-sheet']
+        enum: templateTypes
     },
     status: {
         type: String,
