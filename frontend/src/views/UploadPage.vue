@@ -283,6 +283,10 @@ onMounted(async () => {
         return
     }
 
+    console.log('Template ID:', templateId.value)
+    console.log('Checking key:', `upload.instructions.${templateId.value}`)
+    console.log('Translation result:', t(`upload.instructions.${templateId.value}`, { returnObjects: true }))
+
     // Load recent files for this template
     await loadTemplateFiles()
 })
