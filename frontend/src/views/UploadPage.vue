@@ -263,25 +263,21 @@ const recentTemplateFiles = computed(() => {
 // Template-specific configurations
 const uploadInstructions = computed(() => {
     if (!templateId.value) return []
-    // Convert balanceSheet to balance-sheet
-    const kebabId = templateId.value.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase()
-    const instructionsKey = `upload.instructions.${kebabId}`
+    const instructionsKey = `upload.instructions.${templateId}`
     const result = t(instructionsKey, { returnObjects: true })
     return Array.isArray(result) ? result : []
 })
 
 const sampleHeaders = computed(() => {
     if (!templateId.value) return []
-    const kebabId = templateId.value.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase()
-    const headersKey = `upload.sampleHeaders.${kebabId}`
+    const headersKey = `upload.sampleHeaders.${templateId}`
     const result = t(headersKey, { returnObjects: true })
     return Array.isArray(result) ? result : []
 })
 
 const sampleData = computed(() => {
     if (!templateId.value) return []
-    const kebabId = templateId.value.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase()
-    const dataKey = `upload.sampleData.${kebabId}`
+    const dataKey = `upload.sampleData.${templateId}`
     const result = t(dataKey, { returnObjects: true })
     return Array.isArray(result) ? result : []
 })
