@@ -1,1 +1,1 @@
-module.exports = ['depreciation', 'discounts', 'impairment', 'reports', 'balance-sheet'];
+module.exports = ['depreciation', 'discounts', 'impairment', 'reports', 'balanceSheet'];

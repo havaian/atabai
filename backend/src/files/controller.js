@@ -609,7 +609,7 @@ async function processFileAsync(fileRecord, processingJob) {
             case 'impairment':
                 result = await processImpairmentTemplate(workbook);
                 break;
-            case 'balance-sheet':
+            case 'balanceSheet':
                 result = await processBalanceSheetTemplate(workbook);
                 break;
             default:

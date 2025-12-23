@@ -283,8 +283,8 @@
     "impairmentDescription": "IAS 36 talablariga muvofiq kompleks qadrsizlanish testlari va hisob-kitoblarini o'tkazish",
     "reports": "Moliyaviy hisobotlar",
     "reportsDescription": "Avtomatik muvofiqlik tekshiruvlari bilan XMHS ga mos kompleks moliyaviy hisobotlarni yaratish",
-    "balance-sheet": "Balans transformatsiyasi",
-    "balance-sheetDescription": "NSBUdan IFRS formatiga balans transformatsiyasi IAS 1 standartiga muvofiq"
+    "balanceSheet": "Balans transformatsiyasi",
+    "balanceSheetDescription": "NSBUdan IFRS formatiga balans transformatsiyasi IAS 1 standartiga muvofiq"
   },
   "pricing": {
     "title": "ATABAI vaqt va pulni tejashga yordam beradi",
@@ -399,7 +399,7 @@
         "Ustunlar: Aktiv nomi, Balans qiymati, Adolatli qiymat, Pul oqimi ma'lumotlari",
         "Ixtiyoriy: Test sanasi, Bozor ko'rsatkichlari"
       ],
-      "balance-sheet": [
+      "balanceSheet": [
         "NSBU formatidagi balans bilan Excel fayl (Forma № 1 - ОКUD 0710001)",
         "Standart o'zbek balans tuzilishi kutilmoqda",
         "Ustunlar: Qator kodi, Tavsif, Boshlang'ich balans, Yakuniy balans",
@@ -435,7 +435,7 @@
         "Test sanasi",
         "Holat"
       ],
-      "balance-sheet": [
+      "balanceSheet": [
         "Qator kodi",
         "Nomi",
         "Davr boshida (so'm)",
@@ -494,7 +494,7 @@
           "Qadrsizlangan"
         ]
       ],
-      "balance-sheet": [
+      "balanceSheet": [
         [
           "010",
           "Asosiy vositalar - dastlabki qiymati",
@@ -636,7 +636,7 @@
         "3": "Hisobiy qiymat qoplanuvchi summani oshirganda qadrsizlanish zararini tan olish",
         "4": "Mustaqil naqd oqimlarini yaratmaydigan aktivlar uchun naqd yaratuvchi birliklar (NYB) aniqlanadi"
       },
-      "balance-sheet": {
+      "balanceSheet": {
         "1": "Balans NSBU formatidan IFRS formatiga IAS 1 - Moliyaviy hisobotlarni taqdim etish standartiga muvofiq o'zgartirildi",
         "2": "Joriy/uzoq muddatli klassifikatsiya 12 oylik operatsion tsikl testiga amal qiladi",
         "3": "Barcha NSBU hisob kodlari tegishli IFRS qatorlariga moslashtirilgan",

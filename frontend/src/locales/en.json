@@ -256,8 +256,8 @@
     "impairmentDescription": "Perform comprehensive impairment testing and calculations according to IAS 36 requirements",
     "reports": "Financial Reports",
     "reportsDescription": "Generate comprehensive IFRS-compliant financial reports with automated compliance checks",
-    "balance-sheet": "Balance Sheet Transformation",
-    "balance-sheetDescription": "Transform NSBU balance sheet to IFRS format according to IAS 1 standards"
+    "balanceSheet": "Balance Sheet Transformation",
+    "balanceSheetDescription": "Transform NSBU balance sheet to IFRS format according to IAS 1 standards"
   },
   "features": {
     "title": "Why ATABAI is great",
@@ -367,7 +367,7 @@
         "Columns: Asset Name, Carrying Value, Fair Value, Cash Flow Data",
         "Optional: Testing Date, Market Indicators"
       ],
-      "balance-sheet": [
+      "balanceSheet": [
         "Excel file with NSBU balance sheet format (Form № 1 - ОКУД 0710001)",
         "Standard Uzbek balance sheet structure expected",
         "Columns: Row Code, Description, Beginning Balance, Ending Balance",
@@ -411,7 +411,7 @@
         "Testing Date",
         "Status"
       ],
-      "balance-sheet": [
+      "balanceSheet": [
         "Row Code",
         "Description",
         "Beginning Balance (UZS)",
@@ -464,7 +464,7 @@
           "Impaired"
         ]
       ],
-      "balance-sheet": [
+      "balanceSheet": [
         ["010", "Fixed Assets - Gross", "379,046,345", "364,903,106"],
         ["011", "Accumulated Depreciation", "141,246,647", "147,353,112"],
         ["220", "Trade Receivables", "411,581,488", "403,315,404"]
@@ -592,7 +592,7 @@
         "3": "Impairment loss is recognized when carrying amount exceeds recoverable amount",
         "4": "Cash generating units (CGUs) are identified for assets that do not generate independent cash flows"
       },
-      "balance-sheet": {
+      "balanceSheet": {
         "1": "Balance sheet transformed from NSBU to IFRS format according to IAS 1 - Presentation of Financial Statements",
         "2": "Current/non-current classification follows the 12-month operating cycle test",
         "3": "All NSBU account codes have been mapped to appropriate IFRS line items",

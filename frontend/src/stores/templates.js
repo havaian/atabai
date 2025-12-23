@@ -61,8 +61,8 @@ export const useTemplatesStore = defineStore('templates', () => {
             //     subscriptionRequired: 'premium'
             // },
             {
-                id: 'balance-sheet',
-                key: 'balance-sheet',
+                id: 'balanceSheet',
+                key: 'balanceSheet',
                 name: 'Balance Sheet Transformation',
                 standard: 'IAS 1',
                 category: 'Financial Statements',
@@ -265,7 +265,7 @@ export const useTemplatesStore = defineStore('templates', () => {
                     placeholder: 'Date of impairment test'
                 }
             ],
-            'balance-sheet': [
+            'balanceSheet': [
                 {
                     name: 'rowCode',
                     type: 'text',
@@ -318,7 +318,7 @@ export const useTemplatesStore = defineStore('templates', () => {
                 ru: 'Загрузите данные об активах для тестирования на обесценение. Шаблон выполнит расчеты обесценения в соответствии с IAS 36.',
                 uz: 'Qadrsizlanishni sinash uchun aktiv ma\'lumotlarini yuklang. Shablon IAS 36 ga muvofiq qadrsizlanish hisob-kitoblarini amalga oshiradi.'
             },
-            'balance-sheet': {
+            'balanceSheet': {
                 en: 'Upload your NSBU balance sheet (Form № 1). The template will map all line items to IFRS classifications according to IAS 1.',
                 ru: 'Загрузите баланс в формате НСБУ (Форма № 1). Шаблон сопоставит все статьи с классификацией МСФО согласно IAS 1.',
                 uz: 'NSBU balansini yuklang (Forma № 1). Shablon barcha qatorlarni IAS 1 ga muvofiq IFRS klassifikatsiyasiga moslaydi.'
@@ -360,7 +360,7 @@ export const useTemplatesStore = defineStore('templates', () => {
                     description: 'Cash-generating unit impairment assessment'
                 }
             ],
-            'balance-sheet': [
+            'balanceSheet': [
                 {
                     name: 'Standard Balance Sheet Mapping',
                     description: 'Complete NSBU to IFRS transformation for standard Uzbek balance sheet'
