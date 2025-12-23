@@ -379,7 +379,7 @@ async function getFileDetails(req, res) {
 async function downloadFile(req, res) {
     try {
         const { fileId } = req.params;
-        const { type = 'processed' } = req.query; // 'original' or 'processed'
+        const { type = 'processed' } = req.query;
 
         const file = await File.findOne({
             _id: fileId,
@@ -399,7 +399,7 @@ async function downloadFile(req, res) {
 
         if (type === 'original') {
             downloadPath = `/uploads/${file.filePath}`;
-            downloadName = file.originalName;
+            downloadName = file.filePath; // Use stored filename, not originalName
         } else {
             if (!file.processedFilePath) {
                 return res.status(400).json({
@@ -409,9 +409,7 @@ async function downloadFile(req, res) {
                 });
             }
             downloadPath = `/uploads/${file.processedFilePath}`;
-            const ext = path.extname(file.originalName);
-            const name = path.basename(file.originalName, ext);
-            downloadName = `${name}_ifrs${ext}`;
+            downloadName = file.processedFilePath; // Clean UUID-based name
         }
 
         // Check if file exists
@@ -425,15 +423,9 @@ async function downloadFile(req, res) {
             });
         }
 
-        // Set download headers
-        const encodedFilename = encodeURIComponent(downloadName);
-        const asciiFilename = downloadName.replace(/[^\x00-\x7F]/g, '_'); // Fallback for old browsers
-        
+        // Simple headers - no encoding bullshit
         res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        res.setHeader(
-            'Content-Disposition',
-            `attachment; filename="${asciiFilename}"; filename*=UTF-8''${encodedFilename}`
-        );
+        res.setHeader('Content-Disposition', `attachment; filename="${downloadName}"`);
 
         // Stream file
         const fileStream = require('fs').createReadStream(downloadPath);
