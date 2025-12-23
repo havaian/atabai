@@ -263,42 +263,20 @@ const recentTemplateFiles = computed(() => {
 // Template-specific configurations
 const uploadInstructions = computed(() => {
     if (!templateId.value) return []
-    
-    // Access the raw messages object directly instead of using t()
-    try {
-        const currentLocale = locale.value
-        const instructions = messages.value[currentLocale]?.upload?.instructions?.[templateId.value]
-        return Array.isArray(instructions) ? instructions : []
-    } catch (error) {
-        console.error('Failed to load instructions:', error)
-        return []
-    }
+    const result = tObj(`upload.instructions.${templateId.value}`)
+    return Array.isArray(result) ? result : []
 })
 
 const sampleHeaders = computed(() => {
     if (!templateId.value) return []
-    
-    try {
-        const currentLocale = locale.value
-        const headers = messages.value[currentLocale]?.upload?.sampleHeaders?.[templateId.value]
-        return Array.isArray(headers) ? headers : []
-    } catch (error) {
-        console.error('Failed to load sample headers:', error)
-        return []
-    }
+    const result = tObj(`upload.sampleHeaders.${templateId.value}`)
+    return Array.isArray(result) ? result : []
 })
 
 const sampleData = computed(() => {
     if (!templateId.value) return []
-    
-    try {
-        const currentLocale = locale.value
-        const data = messages.value[currentLocale]?.upload?.sampleData?.[templateId.value]
-        return Array.isArray(data) ? data : []
-    } catch (error) {
-        console.error('Failed to load sample data:', error)
-        return []
-    }
+    const result = tObj(`upload.sampleData.${templateId.value}`)
+    return Array.isArray(result) ? result : []
 })
 
 onMounted(async () => {
@@ -307,27 +285,6 @@ onMounted(async () => {
         router.push('/dashboard')
         return
     }
-
-    // Debug i18n messages object
-    console.log('=== i18n Debug ===')
-    console.log('Template ID:', templateId.value)
-    console.log('Current locale:', locale.value)
-
-    // Check if messages are loaded
-    console.log('Available locales:', Object.keys(messages.value))
-    console.log('Current locale messages:', messages.value[locale.value])
-    console.log('Upload section:', messages.value[locale.value]?.upload)
-    console.log('Instructions section:', messages.value[locale.value]?.upload?.instructions)
-    console.log('Balance sheet instructions:', messages.value[locale.value]?.upload?.instructions?.['balance-sheet'])
-
-    // Try with different key formats
-    const camelKey = `upload.instructions.balanceSheet`
-
-    console.log('Trying camelCase:', camelKey)
-    console.log('Result:', t(camelKey, { returnObjects: true }))
-
-    // Test if returnObjects works at all
-    console.log('Testing returnObjects with upload section:', t('upload', { returnObjects: true }))
 
     // Load recent files for this template
     await loadTemplateFiles()

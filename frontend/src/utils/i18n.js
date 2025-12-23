@@ -82,6 +82,28 @@ const i18n = createI18n({
     silentFallbackWarn: true
 })
 
+// Custom helper for returnObjects that actually works
+i18n.global.tObj = function(key) {
+    try {
+        const locale = i18n.global.locale.value
+        const keys = key.split('.')
+        let result = i18n.global.messages.value[locale]
+        
+        for (const k of keys) {
+            if (result && typeof result === 'object') {
+                result = result[k]
+            } else {
+                return key // Return key if path doesn't exist
+            }
+        }
+        
+        return result !== undefined ? result : key
+    } catch (error) {
+        console.warn(`tObj failed for key: ${key}`, error)
+        return key
+    }
+}
+
 // Track initialization state
 let isInitialized = false
 let initializationPromise = null
