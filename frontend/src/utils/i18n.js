@@ -78,12 +78,12 @@ const i18n = createI18n({
     fallbackLocale: DEFAULT_LOCALE,
     messages: {}, // Will be loaded dynamically
     globalInjection: true,
-    silentTranslationWarn: true, // Reduce console warnings during initialization
+    silentTranslationWarn: true,
     silentFallbackWarn: true
 })
 
-// Custom helper for returnObjects that actually works
-i18n.global.tObj = function(key) {
+// Export tObj as a standalone function
+export function tObj(key) {
     try {
         const locale = i18n.global.locale.value
         const keys = key.split('.')

@@ -221,6 +221,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import { tObj } from '@/utils/i18n'
 import { useTemplatesStore } from '@/stores/templates'
 import { useFilesStore } from '@/stores/files'
 import {
