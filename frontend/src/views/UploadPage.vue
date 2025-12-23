@@ -285,7 +285,7 @@ onMounted(async () => {
 
     console.log('Template ID:', templateId.value)
     console.log('Checking key:', `upload.instructions.${templateId.value}`)
-    console.log('Translation result:', t(`upload.instructions.${templateId.value}`))
+    console.log('Translation result:', t('upload.instructions.balanceSheet'))
 
     // Load recent files for this template
     await loadTemplateFiles()
