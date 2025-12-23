@@ -7,7 +7,7 @@ function detectBalanceSheetStructure(worksheet) {
     let nameColumn = null;
     let dataStartRow = null;
     let unitOfMeasurement = null;
-    let unitDivisor = 1; // Default: no conversion
+    let unitDivisor = 1;
 
     function getCellText(cell) {
         if (!cell || !cell.value) return '';
@@ -32,21 +32,18 @@ function detectBalanceSheetStructure(worksheet) {
             const cellText = getCellText(cell);
             const normalized = normalizeText(cellText);
 
-            // Check for end markers
             if (normalized.includes('раҳбар') || normalized.includes('руководитель') ||
                 normalized.includes('бош бухгалтер') || normalized.includes('главный бухгалтер')) {
                 lastMeaningfulRow = rowNum;
                 global.logger.logInfo(`Found end marker at row ${rowNum}`);
             }
 
-            // Extract unit of measurement and determine divisor
             if ((normalized.includes('единица измерения') || normalized.includes('ўлчов бирлиги')) && !unitOfMeasurement) {
                 const match = cellText.match(/[,،]\s*(.+?)$/);
                 if (match) {
                     unitOfMeasurement = match[1].trim();
                     const unitNormalized = normalizeText(unitOfMeasurement);
 
-                    // Determine divisor based on unit
                     if (unitNormalized.includes('тыс') || unitNormalized.includes('минг')) {
                         unitDivisor = 1000;
                         global.logger.logInfo('Detected unit: thousands (divisor = 1000)');
@@ -69,7 +66,6 @@ function detectBalanceSheetStructure(worksheet) {
         if (rowNum > lastMeaningfulRow + 5) break;
     }
 
-    // Default to thousands if not found
     if (!unitOfMeasurement) {
         unitOfMeasurement = 'тыс. сум. / thousands of sums';
         unitDivisor = 1000;
@@ -78,7 +74,72 @@ function detectBalanceSheetStructure(worksheet) {
 
     global.logger.logInfo(`Searching for structure in ${lastMeaningfulRow} meaningful rows`);
 
-    // ... rest of the function stays the same ...
+    // Find code column
+    for (let rowNum = 1; rowNum <= lastMeaningfulRow; rowNum++) {
+        const row = worksheet.getRow(rowNum);
+
+        row.eachCell((cell, colNumber) => {
+            const cellText = getCellText(cell);
+            const normalized = normalizeText(cellText);
+
+            if (normalized.includes('код стр') || normalized.includes('сатр коди')) {
+                codeColumn = colNumber;
+                headerRow = rowNum;
+                global.logger.logInfo(`✓ Found code column at row ${rowNum}, col ${colNumber}`);
+            }
+        });
+
+        if (codeColumn) break;
+    }
+
+    if (!codeColumn) {
+        throw new Error('Could not find code column (Код стр / Сатр коди)');
+    }
+
+    // Find data start row
+    for (let rowNum = headerRow; rowNum <= Math.min(headerRow + 20, lastMeaningfulRow); rowNum++) {
+        const row = worksheet.getRow(rowNum);
+
+        row.eachCell((cell, colNumber) => {
+            const cellText = getCellText(cell);
+            const normalized = normalizeText(cellText);
+
+            if (normalized === 'актив' || normalized === 'aktiv') {
+                dataStartRow = rowNum + 1;
+                nameColumn = colNumber;
+                global.logger.logInfo(`✓ Found "Актив" at row ${rowNum}, col ${colNumber}`);
+            }
+        });
+
+        if (dataStartRow) break;
+    }
+
+    if (!dataStartRow || !nameColumn) {
+        throw new Error('Could not find Assets section (Актив)');
+    }
+
+    // Find value columns
+    const headerRowData = worksheet.getRow(headerRow);
+    const valueColumns = [];
+
+    headerRowData.eachCell((cell, colNumber) => {
+        const cellText = getCellText(cell);
+        const normalized = normalizeText(cellText);
+
+        if (normalized.includes('начало') || normalized.includes('бошига')) {
+            valueColumns.push({ type: 'start', column: colNumber });
+            global.logger.logInfo(`✓ Found start period column: ${colNumber}`);
+        }
+
+        if (normalized.includes('конец') || normalized.includes('охирига') || normalized.includes('охир')) {
+            valueColumns.push({ type: 'end', column: colNumber });
+            global.logger.logInfo(`✓ Found end period column: ${colNumber}`);
+        }
+    });
+
+    if (valueColumns.length === 0) {
+        throw new Error('Could not find value columns');
+    }
 
     return {
         headerRow,
@@ -88,7 +149,7 @@ function detectBalanceSheetStructure(worksheet) {
         valueColumns,
         lastMeaningfulRow,
         unitOfMeasurement,
-        unitDivisor  // ← Add this
+        unitDivisor
     };
 }
 
@@ -127,7 +188,7 @@ function extractBalanceSheetData(worksheet, structure) {
                 value = 0;
             }
 
-            // Apply unit divisor to convert to declared unit
+            // Apply unit divisor
             if (unitDivisor !== 1 && value !== 0) {
                 value = value / unitDivisor;
             }
@@ -166,7 +227,7 @@ async function transformToIFRS(dataMap) {
         }
     });
 
-    // Also include section totals
+    // Include section totals
     Object.keys(SECTION_TOTALS).forEach(code => {
         if (dataMap.has(code) && !ifrsData[code]) {
             const nsbuData = dataMap.get(code);
@@ -200,18 +261,14 @@ async function processBalanceSheetTemplate(workbook) {
     try {
         const worksheet = workbook.worksheets[0];
 
-        // Detect structure
         const structure = detectBalanceSheetStructure(worksheet);
         global.logger.logInfo(`Detected structure: ${JSON.stringify(structure)}`);
 
-        // Extract data
         const dataMap = extractBalanceSheetData(worksheet, structure);
         global.logger.logInfo(`Extracted ${dataMap.size} line items`);
 
-        // Transform to IFRS
         const ifrsData = await transformToIFRS(dataMap);
 
-        // Create IFRS sheet
         const outputSheet = result.workbook.addWorksheet('IFRS Balance Sheet');
 
         outputSheet.addRow(['BALANCE SHEET - IFRS PRESENTATION']);
@@ -220,11 +277,10 @@ async function processBalanceSheetTemplate(workbook) {
         outputSheet.addRow([]);
         outputSheet.addRow(['Account', 'Start Period', 'End Period']);
 
-        // Sort by section order
         const sectionOrder = [
             'ASSETS - NON-CURRENT',
             'ASSETS - CURRENT',
-            'TOTALS', // For asset totals
+            'TOTALS',
             'EQUITY',
             'LIABILITIES - NON-CURRENT',
             'LIABILITIES - CURRENT'
@@ -241,12 +297,10 @@ async function processBalanceSheetTemplate(workbook) {
             outputSheet.addRow([data.label, data.start, data.end]);
         });
 
-        // Set column widths
         outputSheet.getColumn(1).width = 45;
         outputSheet.getColumn(2).width = 18;
         outputSheet.getColumn(3).width = 18;
 
-        // Format number columns
         outputSheet.getColumn(2).numFmt = '#,##0.00';
         outputSheet.getColumn(3).numFmt = '#,##0.00';
 

@@ -117,7 +117,7 @@
 
             <!-- Empty State -->
             <div v-else-if="recentTemplateFiles.length === 0" class="text-center py-8">
-                <DocumentIcon class="h-12 w-12 text-gray-400 mx-auto mb-3" />
+                <img src="/images/icons/excel.svg" class="h-12 w-12 text-gray-400 mx-auto mb-3" />
                 <h3 class="text-sm font-medium text-gray-900 mb-1">No files processed yet</h3>
                 <p class="text-xs text-gray-500">Process your first {{ currentTemplate?.name }} file above</p>
             </div>
