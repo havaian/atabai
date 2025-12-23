@@ -426,7 +426,7 @@ async function downloadFile(req, res) {
         }
 
         // Set download headers
-        const encodedFilename = encodeURIComponent(downloadFilename);
+        const encodedFilename = encodeURIComponent(downloadName);
         const asciiFilename = downloadName.replace(/[^\x00-\x7F]/g, '_'); // Fallback for old browsers
         
         res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
