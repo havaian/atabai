@@ -469,7 +469,16 @@
         ["011", "Accumulated Depreciation", "141,246,647", "147,353,112"],
         ["220", "Trade Receivables", "411,581,488", "403,315,404"]
       ]
-    }
+    },
+    "recentFiles": {
+      "title": "Recent {template} Files",
+      "description": "Your recently processed files for this template",
+      "viewAll": "View All →",
+      "loading": "Loading recent files...",
+      "empty": "No files processed yet",
+      "emptyAction": "Process your first {template} file above"
+    },
+    "supportedFormats": "Supports .xlsx and .xls files up to 50MB"
   },
   "processing": {
     "title": "Processing Your File",

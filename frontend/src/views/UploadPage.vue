@@ -3,7 +3,7 @@
         <!-- Back Button -->
         <button @click="goBack" class="mb-6 flex items-center text-gray-600 hover:text-atabai-violet transition-colors">
             <ArrowLeftIcon class="h-5 w-5 mr-2" />
-            Back to Dashboard
+            {{ $t('upload.backToDashboard') }}
         </button>
 
         <!-- Template Header -->
@@ -28,11 +28,11 @@
 
         <!-- File Upload Section -->
         <div class="bg-white border border-gray-200 rounded-xl p-6 mb-8">
-            <h2 class="text-xl font-semibold text-gray-900 mb-4">Upload Your File</h2>
+            <h2 class="text-xl font-semibold text-gray-900 mb-4">{{ $t('upload.uploadSection') }}</h2>
 
             <!-- Upload Instructions -->
             <div class="mb-6 p-4 bg-blue-50 rounded-lg">
-                <h3 class="text-sm font-medium text-blue-900 mb-2">Expected File Format:</h3>
+                <h3 class="text-sm font-medium text-blue-900 mb-2">{{ $t('upload.expectedFormat') }}</h3>
                 <ul class="text-sm text-blue-800 space-y-1">
                     <li v-for="instruction in uploadInstructions" :key="instruction">• {{ instruction }}</li>
                 </ul>
@@ -44,14 +44,14 @@
                 :class="{ 'border-atabai-violet bg-atabai-violet/5': isDragOver }">
                 <div v-if="!selectedFile">
                     <CloudArrowUpIcon class="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <h3 class="text-lg font-medium text-gray-900 mb-2">Drop your Excel file here</h3>
-                    <p class="text-gray-500 mb-4">or click to browse files</p>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">{{ $t('upload.dropZone.title') }}</h3>
+                    <p class="text-gray-500 mb-4">{{ $t('upload.dropZone.subtitle') }}</p>
                     <input ref="fileInput" type="file" @change="handleFileSelect" accept=".xlsx,.xls" class="hidden" />
                     <button @click="$refs.fileInput.click()"
                         class="bg-atabai-violet text-white px-6 py-2 rounded-lg hover:bg-atabai-violet/90 transition-colors">
-                        Choose File
+                        {{ $t('upload.dropZone.chooseFile') }}
                     </button>
-                    <p class="text-xs text-gray-400 mt-2">Supports .xlsx and .xls files up to 50MB</p>
+                    <p class="text-xs text-gray-400 mt-2">{{ $t('upload.dropZone.supportedFormats') }}</p>
                 </div>
 
                 <!-- Selected File Preview -->
@@ -69,20 +69,21 @@
                         <div class="bg-atabai-violet h-2 rounded-full transition-all duration-300"
                             :style="{ width: uploadProgress + '%' }"></div>
                     </div>
-                    <p v-if="isProcessing" class="text-sm text-gray-600">{{ uploadProgress }}% uploaded</p>
+                    <p v-if="isProcessing" class="text-sm text-gray-600">{{ uploadProgress }}% {{ $t('common.uploading')
+                        }}</p>
 
                     <div class="flex space-x-3 justify-center">
                         <button @click="processFile" :disabled="isProcessing"
                             class="bg-atabai-violet text-white px-6 py-2 rounded-lg hover:bg-atabai-violet/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
-                            <span v-if="!isProcessing">Process File</span>
+                            <span v-if="!isProcessing">{{ $t('upload.selectedFile.processFile') }}</span>
                             <span v-else class="flex items-center">
                                 <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                                Processing...
+                                {{ $t('upload.selectedFile.processing') }}
                             </span>
                         </button>
                         <button @click="clearFile" :disabled="isProcessing"
                             class="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600 disabled:opacity-50 transition-colors">
-                            Choose Different File
+                            {{ $t('upload.selectedFile.chooseDifferent') }}
                         </button>
                     </div>
                 </div>
@@ -98,12 +99,14 @@
         <div v-if="templateId" class="bg-white border border-gray-200 rounded-xl p-6 mb-8">
             <div class="flex items-center justify-between mb-4">
                 <div>
-                    <h2 class="text-xl font-semibold text-gray-900">Recent {{ currentTemplate?.name }} Files</h2>
-                    <p class="text-sm text-gray-500 mt-1">Your recently processed files for this template</p>
+                    <h2 class="text-xl font-semibold text-gray-900">{{ $t('upload.recentFiles.title', {
+                        template:
+                        currentTemplate?.name }) }}</h2>
+                    <p class="text-sm text-gray-500 mt-1">{{ $t('upload.recentFiles.description') }}</p>
                 </div>
                 <button @click="viewAllTemplateFiles"
                     class="text-sm text-atabai-violet hover:text-atabai-violet/80 transition-colors">
-                    View All →
+                    {{ $t('upload.recentFiles.viewAll') }}
                 </button>
             </div>
 
@@ -111,15 +114,17 @@
             <div v-if="templateFilesLoading" class="flex items-center justify-center py-8">
                 <div class="text-center">
                     <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-atabai-violet mx-auto"></div>
-                    <p class="mt-2 text-sm text-gray-500">Loading recent files...</p>
+                    <p class="mt-2 text-sm text-gray-500">{{ $t('upload.recentFiles.loading') }}</p>
                 </div>
             </div>
 
             <!-- Empty State -->
             <div v-else-if="recentTemplateFiles.length === 0" class="text-center py-8">
-                <img src="/images/icons/excel.svg" class="h-12 w-12 text-gray-400 mx-auto mb-3" />
-                <h3 class="text-sm font-medium text-gray-900 mb-1">No files processed yet</h3>
-                <p class="text-xs text-gray-500">Process your first {{ currentTemplate?.name }} file above</p>
+                <DocumentIcon class="h-12 w-12 text-gray-400 mx-auto mb-3" />
+                <h3 class="text-sm font-medium text-gray-900 mb-1">{{ $t('upload.recentFiles.empty') }}</h3>
+                <p class="text-xs text-gray-500">{{ $t('upload.recentFiles.emptyAction', {
+                    template:
+                    currentTemplate?.name }) }}</p>
             </div>
 
             <!-- Files List -->
@@ -145,7 +150,7 @@
                         <!-- View Results -->
                         <button v-if="file.status === 'completed'" @click="viewFile(file)"
                             class="p-1.5 text-atabai-violet hover:bg-atabai-violet/10 rounded-lg transition-colors"
-                            title="View Results">
+                            :title="$t('history.actions.view')">
                             <EyeIcon class="h-4 w-4" />
                         </button>
 
@@ -153,7 +158,7 @@
                         <button v-else-if="['processing', 'pending'].includes(file.status)"
                             @click="viewProcessing(file)"
                             class="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                            title="View Processing Status">
+                            :title="$t('history.actions.viewProcessing')">
                             <ClockIcon class="h-4 w-4" />
                         </button>
 
@@ -161,7 +166,7 @@
                         <button v-if="file.status === 'completed'" @click="downloadFile(file)"
                             :disabled="file.downloading"
                             class="p-1.5 text-green-600 hover:bg-green-50 rounded-lg transition-colors disabled:opacity-50"
-                            title="Download Processed File">
+                            :title="$t('history.actions.download')">
                             <ArrowDownTrayIcon v-if="!file.downloading" class="h-4 w-4" />
                             <div v-else
                                 class="h-4 w-4 animate-spin border-2 border-green-600 border-t-transparent rounded-full">
@@ -171,7 +176,7 @@
                         <!-- Retry -->
                         <button v-if="file.status === 'failed'" @click="retryFile(file)" :disabled="file.retrying"
                             class="p-1.5 text-yellow-600 hover:bg-yellow-50 rounded-lg transition-colors disabled:opacity-50"
-                            title="Retry Processing">
+                            :title="$t('history.actions.retry')">
                             <ArrowPathIcon v-if="!file.retrying" class="h-4 w-4" />
                             <div v-else
                                 class="h-4 w-4 animate-spin border-2 border-yellow-600 border-t-transparent rounded-full">
@@ -184,7 +189,7 @@
 
         <!-- Sample Data Format -->
         <div class="bg-white border border-gray-200 rounded-xl p-6">
-            <h2 class="text-xl font-semibold text-gray-900 mb-4">Sample Excel Format</h2>
+            <h2 class="text-xl font-semibold text-gray-900 mb-4">{{ $t('upload.sampleFormat.title') }}</h2>
             <div class="overflow-x-auto">
                 <table class="w-full border-collapse border border-gray-300 text-sm">
                     <thead>
@@ -206,8 +211,7 @@
                 </table>
             </div>
             <p class="text-sm text-gray-500 mt-3">
-                Your Excel file should have similar column structure. The system will automatically detect columns and
-                apply IFRS transformations.
+                {{ $t('upload.sampleFormat.description') }}
             </p>
         </div>
     </div>
@@ -258,55 +262,18 @@ const recentTemplateFiles = computed(() => {
 
 // Template-specific configurations
 const uploadInstructions = computed(() => {
-    const instructions = {
-        depreciation: [
-            'Excel file with asset data in NSBU format',
-            'Columns: Asset Name, Original Cost, Purchase Date, Useful Life',
-            'Optional: Depreciation Method, Residual Value',
-            'Each row should represent one asset'
-        ],
-        discounts: [
-            'Excel file with revenue/discount data in NSBU format',
-            'Columns: Transaction ID, Revenue Amount, Discount Type, Discount Value',
-            'Optional: Customer, Date, Product Category'
-        ],
-        impairment: [
-            'Excel file with asset carrying values in NSBU format',
-            'Columns: Asset Name, Carrying Value, Fair Value, Cash Flow Data',
-            'Optional: Testing Date, Market Indicators'
-        ]
-    }
-    return instructions[templateId.value] || []
+    const instructionsKey = `upload.instructions.${templateId.value}`
+    return t(instructionsKey, { returnObjects: true })
 })
 
 const sampleHeaders = computed(() => {
-    const headers = {
-        depreciation: ['Asset Name', 'Original Cost (UZS)', 'Purchase Date', 'Useful Life (Years)', 'Method'],
-        discounts: ['Transaction ID', 'Revenue (UZS)', 'Discount Type', 'Discount %', 'Customer'],
-        impairment: ['Asset Name', 'Carrying Value (UZS)', 'Fair Value (UZS)', 'Testing Date', 'Status']
-    }
-    return headers[templateId.value] || []
+    const headersKey = `upload.sampleHeaders.${templateId.value}`
+    return t(headersKey, { returnObjects: true })
 })
 
 const sampleData = computed(() => {
-    const data = {
-        depreciation: [
-            ['Office Building', '1,000,000,000', '2020-01-15', '40', 'Straight-line'],
-            ['Manufacturing Equipment', '500,000,000', '2021-06-01', '10', 'Declining Balance'],
-            ['Vehicles', '150,000,000', '2022-03-10', '5', 'Straight-line']
-        ],
-        discounts: [
-            ['TXN001', '50,000,000', 'Volume', '5', 'Customer A'],
-            ['TXN002', '25,000,000', 'Early Payment', '2', 'Customer B'],
-            ['TXN003', '75,000,000', 'Seasonal', '10', 'Customer C']
-        ],
-        impairment: [
-            ['Warehouse', '800,000,000', '750,000,000', '2024-12-01', 'Test Required'],
-            ['Retail Store', '300,000,000', '320,000,000', '2024-12-01', 'No Impairment'],
-            ['Production Line', '600,000,000', '550,000,000', '2024-12-01', 'Impaired']
-        ]
-    }
-    return data[templateId.value] || []
+    const dataKey = `upload.sampleData.${templateId.value}`
+    return t(dataKey, { returnObjects: true })
 })
 
 onMounted(async () => {

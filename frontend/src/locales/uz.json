@@ -513,7 +513,16 @@
     "sampleFormat": {
       "title": "Namuna Excel formati",
       "description": "Sizning Excel faylingiz shunga o'xshash ustun tuzilishiga ega bo'lishi kerak. Tizim avtomatik ravishda ustunlarni aniqlaydi va XMHS transformatsiyalarini qo'llaydi."
-    }
+    },
+    "recentFiles": {
+      "title": "Oxirgi {template} fayllari",
+      "description": "Ushbu shablon uchun yaqinda qayta ishlangan fayllaringiz",
+      "viewAll": "Barchasini ko'rish →",
+      "loading": "Oxirgi fayllar yuklanmoqda...",
+      "empty": "Hali fayllar qayta ishlanmagan",
+      "emptyAction": "Yuqorida birinchi {template} faylini qayta ishlang"
+    },
+    "supportedFormats": "50MB gacha .xlsx va .xls fayllarini qo'llab-quvvatlaydi"
   },
   "processing": {
     "title": "Faylingizni qayta ishlash",
