@@ -235,7 +235,7 @@ import {
 
 const router = useRouter()
 const route = useRoute()
-const { t } = useI18n()
+const { t, locale, messages } = useI18n()
 const templatesStore = useTemplatesStore()
 const filesStore = useFilesStore()
 
@@ -262,18 +262,28 @@ const recentTemplateFiles = computed(() => {
 
 // Template-specific configurations
 const uploadInstructions = computed(() => {
-    const instructionsKey = `upload.instructions.${templateId.value}`
-    return t(instructionsKey, { returnObjects: true })
+    if (!templateId.value) return []
+    // Convert balanceSheet to balance-sheet
+    const kebabId = templateId.value.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase()
+    const instructionsKey = `upload.instructions.${kebabId}`
+    const result = t(instructionsKey, { returnObjects: true })
+    return Array.isArray(result) ? result : []
 })
 
 const sampleHeaders = computed(() => {
-    const headersKey = `upload.sampleHeaders.${templateId.value}`
-    return t(headersKey, { returnObjects: true })
+    if (!templateId.value) return []
+    const kebabId = templateId.value.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase()
+    const headersKey = `upload.sampleHeaders.${kebabId}`
+    const result = t(headersKey, { returnObjects: true })
+    return Array.isArray(result) ? result : []
 })
 
 const sampleData = computed(() => {
-    const dataKey = `upload.sampleData.${templateId.value}`
-    return t(dataKey, { returnObjects: true })
+    if (!templateId.value) return []
+    const kebabId = templateId.value.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase()
+    const dataKey = `upload.sampleData.${kebabId}`
+    const result = t(dataKey, { returnObjects: true })
+    return Array.isArray(result) ? result : []
 })
 
 onMounted(async () => {
@@ -283,10 +293,26 @@ onMounted(async () => {
         return
     }
 
+    // Debug i18n messages object
+    console.log('=== i18n Debug ===')
     console.log('Template ID:', templateId.value)
-    console.log('Checking key:', `upload.instructions.${templateId.value}`)
-    console.log('Translation result:', t('upload.instructions.balanceSheet'))
-    console.log('Another i18n test:', t('processing.status.pending'))
+    console.log('Current locale:', locale.value)
+
+    // Check if messages are loaded
+    console.log('Available locales:', Object.keys(messages.value))
+    console.log('Current locale messages:', messages.value[locale.value])
+    console.log('Upload section:', messages.value[locale.value]?.upload)
+    console.log('Instructions section:', messages.value[locale.value]?.upload?.instructions)
+    console.log('Balance sheet instructions:', messages.value[locale.value]?.upload?.instructions?.['balance-sheet'])
+
+    // Try with different key formats
+    const camelKey = `upload.instructions.balanceSheet`
+
+    console.log('Trying camelCase:', camelKey)
+    console.log('Result:', t(camelKey, { returnObjects: true }))
+
+    // Test if returnObjects works at all
+    console.log('Testing returnObjects with upload section:', t('upload', { returnObjects: true }))
 
     // Load recent files for this template
     await loadTemplateFiles()
