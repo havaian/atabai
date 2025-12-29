@@ -343,7 +343,7 @@
     "telegram": "Telegram",
     "email": "Email",
     "instagram": "Instagram",
-    "backToHome": "Bosh sahifaga qaytish"
+    "backToDashboard": "Bosh sahifaga qaytish"
   },
   "settings": {
     "tabs": {

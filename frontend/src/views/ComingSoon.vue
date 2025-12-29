@@ -77,7 +77,7 @@
                         <router-link to="/"
                             class="button text-white/80 hover:text-white font-medium py-4 px-8 rounded-lg hover:bg-white/10 transition-colors inline-flex items-center">
                             <ArrowLeftIcon class="w-6 h-6 mr-2" />
-                            {{ $t('comingSoon.backToHome') }}
+                            {{ $t('comingSoon.backToDashboard') }}
                         </router-link>
                     </div>
                 </div>
