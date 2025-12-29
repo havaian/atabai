@@ -238,20 +238,20 @@ function createStyledBalanceSheet(data) {
         section.items.forEach(item => {
             const row = worksheet.getRow(currentRow);
 
-            // IFRS Code
-            const codeCell = row.getCell(1);
-            codeCell.value = item.code;
-            applyStyle(codeCell, styles.dataCell);
+            // // IFRS Code
+            // const codeCell = row.getCell(1);
+            // codeCell.value = item.code;
+            // applyStyle(codeCell, styles.dataCell);
 
             // Line Item
             const labelCell = row.getCell(2);
             labelCell.value = item.label;
             applyStyle(labelCell, styles.dataCell);
 
-            // NSBU Code
-            const nsbuCell = row.getCell(3);
-            nsbuCell.value = item.nsbuCode || item.code;
-            applyStyle(nsbuCell, styles.dataCell);
+            // // NSBU Code
+            // const nsbuCell = row.getCell(3);
+            // nsbuCell.value = item.nsbuCode || item.code;
+            // applyStyle(nsbuCell, styles.dataCell);
 
             // Beginning Balance
             const startCell = row.getCell(4);
@@ -345,7 +345,6 @@ function createStyledBalanceSheet(data) {
  * @param {Object} data - Report data structure
  * @param {string} data.title - Report title
  * @param {string} data.subtitle - Report subtitle
- * @param {string} data.unit - Unit of measurement
  * @param {Array} data.headers - Column headers
  * @param {Array} data.rows - Data rows
  * @returns {ExcelJS.Workbook}
@@ -370,14 +369,6 @@ function createFlatReport(data) {
         const subtitleRow = worksheet.getRow(currentRow);
         subtitleRow.getCell(1).value = data.subtitle;
         applyStyle(subtitleRow.getCell(1), styles.title);
-        currentRow++;
-    }
-
-    // Unit
-    if (data.unit) {
-        const unitRow = worksheet.getRow(currentRow);
-        unitRow.getCell(1).value = `Unit: ${data.unit}`;
-        applyStyle(unitRow.getCell(1), styles.title);
         currentRow++;
     }
 

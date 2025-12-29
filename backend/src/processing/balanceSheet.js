@@ -12,7 +12,6 @@ function detectBalanceSheetStructure(worksheet) {
     let codeColumn = null;
     let nameColumn = null;
     let dataStartRow = null;
-    let unitOfMeasurement = null;
     let unitDivisor = 1;
     let companyName = null;
     let reportDate = null;
@@ -66,22 +65,6 @@ function detectBalanceSheetStructure(worksheet) {
                 lastMeaningfulRow = Math.min(lastMeaningfulRow, rowNum);
             }
 
-            if ((normalized.includes('единица измерения') || normalized.includes('ўлчов бирлиги')) && !unitOfMeasurement) {
-                const match = cellText.match(/[,،]\s*(.+?)$/);
-                if (match) {
-                    unitOfMeasurement = match[1].trim();
-                    const unitNormalized = normalizeText(unitOfMeasurement);
-
-                    if (unitNormalized.includes('тыс') || unitNormalized.includes('минг')) {
-                        unitDivisor = 1000;
-                    } else if (unitNormalized.includes('млн') || unitNormalized.includes('миллион')) {
-                        unitDivisor = 1000000;
-                    } else if (unitNormalized.includes('млрд') || unitNormalized.includes('миллиард')) {
-                        unitDivisor = 1000000000;
-                    }
-                }
-            }
-
             if (!codeColumn && (normalized.includes('код стр') || normalized.includes('сатр коди'))) {
                 codeColumn = cell.col;
                 headerRow = rowNum;
@@ -89,11 +72,6 @@ function detectBalanceSheetStructure(worksheet) {
         });
 
         if (rowNum > lastMeaningfulRow + 5) break;
-    }
-
-    if (!unitOfMeasurement) {
-        unitOfMeasurement = 'тыс. сум.';
-        unitDivisor = 1000;
     }
 
     if (!codeColumn) {
@@ -147,7 +125,6 @@ function detectBalanceSheetStructure(worksheet) {
         nameColumn,
         valueColumns,
         lastMeaningfulRow,
-        unitOfMeasurement,
         unitDivisor,
         companyName: companyName || 'Company Name',
         reportDate: reportDate || new Date().toISOString().split('T')[0],
@@ -232,9 +209,9 @@ function transformToIFRSStructure(dataMap) {
             const mapping = BALANCE_SHEET_MAPPING[code];
 
             const item = {
-                code: code,
+                // code: code,
                 label: mapping.ifrsClassification,
-                nsbuCode: code,
+                // nsbuCode: code,
                 start: nsbuData.start || 0,
                 end: nsbuData.end || 0
             };
