@@ -184,28 +184,28 @@ function createStyledBalanceSheet(data) {
     // === HEADER SECTION ===
 
     // Title row
-    worksheet.mergeCells(`A${currentRow}:E${currentRow}`);
+    worksheet.mergeCells(`A${currentRow}:C${currentRow}`);
     const titleCell = worksheet.getCell(`A${currentRow}`);
     titleCell.value = data.title || 'STATEMENT OF FINANCIAL POSITION (IFRS)';
     applyStyle(titleCell, styles.title);
     currentRow++;
 
     // Company name
-    worksheet.mergeCells(`A${currentRow}:E${currentRow}`);
+    worksheet.mergeCells(`A${currentRow}:C${currentRow}`);
     const companyCell = worksheet.getCell(`A${currentRow}`);
     companyCell.value = data.companyName;
     applyStyle(companyCell, styles.subtitle);
     currentRow++;
 
     // Report date
-    worksheet.mergeCells(`A${currentRow}:E${currentRow}`);
+    worksheet.mergeCells(`A${currentRow}:C${currentRow}`);
     const dateCell = worksheet.getCell(`A${currentRow}`);
     dateCell.value = `As at ${data.reportDate}`;
     applyStyle(dateCell, styles.metadata);
     currentRow++;
 
     // INN
-    worksheet.mergeCells(`A${currentRow}:E${currentRow}`);
+    worksheet.mergeCells(`A${currentRow}:C${currentRow}`);
     const innCell = worksheet.getCell(`A${currentRow}`);
     innCell.value = `INN: ${data.inn}`;
     applyStyle(innCell, styles.metadata);
@@ -228,7 +228,7 @@ function createStyledBalanceSheet(data) {
     // === DATA SECTIONS ===
     data.sections.forEach(section => {
         // Section header
-        worksheet.mergeCells(`A${currentRow}:E${currentRow}`);
+        worksheet.mergeCells(`A${currentRow}:C${currentRow}`);
         const sectionCell = worksheet.getCell(`A${currentRow}`);
         sectionCell.value = section.name;
         applyStyle(sectionCell, styles.sectionHeader);
