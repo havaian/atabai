@@ -412,7 +412,6 @@
       "chooseFile": "Fayl tanlash",
       "supportedFormats": "10MB gacha .xlsx va .xls fayllarini qo'llab-quvvatlaydi"
     },
-
     "sampleHeaders": {
       "depreciation": [
         "Aktiv nomi",
@@ -650,6 +649,28 @@
       "next": "Keyingi",
       "page": "Sahifa",
       "of": "dan"
+    },
+    "balanceSheet": {
+      "title": "MOLIYAVIY AHVOL TO'G'RISIDA HISOBOT (XMHS)",
+      "asAt": "{date} holatiga ko'ra",
+      "inn": "STIR: {inn}",
+      "columns": {
+        "ifrsCode": "XMHS kodi",
+        "lineItem": "Qator nomi",
+        "nsbuCode": "NSBU kodi",
+        "beginningBalance": "Boshlang'ich balans (so'm)",
+        "endingBalance": "Yakuniy balans (so'm)"
+      },
+      "sections": {
+        "nonCurrentAssets": "Uzoq muddatli aktivlar",
+        "currentAssets": "Joriy aktivlar",
+        "equity": "Kapital",
+        "nonCurrentLiabilities": "Uzoq muddatli majburiyatlar",
+        "currentLiabilities": "Joriy majburiyatlar"
+      },
+      "total": "Jami {section}",
+      "totalAssets": "JAMI AKTIVLAR",
+      "totalEquityLiabilities": "JAMI KAPITAL VA MAJBURIYATLAR"
     }
   },
   "history": {

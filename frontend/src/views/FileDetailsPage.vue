@@ -155,183 +155,141 @@
                 </div>
             </div>
 
-            <!-- Data Comparison -->
-            <div v-if="beforeData && afterData" class="space-y-8">
-                <!-- Before/After Toggle -->
-                <div class="flex items-center justify-center">
-                    <div class="bg-white rounded-lg border border-gray-200 p-1 inline-flex">
-                        <button @click="activeView = 'before'" :class="[
-                            'px-6 py-2 rounded-md text-sm font-medium transition-colors',
-                            activeView === 'before'
-                                ? 'bg-atabai-violet text-white'
-                                : 'text-gray-700 hover:text-gray-900'
-                        ]">
-                            {{ $t('results.comparison.before') }}
-                        </button>
-                        <button @click="activeView = 'after'" :class="[
-                            'px-6 py-2 rounded-md text-sm font-medium transition-colors',
-                            activeView === 'after'
-                                ? 'bg-atabai-violet text-white'
-                                : 'text-gray-700 hover:text-gray-900'
-                        ]">
-                            {{ $t('results.comparison.after') }}
-                        </button>
-                        <button @click="activeView = 'side-by-side'" :class="[
-                            'px-6 py-2 rounded-md text-sm font-medium transition-colors',
-                            activeView === 'side-by-side'
-                                ? 'bg-atabai-violet text-white'
-                                : 'text-gray-700 hover:text-gray-900'
-                        ]">
-                            {{ $t('results.comparison.sideBySide') }}
-                        </button>
-                    </div>
+            <!-- IFRS Balance Sheet Display -->
+            <div v-if="ifrsBalanceSheet"
+                class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden mb-8">
+                <!-- Header Section -->
+                <div class="bg-gray-50 border-b border-gray-200 px-6 py-8 text-center">
+                    <h1 class="text-2xl font-bold text-gray-900 mb-2">
+                        {{ $t('results.balanceSheet.title') }}
+                    </h1>
+                    <h2 class="text-lg font-semibold text-gray-800 mb-1">
+                        {{ ifrsBalanceSheet.companyName }}
+                    </h2>
+                    <p class="text-sm text-gray-600 mb-1">
+                        {{ $t('results.balanceSheet.asAt', { date: ifrsBalanceSheet.reportDate }) }}
+                    </p>
+                    <p class="text-sm text-gray-600">
+                        {{ $t('results.balanceSheet.inn', { inn: ifrsBalanceSheet.inn }) }}
+                    </p>
                 </div>
 
-                <!-- Pagination Controls for Side-by-Side View -->
-                <div v-if="activeView === 'side-by-side' && maxRows > 0"
-                    class="flex items-center justify-between bg-white rounded-lg border border-gray-200 px-6 py-4">
-                    <div class="flex items-center space-x-4">
-                        <span class="text-sm text-gray-700">{{ $t('results.pagination.rowsPerPage') }}</span>
-                        <div class="w-24">
-                            <Select v-model="rowsPerPage" :options="rowsPerPageOptions" @change="resetToFirstPage" />
-                        </div>
-                    </div>
+                <!-- Table Section -->
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <!-- Column Headers -->
+                        <thead class="bg-[#366092]">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                                    {{ $t('results.balanceSheet.columns.ifrsCode') }}
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                                    {{ $t('results.balanceSheet.columns.lineItem') }}
+                                </th>
+                                <th
+                                    class="px-6 py-3 text-center text-xs font-medium text-white uppercase tracking-wider">
+                                    {{ $t('results.balanceSheet.columns.nsbuCode') }}
+                                </th>
+                                <th
+                                    class="px-6 py-3 text-right text-xs font-medium text-white uppercase tracking-wider">
+                                    {{ $t('results.balanceSheet.columns.beginningBalance') }}
+                                </th>
+                                <th
+                                    class="px-6 py-3 text-right text-xs font-medium text-white uppercase tracking-wider">
+                                    {{ $t('results.balanceSheet.columns.endingBalance') }}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <!-- Iterate through sections -->
+                            <template v-for="(section, sectionIndex) in ifrsBalanceSheet.sections" :key="sectionIndex">
+                                <!-- Section Header -->
+                                <tr class="bg-[#D9E1F2]">
+                                    <td colspan="5"
+                                        class="px-6 py-3 text-left text-sm font-bold text-gray-900 uppercase">
+                                        {{ $t(`results.balanceSheet.sections.${getSectionKey(section.name)}`) }}
+                                    </td>
+                                </tr>
 
-                    <div class="flex items-center space-x-4">
-                        <span class="text-sm text-gray-700">
-                            {{ $t('results.pagination.showing', {
-                                start: startRow,
-                                end: endRow,
-                                total: maxRows
-                            }) }}
-                        </span>
+                                <!-- Section Items -->
+                                <tr v-for="(item, itemIndex) in section.items" :key="`${sectionIndex}-${itemIndex}`">
+                                    <td
+                                        class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 border-r border-gray-200">
+                                        {{ item.code }}
+                                    </td>
+                                    <td class="px-6 py-4 text-sm text-gray-900 border-r border-gray-200">
+                                        {{ item.label }}
+                                    </td>
+                                    <td
+                                        class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center border-r border-gray-200">
+                                        {{ item.code }}
+                                    </td>
+                                    <td
+                                        class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right border-r border-gray-200">
+                                        {{ formatNumber(item.start) }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
+                                        {{ formatNumber(item.end) }}
+                                    </td>
+                                </tr>
 
-                        <div class="flex space-x-2">
-                            <button @click="previousPage" :disabled="currentPage === 1"
-                                class="px-3 py-1 border border-gray-300 rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50">
-                                {{ $t('results.pagination.previous') }}
-                            </button>
+                                <!-- Section Total -->
+                                <tr class="bg-gray-50">
+                                    <td
+                                        class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900 border-r border-gray-200">
+                                    </td>
+                                    <td
+                                        class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900 border-r border-gray-200">
+                                        {{ $t('results.balanceSheet.total', {
+                                            section:
+                                                $t(`results.balanceSheet.sections.${getSectionKey(section.name)}`) }) }}
+                                    </td>
+                                    <td
+                                        class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900 border-r border-gray-200">
+                                    </td>
+                                    <td
+                                        class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900 text-right border-r border-gray-200">
+                                        {{ formatNumber(section.totalStart) }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900 text-right">
+                                        {{ formatNumber(section.totalEnd) }}
+                                    </td>
+                                </tr>
+                            </template>
 
-                            <span class="px-3 py-1 text-sm text-gray-700">
-                                {{ $t('results.pagination.page') }} {{ currentPage }} {{ $t('results.pagination.of') }}
-                                {{ totalPages }}
-                            </span>
+                            <!-- Grand Totals -->
+                            <tr class="bg-gray-100 border-t-2 border-gray-300">
+                                <td colspan="3" class="px-6 py-4 text-sm font-bold text-gray-900 uppercase">
+                                    {{ $t('results.balanceSheet.totalAssets') }}
+                                </td>
+                                <td
+                                    class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900 text-right border-r border-gray-200">
+                                    {{ formatNumber(ifrsBalanceSheet.totalAssetsStart) }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900 text-right">
+                                    {{ formatNumber(ifrsBalanceSheet.totalAssetsEnd) }}
+                                </td>
+                            </tr>
 
-                            <button @click="nextPage" :disabled="currentPage === totalPages"
-                                class="px-3 py-1 border border-gray-300 rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50">
-                                {{ $t('results.pagination.next') }}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Data Tables -->
-                <div class="grid gap-8" :class="{
-                    'grid-cols-1': activeView !== 'side-by-side',
-                    'grid-cols-1 lg:grid-cols-2': activeView === 'side-by-side'
-                }">
-                    <!-- Before Data -->
-                    <div v-if="activeView === 'before' || activeView === 'side-by-side'"
-                        class="bg-white rounded-lg shadow-sm border border-gray-200">
-                        <div class="px-6 py-4 border-b border-gray-200">
-                            <h3 class="text-lg font-medium text-gray-900">{{ $t('results.comparison.beforeData') }}</h3>
-                            <p class="text-sm text-gray-500">{{ $t('results.comparison.originalFormat') }}</p>
-                        </div>
-                        <div ref="beforeTableContainer" class="overflow-x-auto max-h-96 overflow-y-auto"
-                            @scroll="onScrollBefore">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50 sticky top-0">
-                                    <tr>
-                                        <th v-for="(header, index) in beforeData.headers"
-                                            :key="`before-header-${index}`"
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            {{ header }}
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody class="bg-white divide-y divide-gray-200">
-                                    <tr v-for="(row, rowIndex) in paginatedBeforeRows"
-                                        :key="`before-row-${startRowIndex + rowIndex}`"
-                                        :data-row-index="startRowIndex + rowIndex"
-                                        @mouseenter="highlightRow(startRowIndex + rowIndex)"
-                                        @mouseleave="unhighlightRow"
-                                        :class="{ 'bg-blue-50': highlightedRowIndex === startRowIndex + rowIndex }">
-                                        <td v-for="(cell, cellIndex) in row"
-                                            :key="`before-cell-${startRowIndex + rowIndex}-${cellIndex}`"
-                                            class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            {{ formatCellValue(cell) }}
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                        <div v-if="activeView === 'before' && beforeData.totalRows > 10"
-                            class="px-6 py-3 bg-gray-50 border-t border-gray-200">
-                            <p class="text-sm text-gray-500">
-                                {{ $t('results.comparison.showingRows', {
-                                    shown: Math.min(10, beforeData.rows.length),
-                                    total: beforeData.totalRows
-                                }) }}
-                            </p>
-                        </div>
-                    </div>
-
-                    <!-- After Data -->
-                    <div v-if="activeView === 'after' || activeView === 'side-by-side'"
-                        class="bg-white rounded-lg shadow-sm border border-gray-200">
-                        <div class="px-6 py-4 border-b border-gray-200">
-                            <h3 class="text-lg font-medium text-gray-900">{{ $t('results.comparison.afterData') }}</h3>
-                            <p class="text-sm text-gray-500">{{ $t('results.comparison.ifrsFormat') }}</p>
-                        </div>
-                        <div ref="afterTableContainer" class="overflow-x-auto max-h-96 overflow-y-auto"
-                            @scroll="onScrollAfter">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50 sticky top-0">
-                                    <tr>
-                                        <th v-for="(header, index) in afterData.headers" :key="`after-header-${index}`"
-                                            :class="[
-                                                'px-6 py-3 text-left text-xs font-medium uppercase tracking-wider',
-                                                isIFRSColumn(header) ? 'text-atabai-violet bg-purple-50' : 'text-gray-500'
-                                            ]">
-                                            {{ header }}
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody class="bg-white divide-y divide-gray-200">
-                                    <tr v-for="(row, rowIndex) in paginatedAfterRows"
-                                        :key="`after-row-${startRowIndex + rowIndex}`"
-                                        :data-row-index="startRowIndex + rowIndex"
-                                        @mouseenter="highlightRow(startRowIndex + rowIndex)"
-                                        @mouseleave="unhighlightRow"
-                                        :class="{ 'bg-blue-50': highlightedRowIndex === startRowIndex + rowIndex }">
-                                        <td v-for="(cell, cellIndex) in row"
-                                            :key="`after-cell-${startRowIndex + rowIndex}-${cellIndex}`" :class="[
-                                                'px-6 py-4 whitespace-nowrap text-sm',
-                                                isIFRSColumn(afterData.headers[cellIndex])
-                                                    ? 'text-atabai-violet bg-purple-50 font-medium'
-                                                    : 'text-gray-900'
-                                            ]">
-                                            {{ formatCellValue(cell) }}
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                        <div v-if="activeView === 'after' && afterData.totalRows > 10"
-                            class="px-6 py-3 bg-gray-50 border-t border-gray-200">
-                            <p class="text-sm text-gray-500">
-                                {{ $t('results.comparison.showingRows', {
-                                    shown: Math.min(10, afterData.rows.length),
-                                    total: afterData.totalRows
-                                }) }}
-                            </p>
-                        </div>
-                    </div>
+                            <tr class="bg-gray-100">
+                                <td colspan="3" class="px-6 py-4 text-sm font-bold text-gray-900 uppercase">
+                                    {{ $t('results.balanceSheet.totalEquityLiabilities') }}
+                                </td>
+                                <td
+                                    class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900 text-right border-r border-gray-200">
+                                    {{ formatNumber(ifrsBalanceSheet.totalEquityLiabStart) }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900 text-right">
+                                    {{ formatNumber(ifrsBalanceSheet.totalEquityLiabEnd) }}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
             <!-- IFRS Compliance Notes -->
-            <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mt-8">
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
                 <div class="flex items-center mb-4">
                     <DocumentCheckIcon class="h-6 w-6 text-blue-500 mr-2" />
                     <h3 class="text-lg font-medium text-blue-800">{{ $t('results.compliance.title') }}</h3>
@@ -348,13 +306,10 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, nextTick } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useFilesStore } from '@/stores/files'
-
-// UI Components
-import Select from '@/components/ui/Select.vue'
 
 // Icons
 import {
@@ -378,58 +333,10 @@ const isLoading = ref(true)
 const isDownloading = ref(false)
 const error = ref(null)
 const fileData = ref(null)
-const beforeData = ref(null)
-const afterData = ref(null)
-const activeView = ref('after')
-
-// Pagination state
-const currentPage = ref(1)
-const rowsPerPage = ref(25)
-const highlightedRowIndex = ref(null)
-
-// Scroll synchronization state
-const isScrollingSyncBefore = ref(false)
-const isScrollingSyncAfter = ref(false)
-const beforeTableContainer = ref(null)
-const afterTableContainer = ref(null)
+const ifrsBalanceSheet = ref(null)
 
 // Get file ID from route
 const fileId = computed(() => route.params.fileId)
-
-// Pagination computed properties
-const maxRows = computed(() => {
-    if (!beforeData.value || !afterData.value) return 0
-    return Math.max(beforeData.value.rows?.length || 0, afterData.value.rows?.length || 0)
-})
-
-const totalPages = computed(() => Math.ceil(maxRows.value / rowsPerPage.value))
-
-const startRowIndex = computed(() => (currentPage.value - 1) * rowsPerPage.value)
-
-const startRow = computed(() => startRowIndex.value + 1)
-
-const endRow = computed(() => Math.min(startRowIndex.value + rowsPerPage.value, maxRows.value))
-
-const rowsPerPageOptions = computed(() => [
-    { value: 10, label: '10' },
-    { value: 25, label: '25' },
-    { value: 50, label: '50' },
-    { value: 100, label: '100' }
-])
-
-const paginatedBeforeRows = computed(() => {
-    if (!beforeData.value?.rows) return []
-    const start = startRowIndex.value
-    const end = start + rowsPerPage.value
-    return beforeData.value.rows.slice(start, end)
-})
-
-const paginatedAfterRows = computed(() => {
-    if (!afterData.value?.rows) return []
-    const start = startRowIndex.value
-    const end = start + rowsPerPage.value
-    return afterData.value.rows.slice(start, end)
-})
 
 // Methods
 function goBack() {
@@ -459,12 +366,9 @@ function formatFileSize(bytes) {
     return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i]
 }
 
-function formatCellValue(value) {
-    if (value === null || value === undefined) return ''
-    if (typeof value === 'number' && value % 1 !== 0) {
-        return value.toLocaleString(undefined, { maximumFractionDigits: 2 })
-    }
-    return String(value)
+function formatNumber(value) {
+    if (value === null || value === undefined) return '0.00'
+    return Number(value).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 }
 
 function getSeverityColor(severity) {
@@ -476,20 +380,25 @@ function getSeverityColor(severity) {
     return colors[severity] || 'bg-gray-500'
 }
 
-function isIFRSColumn(header) {
-    if (!header) return false
-    const headerLower = header.toLowerCase()
-    return headerLower.includes('ifrs') ||
-        headerLower.includes('ias') ||
-        headerLower.includes('compliance') ||
-        headerLower.includes('impairment') ||
-        headerLower.includes('depreciation rate') ||
-        headerLower.includes('transaction price') ||
-        headerLower.includes('recoverable amount')
+function getSectionKey(sectionName) {
+    const sectionMap = {
+        'NON-CURRENT ASSETS': 'nonCurrentAssets',
+        'CURRENT ASSETS': 'currentAssets',
+        'EQUITY': 'equity',
+        'NON-CURRENT LIABILITIES': 'nonCurrentLiabilities',
+        'CURRENT LIABILITIES': 'currentLiabilities'
+    }
+    return sectionMap[sectionName] || sectionName
 }
 
 function getComplianceNotes(templateType) {
     const notes = {
+        balanceSheet: [
+            t('results.compliance.balanceSheet.1'),
+            t('results.compliance.balanceSheet.2'),
+            t('results.compliance.balanceSheet.3'),
+            t('results.compliance.balanceSheet.4')
+        ],
         depreciation: [
             t('results.compliance.depreciation.1'),
             t('results.compliance.depreciation.2'),
@@ -509,62 +418,7 @@ function getComplianceNotes(templateType) {
             t('results.compliance.impairment.4')
         ]
     }
-    return notes[templateType] || []
-}
-
-// Pagination methods
-function nextPage() {
-    if (currentPage.value < totalPages.value) {
-        currentPage.value++
-    }
-}
-
-function previousPage() {
-    if (currentPage.value > 1) {
-        currentPage.value--
-    }
-}
-
-function resetToFirstPage() {
-    currentPage.value = 1
-}
-
-// Row highlighting methods
-function highlightRow(rowIndex) {
-    highlightedRowIndex.value = rowIndex
-}
-
-function unhighlightRow() {
-    highlightedRowIndex.value = null
-}
-
-// Scroll synchronization methods
-function onScrollBefore(event) {
-    if (isScrollingSyncBefore.value || activeView.value !== 'side-by-side') return
-
-    isScrollingSyncAfter.value = true
-    if (afterTableContainer.value) {
-        afterTableContainer.value.scrollTop = event.target.scrollTop
-        afterTableContainer.value.scrollLeft = event.target.scrollLeft
-    }
-
-    nextTick(() => {
-        isScrollingSyncAfter.value = false
-    })
-}
-
-function onScrollAfter(event) {
-    if (isScrollingSyncAfter.value || activeView.value !== 'side-by-side') return
-
-    isScrollingSyncBefore.value = true
-    if (beforeTableContainer.value) {
-        beforeTableContainer.value.scrollTop = event.target.scrollTop
-        beforeTableContainer.value.scrollLeft = event.target.scrollLeft
-    }
-
-    nextTick(() => {
-        isScrollingSyncBefore.value = false
-    })
+    return notes[templateType] || notes.balanceSheet
 }
 
 async function fetchFileData() {
@@ -576,8 +430,11 @@ async function fetchFileData() {
 
         if (response.success) {
             fileData.value = response.file
-            beforeData.value = response.file.beforeData
-            afterData.value = response.file.afterData
+
+            // Process IFRS balance sheet data if available
+            if (response.file.afterData && response.file.afterData.ifrsBalanceSheet) {
+                ifrsBalanceSheet.value = response.file.afterData.ifrsBalanceSheet
+            }
         } else {
             error.value = response.message || t('results.error.fetchFailed')
         }
@@ -592,10 +449,9 @@ async function fetchFileData() {
 async function downloadProcessedFile() {
     try {
         isDownloading.value = true
-        await filesStore.downloadFile(fileId.value, true) // true for processed file
+        await filesStore.downloadFile(fileId.value, true)
     } catch (err) {
         console.error('Error downloading file:', err)
-        // Error handling could be improved with a toast notification
     } finally {
         isDownloading.value = false
     }
@@ -624,5 +480,14 @@ onMounted(() => {
 
 .overflow-x-auto::-webkit-scrollbar-thumb:hover {
     background: #9ca3af;
+}
+
+/* Table cell borders */
+table td {
+    border-bottom: 1px solid #e5e7eb;
+}
+
+table tr:last-child td {
+    border-bottom: none;
 }
 </style>

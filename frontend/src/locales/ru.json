@@ -412,7 +412,6 @@
       "chooseFile": "Выбрать файл",
       "supportedFormats": "Поддерживает файлы .xlsx и .xls размером до 10МБ"
     },
-
     "sampleHeaders": {
       "depreciation": [
         "Название актива",
@@ -644,6 +643,28 @@
       "next": "Следующая",
       "page": "Страница",
       "of": "из"
+    },
+    "balanceSheet": {
+      "title": "ОТЧЁТ О ФИНАНСОВОМ ПОЛОЖЕНИИ (МСФО)",
+      "asAt": "По состоянию на {date}",
+      "inn": "ИНН: {inn}",
+      "columns": {
+        "ifrsCode": "Код МСФО",
+        "lineItem": "Статья",
+        "nsbuCode": "Код НСБУ",
+        "beginningBalance": "Начальный баланс (сум)",
+        "endingBalance": "Конечный баланс (сум)"
+      },
+      "sections": {
+        "nonCurrentAssets": "Внеоборотные активы",
+        "currentAssets": "Оборотные активы",
+        "equity": "Капитал",
+        "nonCurrentLiabilities": "Долгосрочные обязательства",
+        "currentLiabilities": "Краткосрочные обязательства"
+      },
+      "total": "Итого {section}",
+      "totalAssets": "ИТОГО АКТИВЫ",
+      "totalEquityLiabilities": "ИТОГО КАПИТАЛ И ОБЯЗАТЕЛЬСТВА"
     }
   },
   "history": {

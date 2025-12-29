@@ -345,6 +345,38 @@
     "instagram": "Instagram",
     "backToDashboard": "Back to main page"
   },
+  "settings": {
+    "tabs": {
+      "personal": "Personal",
+      "usage": "Usage & Plan",
+      "billing": "Billing",
+      "privacy": "Privacy"
+    },
+    "personal": {
+      "title": "Personal Settings",
+      "description": "Manage your account preferences and display settings",
+      "language": "Language",
+      "languageDescription": "Select your preferred interface language",
+      "theme": "Theme",
+      "themeDescription": "Choose how ATABAI appears to you",
+      "themeLight": "Light",
+      "themeDark": "Dark",
+      "themeSystem": "System"
+    },
+    "saved": "Settings saved successfully",
+    "comingSoon": "Coming Soon",
+    "usageTabDescription": "View your usage statistics and manage subscription plan",
+    "billingTabDescription": "Manage billing information and payment methods",
+    "privacyTabDescription": "Control your privacy settings and data preferences"
+  },
+  "help": {
+    "title": "Need Help?",
+    "description": "We're here to help you with any questions about ATABAI and IFRS automation",
+    "telegram": "Telegram",
+    "email": "Email",
+    "instagram": "Instagram",
+    "backToDashboard": "Back to Dashboard"
+  },
   "upload": {
     "title": "Upload File for Processing",
     "backToDashboard": "Back to Dashboard",
@@ -532,7 +564,7 @@
       "troubleshooting": {
         "title": "Troubleshooting Tips:",
         "tip1": "Large files (>10MB) may take several minutes to process",
-        "tip2": "Complex calculations require more processing time",  
+        "tip2": "Complex calculations require more processing time",
         "tip3": "Server maintenance may temporarily slow processing"
       }
     },
@@ -576,7 +608,7 @@
       "title": "IFRS Compliance Notes",
       "depreciation": {
         "1": "All depreciation calculations follow IAS 16 - Property, Plant and Equipment standards",
-        "2": "Carrying amounts represent cost less accumulated depreciation and impairment losses", 
+        "2": "Carrying amounts represent cost less accumulated depreciation and impairment losses",
         "3": "Depreciation rates are based on estimated useful lives and residual values",
         "4": "Impairment tests are recommended for assets with indicators of impairment"
       },
@@ -601,11 +633,33 @@
     },
     "pagination": {
       "rowsPerPage": "Rows per page",
-      "showing": "Showing {start}-{end} of {total} rows", 
+      "showing": "Showing {start}-{end} of {total} rows",
       "previous": "Previous",
       "next": "Next",
-      "page": "Page", 
+      "page": "Page",
       "of": "of"
+    },
+    "balanceSheet": {
+      "title": "STATEMENT OF FINANCIAL POSITION (IFRS)",
+      "asAt": "As at {date}",
+      "inn": "INN: {inn}",
+      "columns": {
+        "ifrsCode": "IFRS Code",
+        "lineItem": "Line Item",
+        "nsbuCode": "NSBU Code",
+        "beginningBalance": "Beginning Balance (sum)",
+        "endingBalance": "Ending Balance (sum)"
+      },
+      "sections": {
+        "nonCurrentAssets": "Non-Current Assets",
+        "currentAssets": "Current Assets",
+        "equity": "Equity",
+        "nonCurrentLiabilities": "Non-Current Liabilities",
+        "currentLiabilities": "Current Liabilities"
+      },
+      "total": "Total {section}",
+      "totalAssets": "TOTAL ASSETS",
+      "totalEquityLiabilities": "TOTAL EQUITY AND LIABILITIES"
     }
   },
   "history": {
@@ -615,13 +669,13 @@
       "search": "Search",
       "searchPlaceholder": "Search by file name...",
       "status": "Status",
-      "allStatuses": "All Statuses", 
+      "allStatuses": "All Statuses",
       "template": "Template",
       "allTemplates": "All Templates",
       "dateRange": "Date Range",
       "allDates": "All Dates",
       "today": "Today",
-      "thisWeek": "This Week", 
+      "thisWeek": "This Week",
       "thisMonth": "This Month",
       "thisQuarter": "Last 3 Months",
       "clearAll": "Clear All Filters"
@@ -629,7 +683,7 @@
     "table": {
       "fileName": "File Name",
       "template": "Template",
-      "status": "Status", 
+      "status": "Status",
       "processed": "Date",
       "actions": "Actions",
       "completed": "Completed"
@@ -652,7 +706,7 @@
       "uploadFirst": "Upload Your First File"
     },
     "noResults": {
-      "title": "No Files Found", 
+      "title": "No Files Found",
       "description": "No files match your current filters. Try adjusting your search criteria."
     },
     "showingResults": "Showing {count} of {total} files",
