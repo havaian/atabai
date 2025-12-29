@@ -19,6 +19,12 @@
                     <!-- Completed Check -->
                     <CheckCircleIcon v-else-if="jobStatus === 'completed'" class="h-16 w-16 text-green-600" />
 
+                    <!-- Processing File -->
+                    <ArrowPathIcon v-else-if="jobStatus === 'processing'" class="h-16 w-16 text-atabai-violet" />
+
+                    <!-- Pending Processing -->
+                    <ExclamationCircleIcon v-else-if="jobStatus === 'pending'" class="h-16 w-16 text-gray-600" />
+
                     <!-- Failed X -->
                     <XCircleIcon v-else-if="jobStatus === 'failed'" class="h-16 w-16 text-red-600" />
 
@@ -26,12 +32,7 @@
                     <ClockIcon v-else class="h-16 w-16 text-gray-400" />
                 </div>
 
-                <h2 class="text-2xl font-semibold mb-2" :class="{
-                    'text-atabai-violet': jobStatus === 'processing',
-                    'text-green-600': jobStatus === 'completed',
-                    'text-red-600': jobStatus === 'failed',
-                    'text-gray-600': jobStatus === 'pending'
-                }">
+                <h2 class="text-2xl font-semibold mb-2 text-gray-600">
                     {{ statusTitle }}
                 </h2>
 
@@ -143,7 +144,9 @@ import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useFilesStore } from '@/stores/files'
 import {
+    ExclamationCircleIcon,
     CheckCircleIcon,
+    ArrowPathIcon,
     XCircleIcon,
     ClockIcon,
     CheckIcon
