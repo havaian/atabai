@@ -245,8 +245,8 @@ async function downloadResults() {
     try {
         isDownloading.value = true
 
-        if (jobData.value?.result?.fileId) {
-            await filesStore.downloadFile(jobData.value.result.fileId, 'processed')
+        if (jobData.value?.fileId) {
+            await filesStore.downloadFile(jobData.value.fileId, 'processed')
         }
     } catch (error) {
         console.error('Download failed:', error)
