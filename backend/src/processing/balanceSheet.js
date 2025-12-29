@@ -3,9 +3,8 @@ const { BALANCE_SHEET_MAPPING } = require('../mappings/accountMapping');
 const { styleReport } = require('../utils/excelStyler');
 
 /**
- * Balance Sheet Processor - FIXED VERSION
- * Works with existing accountMapping (no "section" field required)
- * Auto-determines section based on NSBU code ranges
+ * Balance Sheet Processor - FINAL FIX
+ * Matches your EXACT accountMapping.js structure
  */
 
 function detectBalanceSheetStructure(worksheet) {
@@ -166,9 +165,13 @@ function extractBalanceSheetData(worksheet, structure) {
         const codeCell = row.getCell(codeColumn);
         const code = codeCell.value?.toString().trim();
 
+        // Skip if not a valid code
         if (!code || code === '' || isNaN(parseInt(code))) {
             continue;
         }
+
+        // Normalize code to 3 digits with leading zeros
+        const normalizedCode = code.padStart(3, '0');
 
         const nameCell = row.getCell(nameColumn);
         const name = nameCell.value?.toString().trim() || '';
@@ -187,6 +190,7 @@ function extractBalanceSheetData(worksheet, structure) {
                 value = 0;
             }
 
+            // Apply unit divisor
             if (unitDivisor !== 1 && value !== 0) {
                 value = value / unitDivisor;
             }
@@ -194,8 +198,8 @@ function extractBalanceSheetData(worksheet, structure) {
             values[type] = value;
         });
 
-        dataMap.set(code, {
-            code,
+        dataMap.set(normalizedCode, {
+            code: normalizedCode,
             name,
             ...values
         });
@@ -204,96 +208,59 @@ function extractBalanceSheetData(worksheet, structure) {
     return dataMap;
 }
 
-/**
- * Determine section based on NSBU code
- * This works WITHOUT needing "section" field in accountMapping
- */
-function determineSection(code) {
-    const numCode = parseInt(code);
-
-    // Based on Uzbekistan balance sheet structure
-    if (numCode >= 10 && numCode <= 149) {
-        return 'nonCurrentAssets';
-    } else if (numCode >= 150 && numCode <= 399) {
-        return 'currentAssets';
-    } else if (numCode >= 400 && numCode <= 499) {
-        return 'equity';
-    } else if (numCode >= 500 && numCode <= 599) {
-        return 'nonCurrentLiabilities';
-    } else if (numCode >= 600 && numCode <= 799) {
-        return 'currentLiabilities';
-    }
-
-    return 'currentAssets'; // default
-}
-
 function transformToIFRSStructure(dataMap) {
-    const sections = {
-        nonCurrentAssets: {
-            name: 'NON-CURRENT ASSETS',
-            items: [],
-            totalStart: 0,
-            totalEnd: 0
-        },
-        currentAssets: {
-            name: 'CURRENT ASSETS',
-            items: [],
-            totalStart: 0,
-            totalEnd: 0
-        },
-        equity: {
-            name: 'EQUITY',
-            items: [],
-            totalStart: 0,
-            totalEnd: 0
-        },
-        nonCurrentLiabilities: {
-            name: 'NON-CURRENT LIABILITIES',
-            items: [],
-            totalStart: 0,
-            totalEnd: 0
-        },
-        currentLiabilities: {
-            name: 'CURRENT LIABILITIES',
-            items: [],
-            totalStart: 0,
-            totalEnd: 0
-        }
-    };
+    // Dynamically extract ALL unique section names from the mapping
+    const uniqueSections = [...new Set(
+        Object.values(BALANCE_SHEET_MAPPING).map(m => m.section)
+    )];
 
-    // Process each mapped account
+    // Initialize sections object dynamically
+    const sections = {};
+    uniqueSections.forEach(sectionName => {
+        sections[sectionName] = {
+            name: sectionName,
+            items: [],
+            totalStart: 0,
+            totalEnd: 0
+        };
+    });
+
+    // Process each code in the mapping
     Object.keys(BALANCE_SHEET_MAPPING).forEach(code => {
         if (dataMap.has(code)) {
             const nsbuData = dataMap.get(code);
             const mapping = BALANCE_SHEET_MAPPING[code];
 
             const item = {
-                code: mapping.ifrsCode || code,
+                code: code,
                 label: mapping.ifrsClassification,
                 nsbuCode: code,
                 start: nsbuData.start || 0,
                 end: nsbuData.end || 0
             };
 
-            // Try to use mapping.section if it exists, otherwise determine from code
-            const section = mapping.section || determineSection(code);
+            // Use the section name directly from mapping
+            const sectionKey = mapping.section;
 
-            if (sections[section]) {
-                sections[section].items.push(item);
-                sections[section].totalStart += item.start;
-                sections[section].totalEnd += item.end;
+            if (sections[sectionKey]) {
+                sections[sectionKey].items.push(item);
+                sections[sectionKey].totalStart += item.start;
+                sections[sectionKey].totalEnd += item.end;
             }
         }
     });
 
-    // Convert to array and filter out empty sections
+    // Filter out empty sections
     const sectionsArray = Object.values(sections).filter(s => s.items.length > 0);
 
-    // Calculate grand totals
-    const totalAssetsStart = sections.nonCurrentAssets.totalStart + sections.currentAssets.totalStart;
-    const totalAssetsEnd = sections.nonCurrentAssets.totalEnd + sections.currentAssets.totalEnd;
-    const totalEquityLiabStart = sections.equity.totalStart + sections.nonCurrentLiabilities.totalStart + sections.currentLiabilities.totalStart;
-    const totalEquityLiabEnd = sections.equity.totalEnd + sections.nonCurrentLiabilities.totalEnd + sections.currentLiabilities.totalEnd;
+    // Calculate grand totals dynamically
+    const assetSections = sectionsArray.filter(s => s.name.includes('ASSETS'));
+    const totalAssetsStart = assetSections.reduce((sum, s) => sum + s.totalStart, 0);
+    const totalAssetsEnd = assetSections.reduce((sum, s) => sum + s.totalEnd, 0);
+
+    const nonAssetSections = sectionsArray.filter(s => !s.name.includes('ASSETS'));
+    const totalEquityLiabStart = nonAssetSections.reduce((sum, s) => sum + s.totalStart, 0);
+    const totalEquityLiabEnd = nonAssetSections.reduce((sum, s) => sum + s.totalEnd, 0);
 
     return {
         sections: sectionsArray,
@@ -320,17 +287,12 @@ async function processBalanceSheetTemplate(workbook) {
     try {
         const worksheet = workbook.worksheets[0];
 
+
         const structure = detectBalanceSheetStructure(worksheet);
+
         const dataMap = extractBalanceSheetData(worksheet, structure);
 
-        console.log('[DEBUG] Extracted data for', dataMap.size, 'codes');
-
         const ifrsStructure = transformToIFRSStructure(dataMap);
-
-        console.log('[DEBUG] Created', ifrsStructure.sections.length, 'sections');
-        ifrsStructure.sections.forEach(s => {
-            console.log(`[DEBUG] Section "${s.name}": ${s.items.length} items`);
-        });
 
         const styledData = {
             title: 'STATEMENT OF FINANCIAL POSITION (IFRS)',
@@ -354,7 +316,7 @@ async function processBalanceSheetTemplate(workbook) {
         return result;
 
     } catch (error) {
-        console.error('[ERROR]', error.message);
+        console.error('[PROCESSOR ERROR]', error.message);
         throw new Error(`Failed to process balance sheet: ${error.message}`);
     }
 }
