@@ -215,7 +215,7 @@ function createStyledBalanceSheet(data) {
     currentRow++;
 
     // === COLUMN HEADERS ===
-    const headers = ['IFRS Code', 'Line Item', 'NSBU Code', 'Beginning Balance (sum)', 'Ending Balance (sum)'];
+    const headers = [/* 'IFRS Code', */ 'Line Item', /* 'NSBU Code', */ 'Beginning Balance (sum)', 'Ending Balance (sum)'];
     const headerRow = worksheet.getRow(currentRow);
 
     headers.forEach((header, index) => {
@@ -244,7 +244,7 @@ function createStyledBalanceSheet(data) {
             // applyStyle(codeCell, styles.dataCell);
 
             // Line Item
-            const labelCell = row.getCell(2);
+            const labelCell = row.getCell(1);
             labelCell.value = item.label;
             applyStyle(labelCell, styles.dataCell);
 
@@ -254,12 +254,12 @@ function createStyledBalanceSheet(data) {
             // applyStyle(nsbuCell, styles.dataCell);
 
             // Beginning Balance
-            const startCell = row.getCell(4);
+            const startCell = row.getCell(2);
             startCell.value = item.start;
             applyStyle(startCell, styles.numberCell);
 
             // Ending Balance
-            const endCell = row.getCell(5);
+            const endCell = row.getCell(3);
             endCell.value = item.end;
             applyStyle(endCell, styles.numberCell);
 
@@ -270,21 +270,21 @@ function createStyledBalanceSheet(data) {
         if (section.totalStart !== undefined && section.totalEnd !== undefined) {
             const totalRow = worksheet.getRow(currentRow);
 
-            totalRow.getCell(1).value = '';
+            // totalRow.getCell(1).value = '';
+            // applyStyle(totalRow.getCell(1), styles.totalRow);
+
+            totalRow.getCell(1).value = `Total ${section.name}`;
             applyStyle(totalRow.getCell(1), styles.totalRow);
+            totalRow.getCell(1).alignment = { horizontal: 'left', vertical: 'center' };
 
-            totalRow.getCell(2).value = `Total ${section.name}`;
+            // totalRow.getCell(3).value = '';
+            // applyStyle(totalRow.getCell(3), styles.totalRow);
+
+            totalRow.getCell(2).value = section.totalStart;
             applyStyle(totalRow.getCell(2), styles.totalRow);
-            totalRow.getCell(2).alignment = { horizontal: 'left', vertical: 'center' };
 
-            totalRow.getCell(3).value = '';
+            totalRow.getCell(3).value = section.totalEnd;
             applyStyle(totalRow.getCell(3), styles.totalRow);
-
-            totalRow.getCell(4).value = section.totalStart;
-            applyStyle(totalRow.getCell(4), styles.totalRow);
-
-            totalRow.getCell(5).value = section.totalEnd;
-            applyStyle(totalRow.getCell(5), styles.totalRow);
 
             currentRow++;
         }
@@ -303,11 +303,11 @@ function createStyledBalanceSheet(data) {
         applyStyle(labelCell, styles.grandTotal);
         labelCell.alignment = { horizontal: 'left', vertical: 'center' };
 
-        totalAssetsRow.getCell(4).value = data.totalAssetsStart;
-        applyStyle(totalAssetsRow.getCell(4), styles.grandTotal);
+        totalAssetsRow.getCell(2).value = data.totalAssetsStart;
+        applyStyle(totalAssetsRow.getCell(2), styles.grandTotal);
 
-        totalAssetsRow.getCell(5).value = data.totalAssetsEnd;
-        applyStyle(totalAssetsRow.getCell(5), styles.grandTotal);
+        totalAssetsRow.getCell(3).value = data.totalAssetsEnd;
+        applyStyle(totalAssetsRow.getCell(3), styles.grandTotal);
 
         currentRow++;
     }
@@ -321,21 +321,21 @@ function createStyledBalanceSheet(data) {
         applyStyle(labelCell, styles.grandTotal);
         labelCell.alignment = { horizontal: 'left', vertical: 'center' };
 
-        totalEquityRow.getCell(4).value = data.totalEquityLiabStart;
-        applyStyle(totalEquityRow.getCell(4), styles.grandTotal);
+        totalEquityRow.getCell(2).value = data.totalEquityLiabStart;
+        applyStyle(totalEquityRow.getCell(2), styles.grandTotal);
 
-        totalEquityRow.getCell(5).value = data.totalEquityLiabEnd;
-        applyStyle(totalEquityRow.getCell(5), styles.grandTotal);
+        totalEquityRow.getCell(3).value = data.totalEquityLiabEnd;
+        applyStyle(totalEquityRow.getCell(3), styles.grandTotal);
 
         currentRow++;
     }
 
     // === COLUMN WIDTHS ===
-    worksheet.getColumn(1).width = 15;  // IFRS Code
-    worksheet.getColumn(2).width = 50;  // Line Item
-    worksheet.getColumn(3).width = 15;  // NSBU Code
-    worksheet.getColumn(4).width = 20;  // Beginning Balance
-    worksheet.getColumn(5).width = 20;  // Ending Balance
+    // worksheet.getColumn(1).width = 15;  // IFRS Code
+    worksheet.getColumn(1).width = 50;  // Line Item
+    // worksheet.getColumn(3).width = 15;  // NSBU Code
+    worksheet.getColumn(2).width = 20;  // Beginning Balance
+    worksheet.getColumn(3).width = 20;  // Ending Balance
 
     return workbook;
 }
