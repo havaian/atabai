@@ -3,8 +3,9 @@ const { BALANCE_SHEET_MAPPING } = require('../mappings/accountMapping');
 const { styleReport } = require('../utils/excelStyler');
 
 /**
- * Balance Sheet Processor - Data Transformation Only
- * Styling is handled by the universal excelStyler module
+ * Balance Sheet Processor - FIXED VERSION
+ * Works with existing accountMapping (no "section" field required)
+ * Auto-determines section based on NSBU code ranges
  */
 
 function detectBalanceSheetStructure(worksheet) {
@@ -33,7 +34,6 @@ function detectBalanceSheetStructure(worksheet) {
 
     let lastMeaningfulRow = worksheet.rowCount;
 
-    // Extract metadata and find structure
     for (let rowNum = 1; rowNum <= Math.min(worksheet.rowCount, 100); rowNum++) {
         const row = worksheet.getRow(rowNum);
 
@@ -41,7 +41,6 @@ function detectBalanceSheetStructure(worksheet) {
             const cellText = getCellText(cell);
             const normalized = normalizeText(cellText);
 
-            // Extract company name (usually near the top)
             if (!companyName && rowNum <= 10) {
                 if (normalized.includes('жамият') || normalized.includes('мчж') ||
                     normalized.includes('общество') || normalized.includes('ооо')) {
@@ -49,7 +48,6 @@ function detectBalanceSheetStructure(worksheet) {
                 }
             }
 
-            // Extract INN
             if (!inn && (normalized.includes('инн') || normalized.includes('стир'))) {
                 const innMatch = cellText.match(/(\d{9,})/);
                 if (innMatch) {
@@ -57,7 +55,6 @@ function detectBalanceSheetStructure(worksheet) {
                 }
             }
 
-            // Extract report date
             if (!reportDate && (normalized.includes('отчетная дата') || normalized.includes('ҳисобот санаси'))) {
                 const dateMatch = cellText.match(/(\d{2}[-./]\d{2}[-./]\d{4})/);
                 if (dateMatch) {
@@ -65,13 +62,11 @@ function detectBalanceSheetStructure(worksheet) {
                 }
             }
 
-            // Find document end markers
             if (normalized.includes('раҳбар') || normalized.includes('руководитель') ||
                 normalized.includes('бош бухгалтер') || normalized.includes('главный бухгалтер')) {
                 lastMeaningfulRow = Math.min(lastMeaningfulRow, rowNum);
             }
 
-            // Extract unit of measurement
             if ((normalized.includes('единица измерения') || normalized.includes('ўлчов бирлиги')) && !unitOfMeasurement) {
                 const match = cellText.match(/[,،]\s*(.+?)$/);
                 if (match) {
@@ -88,7 +83,6 @@ function detectBalanceSheetStructure(worksheet) {
                 }
             }
 
-            // Find code column
             if (!codeColumn && (normalized.includes('код стр') || normalized.includes('сатр коди'))) {
                 codeColumn = cell.col;
                 headerRow = rowNum;
@@ -98,7 +92,6 @@ function detectBalanceSheetStructure(worksheet) {
         if (rowNum > lastMeaningfulRow + 5) break;
     }
 
-    // Defaults if not found
     if (!unitOfMeasurement) {
         unitOfMeasurement = 'тыс. сум.';
         unitDivisor = 1000;
@@ -108,7 +101,6 @@ function detectBalanceSheetStructure(worksheet) {
         throw new Error('Could not find code column in balance sheet');
     }
 
-    // Find data start row (AKTIV section)
     for (let rowNum = headerRow; rowNum <= Math.min(headerRow + 20, lastMeaningfulRow); rowNum++) {
         const row = worksheet.getRow(rowNum);
 
@@ -129,7 +121,6 @@ function detectBalanceSheetStructure(worksheet) {
         throw new Error('Could not find Assets section');
     }
 
-    // Find value columns
     const headerRowData = worksheet.getRow(headerRow);
     const valueColumns = [];
 
@@ -196,7 +187,6 @@ function extractBalanceSheetData(worksheet, structure) {
                 value = 0;
             }
 
-            // Apply unit divisor
             if (unitDivisor !== 1 && value !== 0) {
                 value = value / unitDivisor;
             }
@@ -214,8 +204,30 @@ function extractBalanceSheetData(worksheet, structure) {
     return dataMap;
 }
 
+/**
+ * Determine section based on NSBU code
+ * This works WITHOUT needing "section" field in accountMapping
+ */
+function determineSection(code) {
+    const numCode = parseInt(code);
+
+    // Based on Uzbekistan balance sheet structure
+    if (numCode >= 10 && numCode <= 149) {
+        return 'nonCurrentAssets';
+    } else if (numCode >= 150 && numCode <= 399) {
+        return 'currentAssets';
+    } else if (numCode >= 400 && numCode <= 499) {
+        return 'equity';
+    } else if (numCode >= 500 && numCode <= 599) {
+        return 'nonCurrentLiabilities';
+    } else if (numCode >= 600 && numCode <= 799) {
+        return 'currentLiabilities';
+    }
+
+    return 'currentAssets'; // default
+}
+
 function transformToIFRSStructure(dataMap) {
-    // Group data by sections
     const sections = {
         nonCurrentAssets: {
             name: 'NON-CURRENT ASSETS',
@@ -256,15 +268,15 @@ function transformToIFRSStructure(dataMap) {
             const mapping = BALANCE_SHEET_MAPPING[code];
 
             const item = {
-                code: mapping.ifrsCode,
+                code: mapping.ifrsCode || code,
                 label: mapping.ifrsClassification,
                 nsbuCode: code,
                 start: nsbuData.start || 0,
                 end: nsbuData.end || 0
             };
 
-            // Determine which section this belongs to
-            const section = mapping.section || 'currentAssets';
+            // Try to use mapping.section if it exists, otherwise determine from code
+            const section = mapping.section || determineSection(code);
 
             if (sections[section]) {
                 sections[section].items.push(item);
@@ -274,7 +286,7 @@ function transformToIFRSStructure(dataMap) {
         }
     });
 
-    // Convert to array format for styler
+    // Convert to array and filter out empty sections
     const sectionsArray = Object.values(sections).filter(s => s.items.length > 0);
 
     // Calculate grand totals
@@ -308,16 +320,18 @@ async function processBalanceSheetTemplate(workbook) {
     try {
         const worksheet = workbook.worksheets[0];
 
-        // Step 1: Detect structure and extract metadata
         const structure = detectBalanceSheetStructure(worksheet);
-
-        // Step 2: Extract raw data
         const dataMap = extractBalanceSheetData(worksheet, structure);
 
-        // Step 3: Transform to IFRS structure
+        console.log('[DEBUG] Extracted data for', dataMap.size, 'codes');
+
         const ifrsStructure = transformToIFRSStructure(dataMap);
 
-        // Step 4: Prepare data for styler
+        console.log('[DEBUG] Created', ifrsStructure.sections.length, 'sections');
+        ifrsStructure.sections.forEach(s => {
+            console.log(`[DEBUG] Section "${s.name}": ${s.items.length} items`);
+        });
+
         const styledData = {
             title: 'STATEMENT OF FINANCIAL POSITION (IFRS)',
             companyName: structure.companyName,
@@ -330,10 +344,8 @@ async function processBalanceSheetTemplate(workbook) {
             totalEquityLiabEnd: ifrsStructure.totalEquityLiabEnd
         };
 
-        // Step 5: Use universal styler to create final workbook
         result.workbook = styleReport(styledData, 'balanceSheet');
 
-        // Update summary
         result.summary.transformations = dataMap.size;
         result.summary.changes = ifrsStructure.sections.reduce((sum, s) => sum + s.items.length, 0);
         result.summary.originalRows = dataMap.size;
@@ -342,6 +354,7 @@ async function processBalanceSheetTemplate(workbook) {
         return result;
 
     } catch (error) {
+        console.error('[ERROR]', error.message);
         throw new Error(`Failed to process balance sheet: ${error.message}`);
     }
 }
