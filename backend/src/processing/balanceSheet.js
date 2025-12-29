@@ -1,5 +1,5 @@
 const ExcelJS = require('exceljs');
-const { BALANCE_SHEET_MAPPING, SECTION_TOTALS } = require('../mappings/balanceSheetMapping');
+const { BALANCE_SHEET_MAPPING, SECTION_TOTALS } = require('../mappings/accountMapping');
 
 function detectBalanceSheetStructure(worksheet) {
     let headerRow = null;
