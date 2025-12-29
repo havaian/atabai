@@ -67,7 +67,7 @@
                         <div v-else-if="step.active" class="w-2 h-2 rounded-full bg-atabai-violet animate-pulse"></div>
                         <span v-else class="text-sm font-medium">{{ index + 1 }}</span>
                     </div>
-                    <span class="font-medium">{{ $t(`processing.steps.${step.key}`) }}</span>
+                    <span class="font-medium text-gray-600">{{ $t(`processing.steps.${step.key}`) }}</span>
                 </div>
             </div>
 
