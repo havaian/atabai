@@ -15,13 +15,13 @@ const { getCell, getRow, eachCellInRow } = require('../readers/excelReader');
 function extractBalanceSheetData(normalizedSheet) {
     // Step 1: Detect structure
     const structure = detectBalanceSheetStructure(normalizedSheet);
-    
+
     // Step 2: Extract metadata
     const metadata = extractMetadata(normalizedSheet, structure);
-    
+
     // Step 3: Extract data map
     const dataMap = extractDataMap(normalizedSheet, structure);
-    
+
     return {
         metadata,
         dataMap,
@@ -121,27 +121,29 @@ function extractMetadata(sheet, structure) {
     let inn = null;
     let reportDate = null;
 
-    // Search in header section
-    for (let rowNum = 1; rowNum <= Math.min(30, structure.headerRow); rowNum++) {
+    // Search in header section - EXTENDED RANGE to row 40
+    const searchEndRow = Math.min(40, structure.headerRow || 50);
+
+    for (let rowNum = 1; rowNum <= searchEndRow; rowNum++) {
         const rowData = getRow(sheet, rowNum);
-        
+
         rowData.forEach((cell) => {
             if (!cell || !cell.value) return;
-            
+
             const cellText = getCellText(cell);
             const normalized = normalizeText(cellText);
 
             // Company name detection
             if (!companyName) {
                 // Check for company label
-                if (normalized.includes('корхона') || normalized.includes('предприятие') || 
+                if (normalized.includes('корхона') || normalized.includes('предприятие') ||
                     normalized.includes('ташкилот') || normalized.includes('организация')) {
                     // Look for company name in the same row
                     rowData.forEach((valueCell) => {
                         if (!valueCell || !valueCell.value) return;
                         const valueText = getCellText(valueCell);
                         const valueNormalized = normalizeText(valueText);
-                        
+
                         if (valueNormalized.includes('жамият') || valueNormalized.includes('jamiyat') ||
                             valueNormalized.includes('мчж') || valueNormalized.includes('mchj') ||
                             valueNormalized.includes('общество') || valueNormalized.includes('ооо') ||
@@ -151,7 +153,7 @@ function extractMetadata(sheet, structure) {
                         }
                     });
                 }
-                
+
                 // Direct detection
                 if (!companyName && (
                     normalized.includes('жамият') || normalized.includes('jamiyat') ||
@@ -168,7 +170,7 @@ function extractMetadata(sheet, structure) {
             if (!inn && (normalized.includes('инн') || normalized.includes('стир') || normalized.includes('inn') ||
                 normalized.includes('идентификацион') || normalized.includes('идентификационный') ||
                 normalized.includes('налогоплательщика') || normalized.includes('солиқ тўловчи'))) {
-                
+
                 const innMatch = cellText.match(/(\d{9,})/);
                 if (innMatch) {
                     inn = innMatch[1];
@@ -187,7 +189,7 @@ function extractMetadata(sheet, structure) {
 
             // Report date detection
             if (!reportDate && (normalized.includes('отчетная дата') || normalized.includes('ҳисобот санаси') ||
-                normalized.includes('hisobot sanasi'))) {
+                normalized.includes('hisobot sanasi') || normalized.includes('ҳисобот') || normalized.includes('отчет'))) {
                 const dateMatch = cellText.match(/(\d{2}[-./]\d{2}[-./]\d{4})/);
                 if (dateMatch) {
                     reportDate = dateMatch[1];

@@ -90,23 +90,34 @@ const logFormat = winston.format.combine(
     addCallerInfo(),
     winston.format.timestamp({
         format: () => {
-            // Add +5 timezone (Tashkent/Uzbekistan) 
             const now = new Date();
             const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
-            const tashkentTime = new Date(utc + (5 * 3600000)); // UTC+5
+            const tashkentTime = new Date(utc + (5 * 3600000));
             return tashkentTime.toISOString().replace('T', ' ').replace(/\..+/, '');
         }
     }),
     winston.format.errors({ stack: true }),
     winston.format.printf(({ timestamp, level, message, caller, stack, ...meta }) => {
-        let log = `${timestamp} [${level.toUpperCase()}] ${caller}: ${message}`;
+        // Ensure proper UTF-8 handling
+        const safeMessage = Buffer.isBuffer(message)
+            ? message.toString('utf8')
+            : String(message);
+
+        let log = `${timestamp} [${level.toUpperCase()}] ${caller}: ${safeMessage}`;
 
         // Add metadata if present (exclude caller from meta)
         const cleanMeta = { ...meta };
         delete cleanMeta.caller;
 
         if (Object.keys(cleanMeta).length > 0) {
-            log += ` | ${JSON.stringify(cleanMeta)}`;
+            // Stringify with proper UTF-8 handling
+            const metaStr = JSON.stringify(cleanMeta, (key, value) => {
+                if (typeof value === 'string') {
+                    return value; // Keep strings as-is for proper UTF-8
+                }
+                return value;
+            }, 2);
+            log += ` | ${metaStr}`;
         }
 
         // Add stack trace for errors
@@ -124,10 +135,9 @@ const consoleFormat = winston.format.combine(
     addCallerInfo(),
     winston.format.timestamp({
         format: () => {
-            // Add +5 timezone for console output too
             const now = new Date();
             const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
-            const tashkentTime = new Date(utc + (5 * 3600000)); // UTC+5
+            const tashkentTime = new Date(utc + (5 * 3600000));
             return tashkentTime.toLocaleString('en-GB', {
                 hour12: false,
                 year: 'numeric',
@@ -140,16 +150,21 @@ const consoleFormat = winston.format.combine(
         }
     }),
     winston.format.printf(({ timestamp, level, message, caller, ...meta }) => {
-        // Shorten file path for console display
+        // Ensure proper UTF-8 handling
+        const safeMessage = Buffer.isBuffer(message)
+            ? message.toString('utf8')
+            : String(message);
+
         const shortCaller = caller ? caller.replace(/^src\//, '') : 'unknown';
-        let log = `${timestamp} ${level} [${shortCaller}]: ${message}`;
+        let log = `${timestamp} ${level} [${shortCaller}]: ${safeMessage}`;
 
         // Clean meta (exclude caller)
         const cleanMeta = { ...meta };
         delete cleanMeta.caller;
 
         if (Object.keys(cleanMeta).length > 0) {
-            log += ` ${JSON.stringify(cleanMeta, null, 2)}`;
+            const metaStr = JSON.stringify(cleanMeta, null, 2);
+            log += ` ${metaStr}`;
         }
 
         return log;

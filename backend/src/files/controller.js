@@ -297,6 +297,9 @@ async function getProcessingStatus(req, res) {
 /**
  * Get file details with before/after data
  */
+/**
+ * Get file details with before/after data
+ */
 async function getFileDetails(req, res) {
     try {
         const { fileId } = req.params;
@@ -320,18 +323,50 @@ async function getFileDetails(req, res) {
 
         if (file.status === 'completed' && file.processedFilePath) {
             try {
-                // Read original file
-                const originalWorkbook = new ExcelJS.Workbook();
-                await originalWorkbook.xlsx.readFile(`/uploads/${file.filePath}`);
+                const originalPath = `/uploads/${file.filePath}`;
+                const fileExt = path.extname(file.filePath).toLowerCase();
 
-                // Get first worksheet data (limited to first 20 rows for preview)
-                const originalWs = originalWorkbook.worksheets[0];
-                beforeData = extractWorksheetPreview(originalWs);
+                // Handle .xls files - convert to .xlsx first for preview
+                let previewPath = originalPath;
+                if (fileExt === '.xls') {
+                    try {
+                        const xlsWorkbook = XLSX.readFile(originalPath);
+                        const tempXlsxPath = `/uploads/temp_preview_${file.filePath}.xlsx`;
+                        XLSX.writeFile(xlsWorkbook, tempXlsxPath, { bookType: 'xlsx' });
+                        previewPath = tempXlsxPath;
+                    } catch (conversionError) {
+                        global.logger.logWarn(`Failed to convert .xls for preview: ${conversionError.message}`);
+                        // Skip preview for .xls if conversion fails
+                        beforeData = {
+                            error: 'Preview not available for .xls format',
+                            headers: [],
+                            rows: [],
+                            totalRows: 0
+                        };
+                        previewPath = null;
+                    }
+                }
 
-                // Read processed file
+                // Read original file (if preview path exists)
+                if (previewPath) {
+                    const originalWorkbook = new ExcelJS.Workbook();
+                    await originalWorkbook.xlsx.readFile(previewPath);
+                    const originalWs = originalWorkbook.worksheets[0];
+                    beforeData = extractWorksheetPreview(originalWs);
+
+                    // Clean up temp file if we created one
+                    if (fileExt === '.xls' && previewPath !== originalPath) {
+                        try {
+                            await fs.unlink(previewPath);
+                        } catch (cleanupError) {
+                            global.logger.logWarn(`Failed to cleanup temp preview file: ${cleanupError.message}`);
+                        }
+                    }
+                }
+
+                // Read processed file (always .xlsx)
                 const processedWorkbook = new ExcelJS.Workbook();
                 await processedWorkbook.xlsx.readFile(`/uploads/${file.processedFilePath}`);
-
                 const processedWs = processedWorkbook.worksheets[0];
                 afterData = extractWorksheetPreview(processedWs);
 
@@ -569,20 +604,20 @@ async function processFileAsync(fileRecord, processingJob) {
 
         const filePath = `/uploads/${fileRecord.filePath}`;
         const fileExt = path.extname(fileRecord.fileName).toLowerCase();
-        
+
         let workbookPath = filePath;
 
         // Convert .xls to .xlsx if needed
         if (fileExt === '.xls') {
             global.logger.logInfo(`Converting .xls to .xlsx: ${fileRecord.originalName}`);
-            
+
             // Read .xls file
             const xlsWorkbook = XLSX.readFile(filePath);
-            
+
             // Write as .xlsx
             const xlsxPath = filePath.replace('.xls', '.xlsx');
             XLSX.writeFile(xlsWorkbook, xlsxPath, { bookType: 'xlsx' });
-            
+
             workbookPath = xlsxPath;
             global.logger.logInfo(`Conversion complete: ${xlsxPath}`);
         }
@@ -609,7 +644,7 @@ async function processFileAsync(fileRecord, processingJob) {
 
         // Save processed file
         const processedFilename = `${path.parse(fileRecord.fileName).name}_ifrs${path.extname(fileRecord.fileName)}`;
-        
+
         await result.workbook.xlsx.writeFile(`/uploads/${processedFilename}`);
 
         processingJob.progress = 90;
