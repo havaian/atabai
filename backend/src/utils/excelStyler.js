@@ -165,7 +165,7 @@ function applyStyleToRange(worksheet, startRow, startCol, endRow, endCol, styleC
 }
 
 /**
- * Create styled balance sheet
+ * Create styled balance sheet with formulas
  * @param {Object} data - Balance sheet data structure
  * @param {string} data.title - Report title
  * @param {string} data.companyName - Company name
@@ -180,6 +180,10 @@ function createStyledBalanceSheet(data) {
 
     const styles = STYLE_PRESETS.balanceSheet;
     let currentRow = 1;
+
+    // Track section total rows for grand total formulas
+    const assetSectionTotalRows = [];
+    const equityLiabSectionTotalRows = [];
 
     // === HEADER SECTION ===
 
@@ -215,7 +219,7 @@ function createStyledBalanceSheet(data) {
     currentRow++;
 
     // === COLUMN HEADERS ===
-    const headers = [/* 'IFRS Code', */ 'Line Item', /* 'NSBU Code', */ 'Beginning Balance (sum)', 'Ending Balance (sum)'];
+    const headers = ['Line Item', 'Beginning Balance (sum)', 'Ending Balance (sum)'];
     const headerRow = worksheet.getRow(currentRow);
 
     headers.forEach((header, index) => {
@@ -233,6 +237,9 @@ function createStyledBalanceSheet(data) {
         sectionCell.value = section.name;
         applyStyle(sectionCell, styles.sectionHeader);
         currentRow++;
+
+        // Track first and last data row for this section
+        const sectionStartRow = currentRow;
 
         // Section items
         section.items.forEach(item => {
@@ -266,25 +273,30 @@ function createStyledBalanceSheet(data) {
             currentRow++;
         });
 
-        // Section total
-        if (section.totalStart !== undefined && section.totalEnd !== undefined) {
-            const totalRow = worksheet.getRow(currentRow);
+        const sectionEndRow = currentRow - 1;
 
-            // totalRow.getCell(1).value = '';
-            // applyStyle(totalRow.getCell(1), styles.totalRow);
+        // Section total with FORMULAS
+        if (section.items.length > 0) {
+            const totalRow = worksheet.getRow(currentRow);
 
             totalRow.getCell(1).value = `Total ${section.name}`;
             applyStyle(totalRow.getCell(1), styles.totalRow);
             totalRow.getCell(1).alignment = { horizontal: 'left', vertical: 'center' };
 
-            // totalRow.getCell(3).value = '';
-            // applyStyle(totalRow.getCell(3), styles.totalRow);
-
-            totalRow.getCell(2).value = section.totalStart;
+            // Use SUM formula for beginning balance
+            totalRow.getCell(2).value = { formula: `SUM(B${sectionStartRow}:B${sectionEndRow})` };
             applyStyle(totalRow.getCell(2), styles.totalRow);
 
-            totalRow.getCell(3).value = section.totalEnd;
+            // Use SUM formula for ending balance
+            totalRow.getCell(3).value = { formula: `SUM(C${sectionStartRow}:C${sectionEndRow})` };
             applyStyle(totalRow.getCell(3), styles.totalRow);
+
+            // Track this total row for grand totals
+            if (section.name.includes('ASSETS')) {
+                assetSectionTotalRows.push(currentRow);
+            } else {
+                equityLiabSectionTotalRows.push(currentRow);
+            }
 
             currentRow++;
         }
@@ -294,37 +306,42 @@ function createStyledBalanceSheet(data) {
     });
 
     // === GRAND TOTALS ===
-    if (data.totalAssetsStart !== undefined) {
+
+    // TOTAL ASSETS
+    if (assetSectionTotalRows.length > 0) {
         const totalAssetsRow = worksheet.getRow(currentRow);
 
-        worksheet.mergeCells(`A${currentRow}:C${currentRow}`);
-        const labelCell = totalAssetsRow.getCell(1);
-        labelCell.value = 'TOTAL ASSETS';
-        applyStyle(labelCell, styles.grandTotal);
-        labelCell.alignment = { horizontal: 'left', vertical: 'center' };
+        totalAssetsRow.getCell(1).value = 'TOTAL ASSETS';
+        applyStyle(totalAssetsRow.getCell(1), styles.grandTotal);
+        totalAssetsRow.getCell(1).alignment = { horizontal: 'left', vertical: 'center' };
 
-        totalAssetsRow.getCell(2).value = data.totalAssetsStart;
+        // Create formula that sums all asset section totals
+        const assetRefs = assetSectionTotalRows.map(row => `B${row}`).join('+');
+        totalAssetsRow.getCell(2).value = { formula: assetRefs };
         applyStyle(totalAssetsRow.getCell(2), styles.grandTotal);
 
-        totalAssetsRow.getCell(3).value = data.totalAssetsEnd;
+        const assetRefsEnd = assetSectionTotalRows.map(row => `C${row}`).join('+');
+        totalAssetsRow.getCell(3).value = { formula: assetRefsEnd };
         applyStyle(totalAssetsRow.getCell(3), styles.grandTotal);
 
         currentRow++;
     }
 
-    if (data.totalEquityLiabStart !== undefined) {
+    // TOTAL EQUITY AND LIABILITIES
+    if (equityLiabSectionTotalRows.length > 0) {
         const totalEquityRow = worksheet.getRow(currentRow);
 
-        worksheet.mergeCells(`A${currentRow}:C${currentRow}`);
-        const labelCell = totalEquityRow.getCell(1);
-        labelCell.value = 'TOTAL EQUITY AND LIABILITIES';
-        applyStyle(labelCell, styles.grandTotal);
-        labelCell.alignment = { horizontal: 'left', vertical: 'center' };
+        totalEquityRow.getCell(1).value = 'TOTAL EQUITY AND LIABILITIES';
+        applyStyle(totalEquityRow.getCell(1), styles.grandTotal);
+        totalEquityRow.getCell(1).alignment = { horizontal: 'left', vertical: 'center' };
 
-        totalEquityRow.getCell(2).value = data.totalEquityLiabStart;
+        // Create formula that sums all equity/liability section totals
+        const equityRefs = equityLiabSectionTotalRows.map(row => `B${row}`).join('+');
+        totalEquityRow.getCell(2).value = { formula: equityRefs };
         applyStyle(totalEquityRow.getCell(2), styles.grandTotal);
 
-        totalEquityRow.getCell(3).value = data.totalEquityLiabEnd;
+        const equityRefsEnd = equityLiabSectionTotalRows.map(row => `C${row}`).join('+');
+        totalEquityRow.getCell(3).value = { formula: equityRefsEnd };
         applyStyle(totalEquityRow.getCell(3), styles.grandTotal);
 
         currentRow++;
