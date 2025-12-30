@@ -301,6 +301,44 @@ export const useFilesStore = defineStore('files', () => {
             throw err
         }
     }
+    
+
+    /**
+     * Add a newly uploaded file to the recent files list
+     */
+    const addUploadedFile = (fileData) => {
+        // Add to the beginning of the array (most recent first)
+        this.recentFiles.unshift({
+            id: fileData.fileId || fileData.id,
+            originalName: fileData.fileName || fileData.originalName,
+            status: fileData.status || 'uploaded',
+            templateType: fileData.templateType,
+            jobId: fileData.jobId,
+            createdAt: fileData.createdAt || new Date().toISOString(),
+            updatedAt: fileData.updatedAt || new Date().toISOString()
+        })
+
+        // Keep only the last 50 files to avoid memory issues
+        if (this.recentFiles.length > 50) {
+            this.recentFiles = this.recentFiles.slice(0, 50)
+        }
+    }
+
+    /**
+     * Update a file's status in the recent files list
+     */
+    const updateFileStatus = (fileId, status, additionalData = {}) => {
+        const fileIndex = this.recentFiles.findIndex(f => f.id === fileId)
+        
+        if (fileIndex !== -1) {
+            this.recentFiles[fileIndex] = {
+                ...this.recentFiles[fileIndex],
+                status,
+                updatedAt: new Date().toISOString(),
+                ...additionalData
+            }
+        }
+    }
 
     // Clear store state
     function clearState() {
@@ -346,6 +384,8 @@ export const useFilesStore = defineStore('files', () => {
         deleteFile,
         retryProcessing,
         invalidateCache,
+        addUploadedFile,
+        updateFileStatus,
         clearState
     }
 })

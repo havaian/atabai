@@ -222,6 +222,14 @@ async function loadJobStatus() {
         if (data) {
             jobData.value = data
 
+            // Update the file status in the store when it reaches final status
+            if (['completed', 'failed'].includes(data.status) && data.fileId) {
+                filesStore.updateFileStatus(data.fileId, data.status, {
+                    result: data.result,
+                    duration: data.duration
+                })
+            }
+
             // Stop polling if job is complete or failed
             if (['completed', 'failed'].includes(data.status)) {
                 clearStatusPolling()

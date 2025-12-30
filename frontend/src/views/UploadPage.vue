@@ -365,11 +365,20 @@ async function processFile() {
 
         // Upload file using the correct method name and signature
         const result = await filesStore.uploadFile(selectedFile.value, templateId.value, (progress) => {
-            // Progress is handled automatically by the store
             console.log(`Upload progress: ${progress}%`)
         })
 
         if (result && result.jobId) {
+            // Add the uploaded file to the store immediately
+            filesStore.addUploadedFile({
+                fileId: result.fileId,
+                fileName: result.fileName || selectedFile.value.name,
+                status: result.status || 'pending',
+                templateType: templateId.value,
+                jobId: result.jobId,
+                createdAt: result.createdAt || new Date().toISOString()
+            })
+
             // Refresh template files after upload
             await loadTemplateFiles()
 
