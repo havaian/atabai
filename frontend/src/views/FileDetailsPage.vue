@@ -430,11 +430,9 @@ async function fetchFileData() {
 
         if (response.success) {
             fileData.value = response.file
-
-            // Process IFRS balance sheet data if available
-            if (response.file.afterData && response.file.afterData.ifrsBalanceSheet) {
-                ifrsBalanceSheet.value = response.file.afterData.ifrsBalanceSheet
-            }
+            
+            // Note: We don't show raw Excel preview anymore
+            // Users can download the file to inspect it
         } else {
             error.value = response.message || t('results.error.fetchFailed')
         }

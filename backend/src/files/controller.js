@@ -295,10 +295,7 @@ async function getProcessingStatus(req, res) {
 }
 
 /**
- * Get file details with before/after data
- */
-/**
- * Get file details with before/after data
+ * Get file details
  */
 async function getFileDetails(req, res) {
     try {
@@ -317,64 +314,6 @@ async function getFileDetails(req, res) {
             });
         }
 
-        // Prepare response with before/after data for completed files
-        let beforeData = null;
-        let afterData = null;
-
-        if (file.status === 'completed' && file.processedFilePath) {
-            try {
-                const originalPath = `/uploads/${file.filePath}`;
-                const fileExt = path.extname(file.filePath).toLowerCase();
-
-                // Handle .xls files - convert to .xlsx first for preview
-                let previewPath = originalPath;
-                if (fileExt === '.xls') {
-                    try {
-                        const xlsWorkbook = XLSX.readFile(originalPath);
-                        const tempXlsxPath = `/uploads/temp_preview_${file.filePath}.xlsx`;
-                        XLSX.writeFile(xlsWorkbook, tempXlsxPath, { bookType: 'xlsx' });
-                        previewPath = tempXlsxPath;
-                    } catch (conversionError) {
-                        global.logger.logWarn(`Failed to convert .xls for preview: ${conversionError.message}`);
-                        // Skip preview for .xls if conversion fails
-                        beforeData = {
-                            error: 'Preview not available for .xls format',
-                            headers: [],
-                            rows: [],
-                            totalRows: 0
-                        };
-                        previewPath = null;
-                    }
-                }
-
-                // Read original file (if preview path exists)
-                if (previewPath) {
-                    const originalWorkbook = new ExcelJS.Workbook();
-                    await originalWorkbook.xlsx.readFile(previewPath);
-                    const originalWs = originalWorkbook.worksheets[0];
-                    beforeData = extractWorksheetPreview(originalWs);
-
-                    // Clean up temp file if we created one
-                    if (fileExt === '.xls' && previewPath !== originalPath) {
-                        try {
-                            await fs.unlink(previewPath);
-                        } catch (cleanupError) {
-                            global.logger.logWarn(`Failed to cleanup temp preview file: ${cleanupError.message}`);
-                        }
-                    }
-                }
-
-                // Read processed file (always .xlsx)
-                const processedWorkbook = new ExcelJS.Workbook();
-                await processedWorkbook.xlsx.readFile(`/uploads/${file.processedFilePath}`);
-                const processedWs = processedWorkbook.worksheets[0];
-                afterData = extractWorksheetPreview(processedWs);
-
-            } catch (fileError) {
-                global.logger.logWarn(`Failed to read file data for preview: ${fileError.message}`);
-            }
-        }
-
         res.status(200).json({
             success: true,
             file: {
@@ -389,9 +328,7 @@ async function getFileDetails(req, res) {
                 transformations: file.result?.transformations || 0,
                 changes: file.result?.changes || 0,
                 warnings: file.result?.warnings || [],
-                hasProcessedFile: !!file.processedFilePath,
-                beforeData,
-                afterData
+                hasProcessedFile: !!file.processedFilePath
             }
         });
 
