@@ -164,13 +164,16 @@ function extractMetadata(sheet, structure) {
                 }
             }
 
-            // INN detection
-            if (!inn && (normalized.includes('инн') || normalized.includes('стир') || normalized.includes('inn'))) {
+            // INN detection - Enhanced with Uzbek tax ID label
+            if (!inn && (normalized.includes('инн') || normalized.includes('стир') || normalized.includes('inn') ||
+                normalized.includes('идентификацион') || normalized.includes('идентификационный') ||
+                normalized.includes('налогоплательщика') || normalized.includes('солиқ тўловчи'))) {
+                
                 const innMatch = cellText.match(/(\d{9,})/);
                 if (innMatch) {
                     inn = innMatch[1];
                 } else {
-                    // Check adjacent cells
+                    // Check adjacent cells in the same row for the INN number
                     rowData.forEach((valueCell) => {
                         if (!valueCell || !valueCell.value || inn) return;
                         const valueText = getCellText(valueCell);
