@@ -1,4 +1,4 @@
-// processors/transformers/balanceSheetTransformer.js
+// processors/transformers/balanceSheet.js
 
 const { BALANCE_SHEET_MAPPING } = require('../../mappings/accountMapping');
 
