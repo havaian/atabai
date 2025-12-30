@@ -126,6 +126,53 @@ const STYLE_PRESETS = {
 };
 
 /**
+ * Format date to dd.mm.yyyy
+ * @param {string|Date} dateInput - Date string or Date object
+ * @returns {string} Formatted date string
+ */
+function formatDateToDDMMYYYY(dateInput) {
+    if (!dateInput) return new Date().toLocaleDateString('en-GB').replace(/\//g, '.');
+    
+    let date;
+    
+    // Handle different input types
+    if (dateInput instanceof Date) {
+        date = dateInput;
+    } else if (typeof dateInput === 'string') {
+        // Try to parse various date formats
+        // Formats: dd.mm.yyyy, dd/mm/yyyy, dd-mm-yyyy, yyyy-mm-dd
+        const parts = dateInput.match(/(\d{1,2})[-./](\d{1,2})[-./](\d{4})/);
+        if (parts) {
+            // dd.mm.yyyy or dd/mm/yyyy or dd-mm-yyyy
+            date = new Date(parts[3], parts[2] - 1, parts[1]);
+        } else {
+            // Try yyyy-mm-dd format
+            const isoMatch = dateInput.match(/(\d{4})[-./](\d{1,2})[-./](\d{1,2})/);
+            if (isoMatch) {
+                date = new Date(isoMatch[1], isoMatch[2] - 1, isoMatch[3]);
+            } else {
+                // Fallback: try to parse as-is
+                date = new Date(dateInput);
+            }
+        }
+    } else {
+        date = new Date();
+    }
+    
+    // Check if date is valid
+    if (isNaN(date.getTime())) {
+        date = new Date();
+    }
+    
+    // Format to dd.mm.yyyy
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    
+    return `${day}.${month}.${year}`;
+}
+
+/**
  * Apply style to a cell or range of cells
  */
 function applyStyle(cell, styleConfig) {
@@ -204,7 +251,7 @@ function createStyledBalanceSheet(data) {
     // Report date
     worksheet.mergeCells(`A${currentRow}:C${currentRow}`);
     const dateCell = worksheet.getCell(`A${currentRow}`);
-    dateCell.value = `As at ${data.reportDate}`;
+    dateCell.value = `As at ${formatDateToDDMMYYYY(data.reportDate)}`;
     applyStyle(dateCell, styles.metadata);
     currentRow++;
 
@@ -463,5 +510,6 @@ module.exports = {
     styleReport,
     createStyledBalanceSheet,
     createFlatReport,
+    formatDateToDDMMYYYY,
     STYLE_PRESETS
 };
