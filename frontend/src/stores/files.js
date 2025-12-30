@@ -307,8 +307,8 @@ export const useFilesStore = defineStore('files', () => {
      * Add a newly uploaded file to the recent files list
      */
     const addUploadedFile = (fileData) => {
-        // Add to the beginning of the array (most recent first)
-        this.recentFiles.unshift({
+        // Create a properly formatted file object
+        const newFile = {
             id: fileData.fileId || fileData.id,
             originalName: fileData.fileName || fileData.originalName,
             status: fileData.status || 'uploaded',
@@ -316,27 +316,36 @@ export const useFilesStore = defineStore('files', () => {
             jobId: fileData.jobId,
             createdAt: fileData.createdAt || new Date().toISOString(),
             updatedAt: fileData.updatedAt || new Date().toISOString()
-        })
+        }
+
+        // Add to the beginning of the array (most recent first)
+        recentFiles.value.unshift(newFile)
 
         // Keep only the last 50 files to avoid memory issues
-        if (this.recentFiles.length > 50) {
-            this.recentFiles = this.recentFiles.slice(0, 50)
+        if (recentFiles.value.length > 50) {
+            recentFiles.value = recentFiles.value.slice(0, 50)
         }
+
+        console.log('[FILES STORE] Added uploaded file:', newFile.originalName)
     }
 
     /**
      * Update a file's status in the recent files list
      */
     const updateFileStatus = (fileId, status, additionalData = {}) => {
-        const fileIndex = this.recentFiles.findIndex(f => f.id === fileId)
+        const fileIndex = recentFiles.value.findIndex(f => f.id === fileId)
         
         if (fileIndex !== -1) {
-            this.recentFiles[fileIndex] = {
-                ...this.recentFiles[fileIndex],
+            recentFiles.value[fileIndex] = {
+                ...recentFiles.value[fileIndex],
                 status,
                 updatedAt: new Date().toISOString(),
                 ...additionalData
             }
+            
+            console.log('[FILES STORE] Updated file status:', fileId, 'to', status)
+        } else {
+            console.warn('[FILES STORE] File not found for status update:', fileId)
         }
     }
 
