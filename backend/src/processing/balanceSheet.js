@@ -32,39 +32,90 @@ function detectBalanceSheetStructure(worksheet) {
 
     let lastMeaningfulRow = worksheet.rowCount;
 
-    for (let rowNum = 1; rowNum <= Math.min(worksheet.rowCount, 100); rowNum++) {
+    // First pass: Find company name, INN, and report date in the header section
+    for (let rowNum = 1; rowNum <= Math.min(worksheet.rowCount, 30); rowNum++) {
         const row = worksheet.getRow(rowNum);
 
-        row.eachCell((cell) => {
+        row.eachCell({ includeEmpty: false }, (cell) => {
             const cellText = getCellText(cell);
             const normalized = normalizeText(cellText);
 
-            if (!companyName && rowNum <= 10) {
-                if (normalized.includes('жамият') || normalized.includes('мчж') ||
-                    normalized.includes('общество') || normalized.includes('ооо')) {
+            // Enhanced company name detection - check for company markers
+            if (!companyName) {
+                // Check if this cell has a label for company name
+                if (normalized.includes('корхона') || normalized.includes('предприятие') || 
+                    normalized.includes('ташкилот') || normalized.includes('организация')) {
+                    // Look for the company name in the same row, different columns
+                    row.eachCell({ includeEmpty: false }, (valueCell) => {
+                        const valueText = getCellText(valueCell);
+                        const valueNormalized = normalizeText(valueText);
+                        
+                        // Check if this cell contains company type markers
+                        if (valueNormalized.includes('жамият') || valueNormalized.includes('jamiyat') ||
+                            valueNormalized.includes('мчж') || valueNormalized.includes('mchj') ||
+                            valueNormalized.includes('общество') || valueNormalized.includes('ооо') ||
+                            valueNormalized.includes('mas\'uliyati cheklangan') ||
+                            valueNormalized.includes('масъулияти чекланган')) {
+                            companyName = valueText.trim();
+                        }
+                    });
+                }
+                
+                // Alternative: Direct detection if the cell itself contains company type
+                if (!companyName && (
+                    normalized.includes('жамият') || normalized.includes('jamiyat') ||
+                    normalized.includes('мчж') || normalized.includes('mchj') ||
+                    normalized.includes('общество') || normalized.includes('ооо') ||
+                    normalized.includes('mas\'uliyati cheklangan') ||
+                    normalized.includes('масъулияти чекланган')
+                )) {
                     companyName = cellText.trim();
                 }
             }
 
-            if (!inn && (normalized.includes('инн') || normalized.includes('стир'))) {
+            // INN detection
+            if (!inn && (normalized.includes('инн') || normalized.includes('стир') || normalized.includes('inn'))) {
+                // Check current cell and adjacent cells for numbers
                 const innMatch = cellText.match(/(\d{9,})/);
                 if (innMatch) {
                     inn = innMatch[1];
+                } else {
+                    // Check adjacent cells in the same row
+                    row.eachCell({ includeEmpty: false }, (valueCell) => {
+                        const valueText = getCellText(valueCell);
+                        const match = valueText.match(/(\d{9,})/);
+                        if (match && !inn) {
+                            inn = match[1];
+                        }
+                    });
                 }
             }
 
-            if (!reportDate && (normalized.includes('отчетная дата') || normalized.includes('ҳисобот санаси'))) {
+            // Report date detection
+            if (!reportDate && (normalized.includes('отчетная дата') || normalized.includes('ҳисобот санаси') ||
+                normalized.includes('hisobot sanasi'))) {
                 const dateMatch = cellText.match(/(\d{2}[-./]\d{2}[-./]\d{4})/);
                 if (dateMatch) {
                     reportDate = dateMatch[1];
+                } else {
+                    // Check adjacent cells
+                    row.eachCell({ includeEmpty: false }, (valueCell) => {
+                        const valueText = getCellText(valueCell);
+                        const match = valueText.match(/(\d{2}[-./]\d{2}[-./]\d{4})/);
+                        if (match && !reportDate) {
+                            reportDate = match[1];
+                        }
+                    });
                 }
             }
 
+            // Detect end of header section
             if (normalized.includes('раҳбар') || normalized.includes('руководитель') ||
                 normalized.includes('бош бухгалтер') || normalized.includes('главный бухгалтер')) {
                 lastMeaningfulRow = Math.min(lastMeaningfulRow, rowNum);
             }
 
+            // Detect code column (this marks the start of data section)
             if (!codeColumn && (normalized.includes('код стр') || normalized.includes('сатр коди'))) {
                 codeColumn = cell.col;
                 headerRow = rowNum;
@@ -78,6 +129,7 @@ function detectBalanceSheetStructure(worksheet) {
         throw new Error('Could not find code column in balance sheet');
     }
 
+    // Rest of the function remains the same...
     for (let rowNum = headerRow; rowNum <= Math.min(headerRow + 20, lastMeaningfulRow); rowNum++) {
         const row = worksheet.getRow(rowNum);
 
