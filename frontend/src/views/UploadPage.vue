@@ -57,7 +57,7 @@
                 <!-- Selected File Preview -->
                 <div v-else class="space-y-4">
                     <div class="flex items-center justify-center space-x-3">
-                        <DocumentIcon class="h-8 w-8 text-green-600" />
+                        <img src="/images/icons/excel.svg" class="h-8 w-8 text-green-600 mr-3 flex-shrink-0" />
                         <div class="text-left">
                             <p class="font-medium text-gray-900">{{ selectedFile.name }}</p>
                             <p class="text-sm text-gray-500">{{ formatFileSize(selectedFile.size) }}</p>
@@ -132,7 +132,7 @@
                 <div v-for="file in recentTemplateFiles" :key="file.id"
                     class="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
                     <div class="flex items-center space-x-3 flex-1 min-w-0">
-                        <DocumentIcon class="h-5 w-5 text-gray-400 flex-shrink-0" />
+                        <img src="/images/icons/excel.svg" class="h-5 w-5 text-gray-400 mr-3 flex-shrink-0" />
                         <div class="min-w-0">
                             <p class="text-sm font-medium text-gray-900 truncate">{{ file.originalName }}</p>
                             <div class="flex items-center space-x-3">
