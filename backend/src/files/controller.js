@@ -5,9 +5,6 @@ const XLSX = require('xlsx');
 const crypto = require('crypto');
 const File = require('./model');
 const ProcessingJob = require('../jobs/model');
-const { processDepreciationTemplate } = require('../processing/depreciation');
-const { processDiscountsTemplate } = require('../processing/discounts');
-const { processImpairmentTemplate } = require('../processing/impairment');
 const { processBalanceSheetTemplate } = require('../processors/balanceSheet');
 const templateTypes = require('../utils/templateTypes')
 
@@ -600,15 +597,6 @@ async function processFileAsync(fileRecord, processingJob) {
         // Process based on template type
         let result;
         switch (fileRecord.templateType) {
-            case 'depreciation':
-                result = await processDepreciationTemplate(workbook);
-                break;
-            case 'discounts':
-                result = await processDiscountsTemplate(workbook);
-                break;
-            case 'impairment':
-                result = await processImpairmentTemplate(workbook);
-                break;
             case 'balanceSheet':
                 result = await processBalanceSheetTemplate(workbook);
                 break;
