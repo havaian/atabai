@@ -1,4 +1,4 @@
-// processors/balanceSheetProcessor.js
+// processors/balanceSheet.js
 
 const { readExcelFile } = require('./readers/excelReader');
 const { extractBalanceSheetData } = require('./extractors/balanceSheet');
@@ -11,8 +11,8 @@ const { styleReport } = require('../utils/excelStyler');
  */
 
 /**
- * Process balance sheet from file path or buffer
- * @param {string|Buffer} input - File path or buffer
+ * Process balance sheet from file path, buffer, or ExcelJS Workbook
+ * @param {string|Buffer|ExcelJS.Workbook} input - File path, buffer, or ExcelJS Workbook
  * @returns {Object} Processing result with workbook and summary
  */
 async function processBalanceSheetTemplate(input) {
@@ -29,8 +29,8 @@ async function processBalanceSheetTemplate(input) {
     };
 
     try {
-        // Step 1: Read Excel file (supports both .xlsx and .xls)
-        const normalizedWorkbook = readExcelFile(input);
+        // Step 1: Read Excel file (supports .xlsx, .xls, and ExcelJS Workbook)
+        const normalizedWorkbook = await readExcelFile(input);
 
         if (normalizedWorkbook.sheetCount === 0) {
             throw new Error('No worksheets found in the file');

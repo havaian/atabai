@@ -1,20 +1,26 @@
 // processors/readers/excelReader.js
 
 const XLSX = require('xlsx');
+const ExcelJS = require('exceljs');
 
 /**
  * Universal Excel Reader
- * Handles .xlsx, .xls, and other Excel formats
+ * Handles .xlsx, .xls, and ExcelJS Workbook objects
  * Returns a normalized data structure that extractors can work with
  */
 
 /**
  * Read Excel file and return normalized workbook structure
- * @param {string|Buffer} input - File path or buffer
+ * @param {string|Buffer|ExcelJS.Workbook} input - File path, buffer, or ExcelJS Workbook
  * @returns {Object} Normalized workbook object
  */
-function readExcelFile(input) {
+async function readExcelFile(input) {
     try {
+        // Check if input is already an ExcelJS Workbook
+        if (input && input.worksheets && Array.isArray(input.worksheets)) {
+            return await normalizeExcelJSWorkbook(input);
+        }
+
         // Read the workbook using xlsx library (supports both .xlsx and .xls)
         const workbook = XLSX.read(input, {
             type: Buffer.isBuffer(input) ? 'buffer' : 'file',
@@ -22,10 +28,127 @@ function readExcelFile(input) {
             cellDates: true
         });
 
-        return normalizeWorkbook(workbook);
+        return normalizeXLSXWorkbook(workbook);
     } catch (error) {
         throw new Error(`Failed to read Excel file: ${error.message}`);
     }
+}
+
+/**
+ * Normalize ExcelJS workbook to common format
+ * @param {ExcelJS.Workbook} workbook - ExcelJS workbook object
+ * @returns {Object} Normalized workbook
+ */
+async function normalizeExcelJSWorkbook(workbook) {
+    const sheets = [];
+
+    for (const worksheet of workbook.worksheets) {
+        const normalized = normalizeExcelJSWorksheet(worksheet);
+        sheets.push({
+            name: worksheet.name,
+            data: normalized.data,
+            range: normalized.range,
+            rowCount: normalized.rowCount,
+            columnCount: normalized.columnCount
+        });
+    }
+
+    return {
+        sheets,
+        sheetCount: sheets.length
+    };
+}
+
+/**
+ * Normalize ExcelJS worksheet to common format
+ * @param {ExcelJS.Worksheet} worksheet - ExcelJS worksheet
+ * @returns {Object} Normalized worksheet
+ */
+function normalizeExcelJSWorksheet(worksheet) {
+    const data = [];
+    let maxRow = 0;
+    let maxCol = 0;
+
+    worksheet.eachRow({ includeEmpty: true }, (row, rowNumber) => {
+        const rowData = [];
+
+        row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
+            maxCol = Math.max(maxCol, colNumber);
+
+            rowData.push({
+                value: getCellValueFromExcelJS(cell),
+                rawValue: cell.value,
+                type: cell.type,
+                formula: cell.formula,
+                column: colNumber,
+                row: rowNumber
+            });
+        });
+
+        // Fill empty cells up to maxCol
+        while (rowData.length < maxCol) {
+            rowData.push({
+                value: null,
+                rawValue: null,
+                type: null,
+                formula: null,
+                column: rowData.length + 1,
+                row: rowNumber
+            });
+        }
+
+        data.push(rowData);
+        maxRow = Math.max(maxRow, rowNumber);
+    });
+
+    return {
+        data,
+        range: {
+            startRow: 1,
+            endRow: maxRow,
+            startCol: 1,
+            endCol: maxCol
+        },
+        rowCount: maxRow,
+        columnCount: maxCol
+    };
+}
+
+/**
+ * Get cell value from ExcelJS cell
+ * @param {ExcelJS.Cell} cell - ExcelJS cell
+ * @returns {string|number|null} Cell value
+ */
+function getCellValueFromExcelJS(cell) {
+    if (!cell || !cell.value) return null;
+
+    // Handle rich text
+    if (cell.value.richText) {
+        return cell.value.richText.map(t => t.text || '').join(' ');
+    }
+
+    // Handle hyperlink
+    if (cell.value.hyperlink) {
+        return cell.value.text || cell.value.hyperlink;
+    }
+
+    // Handle formula
+    if (cell.value.formula) {
+        return cell.value.result;
+    }
+
+    // Handle date
+    if (cell.value instanceof Date) {
+        return cell.value;
+    }
+
+    // Handle error
+    if (cell.value.error) {
+        return null;
+    }
+
+    // Return raw value
+    return cell.value;
 }
 
 /**
@@ -33,12 +156,12 @@ function readExcelFile(input) {
  * @param {Object} workbook - XLSX workbook object
  * @returns {Object} Normalized workbook
  */
-function normalizeWorkbook(workbook) {
+function normalizeXLSXWorkbook(workbook) {
     const sheets = [];
 
     workbook.SheetNames.forEach((sheetName) => {
         const worksheet = workbook.Sheets[sheetName];
-        const normalized = normalizeWorksheet(worksheet);
+        const normalized = normalizeXLSXWorksheet(worksheet);
         sheets.push({
             name: sheetName,
             data: normalized.data,
@@ -55,11 +178,11 @@ function normalizeWorkbook(workbook) {
 }
 
 /**
- * Normalize worksheet to a common data structure
+ * Normalize XLSX worksheet to a common data structure
  * @param {Object} worksheet - XLSX worksheet object
  * @returns {Object} Normalized worksheet with row/column access
  */
-function normalizeWorksheet(worksheet) {
+function normalizeXLSXWorksheet(worksheet) {
     const range = XLSX.utils.decode_range(worksheet['!ref'] || 'A1');
     const data = [];
 
@@ -71,7 +194,7 @@ function normalizeWorksheet(worksheet) {
             const cell = worksheet[cellAddress];
 
             row.push({
-                value: cell ? getCellValue(cell) : null,
+                value: cell ? getCellValueFromXLSX(cell) : null,
                 rawValue: cell ? cell.v : null,
                 type: cell ? cell.t : null,
                 formula: cell ? cell.f : null,
@@ -96,11 +219,11 @@ function normalizeWorksheet(worksheet) {
 }
 
 /**
- * Get cell value in a consistent format
+ * Get cell value from XLSX cell in a consistent format
  * @param {Object} cell - XLSX cell object
  * @returns {string|number|null} Cell value
  */
-function getCellValue(cell) {
+function getCellValueFromXLSX(cell) {
     if (!cell) return null;
 
     // Handle different cell types
@@ -165,10 +288,11 @@ function eachCellInRow(normalizedSheet, row, callback) {
 
 module.exports = {
     readExcelFile,
-    normalizeWorkbook,
-    normalizeWorksheet,
+    normalizeExcelJSWorkbook,
+    normalizeXLSXWorkbook,
     getCell,
     getRow,
     eachCellInRow,
-    getCellValue
+    getCellValueFromExcelJS,
+    getCellValueFromXLSX
 };
