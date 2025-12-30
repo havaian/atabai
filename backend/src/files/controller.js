@@ -8,7 +8,7 @@ const ProcessingJob = require('../jobs/model');
 const { processDepreciationTemplate } = require('../processing/depreciation');
 const { processDiscountsTemplate } = require('../processing/discounts');
 const { processImpairmentTemplate } = require('../processing/impairment');
-const { processBalanceSheetTemplate } = require('../processing/balanceSheet');
+const { processBalanceSheetTemplate } = require('../processors/balanceSheet');
 const templateTypes = require('../utils/templateTypes')
 
 /**
