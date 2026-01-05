@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { apiClient } from '@/plugins/axios'
 import {
+    BanknotesIcon,
     CalculatorIcon,
     ChartBarIcon,
     CurrencyDollarIcon,
@@ -70,6 +71,16 @@ export const useTemplatesStore = defineStore('templates', () => {
                 description: 'Transform NSBU balance sheet to IFRS format according to IAS 1 standards',
                 subscriptionRequired: 'basic'
             },
+            {
+                id: 'cashFlow',
+                key: 'cashFlow',
+                name: 'Cash Flow Transformation',
+                standard: 'IAS 7',
+                category: 'Financial Statements',
+                icon: BanknotesIcon,
+                description: 'Transform NSBU cash flow statement to IFRS format according to IAS 7 standards',
+                subscriptionRequired: 'basic'
+            }
         ]
 
         // Merge with actual templates from API if available
@@ -294,8 +305,30 @@ export const useTemplatesStore = defineStore('templates', () => {
                     label: 'Ending Balance',
                     placeholder: 'Amount at period end'
                 }
+            ],
+            'cashFlow': [
+                {
+                    name: 'lineName',
+                    type: 'text',
+                    required: true,
+                    label: 'Line Item',
+                    placeholder: 'Cash flow activity description'
+                },
+                {
+                    name: 'inflow',
+                    type: 'number',
+                    required: false,
+                    label: 'Inflow Amount',
+                    placeholder: 'Cash receipts'
+                },
+                {
+                    name: 'outflow',
+                    type: 'number',
+                    required: false,
+                    label: 'Outflow Amount',
+                    placeholder: 'Cash payments'
+                }
             ]
-
         }
 
         return fields[templateId] || []
@@ -322,6 +355,11 @@ export const useTemplatesStore = defineStore('templates', () => {
                 en: 'Upload your NSBU balance sheet (Form № 1). The template will map all line items to IFRS classifications according to IAS 1.',
                 ru: 'Загрузите баланс в формате НСБУ (Форма № 1). Шаблон сопоставит все статьи с классификацией МСФО согласно IAS 1.',
                 uz: 'NSBU balansini yuklang (Forma № 1). Shablon barcha qatorlarni IAS 1 ga muvofiq IFRS klassifikatsiyasiga moslaydi.'
+            },
+            'cashFlow': {
+                en: 'Upload your NSBU cash flow statement with inflow and outflow columns. The template will map all activities to IFRS cash flow format according to IAS 7.',
+                ru: 'Загрузите отчет о движении денежных средств НСБУ с колонками притока и оттока. Шаблон сопоставит все операции с форматом движения денежных средств МСФО согласно IAS 7.',
+                uz: 'Pul oqimlarining NSBU hisobotini kirish va chiqish ustunlari bilan yuklang. Shablon barcha faoliyatni IAS 7 ga muvofiq IFRS pul oqimlari formatiga moslaydi.'
             }
         }
 
@@ -368,6 +406,16 @@ export const useTemplatesStore = defineStore('templates', () => {
                 {
                     name: 'Comparative Balance Sheet',
                     description: 'Side-by-side comparison of NSBU and IFRS presentations'
+                }
+            ],
+            'cashFlow': [
+                {
+                    name: 'Standard Cash Flow Mapping',
+                    description: 'Complete NSBU to IFRS cash flow transformation'
+                },
+                {
+                    name: 'Comparative Cash Flow',
+                    description: 'Multi-period cash flow analysis with IFRS classification'
                 }
             ]
         }
