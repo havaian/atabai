@@ -257,7 +257,9 @@
     "reports": "Financial Reports",
     "reportsDescription": "Generate comprehensive IFRS-compliant financial reports with automated compliance checks",
     "balanceSheet": "Balance Sheet Transformation",
-    "balanceSheetDescription": "Transform NSBU balance sheet to IFRS format according to IAS 1 standards"
+    "balanceSheetDescription": "Transform NSBU balance sheet to IFRS format according to IAS 1 standards",
+    "cashFlow": "Cash Flow Transformation",
+    "cashFlowDescription": "Transform NSBU cash flow statement to IFRS format according to IAS 7 standards"
   },
   "features": {
     "title": "Why ATABAI is great",
@@ -404,7 +406,13 @@
         "Standard Uzbek balance sheet structure expected",
         "Columns: Row Code, Description, Beginning Balance, Ending Balance",
         "System will map NSBU codes to IFRS classifications"
-      ]
+      ],
+      "cashFlow": {
+        "1": "Cash flow statement transformed from NSBU to IFRS format according to IAS 7 - Statement of Cash Flows",
+        "2": "Activities are classified into operating, investing, and financing categories",
+        "3": "Direct method is used to present operating cash flows where applicable",
+        "4": "Net amounts are calculated automatically for items with both inflows and outflows"
+      }
     },
     "dropZone": {
       "title": "Drop your Excel file here",
@@ -448,6 +456,12 @@
         "Description",
         "Beginning Balance (UZS)",
         "Ending Balance (UZS)"
+      ],
+      "cashFlow": [
+        "Line Item",
+        "Inflow (UZS)",
+        "Outflow (UZS)",
+        "Period"
       ]
     },
     "sampleData": {
@@ -500,6 +514,11 @@
         ["010", "Fixed Assets - Gross", "379,046,345", "364,903,106"],
         ["011", "Accumulated Depreciation", "141,246,647", "147,353,112"],
         ["220", "Trade Receivables", "411,581,488", "403,315,404"]
+      ],
+      "cashFlow": [
+        ["Cash receipts from customers", "1,340,638,713,954", "", "2024"],
+        ["Cash paid to suppliers", "", "1,014,597,002,120", "2024"],
+        ["Income taxes paid", "44,790,796,191", "111,219,623,676", "2024"]
       ]
     },
     "recentFiles": {
@@ -629,6 +648,13 @@
         "2": "Current/non-current classification follows the 12-month operating cycle test",
         "3": "All NSBU account codes have been mapped to appropriate IFRS line items",
         "4": "This mapping provides structure alignment but does not replace full IFRS adjustments and professional audit"
+      },
+      "cashFlow": {
+        "processed": "Cash flow items processed",
+        "changesLabel": "Line item transformations",
+        "changes": "185",
+        "formulasLabel": "Net calculations",
+        "formulas": "24"
       }
     },
     "pagination": {
@@ -660,6 +686,30 @@
       "total": "Total {section}",
       "totalAssets": "TOTAL ASSETS",
       "totalEquityLiabilities": "TOTAL EQUITY AND LIABILITIES"
+    },
+    "cashFlow": {
+      "title": "STATEMENT OF CASH FLOWS (IFRS)",
+      "period": "For the period ended {date}",
+      "inn": "INN: {inn}",
+      "columns": {
+        "lineItem": "Cash Flow Item",
+        "amount": "Amount (UZS)"
+      },
+      "sections": {
+        "operating": "Operating Activities",
+        "investing": "Investing Activities",
+        "financing": "Financing Activities",
+        "reconciliation": "Reconciliation"
+      },
+      "totals": {
+        "netOperating": "Net cash from operating activities",
+        "netInvesting": "Net cash from investing activities",
+        "netFinancing": "Net cash from financing activities",
+        "netChange": "Net increase/(decrease) in cash",
+        "fxEffects": "Effect of exchange rate changes",
+        "cashBeginning": "Cash at beginning of period",
+        "cashEnding": "Cash at end of period"
+      }
     }
   },
   "history": {

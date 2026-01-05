@@ -1,1 +1,1 @@
-module.exports = ['balanceSheet'];
+module.exports = ['balanceSheet', 'cashFlow'];

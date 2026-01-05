@@ -284,7 +284,9 @@
     "reports": "Moliyaviy hisobotlar",
     "reportsDescription": "Avtomatik muvofiqlik tekshiruvlari bilan XMHS ga mos kompleks moliyaviy hisobotlarni yaratish",
     "balanceSheet": "Balans transformatsiyasi",
-    "balanceSheetDescription": "NSBUdan IFRS formatiga balans transformatsiyasi IAS 1 standartiga muvofiq"
+    "balanceSheetDescription": "NSBUdan IFRS formatiga balans transformatsiyasi IAS 1 standartiga muvofiq",
+    "cashFlow": "Pul oqimlari hisobotini o'zgartirish",
+    "cashFlowDescription": "NSBU pul oqimlari hisobotini IAS 7 standartlariga muvofiq IFRS formatiga o'zgartirish"
   },
   "pricing": {
     "title": "ATABAI vaqt va pulni tejashga yordam beradi",
@@ -404,7 +406,13 @@
         "Standart o'zbek balans tuzilishi kutilmoqda",
         "Ustunlar: Qator kodi, Tavsif, Boshlang'ich balans, Yakuniy balans",
         "Tizim NSBU kodlarini IFRS klassifikatsiyasiga moslaydi"
-      ]
+      ],
+      "cashFlow": {
+        "1": "Pul oqimlari hisoboti NSBU formatidan IAS 7 - Pul oqimlari hisoboti bo'yicha IFRS formatiga o'zgartirildi",
+        "2": "Faoliyat operatsion, investitsion va moliyaviy toifalarga ajratiladi",
+        "3": "Operatsion pul oqimlarini taqdim etishda to'g'ridan-to'g'ri usul qo'llaniladi",
+        "4": "Kirish va chiqishga ega qatorlar uchun sof summalar avtomatik hisoblanadi"
+      }
     },
     "dropZone": {
       "title": "Excel faylingizni bu yerga tashlang",
@@ -439,6 +447,12 @@
         "Nomi",
         "Davr boshida (so'm)",
         "Davr oxirida (so'm)"
+      ],
+      "cashFlow": [
+        "Qator nomi",
+        "Kirish (so'm)",
+        "Chiqish (so'm)",
+        "Davr"
       ]
     },
     "sampleData": {
@@ -502,6 +516,11 @@
         ],
         ["011", "To'plangan amortizatsiya", "141,246,647", "147,353,112"],
         ["220", "Debitorlik qarzlari", "411,581,488", "403,315,404"]
+      ],
+      "cashFlow": [
+        ["Xaridorlardan tushgan pul", "1,340,638,713,954", "", "2024"],
+        ["Yetkazib beruvchilarga to'langan", "", "1,014,597,002,120", "2024"],
+        ["To'langan soliqlar", "44,790,796,191", "111,219,623,676", "2024"]
       ]
     },
     "selectedFile": {
@@ -640,6 +659,13 @@
         "2": "Joriy/uzoq muddatli klassifikatsiya 12 oylik operatsion tsikl testiga amal qiladi",
         "3": "Barcha NSBU hisob kodlari tegishli IFRS qatorlariga moslashtirilgan",
         "4": "Ushbu moslashtirish tuzilma moslashuvini ta'minlaydi, lekin to'liq IFRS tuzatishlari va professional auditni almashtirmaydi"
+      },
+      "cashFlow": {
+        "processed": "Pul oqimlari qatorlari qayta ishlandi",
+        "changesLabel": "Qator o'zgarishlari",
+        "changes": "185",
+        "formulasLabel": "Sof hisob-kitoblar",
+        "formulas": "24"
       }
     },
     "pagination": {
@@ -671,6 +697,30 @@
       "total": "Jami {section}",
       "totalAssets": "JAMI AKTIVLAR",
       "totalEquityLiabilities": "JAMI KAPITAL VA MAJBURIYATLAR"
+    },
+    "cashFlow": {
+      "title": "PUL OQIMLARI HISOBOTI (IFRS)",
+      "period": "{date} sanasida tugagan davr uchun",
+      "inn": "INN: {inn}",
+      "columns": {
+        "lineItem": "Pul oqimi qatori",
+        "amount": "Summa (so'm)"
+      },
+      "sections": {
+        "operating": "Operatsion faoliyat",
+        "investing": "Investitsion faoliyat",
+        "financing": "Moliyaviy faoliyat",
+        "reconciliation": "Uzlashtirish"
+      },
+      "totals": {
+        "netOperating": "Operatsion faoliyatdan sof pul mablag'lari",
+        "netInvesting": "Investitsion faoliyatdan sof pul mablag'lari",
+        "netFinancing": "Moliyaviy faoliyatdan sof pul mablag'lari",
+        "netChange": "Pul mablag'larining sof o'sishi/(kamayishi)",
+        "fxEffects": "Valyuta kurslari o'zgarishining ta'siri",
+        "cashBeginning": "Davr boshidagi pul mablag'lari",
+        "cashEnding": "Davr oxiridagi pul mablag'lari"
+      }
     }
   },
   "history": {

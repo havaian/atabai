@@ -6,6 +6,7 @@ const crypto = require('crypto');
 const File = require('./model');
 const ProcessingJob = require('../jobs/model');
 const { processBalanceSheetTemplate } = require('../processors/balanceSheet');
+const { processCashFlowTemplate } = require('../processors/cashFlow');
 const templateTypes = require('../utils/templateTypes')
 
 /**
@@ -568,12 +569,17 @@ async function processFileAsync(fileRecord, processingJob) {
 
         // Process based on template type
         let result;
-        switch (fileRecord.templateType) {
+        switch (processingJob.templateType) {
             case 'balanceSheet':
-                result = await processBalanceSheetTemplate(workbook);
+                result = await processBalanceSheetTemplate(filePath);
                 break;
+            
+            case 'cashFlow':
+                result = await processCashFlowTemplate(filePath);
+                break;
+            
             default:
-                throw new Error(`Unknown template type: ${fileRecord.templateType}`);
+                throw new Error(`Unknown template type: ${processingJob.templateType}`);
         }
 
         processingJob.progress = 70;

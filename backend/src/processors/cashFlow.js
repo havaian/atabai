@@ -1,21 +1,21 @@
-// processors/balanceSheet.js
+// processors/cashFlow.js
 
 const { readExcelFile } = require('./readers/excelReader');
-const { extractBalanceSheetData } = require('./extractors/balanceSheet');
-const { transformToIFRSStructure } = require('./transformers/balanceSheet');
-const { styleReport } = require('../utils/stylers/balanceSheet');
+const { extractCashFlowData } = require('./extractors/cashFlow');
+const { transformToIFRSCashFlow } = require('./transformers/cashFlow');
+const { styleCashFlowReport } = require('../utils/stylers/cashFlow');
 
 /**
- * Balance Sheet Processor - Modular Architecture
- * Orchestrates the processing pipeline
+ * Cash Flow Processor - Modular Architecture
+ * Orchestrates the processing pipeline for cash flow statements
  */
 
 /**
- * Process balance sheet from file path, buffer, or ExcelJS Workbook
+ * Process cash flow from file path, buffer, or ExcelJS Workbook
  * @param {string|Buffer|ExcelJS.Workbook} input - File path, buffer, or ExcelJS Workbook
  * @returns {Object} Processing result with workbook and summary
  */
-async function processBalanceSheetTemplate(input) {
+async function processCashFlowTemplate(input) {
     const result = {
         workbook: null,
         summary: {
@@ -39,25 +39,28 @@ async function processBalanceSheetTemplate(input) {
         const sheet = normalizedWorkbook.sheets[0];
 
         // Step 2: Extract data from the sheet
-        const extracted = extractBalanceSheetData(sheet);
+        const extracted = extractCashFlowData(sheet);
 
         // Step 3: Transform to IFRS structure
-        const ifrsStructure = transformToIFRSStructure(extracted.dataMap);
+        const ifrsStructure = transformToIFRSCashFlow(extracted.dataMap);
 
         // Step 4: Style the output
         const styledData = {
-            title: 'STATEMENT OF FINANCIAL POSITION (IFRS)',
+            title: 'STATEMENT OF CASH FLOWS (IFRS)',
             companyName: extracted.metadata.companyName,
-            reportDate: extracted.metadata.reportDate,
+            period: extracted.metadata.period || 'For the period ended',
             inn: extracted.metadata.inn,
             sections: ifrsStructure.sections,
-            totalAssetsStart: ifrsStructure.totalAssetsStart,
-            totalAssetsEnd: ifrsStructure.totalAssetsEnd,
-            totalEquityLiabStart: ifrsStructure.totalEquityLiabStart,
-            totalEquityLiabEnd: ifrsStructure.totalEquityLiabEnd
+            operatingTotal: ifrsStructure.operatingTotal,
+            investingTotal: ifrsStructure.investingTotal,
+            financingTotal: ifrsStructure.financingTotal,
+            netChange: ifrsStructure.netChange,
+            fxEffects: ifrsStructure.fxEffects,
+            cashBeginning: ifrsStructure.cashBeginning,
+            cashEnding: ifrsStructure.cashEnding
         };
 
-        result.workbook = styleReport(styledData, 'balanceSheet');
+        result.workbook = styleCashFlowReport(styledData);
 
         // Update summary
         result.summary.transformations = extracted.dataMap.size;
@@ -68,11 +71,11 @@ async function processBalanceSheetTemplate(input) {
         return result;
 
     } catch (error) {
-        console.error('[PROCESSOR ERROR]', error.message);
-        throw new Error(`Failed to process balance sheet: ${error.message}`);
+        console.error('[CASH FLOW PROCESSOR ERROR]', error.message);
+        throw new Error(`Failed to process cash flow statement: ${error.message}`);
     }
 }
 
 module.exports = {
-    processBalanceSheetTemplate
+    processCashFlowTemplate
 };
