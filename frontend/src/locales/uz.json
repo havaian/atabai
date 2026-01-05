@@ -285,7 +285,7 @@
     "reportsDescription": "Avtomatik muvofiqlik tekshiruvlari bilan XMHS ga mos kompleks moliyaviy hisobotlarni yaratish",
     "balanceSheet": "Balans transformatsiyasi",
     "balanceSheetDescription": "NSBUdan IFRS formatiga balans transformatsiyasi IAS 1 standartiga muvofiq",
-    "cashFlow": "Pul oqimlari hisobotini o'zgartirish",
+    "cashFlow": "Pul oqimlari hisobotini transformatsiyasi",
     "cashFlowDescription": "NSBU pul oqimlari hisobotini IAS 7 standartlariga muvofiq IFRS formatiga o'zgartirish"
   },
   "pricing": {
