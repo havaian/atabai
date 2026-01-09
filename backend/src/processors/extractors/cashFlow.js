@@ -1,18 +1,13 @@
-// extractors/cashFlow.js
+// extractors/cashFlow.js - DEBUG VERSION
 
 /**
  * Cash Flow Statement Data Extractor
- * Handles row-based monthly format used by Uzbek companies
- * 
- * Tested with real CF files:
- * - CF_example.xlsx: Row 2 headers, Row 3+ data
- * - CF_1.xlsx: Row 1 "CF", Row 2+ data
- * - CF_2.xlsx: Row 3 "CF", Row 4+ data
+ * WITH EXTENSIVE DEBUG LOGGING
  */
 
 function extractCashFlowData(sheet) {
     global.logger.logInfo('[CF EXTRACTOR] Starting extraction...');
-    global.logger.logInfo('[CF EXTRACTOR] Sheet keys:', Object.keys(sheet));
+    global.logger.logInfo('[CF EXTRACTOR] Sheet keys:', JSON.stringify(Object.keys(sheet)));
 
     const result = {
         metadata: {
@@ -58,6 +53,13 @@ function extractCashFlowData(sheet) {
     }
 
     global.logger.logInfo(`[CF EXTRACTOR] Total rows: ${rowCount}`);
+
+    // DEBUG: Check first few rows
+    global.logger.logInfo('[CF EXTRACTOR DEBUG] First 10 rows, column A:');
+    for (let i = 0; i < Math.min(10, rowCount); i++) {
+        const val = getCellValue(i, 0);
+        global.logger.logInfo(`  Row ${i}: "${val}"`);
+    }
 
     // Find where data starts - look for "CF" or "Операционная деятельность"
     let dataStartRow = -1;
@@ -140,6 +142,15 @@ function extractCashFlowData(sheet) {
         let totalValue = 0;
         let nonZeroCount = 0;
 
+        // DEBUG: Log first 3 cells of first 3 data rows
+        if (itemsExtracted < 3) {
+            global.logger.logInfo(`[CF EXTRACTOR DEBUG] Row ${i} "${lineItemStr}" - checking columns:`);
+            for (let col = 1; col <= 3; col++) {
+                const cellValue = getCellValue(i, col);
+                global.logger.logInfo(`  Col ${col}: value="${cellValue}", type=${typeof cellValue}`);
+            }
+        }
+
         // Check up to 30 columns for monthly data
         for (let col = 1; col < 30; col++) {
             const cellValue = getCellValue(i, col);
@@ -157,6 +168,9 @@ function extractCashFlowData(sheet) {
             if (Math.abs(numValue) > 0.01) nonZeroCount++;
         }
 
+        // DEBUG: Log extraction results for every row
+        global.logger.logInfo(`[CF EXTRACTOR DEBUG] Row ${i} "${lineItemStr}": extracted ${values.length} values, total=${totalValue.toFixed(2)}, section=${currentSection}, subsection=${currentSubSection}`);
+
         // Only store if we extracted some values and have a section
         if (values.length > 0 && currentSection) {
             const dataEntry = {
@@ -173,7 +187,14 @@ function extractCashFlowData(sheet) {
             result.dataMap.set(lineItemStr, dataEntry);
             itemsExtracted++;
 
-            global.logger.logInfo(`[CF EXTRACTOR] Row ${i}: "${lineItemStr}" = ${totalValue.toFixed(2)} (${values.length} months, ${nonZeroCount} non-zero)`);
+            global.logger.logInfo(`[CF EXTRACTOR] ✓ STORED Row ${i}: "${lineItemStr}" = ${totalValue.toFixed(2)} (${values.length} months, ${nonZeroCount} non-zero)`);
+        } else {
+            // DEBUG: Log why we didn't store
+            if (values.length === 0) {
+                global.logger.logInfo(`[CF EXTRACTOR] ✗ SKIPPED Row ${i} "${lineItemStr}": No values extracted`);
+            } else if (!currentSection) {
+                global.logger.logInfo(`[CF EXTRACTOR] ✗ SKIPPED Row ${i} "${lineItemStr}": No current section`);
+            }
         }
     }
 
