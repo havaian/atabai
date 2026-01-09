@@ -35,13 +35,33 @@ function extractCashFlowData(sheet) {
         global.logger.logInfo('[CF EXTRACTOR] Using sheet.data structure');
         rows = sheet.data;
         rowCount = rows.length;
-        getCellValue = (rowIndex, colIndex) => {
-            if (rowIndex >= rows.length) return null;
-            const row = rows[rowIndex];
-            if (!row || !row.cells || colIndex >= row.cells.length) return null;
-            const cell = row.cells[colIndex];
-            return cell ? cell.value : null;
-        };
+        
+        // Check structure: is it data[row].cells[col] or data[row][col]?
+        if (rowCount > 0 && rows[0]) {
+            if (rows[0].cells) {
+                // Structure: data[row].cells[col].value
+                global.logger.logInfo('[CF EXTRACTOR] Structure: data[row].cells[col].value');
+                getCellValue = (rowIndex, colIndex) => {
+                    if (rowIndex >= rows.length) return null;
+                    const row = rows[rowIndex];
+                    if (!row || !row.cells || colIndex >= row.cells.length) return null;
+                    const cell = row.cells[colIndex];
+                    return cell ? cell.value : null;
+                };
+            } else if (Array.isArray(rows[0])) {
+                // Structure: data[row][col] - direct 2D array
+                global.logger.logInfo('[CF EXTRACTOR] Structure: data[row][col] direct array');
+                getCellValue = (rowIndex, colIndex) => {
+                    if (rowIndex >= rows.length) return null;
+                    const row = rows[rowIndex];
+                    if (!Array.isArray(row) || colIndex >= row.length) return null;
+                    return row[colIndex];  // Direct access!
+                };
+            } else {
+                global.logger.logError('[CF EXTRACTOR] Unknown data structure!');
+                throw new Error('Unknown sheet.data structure');
+            }
+        }
     } else if (sheet.rows && Array.isArray(sheet.rows)) {
         global.logger.logInfo('[CF EXTRACTOR] Using sheet.rows structure');
         rows = sheet.rows;
@@ -61,32 +81,11 @@ function extractCashFlowData(sheet) {
 
     global.logger.logInfo(`[CF EXTRACTOR] Total rows: ${rowCount}`);
 
-    // DEBUG: Inspect the actual structure
-    global.logger.logInfo('[CF EXTRACTOR DEBUG] Inspecting sheet.data structure:');
-    if (rowCount > 0) {
-        const row0 = rows[0];
-        global.logger.logInfo(`  row[0] type: ${typeof row0}`);
-        global.logger.logInfo(`  row[0] is array: ${Array.isArray(row0)}`);
-        if (row0) {
-            global.logger.logInfo(`  row[0] keys: ${Object.keys(row0).slice(0, 10).join(', ')}`);
-            global.logger.logInfo(`  row[0].cells exists: ${!!row0.cells}`);
-            global.logger.logInfo(`  row[0].cells type: ${typeof row0.cells}`);
-            if (row0.cells) {
-                global.logger.logInfo(`  row[0].cells is array: ${Array.isArray(row0.cells)}`);
-                global.logger.logInfo(`  row[0].cells.length: ${row0.cells.length}`);
-                if (row0.cells.length > 0) {
-                    global.logger.logInfo(`  row[0].cells[0]: ${JSON.stringify(row0.cells[0])}`);
-                }
-            }
-        }
-        
-        const row2 = rows[2];
-        if (row2) {
-            global.logger.logInfo(`  row[2] keys: ${Object.keys(row2).slice(0, 10).join(', ')}`);
-            if (row2.cells && row2.cells.length > 0) {
-                global.logger.logInfo(`  row[2].cells[0]: ${JSON.stringify(row2.cells[0])}`);
-            }
-        }
+    // TEST: Verify getCellValue works
+    global.logger.logInfo('[CF EXTRACTOR] Testing getCellValue on first 5 rows:');
+    for (let i = 0; i < Math.min(5, rowCount); i++) {
+        const val = getCellValue(i, 0);
+        global.logger.logInfo(`  Row ${i}, Col 0: "${val}"`);
     }
 
     // Find where data starts
