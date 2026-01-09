@@ -260,10 +260,10 @@ async function createStyledBalanceSheet(data) {
                 extension: 'png',
             });
 
-            // Add logo to top-left
+            // Add logo to top-left (square dimensions to match actual image 3299x3190)
             worksheet.addImage(imageId, {
                 tl: { col: 0, row: 0 },
-                ext: { width: 120, height: 40 }
+                ext: { width: 40, height: 40 }  // Square dimensions for square logo
             });
 
             // Company name next to logo
