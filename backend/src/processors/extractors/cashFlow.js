@@ -17,6 +17,7 @@
 
 function extractCashFlowData(sheet) {
     console.log('[CF EXTRACTOR] Starting extraction...');
+    console.log('[CF EXTRACTOR] Sheet structure:', Object.keys(sheet));
 
     const result = {
         metadata: {
@@ -29,7 +30,8 @@ function extractCashFlowData(sheet) {
         sections: []
     };
 
-    const rowCount = sheet.rowCount;
+    const rows = sheet.rows;
+    const rowCount = rows.length;
     console.log(`[CF EXTRACTOR] Total rows: ${rowCount}`);
 
     let currentSection = null;
@@ -38,15 +40,22 @@ function extractCashFlowData(sheet) {
     let monthColumns = [];
 
     // Find header row and month columns
-    for (let i = 1; i <= Math.min(5, rowCount); i++) {
-        const firstCell = sheet.getCell(i, 1).value;
-        if (firstCell && (firstCell === 'CF' || String(firstCell).includes('Операционная'))) {
-            headerRow = i - 1;
-            // Extract month columns (columns B onwards)
-            for (let col = 2; col <= sheet.columnCount; col++) {
-                const cellValue = sheet.getCell(headerRow, col).value;
-                if (cellValue) {
-                    monthColumns.push(col);
+    for (let i = 0; i < Math.min(5, rowCount); i++) {
+        const row = rows[i];
+        if (!row || !row.cells || row.cells.length === 0) continue;
+
+        const firstCell = row.cells[0];
+        const firstValue = firstCell ? firstCell.value : null;
+
+        if (firstValue && (firstValue === 'CF' || String(firstValue).includes('Операционная'))) {
+            headerRow = i > 0 ? i - 1 : 0;
+            // Extract month columns (columns 1+ = B onwards in Excel)
+            if (headerRow < rowCount && rows[headerRow] && rows[headerRow].cells) {
+                for (let col = 1; col < rows[headerRow].cells.length; col++) {
+                    const cellValue = rows[headerRow].cells[col] ? rows[headerRow].cells[col].value : null;
+                    if (cellValue) {
+                        monthColumns.push(col);
+                    }
                 }
             }
             break;
@@ -59,9 +68,12 @@ function extractCashFlowData(sheet) {
     let startDataRow = headerRow + 1;
     if (headerRow === 0) startDataRow = 3; // Default if no header found
 
-    for (let i = startDataRow; i <= rowCount; i++) {
-        const lineItemCell = sheet.getCell(i, 1);
-        const lineItem = lineItemCell.value;
+    for (let i = startDataRow; i < rowCount; i++) {
+        const row = rows[i];
+        if (!row || !row.cells || row.cells.length === 0) continue;
+
+        const lineItemCell = row.cells[0];
+        const lineItem = lineItemCell ? lineItemCell.value : null;
 
         if (!lineItem) continue;
 
@@ -117,8 +129,15 @@ function extractCashFlowData(sheet) {
         const values = [];
         let totalValue = 0;
 
-        for (const col of monthColumns) {
-            const cellValue = sheet.getCell(i, col).value;
+        // If no month columns detected, use all available columns after first
+        const columnsToCheck = monthColumns.length > 0 ? monthColumns :
+            Array.from({ length: row.cells.length - 1 }, (_, i) => i + 1);
+
+        for (const col of columnsToCheck) {
+            if (col >= row.cells.length) continue;
+
+            const cell = row.cells[col];
+            const cellValue = cell ? cell.value : null;
             let numValue = 0;
 
             if (cellValue !== null && cellValue !== undefined) {
@@ -129,21 +148,23 @@ function extractCashFlowData(sheet) {
             totalValue += numValue;
         }
 
-        // Store the data
-        const dataEntry = {
-            lineItem: lineItemStr,
-            section: currentSection,
-            subSection: currentSubSection,
-            values: values,
-            total: totalValue,
-            isInflow: totalValue >= 0,
-            isOutflow: totalValue < 0,
-            row: i
-        };
+        // Only store if we have a section assigned and non-zero total or it's a meaningful line
+        if (currentSection || Math.abs(totalValue) > 0.01) {
+            const dataEntry = {
+                lineItem: lineItemStr,
+                section: currentSection,
+                subSection: currentSubSection,
+                values: values,
+                total: totalValue,
+                isInflow: totalValue >= 0,
+                isOutflow: totalValue < 0,
+                row: i
+            };
 
-        result.dataMap.set(lineItemStr, dataEntry);
+            result.dataMap.set(lineItemStr, dataEntry);
 
-        console.log(`[CF EXTRACTOR] Extracted: ${lineItemStr} = ${totalValue.toFixed(2)} (${values.length} months)`);
+            console.log(`[CF EXTRACTOR] Extracted: ${lineItemStr} = ${totalValue.toFixed(2)} (${values.length} months)`);
+        }
     }
 
     console.log(`[CF EXTRACTOR] Extraction complete. Total items: ${result.dataMap.size}`);
