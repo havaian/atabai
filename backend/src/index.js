@@ -12,7 +12,7 @@ const cookieParser = require('cookie-parser');
 // Import configurations
 const { connect: connectDatabase } = require('./config/database');
 const { connectRedis } = require('./config/redis');
-require('./config/logger');
+require('./utils/logger');
 
 // Import middleware
 const { errorHandler } = require('./middleware/errorHandler');
