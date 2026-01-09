@@ -2,7 +2,7 @@
 
 function extractCashFlowData(sheet) {
     global.logger.logInfo('[CF EXTRACTOR] Starting extraction...');
-
+    
     // FIX: Sheet might be a JSON string, parse it first
     if (typeof sheet === 'string') {
         global.logger.logInfo('[CF EXTRACTOR] Sheet is a string, parsing JSON...');
@@ -13,9 +13,9 @@ function extractCashFlowData(sheet) {
             throw new Error('Invalid sheet format: expected object or JSON string');
         }
     }
-
+    
     global.logger.logInfo('[CF EXTRACTOR] Sheet keys:', Object.keys(sheet));
-
+    
     const result = {
         metadata: {
             companyName: '',
@@ -60,6 +60,34 @@ function extractCashFlowData(sheet) {
     }
 
     global.logger.logInfo(`[CF EXTRACTOR] Total rows: ${rowCount}`);
+
+    // DEBUG: Inspect the actual structure
+    global.logger.logInfo('[CF EXTRACTOR DEBUG] Inspecting sheet.data structure:');
+    if (rowCount > 0) {
+        const row0 = rows[0];
+        global.logger.logInfo(`  row[0] type: ${typeof row0}`);
+        global.logger.logInfo(`  row[0] is array: ${Array.isArray(row0)}`);
+        if (row0) {
+            global.logger.logInfo(`  row[0] keys: ${Object.keys(row0).slice(0, 10).join(', ')}`);
+            global.logger.logInfo(`  row[0].cells exists: ${!!row0.cells}`);
+            global.logger.logInfo(`  row[0].cells type: ${typeof row0.cells}`);
+            if (row0.cells) {
+                global.logger.logInfo(`  row[0].cells is array: ${Array.isArray(row0.cells)}`);
+                global.logger.logInfo(`  row[0].cells.length: ${row0.cells.length}`);
+                if (row0.cells.length > 0) {
+                    global.logger.logInfo(`  row[0].cells[0]: ${JSON.stringify(row0.cells[0])}`);
+                }
+            }
+        }
+        
+        const row2 = rows[2];
+        if (row2) {
+            global.logger.logInfo(`  row[2] keys: ${Object.keys(row2).slice(0, 10).join(', ')}`);
+            if (row2.cells && row2.cells.length > 0) {
+                global.logger.logInfo(`  row[2].cells[0]: ${JSON.stringify(row2.cells[0])}`);
+            }
+        }
+    }
 
     // Find where data starts
     let dataStartRow = -1;
