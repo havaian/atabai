@@ -236,8 +236,8 @@ const logAction = (action, details = {}, level = 'info') => {
             category: 'action'
         });
     } catch (error) {
-        console.error(`Error logging action ${action}:`, error);
-        console.log(`Fallback log - ${action}:`, details);
+        global.logger.logError(`Error logging action ${action}:`, error);
+        global.logger.logInfo(`Fallback log - ${action}:`, details);
     }
 };
 

@@ -249,7 +249,7 @@ async function createStyledBalanceSheet(data) {
         for (const testPath of possiblePaths) {
             if (fs.existsSync(testPath)) {
                 logoPath = testPath;
-                console.log(`[BALANCE SHEET STYLER] Logo found at: ${logoPath}`);
+                global.logger.logInfo(`[BALANCE SHEET STYLER] Logo found at: ${logoPath}`);
                 break;
             }
         }
@@ -274,7 +274,7 @@ async function createStyledBalanceSheet(data) {
             companyRow.height = 30;
             currentRow += 2;
         } else {
-            console.warn('[BALANCE SHEET STYLER] Logo not found in any expected location');
+            global.logger.logWarn('[BALANCE SHEET STYLER] Logo not found in any expected location');
             // Add company name without logo
             const companyRow = worksheet.getRow(currentRow);
             companyRow.getCell(1).value = 'ATABAI';
@@ -284,7 +284,7 @@ async function createStyledBalanceSheet(data) {
             currentRow += 2;
         }
     } catch (error) {
-        console.warn('[BALANCE SHEET STYLER] Could not load logo:', error.message);
+        global.logger.logWarn('[BALANCE SHEET STYLER] Could not load logo:', error.message);
         // Add company name as fallback
         const companyRow = worksheet.getRow(currentRow);
         companyRow.getCell(1).value = 'ATABAI';

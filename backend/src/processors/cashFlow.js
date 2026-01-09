@@ -71,7 +71,7 @@ async function processCashFlowTemplate(input) {
         return result;
 
     } catch (error) {
-        console.error('[CASH FLOW PROCESSOR ERROR]', error.message);
+        global.logger.logError('[CASH FLOW PROCESSOR ERROR]', error.message);
         throw new Error(`Failed to process cash flow statement: ${error.message}`);
     }
 }

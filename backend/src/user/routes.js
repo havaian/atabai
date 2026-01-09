@@ -63,7 +63,7 @@ router.patch('/preferences', authenticateJWT, async (req, res) => {
             preferences: req.user.preferences
         });
     } catch (error) {
-        console.error('Update preferences error:', error);
+        global.logger.logError('Update preferences error:', error);
         res.status(500).json({
             success: false,
             error: 'Failed to update preferences'

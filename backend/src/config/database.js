@@ -21,16 +21,16 @@ class DatabaseConnection {
         const options = this.getConnectionOptions();
 
         try {
-            console.log('🔌 Attempting to connect to MongoDB...');
+            global.logger.logInfo('🔌 Attempting to connect to MongoDB...');
 
             await mongoose.connect(mongoUri, options);
 
             this.isConnected = true;
             this.connectionAttempts = 0;
 
-            console.log('✅ MongoDB connected successfully');
-            console.log(`📊 Database: ${mongoose.connection.name}`);
-            console.log(`🌐 Host: ${mongoose.connection.host}:${mongoose.connection.port}`);
+            global.logger.logInfo('✅ MongoDB connected successfully');
+            global.logger.logInfo(`📊 Database: ${mongoose.connection.name}`);
+            global.logger.logInfo(`🌐 Host: ${mongoose.connection.host}:${mongoose.connection.port}`);
 
             // Set up connection event handlers
             this.setupEventHandlers();
@@ -38,14 +38,14 @@ class DatabaseConnection {
             return true;
         } catch (error) {
             this.connectionAttempts++;
-            console.error(`❌ MongoDB connection failed (attempt ${this.connectionAttempts}/${this.maxRetries}):`, error.message);
+            global.logger.logError(`❌ MongoDB connection failed (attempt ${this.connectionAttempts}/${this.maxRetries}):`, error.message);
 
             if (this.connectionAttempts < this.maxRetries) {
-                console.log(`🔄 Retrying in ${this.retryDelay / 1000} seconds...`);
+                global.logger.logInfo(`🔄 Retrying in ${this.retryDelay / 1000} seconds...`);
                 await this.delay(this.retryDelay);
                 return this.connect();
             } else {
-                console.error('💀 Maximum connection attempts reached. Exiting...');
+                global.logger.logError('💀 Maximum connection attempts reached. Exiting...');
                 process.exit(1);
             }
         }
@@ -113,20 +113,20 @@ class DatabaseConnection {
     setupEventHandlers() {
         // Connection events
         mongoose.connection.on('connected', () => {
-            console.log('📡 Mongoose connected to MongoDB');
+            global.logger.logInfo('📡 Mongoose connected to MongoDB');
         });
 
         mongoose.connection.on('error', (error) => {
-            console.error('❌ Mongoose connection error:', error.message);
+            global.logger.logError('❌ Mongoose connection error:', error.message);
         });
 
         mongoose.connection.on('disconnected', () => {
-            console.warn('⚠️ Mongoose disconnected from MongoDB');
+            global.logger.logWarn('⚠️ Mongoose disconnected from MongoDB');
             this.isConnected = false;
         });
 
         mongoose.connection.on('reconnected', () => {
-            console.log('🔄 Mongoose reconnected to MongoDB');
+            global.logger.logInfo('🔄 Mongoose reconnected to MongoDB');
             this.isConnected = true;
         });
 
@@ -205,14 +205,14 @@ class DatabaseConnection {
      * Graceful shutdown
      */
     async gracefulShutdown(signal) {
-        console.log(`\n🔄 Received ${signal}. Closing MongoDB connection...`);
+        global.logger.logInfo(`\n🔄 Received ${signal}. Closing MongoDB connection...`);
 
         try {
             await mongoose.connection.close();
-            console.log('✅ MongoDB connection closed successfully');
+            global.logger.logInfo('✅ MongoDB connection closed successfully');
             process.exit(0);
         } catch (error) {
-            console.error('❌ Error during MongoDB shutdown:', error.message);
+            global.logger.logError('❌ Error during MongoDB shutdown:', error.message);
             process.exit(1);
         }
     }

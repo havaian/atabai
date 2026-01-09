@@ -37,7 +37,7 @@ async function styleCashFlowReport(data) {
         for (const testPath of possiblePaths) {
             if (fs.existsSync(testPath)) {
                 logoPath = testPath;
-                console.log(`[CF STYLER] Logo found at: ${logoPath}`);
+                global.logger.logInfo(`[CF STYLER] Logo found at: ${logoPath}`);
                 break;
             }
         }
@@ -62,7 +62,7 @@ async function styleCashFlowReport(data) {
             companyRow.height = 30;
             currentRow += 2;
         } else {
-            console.warn('[CF STYLER] Logo not found in any expected location');
+            global.logger.logWarn('[CF STYLER] Logo not found in any expected location');
             // Add company name without logo
             const companyRow = worksheet.getRow(currentRow);
             companyRow.getCell(1).value = 'ATABAI';
@@ -72,7 +72,7 @@ async function styleCashFlowReport(data) {
             currentRow += 2;
         }
     } catch (error) {
-        console.warn('[CF STYLER] Could not load logo:', error.message);
+        global.logger.logWarn('[CF STYLER] Could not load logo:', error.message);
         // Add company name as fallback
         const companyRow = worksheet.getRow(currentRow);
         companyRow.getCell(1).value = 'ATABAI';

@@ -68,7 +68,7 @@ async function processBalanceSheetTemplate(input) {
         return result;
 
     } catch (error) {
-        console.error('[PROCESSOR ERROR]', error.message);
+        global.logger.logError('[PROCESSOR ERROR]', error.message);
         throw new Error(`Failed to process balance sheet: ${error.message}`);
     }
 }

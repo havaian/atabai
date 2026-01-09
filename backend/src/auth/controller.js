@@ -56,24 +56,24 @@ class AuthController {
      * POST /api/auth/google/callback
      */
     async handleGoogleCallback(req, res) {
-        console.log('🔧 OAuth callback received');
-        console.log('🔧 Request body:', req.body);
+        global.logger.logInfo('🔧 OAuth callback received');
+        global.logger.logInfo('🔧 Request body:', req.body);
 
         try {
             const { code } = req.body;
 
             if (!code) {
-                console.log('❌ No OAuth code provided');
+                global.logger.logInfo('❌ No OAuth code provided');
                 return res.status(400).json({
                     error: 'OAUTH_CODE_MISSING',
                     message: 'OAuth authorization code is required'
                 });
             }
 
-            console.log('🔧 OAuth code received:', code.substring(0, 10) + '...');
+            global.logger.logInfo('🔧 OAuth code received:', code.substring(0, 10) + '...');
 
             // Exchange authorization code for access token
-            console.log('🔧 Exchanging code for tokens...');
+            global.logger.logInfo('🔧 Exchanging code for tokens...');
             const tokenResponse = await axios.post('https://oauth2.googleapis.com/token', {
                 client_id: process.env.GOOGLE_CLIENT_ID,
                 client_secret: process.env.GOOGLE_CLIENT_SECRET,
@@ -83,10 +83,10 @@ class AuthController {
             });
 
             const { access_token } = tokenResponse.data;
-            console.log('🔧 Access token received');
+            global.logger.logInfo('🔧 Access token received');
 
             // Get user profile from Google
-            console.log('🔧 Fetching user profile from Google...');
+            global.logger.logInfo('🔧 Fetching user profile from Google...');
             const profileResponse = await axios.get('https://www.googleapis.com/oauth2/v2/userinfo', {
                 headers: {
                     Authorization: `Bearer ${access_token}`
@@ -94,7 +94,7 @@ class AuthController {
             });
 
             const googleProfile = profileResponse.data;
-            console.log('🔧 Google profile received:', {
+            global.logger.logInfo('🔧 Google profile received:', {
                 id: googleProfile.id,
                 email: googleProfile.email,
                 name: googleProfile.name
@@ -108,11 +108,11 @@ class AuthController {
                 photos: [{ value: googleProfile.picture }]
             });
 
-            console.log('🔧 User found/created:', user.email);
+            global.logger.logInfo('🔧 User found/created:', user.email);
             await user.updateLastLogin();
 
             // Generate tokens
-            console.log('🔧 Generating JWT tokens...');
+            global.logger.logInfo('🔧 Generating JWT tokens...');
             const { accessToken: jwtToken, refreshToken } = await authService.generateTokenPair(user);
 
             // Create session data
@@ -127,12 +127,12 @@ class AuthController {
             });
 
         } catch (error) {
-            console.error('❌ DETAILED OAuth callback error:', error);
-            console.error('❌ Error name:', error.name);
-            console.error('❌ Error message:', error.message);
+            global.logger.logError('❌ DETAILED OAuth callback error:', error);
+            global.logger.logError('❌ Error name:', error.name);
+            global.logger.logError('❌ Error message:', error.message);
 
             if (error.response) {
-                console.error('❌ API Error response:', {
+                global.logger.logError('❌ API Error response:', {
                     status: error.response.status,
                     data: error.response.data
                 });
@@ -158,20 +158,20 @@ class AuthController {
  */
     async handlePassportCallback(req, res) {
         try {
-            console.log('🔧 Passport OAuth callback received');
+            global.logger.logInfo('🔧 Passport OAuth callback received');
 
             if (!req.user) {
-                console.log('❌ No user from Passport authentication');
+                global.logger.logInfo('❌ No user from Passport authentication');
                 return res.redirect(`${process.env.FRONTEND_URL}/login?error=oauth_failed`);
             }
 
-            console.log('🔧 User authenticated via Passport:', req.user.email);
+            global.logger.logInfo('🔧 User authenticated via Passport:', req.user.email);
 
             // Update last login
             await req.user.updateLastLogin();
 
             // Generate JWT tokens
-            console.log('🔧 Generating JWT tokens...');
+            global.logger.logInfo('🔧 Generating JWT tokens...');
             const { accessToken, refreshToken } = await authService.generateTokenPair(req.user);
 
             // Create session data
@@ -188,14 +188,14 @@ class AuthController {
                     subscriptionType: req.user.subscriptionType
                 }))}`;
 
-            console.log('🔧 Redirecting to:', `${process.env.FRONTEND_URL}/auth/success`);
+            global.logger.logInfo('🔧 Redirecting to:', `${process.env.FRONTEND_URL}/auth/success`);
 
             global.logger.logInfo(`User logged in successfully via Passport: ${req.user.email}`, { category: 'auth' });
 
             res.redirect(redirectUrl);
 
         } catch (error) {
-            console.error('❌ Passport OAuth callback error:', error);
+            global.logger.logError('❌ Passport OAuth callback error:', error);
 
             global.logger.logError('Passport OAuth callback error', {
                 error: error.message,
@@ -214,14 +214,14 @@ class AuthController {
     async handleManualCallback(req, res) {
         // This is your existing handleGoogleCallback method
         // Just rename it to handleManualCallback
-        console.log('🔧 Manual OAuth callback received');
-        console.log('🔧 Request body:', req.body);
+        global.logger.logInfo('🔧 Manual OAuth callback received');
+        global.logger.logInfo('🔧 Request body:', req.body);
 
         try {
             const { code } = req.body;
 
             if (!code) {
-                console.log('❌ No OAuth code provided');
+                global.logger.logInfo('❌ No OAuth code provided');
                 return res.status(400).json({
                     error: 'OAUTH_CODE_MISSING',
                     message: 'OAuth authorization code is required'

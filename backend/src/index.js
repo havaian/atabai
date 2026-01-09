@@ -142,14 +142,14 @@ const initializeApp = async () => {
     try {
         // Connect to MongoDB
         await connectDatabase(process.env.MONGO_URI);
-        console.log('✅ Mongodb connected successfully');
+        global.logger.logInfo('✅ Mongodb connected successfully');
 
         // await connectRedis();
         // global.logger.logInfo('Redis connected successfully', { category: 'startup' });
 
         const PORT = process.env.BACKEND_PORT || 3000;
         const server = app.listen(PORT, '0.0.0.0', () => {
-            console.log(`🚀 Server listening on port ${PORT}`);
+            global.logger.logInfo(`🚀 Server listening on port ${PORT}`);
             global.logger.logInfo(`🚀 Server running in ${process.env.NODE_ENV} mode on port ${PORT}`, {
                 port: PORT,
                 environment: process.env.NODE_ENV,
@@ -159,13 +159,13 @@ const initializeApp = async () => {
 
         // Graceful shutdown
         const gracefulShutdown = (signal) => {
-            console.log(`📡 Received ${signal}. Graceful shutdown initiated...`);
+            global.logger.logInfo(`📡 Received ${signal}. Graceful shutdown initiated...`);
             global.logger.logInfo(`Received ${signal}. Graceful shutdown initiated...`, { 
                 signal,
                 category: 'shutdown' 
             });
             server.close(() => {
-                console.log('🔴 HTTP server closed');
+                global.logger.logInfo('🔴 HTTP server closed');
                 global.logger.logInfo('HTTP server closed', { category: 'shutdown' });
                 process.exit(0);
             });
@@ -175,9 +175,9 @@ const initializeApp = async () => {
         process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
     } catch (error) {
-        console.error('❌ INITIALIZATION ERROR:', error);
-        console.error('❌ Error message:', error.message);
-        console.error('❌ Error stack:', error.stack);
+        global.logger.logError('❌ INITIALIZATION ERROR:', error);
+        global.logger.logError('❌ Error message:', error.message);
+        global.logger.logError('❌ Error stack:', error.stack);
         global.logger.logError('Failed to initialize application', { 
             error: error.message,
             stack: error.stack,

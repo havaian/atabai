@@ -56,8 +56,8 @@ const LINE_ITEM_MAPPING = {
 };
 
 function transformToIFRSCashFlow(dataMap) {
-    console.log('[CF TRANSFORMER] Starting transformation...');
-    console.log(`[CF TRANSFORMER] Input items: ${dataMap.size}`);
+    global.logger.logInfo('[CF TRANSFORMER] Starting transformation...');
+    global.logger.logInfo(`[CF TRANSFORMER] Input items: ${dataMap.size}`);
 
     const result = {
         sections: [],
@@ -103,7 +103,7 @@ function transformToIFRSCashFlow(dataMap) {
             result.financingTotal += data.total;
         }
 
-        console.log(`[CF TRANSFORMER] Mapped: ${key} → ${ifrsLabel} (${data.total.toFixed(2)})`);
+        global.logger.logInfo(`[CF TRANSFORMER] Mapped: ${key} → ${ifrsLabel} (${data.total.toFixed(2)})`);
     }
 
     // Add default items if sections are empty
@@ -166,11 +166,11 @@ function transformToIFRSCashFlow(dataMap) {
     result.netChange = result.operatingTotal + result.investingTotal + result.financingTotal;
     result.cashEnding = result.cashBeginning + result.netChange + result.fxEffects;
 
-    console.log('[CF TRANSFORMER] Transformation complete');
-    console.log(`[CF TRANSFORMER] Operating: ${result.operatingTotal.toFixed(2)}`);
-    console.log(`[CF TRANSFORMER] Investing: ${result.investingTotal.toFixed(2)}`);
-    console.log(`[CF TRANSFORMER] Financing: ${result.financingTotal.toFixed(2)}`);
-    console.log(`[CF TRANSFORMER] Net Change: ${result.netChange.toFixed(2)}`);
+    global.logger.logInfo('[CF TRANSFORMER] Transformation complete');
+    global.logger.logInfo(`[CF TRANSFORMER] Operating: ${result.operatingTotal.toFixed(2)}`);
+    global.logger.logInfo(`[CF TRANSFORMER] Investing: ${result.investingTotal.toFixed(2)}`);
+    global.logger.logInfo(`[CF TRANSFORMER] Financing: ${result.financingTotal.toFixed(2)}`);
+    global.logger.logInfo(`[CF TRANSFORMER] Net Change: ${result.netChange.toFixed(2)}`);
 
     return result;
 }
