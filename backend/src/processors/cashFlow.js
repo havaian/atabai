@@ -44,7 +44,7 @@ async function processCashFlowTemplate(input) {
         // Step 3: Transform to IFRS structure
         const ifrsStructure = transformToIFRSCashFlow(extracted.dataMap);
 
-        // Step 4: Style the output
+        // Step 4: Style the output (now async due to logo loading)
         const styledData = {
             title: 'STATEMENT OF CASH FLOWS (IFRS)',
             companyName: extracted.metadata.companyName,
@@ -60,7 +60,7 @@ async function processCashFlowTemplate(input) {
             cashEnding: ifrsStructure.cashEnding
         };
 
-        result.workbook = styleCashFlowReport(styledData);
+        result.workbook = await styleCashFlowReport(styledData);
 
         // Update summary
         result.summary.transformations = extracted.dataMap.size;

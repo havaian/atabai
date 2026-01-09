@@ -12,7 +12,6 @@ const cookieParser = require('cookie-parser');
 // Import configurations
 const { connect: connectDatabase } = require('./config/database');
 const { connectRedis } = require('./config/redis');
-const logger = require('./utils/logger');
 
 // Import middleware
 const { errorHandler } = require('./middleware/errorHandler');
@@ -94,12 +93,12 @@ app.use(compression());
 
 // Logging middleware with enhanced Morgan integration
 if (process.env.NODE_ENV === 'development') {
-    app.use(morgan(logger.http.devFormat, {
-        stream: logger.http.stream
+    app.use(morgan(global.logger.http.devFormat, {
+        stream: global.logger.http.stream
     }));
 } else {
-    app.use(morgan(logger.http.prodFormat, {
-        stream: logger.http.stream
+    app.use(morgan(global.logger.http.prodFormat, {
+        stream: global.logger.http.stream
     }));
 }
 
@@ -145,12 +144,12 @@ const initializeApp = async () => {
         console.log('✅ Mongodb connected successfully');
 
         // await connectRedis();
-        // logger.logInfo('Redis connected successfully', { category: 'startup' });
+        // global.logger.logInfo('Redis connected successfully', { category: 'startup' });
 
         const PORT = process.env.BACKEND_PORT || 3000;
         const server = app.listen(PORT, '0.0.0.0', () => {
             console.log(`🚀 Server listening on port ${PORT}`);
-            logger.logInfo(`🚀 Server running in ${process.env.NODE_ENV} mode on port ${PORT}`, {
+            global.logger.logInfo(`🚀 Server running in ${process.env.NODE_ENV} mode on port ${PORT}`, {
                 port: PORT,
                 environment: process.env.NODE_ENV,
                 category: 'startup'
@@ -160,13 +159,13 @@ const initializeApp = async () => {
         // Graceful shutdown
         const gracefulShutdown = (signal) => {
             console.log(`📡 Received ${signal}. Graceful shutdown initiated...`);
-            logger.logInfo(`Received ${signal}. Graceful shutdown initiated...`, { 
+            global.logger.logInfo(`Received ${signal}. Graceful shutdown initiated...`, { 
                 signal,
                 category: 'shutdown' 
             });
             server.close(() => {
                 console.log('🔴 HTTP server closed');
-                logger.logInfo('HTTP server closed', { category: 'shutdown' });
+                global.logger.logInfo('HTTP server closed', { category: 'shutdown' });
                 process.exit(0);
             });
         };
@@ -178,7 +177,7 @@ const initializeApp = async () => {
         console.error('❌ INITIALIZATION ERROR:', error);
         console.error('❌ Error message:', error.message);
         console.error('❌ Error stack:', error.stack);
-        logger.logError('Failed to initialize application', { 
+        global.logger.logError('Failed to initialize application', { 
             error: error.message,
             stack: error.stack,
             category: 'startup' 

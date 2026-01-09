@@ -1,6 +1,5 @@
 const User = require('../user/model');
 const authService = require('../services/auth');
-const logger = require('../utils/logger');
 const axios = require('axios');
 
 class AuthController {
@@ -25,7 +24,7 @@ class AuthController {
                 message: 'Redirect to Google OAuth'
             });
         } catch (error) {
-            logger.error('Error initiating Google login:', error);
+            global.logger.error('Error initiating Google login:', error);
             res.status(500).json({
                 error: 'OAUTH_INITIATION_FAILED',
                 message: 'Failed to initiate Google login'
@@ -35,7 +34,7 @@ class AuthController {
 
     async createUserSession(user, accessToken, refreshToken) {
         try {
-            logger.info(`User logged in successfully: ${user.email}`);
+            global.logger.info(`User logged in successfully: ${user.email}`);
 
             res.json({
                 success: true,
@@ -44,7 +43,7 @@ class AuthController {
             });
 
         } catch (error) {
-            logger.error('Google OAuth callback error:', error);
+            global.logger.error('Google OAuth callback error:', error);
             res.status(500).json({
                 error: 'OAUTH_CALLBACK_FAILED',
                 message: 'OAuth callback failed'
@@ -119,7 +118,7 @@ class AuthController {
             // Create session data
             const sessionData = authService.createUserSession(user, jwtToken, refreshToken);
 
-            logger.logInfo(`User logged in successfully: ${user.email}`, { category: 'auth' });
+            global.logger.logInfo(`User logged in successfully: ${user.email}`, { category: 'auth' });
 
             res.json({
                 success: true,
@@ -139,7 +138,7 @@ class AuthController {
                 });
             }
 
-            logger.logError('Google OAuth callback error', {
+            global.logger.logError('Google OAuth callback error', {
                 error: error.message,
                 stack: error.stack,
                 apiError: error.response?.data,
@@ -191,14 +190,14 @@ class AuthController {
 
             console.log('🔧 Redirecting to:', `${process.env.FRONTEND_URL}/auth/success`);
 
-            logger.logInfo(`User logged in successfully via Passport: ${req.user.email}`, { category: 'auth' });
+            global.logger.logInfo(`User logged in successfully via Passport: ${req.user.email}`, { category: 'auth' });
 
             res.redirect(redirectUrl);
 
         } catch (error) {
             console.error('❌ Passport OAuth callback error:', error);
 
-            logger.logError('Passport OAuth callback error', {
+            global.logger.logError('Passport OAuth callback error', {
                 error: error.message,
                 stack: error.stack,
                 category: 'auth-error'
@@ -268,7 +267,7 @@ class AuthController {
             // Generate new access token
             const newAccessToken = await authService.generateAccessToken(user);
 
-            logger.info(`Access token refreshed for user: ${user.email}`);
+            global.logger.info(`Access token refreshed for user: ${user.email}`);
 
             res.json({
                 success: true,
@@ -277,7 +276,7 @@ class AuthController {
             });
 
         } catch (error) {
-            logger.warn(`Token refresh failed: ${error.message}`);
+            global.logger.warn(`Token refresh failed: ${error.message}`);
 
             if (error.message === 'REFRESH_TOKEN_EXPIRED') {
                 return res.status(401).json({
@@ -327,7 +326,7 @@ class AuthController {
             });
 
         } catch (error) {
-            logger.error('Error fetching user profile:', error);
+            global.logger.error('Error fetching user profile:', error);
             res.status(500).json({
                 error: 'PROFILE_FETCH_FAILED',
                 message: 'Failed to fetch user profile'
@@ -373,7 +372,7 @@ class AuthController {
 
             await user.save();
 
-            logger.info(`Profile updated for user: ${user.email}`);
+            global.logger.info(`Profile updated for user: ${user.email}`);
 
             res.json({
                 success: true,
@@ -389,7 +388,7 @@ class AuthController {
             });
 
         } catch (error) {
-            logger.error('Error updating user profile:', error);
+            global.logger.error('Error updating user profile:', error);
             res.status(500).json({
                 error: 'PROFILE_UPDATE_FAILED',
                 message: 'Failed to update profile'
@@ -417,7 +416,7 @@ class AuthController {
                 }
             }
 
-            logger.info(`User logged out: ${user?.email || 'Unknown'}`);
+            global.logger.info(`User logged out: ${user?.email || 'Unknown'}`);
 
             res.json({
                 success: true,
@@ -425,7 +424,7 @@ class AuthController {
             });
 
         } catch (error) {
-            logger.error('Error during logout:', error);
+            global.logger.error('Error during logout:', error);
             // Don't fail logout even if token revocation fails
             res.json({
                 success: true,
@@ -452,7 +451,7 @@ class AuthController {
                 }
             });
         } catch (error) {
-            logger.error('Auth health check failed:', error);
+            global.logger.error('Auth health check failed:', error);
             res.status(500).json({
                 success: false,
                 service: 'auth',

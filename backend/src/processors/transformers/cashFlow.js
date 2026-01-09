@@ -1,19 +1,11 @@
 // processors/transformers/cashFlow.js
 
-const { CASH_FLOW_MAPPING } = require('../../mappings/cashFlowMapping');
-
 /**
- * Cash Flow Transformer
- * Transforms raw cash flow data to IFRS structure
+ * Cash Flow Transformer - Enhanced Version
+ * Transforms detailed line items to IFRS structure with intelligent grouping
  */
 
-/**
- * Transform extracted data to IFRS structure
- * @param {Map} dataMap - Raw data map from extractor
- * @returns {Object} IFRS structure
- */
 function transformToIFRSCashFlow(dataMap) {
-    // Initialize sections
     const sections = {
         'OPERATING ACTIVITIES': {
             name: 'OPERATING ACTIVITIES',
@@ -29,69 +21,92 @@ function transformToIFRSCashFlow(dataMap) {
             name: 'FINANCING ACTIVITIES',
             items: [],
             subtotal: 0
-        },
-        'RECONCILIATION': {
-            name: 'RECONCILIATION',
-            items: [],
-            subtotal: 0
         }
     };
 
-    // Process each mapped line
-    Object.keys(CASH_FLOW_MAPPING).forEach(lineCode => {
-        const mapping = CASH_FLOW_MAPPING[lineCode];
-        const nsbuData = dataMap.get(lineCode);
+    // Group items by classification
+    const groupedItems = {
+        'OPERATING ACTIVITIES': {},
+        'INVESTING ACTIVITIES': {},
+        'FINANCING ACTIVITIES': {}
+    };
 
-        // Skip if no data found for this line
-        if (!nsbuData) return;
+    // Extract section totals
+    const operatingTotal = dataMap.get('operating_section_total')?.netAmount || 0;
+    const investingTotal = dataMap.get('investing_section_total')?.netAmount || 0;
+    const financingTotal = dataMap.get('financing_section_total')?.netAmount || 0;
 
-        // Determine the amount based on flow type
-        let amount = 0;
-
-        if (mapping.flowType === 'inflow') {
-            amount = nsbuData.inflow || nsbuData.netAmount;
-        } else if (mapping.flowType === 'outflow') {
-            amount = -(nsbuData.outflow || Math.abs(nsbuData.netAmount));
-        } else if (mapping.flowType === 'net' || mapping.netCalculation) {
-            amount = nsbuData.netAmount;
-        } else if (mapping.flowType === 'subtotal' || mapping.flowType === 'total') {
-            amount = nsbuData.netAmount;
-        } else if (mapping.flowType === 'balance') {
-            amount = nsbuData.netAmount || nsbuData.inflow;
-        } else if (mapping.flowType === 'adjustment') {
-            amount = nsbuData.netAmount;
+    // Process all line items
+    for (const [key, value] of dataMap.entries()) {
+        // Skip section headers and subsection totals
+        if (value.itemType === 'section_header' || value.itemType === 'subsection_total') {
+            continue;
         }
 
-        const item = {
-            lineCode: lineCode,
-            label: mapping.ifrsClassification,
-            amount: amount,
-            flowType: mapping.flowType,
-            isCalculated: mapping.isCalculated || false
-        };
+        if (value.itemType === 'line_item') {
+            const section = value.section;
+            const classification = value.classification;
 
-        sections[mapping.section].items.push(item);
+            // Group items by classification
+            if (!groupedItems[section][classification]) {
+                groupedItems[section][classification] = {
+                    classification: classification,
+                    items: [],
+                    total: 0,
+                    flowType: value.flowType
+                };
+            }
 
-        // Add to section subtotal (exclude calculated subtotals)
-        if (!mapping.isCalculated && mapping.flowType !== 'subtotal' &&
-            mapping.flowType !== 'total' && mapping.section !== 'RECONCILIATION') {
-            sections[mapping.section].subtotal += amount;
+            groupedItems[section][classification].items.push({
+                name: value.originalName,
+                amount: value.netAmount
+            });
+            groupedItems[section][classification].total += value.netAmount;
         }
-    });
+    }
 
-    // Calculate section totals
-    const operatingTotal = sections['OPERATING ACTIVITIES'].subtotal;
-    const investingTotal = sections['INVESTING ACTIVITIES'].subtotal;
-    const financingTotal = sections['FINANCING ACTIVITIES'].subtotal;
+    // Convert grouped items to section items
+    for (const [sectionName, classifications] of Object.entries(groupedItems)) {
+        const sortedClassifications = Object.entries(classifications).sort((a, b) => {
+            // Sort inflows before outflows
+            if (a[1].flowType === 'inflow' && b[1].flowType === 'outflow') return -1;
+            if (a[1].flowType === 'outflow' && b[1].flowType === 'inflow') return 1;
+            // Then by absolute amount (descending)
+            return Math.abs(b[1].total) - Math.abs(a[1].total);
+        });
 
-    // Get reconciliation values
-    const fxEffects = dataMap.get('221')?.netAmount || 0;
-    const cashBeginning = dataMap.get('230')?.netAmount || dataMap.get('230')?.inflow || 0;
+        for (const [classification, data] of sortedClassifications) {
+            const amount = data.total;
 
-    // Calculate net change in cash
+            // Main classification line
+            sections[sectionName].items.push({
+                label: classification,
+                amount: amount,
+                flowType: data.flowType,
+                isGroupHeader: data.items.length > 1
+            });
+
+            // Add detail items as sub-items (indented)
+            if (data.items.length > 1) {
+                data.items.forEach(item => {
+                    sections[sectionName].items.push({
+                        label: item.name,
+                        amount: item.amount,
+                        flowType: data.flowType,
+                        isSubItem: true,
+                        indent: 1
+                    });
+                });
+            }
+
+            sections[sectionName].subtotal += amount;
+        }
+    }
+
+    // Calculate totals
     const netChange = operatingTotal + investingTotal + financingTotal;
-
-    // Calculate ending cash
+    const fxEffects = 0;
+    const cashBeginning = 0;
     const cashEnding = cashBeginning + netChange + fxEffects;
 
     return {

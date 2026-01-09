@@ -44,7 +44,7 @@ async function processBalanceSheetTemplate(input) {
         // Step 3: Transform to IFRS structure
         const ifrsStructure = transformToIFRSStructure(extracted.dataMap);
 
-        // Step 4: Style the output
+        // Step 4: Style the output (now async due to logo loading)
         const styledData = {
             title: 'STATEMENT OF FINANCIAL POSITION (IFRS)',
             companyName: extracted.metadata.companyName,
@@ -57,7 +57,7 @@ async function processBalanceSheetTemplate(input) {
             totalEquityLiabEnd: ifrsStructure.totalEquityLiabEnd
         };
 
-        result.workbook = styleReport(styledData, 'balanceSheet');
+        result.workbook = await styleReport(styledData, 'balanceSheet');
 
         // Update summary
         result.summary.transformations = extracted.dataMap.size;

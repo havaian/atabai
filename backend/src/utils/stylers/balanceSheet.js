@@ -1,4 +1,6 @@
 const ExcelJS = require('exceljs');
+const path = require('path');
+const fs = require('fs');
 
 /**
  * Universal Excel Styler Module
@@ -132,9 +134,9 @@ const STYLE_PRESETS = {
  */
 function formatDateToDDMMYYYY(dateInput) {
     if (!dateInput) return new Date().toLocaleDateString('en-GB').replace(/\//g, '.');
-    
+
     let date;
-    
+
     // Handle different input types
     if (dateInput instanceof Date) {
         date = dateInput;
@@ -158,17 +160,17 @@ function formatDateToDDMMYYYY(dateInput) {
     } else {
         date = new Date();
     }
-    
+
     // Check if date is valid
     if (isNaN(date.getTime())) {
         date = new Date();
     }
-    
+
     // Format to dd.mm.yyyy
     const day = String(date.getDate()).padStart(2, '0');
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const year = date.getFullYear();
-    
+
     return `${day}.${month}.${year}`;
 }
 
@@ -221,7 +223,7 @@ function applyStyleToRange(worksheet, startRow, startCol, endRow, endCol, styleC
  * @param {Array} data.sections - Array of sections with items
  * @returns {ExcelJS.Workbook}
  */
-function createStyledBalanceSheet(data) {
+async function createStyledBalanceSheet(data) {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('IFRS Statement');
 
@@ -231,6 +233,34 @@ function createStyledBalanceSheet(data) {
     // Track section total rows for grand total formulas
     const assetSectionTotalRows = [];
     const equityLiabSectionTotalRows = [];
+
+    // === LOGO AND COMPANY BRANDING ===
+    try {
+        const logoPath = path.join(__dirname, '../../../public/assets/images/icons/logo.png');
+        if (fs.existsSync(logoPath)) {
+            const imageId = workbook.addImage({
+                filename: logoPath,
+                extension: 'png',
+            });
+
+            // Add logo to top-left
+            worksheet.addImage(imageId, {
+                tl: { col: 0, row: 0 },
+                ext: { width: 120, height: 40 }
+            });
+
+            // Company name next to logo
+            const companyRow = worksheet.getRow(currentRow);
+            companyRow.getCell(2).value = 'ATABAI';
+            companyRow.getCell(2).font = { name: 'Arial', size: 16, bold: true, color: { argb: 'FF9500FF' } };
+            companyRow.getCell(2).alignment = { horizontal: 'left', vertical: 'center' };
+            companyRow.height = 30;
+            currentRow += 2;
+        }
+    } catch (error) {
+        console.warn('Could not load logo:', error.message);
+        // Continue without logo if it fails
+    }
 
     // === HEADER SECTION ===
 
@@ -490,10 +520,10 @@ function createFlatReport(data) {
 /**
  * Main styler function - routes to appropriate style based on report type
  */
-function styleReport(data, reportType) {
+async function styleReport(data, reportType) {
     switch (reportType) {
         case 'balanceSheet':
-            return createStyledBalanceSheet(data);
+            return await createStyledBalanceSheet(data);
 
         case 'flat':
         case 'depreciation':

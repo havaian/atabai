@@ -5,7 +5,6 @@ class JobCleanupMiddleware {
     constructor() {
         this.isRunning = false
         this.cleanupInterval = null
-        this.logger = global.logger || console
     }
 
     /**
@@ -13,11 +12,11 @@ class JobCleanupMiddleware {
      */
     async start() {
         if (this.isRunning) {
-            this.logger.logWarn('Job cleanup service already running')
+            global.logger.logWarn('Job cleanup service already running')
             return
         }
 
-        this.logger.logInfo('Starting job cleanup service...')
+        global.logger.logInfo('Starting job cleanup service...')
         this.isRunning = true
 
         try {
@@ -29,13 +28,13 @@ class JobCleanupMiddleware {
                 try {
                     await this.cleanupStuckJobs()
                 } catch (error) {
-                    this.logger.logError('Error in scheduled cleanup:', error)
+                    global.logger.logError('Error in scheduled cleanup:', error)
                 }
             }, 2 * 60 * 1000) // 2 minutes
 
-            this.logger.logInfo('Job cleanup service started successfully')
+            global.logger.logInfo('Job cleanup service started successfully')
         } catch (error) {
-            this.logger.logError('Failed to start job cleanup service:', error)
+            global.logger.logError('Failed to start job cleanup service:', error)
             this.isRunning = false
         }
     }
@@ -49,7 +48,7 @@ class JobCleanupMiddleware {
             this.cleanupInterval = null
         }
         this.isRunning = false
-        this.logger.logInfo('Job cleanup service stopped')
+        global.logger.logInfo('Job cleanup service stopped')
     }
 
     /**
@@ -61,7 +60,7 @@ class JobCleanupMiddleware {
             const timeoutMs = timeoutMinutes * 60 * 1000
             const timeoutTime = new Date(Date.now() - timeoutMs)
 
-            this.logger.logDebug(`Looking for stuck jobs older than ${timeoutMinutes} minutes...`)
+            global.logger.logDebug(`Looking for stuck jobs older than ${timeoutMinutes} minutes...`)
 
             // Find stuck jobs - including 'uploaded' status
             const stuckJobs = await ProcessingJob.find({
@@ -70,20 +69,20 @@ class JobCleanupMiddleware {
             }).populate('fileId')
 
             if (stuckJobs.length === 0) {
-                this.logger.logDebug('No stuck jobs found')
+                global.logger.logDebug('No stuck jobs found')
                 return
             }
 
-            this.logger.logInfo(`Found ${stuckJobs.length} stuck jobs to clean up`)
+            global.logger.logInfo(`Found ${stuckJobs.length} stuck jobs to clean up`)
 
             for (const job of stuckJobs) {
                 await this.markJobAsFailed(job)
             }
 
-            this.logger.logInfo(`Cleaned up ${stuckJobs.length} stuck jobs`)
+            global.logger.logInfo(`Cleaned up ${stuckJobs.length} stuck jobs`)
 
         } catch (error) {
-            this.logger.logError('Error during job cleanup:', error)
+            global.logger.logError('Error during job cleanup:', error)
         }
     }
 
@@ -95,7 +94,7 @@ class JobCleanupMiddleware {
             const jobAge = Date.now() - new Date(job.updatedAt).getTime()
             const ageMinutes = Math.round(jobAge / (60 * 1000))
 
-            this.logger.logInfo(`Marking job ${job.jobId} as failed (stuck for ${ageMinutes} minutes)`)
+            global.logger.logInfo(`Marking job ${job.jobId} as failed (stuck for ${ageMinutes} minutes)`)
 
             // Update the processing job
             job.status = 'failed'
@@ -117,12 +116,12 @@ class JobCleanupMiddleware {
                     file.completedAt = new Date()
                     await file.save()
                     
-                    this.logger.logDebug(`Updated file ${file._id} status to failed`)
+                    global.logger.logDebug(`Updated file ${file._id} status to failed`)
                 }
             }
 
         } catch (error) {
-            this.logger.logError(`Error marking job ${job.jobId} as failed:`, error)
+            global.logger.logError(`Error marking job ${job.jobId} as failed:`, error)
         }
     }
 
@@ -141,7 +140,7 @@ class JobCleanupMiddleware {
      * Manual cleanup trigger (useful for testing)
      */
     async triggerCleanup() {
-        this.logger.logInfo('Manual cleanup triggered')
+        global.logger.logInfo('Manual cleanup triggered')
         await this.cleanupStuckJobs()
     }
 }
