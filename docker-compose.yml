@@ -53,6 +53,7 @@ services:
     env_file: 
       - .env
     volumes:
+      - ./backend/public:/app/public
       - ./uploads:/uploads:rw,Z
       - ./logs:/app/logs
     ports:

@@ -1,124 +1,178 @@
-// processors/transformers/cashFlow.js
+// transformers/cashFlow.js
 
 /**
- * Cash Flow Transformer - Enhanced Version
- * Transforms detailed line items to IFRS structure with intelligent grouping
+ * Cash Flow Transformer - Maps Uzbek CF format to IFRS structure
+ * Handles Russian line item names and creates IFRS-compliant sections
  */
 
+// Mapping of Russian line items to IFRS line items
+const LINE_ITEM_MAPPING = {
+    // Operating Activities - Inflows
+    'Реализация продукции и товаров': 'Cash receipts from sale of goods',
+    'Реализация услуг': 'Cash receipts from rendering of services',
+    'Прочая выручка': 'Other operating receipts',
+    'Авансы полученные': 'Advances received from customers',
+    'Прочие поступления': 'Other cash receipts',
+    'Возврат НДС': 'VAT refunds received',
+    'Приток': 'Cash generated from operations',
+
+    // Operating Activities - Outflows
+    'Платежи поставщикам за товары и услуги': 'Cash paid to suppliers',
+    'Авансы выданные': 'Advances paid',
+    'Выплаты по заработной плате': 'Cash paid to employees',
+    'Налог на прибыль': 'Income taxes paid',
+    'Другие платежи в бюджет': 'Other taxes paid',
+    'Выплаты по краткосрочной аренде': 'Cash paid for short-term leases',
+    'Прочие выплаты': 'Other operating payments',
+    'Отток': 'Cash used in operations',
+    'ВГО': 'VAT and other payments',
+
+    // Investing Activities - Inflows
+    'От продажи основных средств': 'Proceeds from sale of property, plant and equipment',
+    'Продажа недвижимого имущества': 'Proceeds from sale of real estate',
+    'Продажа спец.техники': 'Proceeds from sale of equipment',
+    'Дивиденды полученные': 'Dividends received',
+    'Проценты полученные': 'Interest received',
+    'Притоки': 'Cash from investing activities',
+
+    // Investing Activities - Outflows
+    'Приобретение зданий и сооружений': 'Purchase of buildings and structures',
+    'Приобретение строительных машин': 'Purchase of construction equipment',
+    'Приобретение транспорта': 'Purchase of vehicles',
+    'Приобретение основных средств': 'Purchase of property, plant and equipment',
+    'Приобретение нематериальных активов': 'Purchase of intangible assets',
+    'Займы выданные': 'Loans granted',
+
+    // Financing Activities - Inflows
+    'Поступления от эмиссии акций': 'Proceeds from issuance of shares',
+    'Кредиты и займы полученные': 'Proceeds from borrowings',
+    'Целевое финансирование': 'Proceeds from grants',
+
+    // Financing Activities - Outflows
+    'Погашение кредитов и займов': 'Repayment of borrowings',
+    'Выплата дивидендов': 'Dividends paid',
+    'Проценты уплаченные': 'Interest paid',
+    'Погашение обязательств по аренде': 'Payment of lease liabilities'
+};
+
 function transformToIFRSCashFlow(dataMap) {
-    const sections = {
-        'OPERATING ACTIVITIES': {
-            name: 'OPERATING ACTIVITIES',
-            items: [],
-            subtotal: 0
-        },
-        'INVESTING ACTIVITIES': {
-            name: 'INVESTING ACTIVITIES',
-            items: [],
-            subtotal: 0
-        },
-        'FINANCING ACTIVITIES': {
-            name: 'FINANCING ACTIVITIES',
-            items: [],
-            subtotal: 0
-        }
+    console.log('[CF TRANSFORMER] Starting transformation...');
+    console.log(`[CF TRANSFORMER] Input items: ${dataMap.size}`);
+
+    const result = {
+        sections: [],
+        operatingTotal: 0,
+        investingTotal: 0,
+        financingTotal: 0,
+        netChange: 0,
+        fxEffects: 0,
+        cashBeginning: 0,
+        cashEnding: 0
     };
 
-    // Group items by classification
-    const groupedItems = {
-        'OPERATING ACTIVITIES': {},
-        'INVESTING ACTIVITIES': {},
-        'FINANCING ACTIVITIES': {}
-    };
+    // Organize data by sections
+    const operatingItems = [];
+    const investingItems = [];
+    const financingItems = [];
 
-    // Extract section totals
-    const operatingTotal = dataMap.get('operating_section_total')?.netAmount || 0;
-    const investingTotal = dataMap.get('investing_section_total')?.netAmount || 0;
-    const financingTotal = dataMap.get('financing_section_total')?.netAmount || 0;
+    for (const [key, data] of dataMap.entries()) {
+        const ifrsLabel = LINE_ITEM_MAPPING[key] || key;
 
-    // Process all line items
-    for (const [key, value] of dataMap.entries()) {
-        // Skip section headers and subsection totals
-        if (value.itemType === 'section_header' || value.itemType === 'subsection_total') {
-            continue;
+        const item = {
+            label: ifrsLabel,
+            amount: data.total,
+            flowType: data.isOutflow ? 'outflow' : 'inflow',
+            indent: 1
+        };
+
+        // Add sub-item markers for detail lines
+        if (data.subSection) {
+            item.indent = 2;
+            item.isSubItem = true;
         }
 
-        if (value.itemType === 'line_item') {
-            const section = value.section;
-            const classification = value.classification;
-
-            // Group items by classification
-            if (!groupedItems[section][classification]) {
-                groupedItems[section][classification] = {
-                    classification: classification,
-                    items: [],
-                    total: 0,
-                    flowType: value.flowType
-                };
-            }
-
-            groupedItems[section][classification].items.push({
-                name: value.originalName,
-                amount: value.netAmount
-            });
-            groupedItems[section][classification].total += value.netAmount;
+        // Route to appropriate section
+        if (data.section === 'OPERATING') {
+            operatingItems.push(item);
+            result.operatingTotal += data.total;
+        } else if (data.section === 'INVESTING') {
+            investingItems.push(item);
+            result.investingTotal += data.total;
+        } else if (data.section === 'FINANCING') {
+            financingItems.push(item);
+            result.financingTotal += data.total;
         }
+
+        console.log(`[CF TRANSFORMER] Mapped: ${key} → ${ifrsLabel} (${data.total.toFixed(2)})`);
     }
 
-    // Convert grouped items to section items
-    for (const [sectionName, classifications] of Object.entries(groupedItems)) {
-        const sortedClassifications = Object.entries(classifications).sort((a, b) => {
-            // Sort inflows before outflows
-            if (a[1].flowType === 'inflow' && b[1].flowType === 'outflow') return -1;
-            if (a[1].flowType === 'outflow' && b[1].flowType === 'inflow') return 1;
-            // Then by absolute amount (descending)
-            return Math.abs(b[1].total) - Math.abs(a[1].total);
+    // Add default items if sections are empty
+    if (operatingItems.length === 0) {
+        operatingItems.push({
+            label: 'Cash generated from operations',
+            amount: 0,
+            flowType: 'inflow',
+            indent: 1
         });
-
-        for (const [classification, data] of sortedClassifications) {
-            const amount = data.total;
-
-            // Main classification line
-            sections[sectionName].items.push({
-                label: classification,
-                amount: amount,
-                flowType: data.flowType,
-                isGroupHeader: data.items.length > 1
-            });
-
-            // Add detail items as sub-items (indented)
-            if (data.items.length > 1) {
-                data.items.forEach(item => {
-                    sections[sectionName].items.push({
-                        label: item.name,
-                        amount: item.amount,
-                        flowType: data.flowType,
-                        isSubItem: true,
-                        indent: 1
-                    });
-                });
-            }
-
-            sections[sectionName].subtotal += amount;
-        }
+        operatingItems.push({
+            label: 'Income taxes paid',
+            amount: 0,
+            flowType: 'outflow',
+            indent: 1
+        });
     }
+
+    if (investingItems.length === 0) {
+        investingItems.push({
+            label: 'Purchase of property, plant and equipment',
+            amount: 0,
+            flowType: 'outflow',
+            indent: 1
+        });
+    }
+
+    if (financingItems.length === 0) {
+        financingItems.push({
+            label: 'Proceeds from borrowings',
+            amount: 0,
+            flowType: 'inflow',
+            indent: 1
+        });
+        financingItems.push({
+            label: 'Repayment of borrowings',
+            amount: 0,
+            flowType: 'outflow',
+            indent: 1
+        });
+    }
+
+    // Build sections
+    result.sections.push({
+        name: 'OPERATING ACTIVITIES',
+        items: operatingItems
+    });
+
+    result.sections.push({
+        name: 'INVESTING ACTIVITIES',
+        items: investingItems
+    });
+
+    result.sections.push({
+        name: 'FINANCING ACTIVITIES',
+        items: financingItems
+    });
 
     // Calculate totals
-    const netChange = operatingTotal + investingTotal + financingTotal;
-    const fxEffects = 0;
-    const cashBeginning = 0;
-    const cashEnding = cashBeginning + netChange + fxEffects;
+    result.netChange = result.operatingTotal + result.investingTotal + result.financingTotal;
+    result.cashEnding = result.cashBeginning + result.netChange + result.fxEffects;
 
-    return {
-        sections: Object.values(sections).filter(s => s.items.length > 0),
-        operatingTotal,
-        investingTotal,
-        financingTotal,
-        netChange,
-        fxEffects,
-        cashBeginning,
-        cashEnding
-    };
+    console.log('[CF TRANSFORMER] Transformation complete');
+    console.log(`[CF TRANSFORMER] Operating: ${result.operatingTotal.toFixed(2)}`);
+    console.log(`[CF TRANSFORMER] Investing: ${result.investingTotal.toFixed(2)}`);
+    console.log(`[CF TRANSFORMER] Financing: ${result.financingTotal.toFixed(2)}`);
+    console.log(`[CF TRANSFORMER] Net Change: ${result.netChange.toFixed(2)}`);
+
+    return result;
 }
 
 module.exports = {

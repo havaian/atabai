@@ -242,7 +242,8 @@
                                         class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900 border-r border-gray-200">
                                         {{ $t('results.balanceSheet.total', {
                                             section:
-                                                $t(`results.balanceSheet.sections.${getSectionKey(section.name)}`) }) }}
+                                                $t(`results.balanceSheet.sections.${getSectionKey(section.name)}`)
+                                        }) }}
                                     </td>
                                     <td
                                         class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900 border-r border-gray-200">
@@ -306,7 +307,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useFilesStore } from '@/stores/files'
@@ -337,6 +338,13 @@ const ifrsBalanceSheet = ref(null)
 
 // Get file ID from route
 const fileId = computed(() => route.params.fileId)
+
+// Watch for route parameter changes and refetch data
+watch(fileId, (newFileId, oldFileId) => {
+    if (newFileId && newFileId !== oldFileId) {
+        fetchFileData()
+    }
+})
 
 // Methods
 function goBack() {
@@ -430,7 +438,7 @@ async function fetchFileData() {
 
         if (response.success) {
             fileData.value = response.file
-            
+
             // Note: We don't show raw Excel preview anymore
             // Users can download the file to inspect it
         } else {

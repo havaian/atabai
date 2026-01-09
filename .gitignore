@@ -76,6 +76,7 @@ uploads/
 media/
 public/uploads/
 public/media/
+!public
 
 # Configuration files that may contain sensitive information
 config.js

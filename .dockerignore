@@ -105,3 +105,4 @@ uploads
 media
 public/uploads
 public/media
+!public

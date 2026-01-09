@@ -24,8 +24,25 @@ async function styleCashFlowReport(data) {
 
     // === LOGO AND COMPANY BRANDING ===
     try {
-        const logoPath = path.join(__dirname, '../../../public/assets/images/icons/logo.png');
-        if (fs.existsSync(logoPath)) {
+        // Try multiple possible paths for the logo
+        const possiblePaths = [
+            path.join(__dirname, '../../public/assets/images/icons/logo.png'),
+            path.join(__dirname, '../../../frontend/public/images/icons/logo.png'),
+            path.join(__dirname, '../../frontend/public/images/icons/logo.png'),
+            '/app/public/assets/images/icons/logo.png',
+            '/app/frontend/public/images/icons/logo.png'
+        ];
+
+        let logoPath = null;
+        for (const testPath of possiblePaths) {
+            if (fs.existsSync(testPath)) {
+                logoPath = testPath;
+                console.log(`[CF STYLER] Logo found at: ${logoPath}`);
+                break;
+            }
+        }
+
+        if (logoPath) {
             const imageId = workbook.addImage({
                 filename: logoPath,
                 extension: 'png',
@@ -44,10 +61,25 @@ async function styleCashFlowReport(data) {
             companyRow.getCell(2).alignment = { horizontal: 'left', vertical: 'center' };
             companyRow.height = 30;
             currentRow += 2;
+        } else {
+            console.warn('[CF STYLER] Logo not found in any expected location');
+            // Add company name without logo
+            const companyRow = worksheet.getRow(currentRow);
+            companyRow.getCell(1).value = 'ATABAI';
+            companyRow.getCell(1).font = { name: 'Arial', size: 16, bold: true, color: { argb: 'FF9500FF' } };
+            companyRow.getCell(1).alignment = { horizontal: 'center', vertical: 'center' };
+            worksheet.mergeCells(currentRow, 1, currentRow, 2);
+            currentRow += 2;
         }
     } catch (error) {
-        console.warn('Could not load logo:', error.message);
-        // Continue without logo if it fails
+        console.warn('[CF STYLER] Could not load logo:', error.message);
+        // Add company name as fallback
+        const companyRow = worksheet.getRow(currentRow);
+        companyRow.getCell(1).value = 'ATABAI';
+        companyRow.getCell(1).font = { name: 'Arial', size: 16, bold: true, color: { argb: 'FF9500FF' } };
+        companyRow.getCell(1).alignment = { horizontal: 'center', vertical: 'center' };
+        worksheet.mergeCells(currentRow, 1, currentRow, 2);
+        currentRow += 2;
     }
 
     // === TITLE SECTION ===
