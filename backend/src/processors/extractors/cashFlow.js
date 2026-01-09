@@ -49,13 +49,18 @@ function extractCashFlowData(sheet) {
                     return cell ? cell.value : null;
                 };
             } else if (Array.isArray(rows[0])) {
-                // Structure: data[row][col] - direct 2D array
-                global.logger.logInfo('[CF EXTRACTOR] Structure: data[row][col] direct array');
+                // Structure: data[row][col] - but cells are objects with .value
+                global.logger.logInfo('[CF EXTRACTOR] Structure: data[row][col] with cell objects');
                 getCellValue = (rowIndex, colIndex) => {
                     if (rowIndex >= rows.length) return null;
                     const row = rows[rowIndex];
                     if (!Array.isArray(row) || colIndex >= row.length) return null;
-                    return row[colIndex];  // Direct access!
+                    const cell = row[colIndex];
+                    // Cell is an object, access its value property
+                    if (cell && typeof cell === 'object') {
+                        return cell.value !== undefined ? cell.value : null;
+                    }
+                    return cell;  // In case it's already a primitive value
                 };
             } else {
                 global.logger.logError('[CF EXTRACTOR] Unknown data structure!');
@@ -85,7 +90,14 @@ function extractCashFlowData(sheet) {
     global.logger.logInfo('[CF EXTRACTOR] Testing getCellValue on first 5 rows:');
     for (let i = 0; i < Math.min(5, rowCount); i++) {
         const val = getCellValue(i, 0);
-        global.logger.logInfo(`  Row ${i}, Col 0: "${val}"`);
+        global.logger.logInfo(`  Row ${i}, Col 0: "${val}" (type: ${typeof val})`);
+    }
+    
+    // DEBUG: Check what's in the actual cell object
+    if (rowCount > 2 && rows[2] && rows[2][0]) {
+        const sampleCell = rows[2][0];
+        global.logger.logInfo(`[CF EXTRACTOR DEBUG] Sample cell (row 2, col 0) properties: ${Object.keys(sampleCell).join(', ')}`);
+        global.logger.logInfo(`[CF EXTRACTOR DEBUG] Sample cell.value: "${sampleCell.value}"`);
     }
 
     // Find where data starts
