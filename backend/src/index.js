@@ -12,6 +12,7 @@ const cookieParser = require('cookie-parser');
 // Import configurations
 const { connect: connectDatabase } = require('./config/database');
 const { connectRedis } = require('./config/redis');
+require('./config/logger');
 
 // Import middleware
 const { errorHandler } = require('./middleware/errorHandler');
@@ -93,11 +94,11 @@ app.use(compression());
 
 // Logging middleware with enhanced Morgan integration
 if (process.env.NODE_ENV === 'development') {
-    app.use(morgan(global.logger.http.devFormat, {
+    app.use(morgan(logger.http.devFormat, {
         stream: global.logger.http.stream
     }));
 } else {
-    app.use(morgan(global.logger.http.prodFormat, {
+    app.use(morgan(logger.http.prodFormat, {
         stream: global.logger.http.stream
     }));
 }
