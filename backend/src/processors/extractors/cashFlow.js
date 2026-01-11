@@ -2,7 +2,7 @@
 
 function extractCashFlowData(sheet) {
     global.logger.logInfo('[CF EXTRACTOR] Starting extraction...');
-    
+
     // FIX: Sheet might be a JSON string, parse it first
     if (typeof sheet === 'string') {
         global.logger.logInfo('[CF EXTRACTOR] Sheet is a string, parsing JSON...');
@@ -13,9 +13,9 @@ function extractCashFlowData(sheet) {
             throw new Error('Invalid sheet format: expected object or JSON string');
         }
     }
-    
+
     global.logger.logInfo('[CF EXTRACTOR] Sheet keys:', Object.keys(sheet));
-    
+
     const result = {
         metadata: {
             companyName: '',
@@ -35,7 +35,7 @@ function extractCashFlowData(sheet) {
         global.logger.logInfo('[CF EXTRACTOR] Using sheet.data structure');
         rows = sheet.data;
         rowCount = rows.length;
-        
+
         // Check structure: is it data[row].cells[col] or data[row][col]?
         if (rowCount > 0 && rows[0]) {
             if (rows[0].cells) {
@@ -92,7 +92,7 @@ function extractCashFlowData(sheet) {
         const val = getCellValue(i, 0);
         global.logger.logInfo(`  Row ${i}, Col 0: "${val}" (type: ${typeof val})`);
     }
-    
+
     // DEBUG: Check what's in the actual cell object
     if (rowCount > 2 && rows[2] && rows[2][0]) {
         const sampleCell = rows[2][0];
