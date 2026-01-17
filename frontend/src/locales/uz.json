@@ -83,6 +83,7 @@
     "title": "XMHS ni avtomatlashtiring. Su'niy Intellekt bilan.",
     "subtitle": "Murakkab moliyaviy ma'lumotlarni aniq, auditga tayyor XMHS hisobotlariga aylantiring — tezroq, arzonroq va to'liq shaffoflik bilan.",
     "tryFree": "Bepul sinab ko'ring",
+    "bookDemo": "Demo bron qilish",
     "loginGoogle": "Google orqali kirish"
   },
   "stats": {
@@ -322,14 +323,14 @@
     }
   },
   "cta": {
-    "title": "Hoziroq bepul sinab ko'ring",
-    "subtitle": "Har qanday vazifalaringiz uchun va ATABAI samaradorligini baholang",
-    "button": "Hoziroq sinab ko'ring"
+    "title": "Amalda ko'rishga tayyormisiz?",
+    "subtitle": "Shaxsiy demo bron qiling va ATABAI XMHS jarayonini qanday o'zgartirishini ko'ring",
+    "button": "Demo bron qilish"
   },
   "finalCta": {
     "title": "Boshlashga tayyormisiz?",
-    "subtitle": "XMHS hisob-kitoblaringizni bugundan avtomatlashtirni boshlang",
-    "button": "Boshlash"
+    "subtitle": "Demo rejalashtiring va ATABAI ni amalda ko'ring",
+    "button": "Demo bron qilish"
   },
   "comingSoon": {
     "pageTitle": "Tez orada",

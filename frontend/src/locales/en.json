@@ -83,6 +83,7 @@
     "title": "Automate IFRS. Powered by AI.",
     "subtitle": "Turn complex financial data into accurate, audit-ready IFRS reports — faster, cheaper, and with full transparency.",
     "tryFree": "Try for free",
+    "bookDemo": "Book Demo",
     "loginGoogle": "Sign in with Google"
   },
   "stats": {
@@ -322,14 +323,14 @@
     }
   },
   "cta": {
-    "title": "Try now for free",
-    "subtitle": "For any of your tasks and see the effectiveness of ATABAI",
-    "button": "Try now"
+    "title": "Ready to see it in action?",
+    "subtitle": "Book a personalized demo and see how ATABAI transforms your IFRS workflow",
+    "button": "Book Demo"
   },
   "finalCta": {
     "title": "Ready to start?",
-    "subtitle": "Start automating your IFRS calculations today",
-    "button": "Get Started"
+    "subtitle": "Schedule a demo and see ATABAI in action",
+    "button": "Book Demo"
   },
   "comingSoon": {
     "pageTitle": "Coming Soon",

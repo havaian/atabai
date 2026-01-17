@@ -11,9 +11,9 @@
           <!-- Centered first CTA button -->
           <div class="flex justify-center mt-15 md:mt-10 md:mb-15">
             <button
-              @click="authStore.isAuthenticated ? $router.push('/dashboard') : authStore.login()"
+              @click="openCalendlyPopup"
               class="btn-secondary pulse-glow min-w-60 min-h-14 flex items-center gap-2 justify-center md:px-5">
-              {{ $t('hero.tryFree') }}
+              {{ $t('hero.bookDemo') }}
             </button>
           </div>
         </div>
@@ -271,7 +271,7 @@
                 <!-- Fixed mask button structure -->
                 <div class="btn-mask-container mt-12 md:mt-10">
                   <button
-                    @click="authStore.isAuthenticated ? $router.push('/dashboard') : authStore.login()"
+                    @click="openCalendlyPopup"
                     class="btn-primary bg-white text-black border-white hover:bg-transparent hover:text-white hover:border-white min-w-60 min-h-14 px-7">
                     {{ $t('cta.button') }}
                   </button>
@@ -361,7 +361,7 @@
           </div>
           <div class="flex md:flex-col md:mt-10 md:items-center mt-10">
             <button
-              @click="authStore.isAuthenticated ? $router.push('/dashboard') : authStore.login()"
+              @click="openCalendlyPopup"
               class="btn-circle w-65 h-65 flex justify-center items-center flex-col gap-5 text-xl font-medium whitespace-pre-line leading-tight text-center">
               <ArrowRightIcon class="w-12 h-12 text-black" />
               {{ $t('finalCta.button') }}
@@ -374,7 +374,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import {
@@ -518,6 +518,33 @@ function selectTemplate(template) {
 function goToComingSoon() {
   router.push('/coming-soon')
 }
+
+
+const openCalendlyPopup = () => {
+  if (window.Calendly) {
+    window.Calendly.initPopupWidget({
+      url: 'https://calendly.com/your-username/30min' // UPDATE THIS with your actual Calendly link
+    })
+  } else {
+    console.warn('Calendly not loaded yet')
+  }
+}
+
+// Load Calendly script
+onMounted(() => {
+  if (!document.querySelector('script[src*="calendly"]')) {
+    const script = document.createElement('script')
+    script.src = 'https://assets.calendly.com/assets/external/widget.js'
+    script.async = true
+    document.head.appendChild(script)
+
+    // Load Calendly CSS
+    const link = document.createElement('link')
+    link.href = 'https://assets.calendly.com/assets/external/widget.css'
+    link.rel = 'stylesheet'
+    document.head.appendChild(link)
+  }
+})
 </script>
 
 <style scoped>
