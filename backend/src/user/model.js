@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { getFileLimit } = require('../config/subscription');
 
 const userSchema = new mongoose.Schema({
     googleId: {
@@ -99,9 +100,9 @@ userSchema.virtual('isSubscriptionActive').get(function () {
 });
 
 // Method to check if user can process files
-userSchema.methods.canProcessFiles = function () {
-    const monthlyLimit = this.subscriptionType === 'basic' ? 5 : Infinity;
-    return this.filesProcessedThisMonth < monthlyLimit && this.isActive;
+userSchema.methods.canProcessFiles = async function () {
+    const limit = await getFileLimit(user.subscriptionType);
+    return this.filesProcessedThisMonth < limit && this.isActive;
 };
 
 // Method to increment processed files counter

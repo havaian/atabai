@@ -1,6 +1,7 @@
 const passport = require('passport');
 const User = require('../user/model');
 const authService = require('../services/auth');
+const { getFileLimit } = require('../config/subscription');
 
 /**
  * JWT Authentication Middleware
@@ -142,7 +143,7 @@ const requireSubscription = (requiredLevel = 'basic') => {
  * File processing limit check middleware
  * Ensures user hasn't exceeded monthly processing limit
  */
-const checkFileProcessingLimit = (req, res, next) => {
+const checkFileProcessingLimit = async (req, res, next) => {
     if (!req.user) {
         return res.status(401).json({
             error: 'AUTHENTICATION_REQUIRED',
@@ -151,13 +152,13 @@ const checkFileProcessingLimit = (req, res, next) => {
     }
 
     if (!req.user.canProcessFiles()) {
-        const monthlyLimit = req.user.subscriptionType === 'basic' ? 5 : 'unlimited';
+        const limit = await getFileLimit(req.user.subscriptionType);
 
         return res.status(403).json({
             error: 'PROCESSING_LIMIT_EXCEEDED',
             message: 'Monthly file processing limit exceeded',
             currentCount: req.user.filesProcessedThisMonth,
-            monthlyLimit,
+            limit,
             subscriptionType: req.user.subscriptionType
         });
     }

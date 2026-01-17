@@ -32,7 +32,7 @@
     "/upload": "Upload File"
   },
   "pageDescriptions": {
-    "/": "Powerful platform for automating Excel calculations according to IFRS. With ATABAI, financial reporting will be tens of times cheaper and faster.",
+    "/": "Automate IFRS. Powered by AI.. Turn complex financial data into accurate, audit-ready IFRS reports — faster, cheaper, and with full transparency..",
     "/dashboard": "ATABAI Dashboard - manage files, IFRS templates and monitor the processing of financial documents.",
     "/templates": "IFRS templates for automating depreciation calculations, discounts, asset impairment and financial reports.",
     "/profile": "ATABAI user profile settings - manage subscription, preferences and personal data.",
@@ -44,7 +44,7 @@
     "/auth/success": "Completing your authentication to ATABAI platform",
     "/settings": "ATABAI user settings - manage preferences, subscription and account details",
     "/help": "Get help and support for ATABAI - contact us for questions about IFRS automation",
-    "/upload": "Upload your Excel file to transform from NSBU to IFRS format with automated calculations"
+    "/upload": "Upload your Excel file to transform from Regional Standard to IFRS format with automated calculations"
   },
   "nav": {
     "home": "Home",
@@ -80,8 +80,8 @@
     "emptyState": "Here will be your recent files"
   },
   "hero": {
-    "title": "Powerful platform for automating Excel calculations according to IFRS",
-    "subtitle": "With ATABAI, financial reporting will be tens of times cheaper and faster",
+    "title": "Automate IFRS. Powered by AI.",
+    "subtitle": "Turn complex financial data into accurate, audit-ready IFRS reports — faster, cheaper, and with full transparency.",
     "tryFree": "Try for free",
     "loginGoogle": "Sign in with Google"
   },
@@ -115,7 +115,7 @@
     "step4": {
       "title": "4. See the transformation",
       "description": "Watch how your local format transforms into international IFRS standards",
-      "before": "Before (NSBU Format)",
+      "before": "Before (Regional Standard Format)",
       "after": "After (IFRS Format)",
       "transformation": "Transformation",
       "compliant": "IFRS Compliant",
@@ -257,9 +257,9 @@
     "reports": "Financial Reports",
     "reportsDescription": "Generate comprehensive IFRS-compliant financial reports with automated compliance checks",
     "balanceSheet": "Balance Sheet Transformation",
-    "balanceSheetDescription": "Transform NSBU balance sheet to IFRS format according to IAS 1 standards",
+    "balanceSheetDescription": "Transform Regional Standard balance sheet to IFRS format according to IAS 1 standards",
     "cashFlow": "Cash Flow Transformation",
-    "cashFlowDescription": "Transform NSBU cash flow statement to IFRS format according to IAS 7 standards"
+    "cashFlowDescription": "Transform Regional Standard cash flow statement to IFRS format according to IAS 7 standards"
   },
   "features": {
     "title": "Why ATABAI is great",
@@ -296,7 +296,7 @@
     "basic": {
       "title": "Basic",
       "price": "Free",
-      "files": "5 files per month",
+      "files": "3 files per month",
       "templates": "Basic IFRS templates",
       "history": "Last 10 files history",
       "export": "Export processed files"
@@ -386,29 +386,29 @@
     "expectedFormat": "Expected File Format:",
     "instructions": {
       "depreciation": [
-        "Excel file with asset data in NSBU format",
+        "Excel file with asset data in Regional Standard format",
         "Columns: Asset Name, Original Cost, Purchase Date, Useful Life",
         "Optional: Depreciation Method, Residual Value",
         "Each row should represent one asset"
       ],
       "discounts": [
-        "Excel file with revenue/discount data in NSBU format",
+        "Excel file with revenue/discount data in Regional Standard format",
         "Columns: Transaction ID, Revenue Amount, Discount Type, Discount Value",
         "Optional: Customer, Date, Product Category"
       ],
       "impairment": [
-        "Excel file with asset carrying values in NSBU format",
+        "Excel file with asset carrying values in Regional Standard format",
         "Columns: Asset Name, Carrying Value, Fair Value, Cash Flow Data",
         "Optional: Testing Date, Market Indicators"
       ],
       "balanceSheet": [
-        "Excel file with NSBU balance sheet format (Form № 1 - ОКУД 0710001)",
+        "Excel file with Regional Standard balance sheet format (Form № 1 - ОКУД 0710001)",
         "Standard Uzbek balance sheet structure expected",
         "Columns: Row Code, Description, Beginning Balance, Ending Balance",
-        "System will map NSBU codes to IFRS classifications"
+        "System will map Regional Standard codes to IFRS classifications"
       ],
       "cashFlow": {
-        "1": "Cash flow statement transformed from NSBU to IFRS format according to IAS 7 - Statement of Cash Flows",
+        "1": "Cash flow statement transformed from Regional Standard to IFRS format according to IAS 7 - Statement of Cash Flows",
         "2": "Activities are classified into operating, investing, and financing categories",
         "3": "Direct method is used to present operating cash flows where applicable",
         "4": "Net amounts are calculated automatically for items with both inflows and outflows"
@@ -617,7 +617,7 @@
       "before": "Before",
       "after": "After",
       "sideBySide": "Side by Side",
-      "beforeData": "Original Data (NSBU Format)",
+      "beforeData": "Original Data (Regional Standard Format)",
       "afterData": "Processed Data (IFRS Format)",
       "originalFormat": "Original format from your uploaded file",
       "ifrsFormat": "IFRS compliant format with applied transformations",
@@ -644,9 +644,9 @@
         "4": "Cash generating units (CGUs) are identified for assets that do not generate independent cash flows"
       },
       "balanceSheet": {
-        "1": "Balance sheet transformed from NSBU to IFRS format according to IAS 1 - Presentation of Financial Statements",
+        "1": "Balance sheet transformed from Regional Standard to IFRS format according to IAS 1 - Presentation of Financial Statements",
         "2": "Current/non-current classification follows the 12-month operating cycle test",
-        "3": "All NSBU account codes have been mapped to appropriate IFRS line items",
+        "3": "All Regional Standard account codes have been mapped to appropriate IFRS line items",
         "4": "This mapping provides structure alignment but does not replace full IFRS adjustments and professional audit"
       },
       "cashFlow": {
@@ -672,7 +672,7 @@
       "columns": {
         "ifrsCode": "IFRS Code",
         "lineItem": "Line Item",
-        "nsbuCode": "NSBU Code",
+        "nsbuCode": "Regional Standard Code",
         "beginningBalance": "Beginning Balance (sum)",
         "endingBalance": "Ending Balance (sum)"
       },

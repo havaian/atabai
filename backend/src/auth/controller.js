@@ -1,5 +1,6 @@
 const User = require('../user/model');
 const authService = require('../services/auth');
+const { getFileLimit } = require('../config/subscription');
 const axios = require('axios');
 
 class AuthController {
@@ -317,7 +318,7 @@ class AuthController {
                     picture: user.picture,
                     subscriptionType: user.subscriptionType,
                     filesProcessedThisMonth: user.filesProcessedThisMonth,
-                    monthlyLimit: user.subscriptionType === 'basic' ? 5 : 'unlimited',
+                    monthlyLimit: await getFileLimit(user.subscriptionType),
                     canProcessFiles: user.canProcessFiles(),
                     preferences: user.preferences,
                     lastLoginAt: user.lastLoginAt,

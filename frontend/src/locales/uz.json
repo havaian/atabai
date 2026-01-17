@@ -32,7 +32,7 @@
     "/upload": "Fayl yuklash"
   },
   "pageDescriptions": {
-    "/": "XMHS bo'yicha Excel hisob-kitoblarini avtomatlashtirish uchun kuchli platforma. ATABAI bilan moliyaviy hisobot o'n marta arzon va tezroq bo'ladi.",
+    "/": "XMHS ni avtomatlashtiring. Su'niy Intellekt bilan.. Murakkab moliyaviy ma'lumotlarni aniq, auditga tayyor XMHS hisobotlariga aylantiring — tezroq, arzonroq va to'liq shaffoflik bilan..",
     "/dashboard": "ATABAI boshqaruv paneli - fayllar, XMHS shablonlari va moliyaviy hujjatlar qayta ishlashini boshqaring.",
     "/templates": "Amortizatsiya, chegirmalar, aktivlar qadrsizlanishi va moliyaviy hisobotlar hisob-kitoblarini avtomatlashtirish uchun XMHS shablonlari.",
     "/profile": "ATABAI foydalanuvchi profili sozlamalari - obuna, afzalliklar va shaxsiy ma'lumotlarni boshqaring.",
@@ -80,8 +80,8 @@
     "emptyState": "Bu yerda sizning fayllaringiz ko'rinadi"
   },
   "hero": {
-    "title": "XMHS bo'yicha Excel hisob-kitoblarini avtomatlashtirish uchun kuchli platforma",
-    "subtitle": "ATABAI bilan moliyaviy hisobot o'n marta arzon va tezroq bo'ladi",
+    "title": "XMHS ni avtomatlashtiring. Su'niy Intellekt bilan.",
+    "subtitle": "Murakkab moliyaviy ma'lumotlarni aniq, auditga tayyor XMHS hisobotlariga aylantiring — tezroq, arzonroq va to'liq shaffoflik bilan.",
     "tryFree": "Bepul sinab ko'ring",
     "loginGoogle": "Google orqali kirish"
   },
@@ -296,7 +296,7 @@
     "basic": {
       "title": "Asosiy",
       "price": "Bepul",
-      "files": "Oyiga 5 ta fayl",
+      "files": "Oyiga 4ta fayl",
       "templates": "Asosiy XMHS shablonlari",
       "history": "Oxirgi 10 ta fayl tarixi",
       "export": "Qayta ishlangan fayllarni eksport qilish"
@@ -402,13 +402,13 @@
         "Ixtiyoriy: Test sanasi, Bozor ko'rsatkichlari"
       ],
       "balanceSheet": [
-        "NSBU formatidagi balans bilan Excel fayl (Forma № 1 - ОКUD 0710001)",
+        "milliy standartlar formatidagi balans bilan Excel fayl (Forma № 1 - ОКUD 0710001)",
         "Standart o'zbek balans tuzilishi kutilmoqda",
         "Ustunlar: Qator kodi, Tavsif, Boshlang'ich balans, Yakuniy balans",
         "Tizim NSBU kodlarini IFRS klassifikatsiyasiga moslaydi"
       ],
       "cashFlow": {
-        "1": "Pul oqimlari hisoboti NSBU formatidan IAS 7 - Pul oqimlari hisoboti bo'yicha IFRS formatiga o'zgartirildi",
+        "1": "Pul oqimlari hisoboti milliy standartlar formatidan IAS 7 - Pul oqimlari hisoboti bo'yicha IFRS formatiga o'zgartirildi",
         "2": "Faoliyat operatsion, investitsion va moliyaviy toifalarga ajratiladi",
         "3": "Operatsion pul oqimlarini taqdim etishda to'g'ridan-to'g'ri usul qo'llaniladi",
         "4": "Kirish va chiqishga ega qatorlar uchun sof summalar avtomatik hisoblanadi"
@@ -655,7 +655,7 @@
         "4": "Mustaqil naqd oqimlarini yaratmaydigan aktivlar uchun naqd yaratuvchi birliklar (NYB) aniqlanadi"
       },
       "balanceSheet": {
-        "1": "Balans NSBU formatidan IFRS formatiga IAS 1 - Moliyaviy hisobotlarni taqdim etish standartiga muvofiq o'zgartirildi",
+        "1": "Balans milliy standartlar formatidan IFRS formatiga IAS 1 - Moliyaviy hisobotlarni taqdim etish standartiga muvofiq o'zgartirildi",
         "2": "Joriy/uzoq muddatli klassifikatsiya 12 oylik operatsion tsikl testiga amal qiladi",
         "3": "Barcha NSBU hisob kodlari tegishli IFRS qatorlariga moslashtirilgan",
         "4": "Ushbu moslashtirish tuzilma moslashuvini ta'minlaydi, lekin to'liq IFRS tuzatishlari va professional auditni almashtirmaydi"
@@ -683,7 +683,7 @@
       "columns": {
         "ifrsCode": "XMHS kodi",
         "lineItem": "Qator nomi",
-        "nsbuCode": "NSBU kodi",
+        "nsbuCode": "milliy standartlar kodi",
         "beginningBalance": "Boshlang'ich balans (so'm)",
         "endingBalance": "Yakuniy balans (so'm)"
       },
