@@ -1,20 +1,15 @@
-// extractors/cashFlow.js - FIXED VERSION
+// extractors/cashFlow.js - STRUCTURE-BASED VERSION
 
 function extractCashFlowData(sheet) {
     global.logger.logInfo('[CF EXTRACTOR] Starting extraction...');
 
-    // FIX: Sheet might be a JSON string, parse it first
     if (typeof sheet === 'string') {
-        global.logger.logInfo('[CF EXTRACTOR] Sheet is a string, parsing JSON...');
         try {
             sheet = JSON.parse(sheet);
         } catch (e) {
-            global.logger.logError('[CF EXTRACTOR] Failed to parse sheet JSON:', e.message);
             throw new Error('Invalid sheet format: expected object or JSON string');
         }
     }
-
-    global.logger.logInfo('[CF EXTRACTOR] Sheet keys:', Object.keys(sheet));
 
     const result = {
         metadata: {
@@ -32,15 +27,11 @@ function extractCashFlowData(sheet) {
     let rowCount = 0;
 
     if (sheet.data && Array.isArray(sheet.data)) {
-        global.logger.logInfo('[CF EXTRACTOR] Using sheet.data structure');
         rows = sheet.data;
         rowCount = rows.length;
 
-        // Check structure: is it data[row].cells[col] or data[row][col]?
         if (rowCount > 0 && rows[0]) {
             if (rows[0].cells) {
-                // Structure: data[row].cells[col].value
-                global.logger.logInfo('[CF EXTRACTOR] Structure: data[row].cells[col].value');
                 getCellValue = (rowIndex, colIndex) => {
                     if (rowIndex >= rows.length) return null;
                     const row = rows[rowIndex];
@@ -49,26 +40,21 @@ function extractCashFlowData(sheet) {
                     return cell ? cell.value : null;
                 };
             } else if (Array.isArray(rows[0])) {
-                // Structure: data[row][col] - but cells are objects with .value
-                global.logger.logInfo('[CF EXTRACTOR] Structure: data[row][col] with cell objects');
                 getCellValue = (rowIndex, colIndex) => {
                     if (rowIndex >= rows.length) return null;
                     const row = rows[rowIndex];
                     if (!Array.isArray(row) || colIndex >= row.length) return null;
                     const cell = row[colIndex];
-                    // Cell is an object, access its value property
                     if (cell && typeof cell === 'object') {
                         return cell.value !== undefined ? cell.value : null;
                     }
-                    return cell;  // In case it's already a primitive value
+                    return cell;
                 };
             } else {
-                global.logger.logError('[CF EXTRACTOR] Unknown data structure!');
                 throw new Error('Unknown sheet.data structure');
             }
         }
     } else if (sheet.rows && Array.isArray(sheet.rows)) {
-        global.logger.logInfo('[CF EXTRACTOR] Using sheet.rows structure');
         rows = sheet.rows;
         rowCount = rows.length;
         getCellValue = (rowIndex, colIndex) => {
@@ -79,26 +65,10 @@ function extractCashFlowData(sheet) {
             return cell ? cell.value : null;
         };
     } else {
-        global.logger.logError('[CF EXTRACTOR] ERROR: Unknown sheet structure');
-        global.logger.logError('[CF EXTRACTOR] Available keys:', Object.keys(sheet));
         throw new Error('Unable to read sheet structure. Expected sheet.rows or sheet.data array.');
     }
 
     global.logger.logInfo(`[CF EXTRACTOR] Total rows: ${rowCount}`);
-
-    // TEST: Verify getCellValue works
-    global.logger.logInfo('[CF EXTRACTOR] Testing getCellValue on first 5 rows:');
-    for (let i = 0; i < Math.min(5, rowCount); i++) {
-        const val = getCellValue(i, 0);
-        global.logger.logInfo(`  Row ${i}, Col 0: "${val}" (type: ${typeof val})`);
-    }
-
-    // DEBUG: Check what's in the actual cell object
-    if (rowCount > 2 && rows[2] && rows[2][0]) {
-        const sampleCell = rows[2][0];
-        global.logger.logInfo(`[CF EXTRACTOR DEBUG] Sample cell (row 2, col 0) properties: ${Object.keys(sampleCell).join(', ')}`);
-        global.logger.logInfo(`[CF EXTRACTOR DEBUG] Sample cell.value: "${sampleCell.value}"`);
-    }
 
     // Find where data starts
     let dataStartRow = -1;
@@ -114,9 +84,9 @@ function extractCashFlowData(sheet) {
             break;
         }
 
-        if (cellStr.includes('Операционная деятельность')) {
+        if (isSectionHeader(cellStr, 'OPERATING')) {
             dataStartRow = i;
-            global.logger.logInfo(`[CF EXTRACTOR] Found "Операционная деятельность" at row ${i}, data starts at row ${dataStartRow}`);
+            global.logger.logInfo(`[CF EXTRACTOR] Found Operating section at row ${i}, data starts at row ${dataStartRow}`);
             break;
         }
     }
@@ -138,39 +108,26 @@ function extractCashFlowData(sheet) {
         const lineItemStr = String(lineItem).trim();
         if (!lineItemStr || lineItemStr.length === 0) continue;
 
-        // Detect main sections
-        if (lineItemStr.includes('Операционная деятельность') || lineItemStr.includes('операционной деятельности')) {
-            currentSection = 'OPERATING';
+        // STOP at FCF - support Russian, Uzbek, English
+        if (isFCFMarker(lineItemStr)) {
+            global.logger.logInfo(`[CF EXTRACTOR] Row ${i}: Found FCF marker "${lineItemStr}" - stopping extraction`);
+            break;
+        }
+
+        // Detect main sections - support Russian and Uzbek
+        const detectedSection = detectSection(lineItemStr);
+        if (detectedSection) {
+            currentSection = detectedSection;
             currentSubSection = null;
-            global.logger.logInfo(`[CF EXTRACTOR] Row ${i}: OPERATING ACTIVITIES`);
+            global.logger.logInfo(`[CF EXTRACTOR] Row ${i}: ${detectedSection} ACTIVITIES`);
             continue;
         }
 
-        if (lineItemStr.includes('Инвестиционная деятельность') || lineItemStr.includes('инвестиционной деятельности')) {
-            currentSection = 'INVESTING';
-            currentSubSection = null;
-            global.logger.logInfo(`[CF EXTRACTOR] Row ${i}: INVESTING ACTIVITIES`);
-            continue;
-        }
-
-        if (lineItemStr.includes('Финансовая деятельность') || lineItemStr.includes('финансовой деятельности')) {
-            currentSection = 'FINANCING';
-            currentSubSection = null;
-            global.logger.logInfo(`[CF EXTRACTOR] Row ${i}: FINANCING ACTIVITIES`);
-            continue;
-        }
-
-        // Detect sub-sections
-        const lineItemLower = lineItemStr.toLowerCase();
-        if (lineItemLower.includes('приток') || lineItemLower.includes('притоки')) {
-            currentSubSection = 'INFLOW';
-            global.logger.logInfo(`[CF EXTRACTOR] Row ${i}: INFLOWS`);
-            continue;
-        }
-
-        if (lineItemLower.includes('отток') || lineItemLower.includes('оттоки')) {
-            currentSubSection = 'OUTFLOW';
-            global.logger.logInfo(`[CF EXTRACTOR] Row ${i}: OUTFLOWS`);
+        // Detect sub-sections (inflow/outflow) - support Russian and Uzbek
+        const detectedSubSection = detectSubSection(lineItemStr);
+        if (detectedSubSection) {
+            currentSubSection = detectedSubSection;
+            global.logger.logInfo(`[CF EXTRACTOR] Row ${i}: ${detectedSubSection}`);
             continue;
         }
 
@@ -179,13 +136,10 @@ function extractCashFlowData(sheet) {
         let totalValue = 0;
         let nonZeroCount = 0;
 
-        // Check up to 30 columns for monthly data
         for (let col = 1; col < 30; col++) {
             const cellValue = getCellValue(i, col);
 
-            // Stop if we hit empty columns (no more data)
             if (cellValue === null || cellValue === undefined) {
-                // Only stop if we've already found some data
                 if (values.length > 0) break;
                 continue;
             }
@@ -212,7 +166,7 @@ function extractCashFlowData(sheet) {
             result.dataMap.set(lineItemStr, dataEntry);
             itemsExtracted++;
 
-            global.logger.logInfo(`[CF EXTRACTOR] Row ${i}: "${lineItemStr}" = ${totalValue.toFixed(2)} (${values.length} months, ${nonZeroCount} non-zero)`);
+            global.logger.logInfo(`[CF EXTRACTOR] Row ${i}: "${lineItemStr}" = ${totalValue.toFixed(2)} (Section: ${currentSection}, ${values.length} months)`);
         }
     }
 
@@ -223,6 +177,85 @@ function extractCashFlowData(sheet) {
     }
 
     return result;
+}
+
+/**
+ * Detect if line is FCF marker - supports Russian, Uzbek, English
+ */
+function isFCFMarker(text) {
+    const lower = text.toLowerCase().trim();
+
+    // English
+    if (lower === 'fcf' || lower === 'free cash flow') return true;
+
+    // Russian
+    if (lower.includes('свободный денежный поток')) return true;
+
+    // Uzbek
+    if (lower.includes('erkin pul oqimi')) return true;
+
+    return false;
+}
+
+/**
+ * Detect section header - supports Russian and Uzbek
+ */
+function detectSection(text) {
+    const lower = text.toLowerCase();
+
+    // Operating activities
+    // Russian: операционная деятельность, операционной деятельности
+    // Uzbek: operatsion faoliyat, operatsion faoliyati
+    if (lower.includes('операцион') || lower.includes('operatsion')) {
+        return 'OPERATING';
+    }
+
+    // Investing activities
+    // Russian: инвестиционная деятельность, инвестиционной деятельности
+    // Uzbek: investitsion faoliyat, investitsion faoliyati
+    if (lower.includes('инвестицион') || lower.includes('investitsion')) {
+        return 'INVESTING';
+    }
+
+    // Financing activities
+    // Russian: финансовая деятельность, финансовой деятельности
+    // Uzbek: moliyaviy faoliyat, moliyaviy faoliyati
+    if (lower.includes('финансов') || lower.includes('moliyaviy')) {
+        return 'FINANCING';
+    }
+
+    return null;
+}
+
+/**
+ * Detect sub-section (inflow/outflow) - supports Russian and Uzbek
+ */
+function detectSubSection(text) {
+    const lower = text.toLowerCase();
+
+    // Inflow
+    // Russian: приток, притоки
+    // Uzbek: kiruvchi, tushum
+    if (lower.includes('приток') || lower.includes('kiruvchi') || lower.includes('tushum')) {
+        return 'INFLOW';
+    }
+
+    // Outflow
+    // Russian: отток, оттоки
+    // Uzbek: chiquvchi, xarajat
+    if (lower.includes('отток') || lower.includes('chiquvchi') || lower.includes('xarajat')) {
+        return 'OUTFLOW';
+    }
+
+    return null;
+}
+
+/**
+ * Check if text is a section header
+ */
+function isSectionHeader(text, sectionType) {
+    const section = detectSection(text);
+    return section === sectionType;
 }
 
 module.exports = {
