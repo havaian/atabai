@@ -25,7 +25,7 @@ class AuthController {
                 message: 'Redirect to Google OAuth'
             });
         } catch (error) {
-            global.logger.error('Error initiating Google login:', error);
+            global.logger.logError('Error initiating Google login:', error);
             res.status(500).json({
                 error: 'OAUTH_INITIATION_FAILED',
                 message: 'Failed to initiate Google login'
@@ -35,7 +35,7 @@ class AuthController {
 
     async createUserSession(user, accessToken, refreshToken) {
         try {
-            global.logger.info(`User logged in successfully: ${user.email}`);
+            global.logger.logInfo(`User logged in successfully: ${user.email}`);
 
             res.json({
                 success: true,
@@ -44,7 +44,7 @@ class AuthController {
             });
 
         } catch (error) {
-            global.logger.error('Google OAuth callback error:', error);
+            global.logger.logError('Google OAuth callback error:', error);
             res.status(500).json({
                 error: 'OAUTH_CALLBACK_FAILED',
                 message: 'OAuth callback failed'
@@ -268,7 +268,7 @@ class AuthController {
             // Generate new access token
             const newAccessToken = await authService.generateAccessToken(user);
 
-            global.logger.info(`Access token refreshed for user: ${user.email}`);
+            global.logger.logInfo(`Access token refreshed for user: ${user.email}`);
 
             res.json({
                 success: true,
@@ -277,7 +277,7 @@ class AuthController {
             });
 
         } catch (error) {
-            global.logger.warn(`Token refresh failed: ${error.message}`);
+            global.logger.logWarn(`Token refresh failed: ${error.message}`);
 
             if (error.message === 'REFRESH_TOKEN_EXPIRED') {
                 return res.status(401).json({
@@ -327,7 +327,7 @@ class AuthController {
             });
 
         } catch (error) {
-            global.logger.error('Error fetching user profile:', error);
+            global.logger.logError('Error fetching user profile:', error);
             res.status(500).json({
                 error: 'PROFILE_FETCH_FAILED',
                 message: 'Failed to fetch user profile'
@@ -373,7 +373,7 @@ class AuthController {
 
             await user.save();
 
-            global.logger.info(`Profile updated for user: ${user.email}`);
+            global.logger.logInfo(`Profile updated for user: ${user.email}`);
 
             res.json({
                 success: true,
@@ -389,7 +389,7 @@ class AuthController {
             });
 
         } catch (error) {
-            global.logger.error('Error updating user profile:', error);
+            global.logger.logError('Error updating user profile:', error);
             res.status(500).json({
                 error: 'PROFILE_UPDATE_FAILED',
                 message: 'Failed to update profile'
@@ -417,7 +417,7 @@ class AuthController {
                 }
             }
 
-            global.logger.info(`User logged out: ${user?.email || 'Unknown'}`);
+            global.logger.logInfo(`User logged out: ${user?.email || 'Unknown'}`);
 
             res.json({
                 success: true,
@@ -425,7 +425,7 @@ class AuthController {
             });
 
         } catch (error) {
-            global.logger.error('Error during logout:', error);
+            global.logger.logError('Error during logout:', error);
             // Don't fail logout even if token revocation fails
             res.json({
                 success: true,
@@ -452,7 +452,7 @@ class AuthController {
                 }
             });
         } catch (error) {
-            global.logger.error('Auth health check failed:', error);
+            global.logger.logError('Auth health check failed:', error);
             res.status(500).json({
                 success: false,
                 service: 'auth',
