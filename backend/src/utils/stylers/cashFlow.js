@@ -1,4 +1,4 @@
-// utils/stylers/cashFlow.js - FIXED WITH MULTI-PERIOD SUPPORT
+// utils/stylers/cashFlow.js - WITH EXCEL FORMULAS
 
 const ExcelJS = require('exceljs');
 const path = require('path');
@@ -8,9 +8,11 @@ async function styleCashFlowReport(data) {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Cash Flow Statement');
 
-    // Use periods from data (extracted from file)
+    // Use periods from data (extracted from source file)
     const periods = data.periods || [{ label: 'Total', columnIndex: 1 }];
     const periodCount = periods.length;
+
+    global.logger.logInfo(`[CF STYLER] Creating output with ${periodCount} period columns`);
 
     // Set column widths
     const columns = [{ width: 50 }]; // Description column
@@ -126,23 +128,36 @@ async function styleCashFlowReport(data) {
     headerRow.height = 25;
     currentRow++;
 
+    // Track row ranges for formulas
+    const sectionRanges = {
+        operating: { start: 0, end: 0 },
+        investing: { start: 0, end: 0 },
+        financing: { start: 0, end: 0 }
+    };
+
     // === OPERATING ACTIVITIES ===
+    sectionRanges.operating.start = currentRow + 1;
     currentRow = addSection(worksheet, currentRow, 'CASH FLOWS FROM OPERATING ACTIVITIES:', periods, data.sections[0], true);
-    currentRow = addSectionTotal(worksheet, currentRow, 'Net cash from operating activities', periods, data.operatingTotal);
+    sectionRanges.operating.end = currentRow - 1;
+    currentRow = addSectionTotalWithFormulas(worksheet, currentRow, 'Net cash from operating activities', periods, sectionRanges.operating);
     currentRow++; // Blank line
 
     // === INVESTING ACTIVITIES ===
+    sectionRanges.investing.start = currentRow + 1;
     currentRow = addSection(worksheet, currentRow, 'CASH FLOWS FROM INVESTING ACTIVITIES:', periods, data.sections[1], false);
-    currentRow = addSectionTotal(worksheet, currentRow, 'Net cash from investing activities', periods, data.investingTotal);
+    sectionRanges.investing.end = currentRow - 1;
+    currentRow = addSectionTotalWithFormulas(worksheet, currentRow, 'Net cash from investing activities', periods, sectionRanges.investing);
     currentRow++; // Blank line
 
     // === FINANCING ACTIVITIES ===
+    sectionRanges.financing.start = currentRow + 1;
     currentRow = addSection(worksheet, currentRow, 'CASH FLOWS FROM FINANCING ACTIVITIES:', periods, data.sections[2], false);
-    currentRow = addSectionTotal(worksheet, currentRow, 'Net cash from financing activities', periods, data.financingTotal);
+    sectionRanges.financing.end = currentRow - 1;
+    currentRow = addSectionTotalWithFormulas(worksheet, currentRow, 'Net cash from financing activities', periods, sectionRanges.financing);
     currentRow++; // Blank line
 
     // === RECONCILIATION ===
-    currentRow = addReconciliation(worksheet, currentRow, periods, data);
+    currentRow = addReconciliationWithFormulas(worksheet, currentRow, periods, data, sectionRanges);
 
     return workbook;
 }
@@ -181,7 +196,7 @@ function addSection(worksheet, startRow, sectionTitle, periods, sectionData, isO
             itemRow.getCell(1).font = { name: 'Arial', size: 10 };
             itemRow.getCell(1).alignment = { horizontal: 'left', vertical: 'center', indent: item.indent || 1 };
 
-            // Period values
+            // Period values (actual numbers, not formulas for line items)
             for (let i = 0; i < periods.length; i++) {
                 const cell = itemRow.getCell(i + 2);
                 const value = item.periodValues ? item.periodValues[i] : 0;
@@ -202,7 +217,7 @@ function addSection(worksheet, startRow, sectionTitle, periods, sectionData, isO
     return currentRow;
 }
 
-function addSectionTotal(worksheet, row, label, periods, totalsArray) {
+function addSectionTotalWithFormulas(worksheet, row, label, periods, range) {
     const totalRow = worksheet.getRow(row);
 
     // Total label
@@ -215,11 +230,14 @@ function addSectionTotal(worksheet, row, label, periods, totalsArray) {
         fgColor: { argb: 'FFD9E1F2' }
     };
 
-    // Total values for each period
+    // Formula for each period column
     for (let i = 0; i < periods.length; i++) {
         const cell = totalRow.getCell(i + 2);
-        const value = totalsArray[i] || 0;
-        cell.value = value;
+        const colLetter = getColumnLetter(i + 2);
+
+        // Create SUM formula
+        const formula = `=SUM(${colLetter}${range.start}:${colLetter}${range.end})`;
+        cell.value = { formula: formula };
         cell.numFmt = '#,##0.00';
         cell.font = { name: 'Arial', size: 11, bold: true };
         cell.alignment = { horizontal: 'right', vertical: 'center' };
@@ -238,10 +256,15 @@ function addSectionTotal(worksheet, row, label, periods, totalsArray) {
     return row + 1;
 }
 
-function addReconciliation(worksheet, startRow, periods, data) {
+function addReconciliationWithFormulas(worksheet, startRow, periods, data, sectionRanges) {
     let currentRow = startRow;
 
-    // Net change
+    // Store row numbers for formulas
+    const operatingTotalRow = sectionRanges.operating.end + 1;
+    const investingTotalRow = sectionRanges.investing.end + 1;
+    const financingTotalRow = sectionRanges.financing.end + 1;
+
+    // Net change (formula: sum of three section totals)
     const netRow = worksheet.getRow(currentRow);
     netRow.getCell(1).value = 'Net increase/(decrease) in cash and cash equivalents';
     netRow.getCell(1).font = { name: 'Arial', size: 11, bold: true };
@@ -254,7 +277,11 @@ function addReconciliation(worksheet, startRow, periods, data) {
 
     for (let i = 0; i < periods.length; i++) {
         const cell = netRow.getCell(i + 2);
-        cell.value = data.netChange[i] || 0;
+        const colLetter = getColumnLetter(i + 2);
+
+        // Formula: Operating + Investing + Financing
+        const formula = `=${colLetter}${operatingTotalRow}+${colLetter}${investingTotalRow}+${colLetter}${financingTotalRow}`;
+        cell.value = { formula: formula };
         cell.numFmt = '#,##0.00';
         cell.font = { name: 'Arial', size: 11, bold: true };
         cell.alignment = { horizontal: 'right', vertical: 'center' };
@@ -269,11 +296,14 @@ function addReconciliation(worksheet, startRow, periods, data) {
         };
     }
     netRow.height = 22;
+    const netChangeRow = currentRow;
     currentRow++;
 
     // FX effects (if applicable)
+    let fxEffectsRow = null;
     const hasFxEffects = data.fxEffects && data.fxEffects.some(v => Math.abs(v) > 0.01);
     if (hasFxEffects) {
+        fxEffectsRow = currentRow;
         const fxRow = worksheet.getRow(currentRow);
         fxRow.getCell(1).value = 'Effect of exchange rate changes';
         fxRow.getCell(1).font = { name: 'Arial', size: 10 };
@@ -300,9 +330,10 @@ function addReconciliation(worksheet, startRow, periods, data) {
         cell.numFmt = '#,##0.00';
         cell.alignment = { horizontal: 'right', vertical: 'center' };
     }
+    const beginBalanceRow = currentRow;
     currentRow++;
 
-    // Ending balance
+    // Ending balance (formula: beginning + net change + fx)
     const endRow = worksheet.getRow(currentRow);
     endRow.getCell(1).value = 'Cash and cash equivalents at end of period';
     endRow.getCell(1).font = { name: 'Arial', size: 11, bold: true, color: { argb: 'FFFFFFFF' } };
@@ -315,7 +346,17 @@ function addReconciliation(worksheet, startRow, periods, data) {
 
     for (let i = 0; i < periods.length; i++) {
         const cell = endRow.getCell(i + 2);
-        cell.value = data.cashEnding[i] || 0;
+        const colLetter = getColumnLetter(i + 2);
+
+        // Formula: Beginning + Net Change + FX Effects (if present)
+        let formula;
+        if (fxEffectsRow) {
+            formula = `=${colLetter}${beginBalanceRow}+${colLetter}${netChangeRow}+${colLetter}${fxEffectsRow}`;
+        } else {
+            formula = `=${colLetter}${beginBalanceRow}+${colLetter}${netChangeRow}`;
+        }
+
+        cell.value = { formula: formula };
         cell.numFmt = '#,##0.00';
         cell.font = { name: 'Arial', size: 11, bold: true, color: { argb: 'FFFFFFFF' } };
         cell.alignment = { horizontal: 'right', vertical: 'center' };
@@ -332,6 +373,20 @@ function addReconciliation(worksheet, startRow, periods, data) {
     endRow.height = 22;
 
     return currentRow + 1;
+}
+
+/**
+ * Convert column number to Excel column letter
+ * 1 -> A, 2 -> B, 26 -> Z, 27 -> AA, etc.
+ */
+function getColumnLetter(columnNumber) {
+    let letter = '';
+    while (columnNumber > 0) {
+        const remainder = (columnNumber - 1) % 26;
+        letter = String.fromCharCode(65 + remainder) + letter;
+        columnNumber = Math.floor((columnNumber - 1) / 26);
+    }
+    return letter;
 }
 
 module.exports = {
