@@ -50,7 +50,7 @@ services:
       dockerfile: Dockerfile
     environment:
       - JWT_SECRET=${JWT_SECRET}
-      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
     container_name: ${PROJECT_NAME:-atabai}-backend
     restart: unless-stopped
     env_file: 
