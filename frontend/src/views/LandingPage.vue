@@ -523,7 +523,7 @@ function goToComingSoon() {
 const openCalendlyPopup = () => {
   if (window.Calendly) {
     window.Calendly.initPopupWidget({
-      url: 'https://calendly.com/your-username/30min' // UPDATE THIS with your actual Calendly link
+      url: 'https://calendly.com/aziz-saidov918/30min'
     })
   } else {
     console.warn('Calendly not loaded yet')
