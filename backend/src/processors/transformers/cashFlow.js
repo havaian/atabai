@@ -1,24 +1,20 @@
-// transformers/cashFlow.js - STRUCTURE-BASED VERSION
+// transformers/cashFlow.js - FIXED WITH PERIOD SUPPORT
 
-/**
- * Cash Flow Transformer - MINIMAL MAPPING VERSION
- * Categorizes by section structure, keeps original item names
- * Flexible for Russian, Uzbek, or any language
- */
-
-function transformToIFRSCashFlow(dataMap) {
+function transformToIFRSCashFlow(dataMap, periods) {
     global.logger.logInfo('[CF TRANSFORMER] Starting transformation...');
     global.logger.logInfo(`[CF TRANSFORMER] Input items: ${dataMap.size}`);
+    global.logger.logInfo(`[CF TRANSFORMER] Periods: ${periods.length}`);
 
     const result = {
         sections: [],
-        operatingTotal: 0,
-        investingTotal: 0,
-        financingTotal: 0,
-        netChange: 0,
-        fxEffects: 0,
-        cashBeginning: 0,
-        cashEnding: 0
+        periods: periods || [{ label: 'Total', columnIndex: 1 }],
+        operatingTotal: new Array(periods?.length || 1).fill(0),
+        investingTotal: new Array(periods?.length || 1).fill(0),
+        financingTotal: new Array(periods?.length || 1).fill(0),
+        netChange: new Array(periods?.length || 1).fill(0),
+        fxEffects: new Array(periods?.length || 1).fill(0),
+        cashBeginning: new Array(periods?.length || 1).fill(0),
+        cashEnding: new Array(periods?.length || 1).fill(0)
     };
 
     // Organize data by sections
@@ -26,18 +22,19 @@ function transformToIFRSCashFlow(dataMap) {
     const investingItems = [];
     const financingItems = [];
 
-    // Track section item counts for logging
     let sectionCounts = { OPERATING: 0, INVESTING: 0, FINANCING: 0 };
 
     for (const [key, data] of dataMap.entries()) {
-        // Keep original item name - don't translate
-        const label = key;
+        // Keep original item name
+        const label = data.lineItem;
 
         const item = {
             label: label,
-            amount: data.total,
+            periodValues: data.periodValues,
+            total: data.total,
             flowType: data.total < 0 ? 'outflow' : 'inflow',
-            indent: 1
+            indent: 1,
+            subSection: data.subSection  // Preserve subsection for grouping
         };
 
         // Add sub-item markers for detail lines
@@ -46,33 +43,38 @@ function transformToIFRSCashFlow(dataMap) {
             item.isSubItem = true;
         }
 
-        // Route to appropriate section based on extracted section
-        // The extractor already determined the correct section from file structure
+        // Route to appropriate section
         if (data.section === 'OPERATING') {
             operatingItems.push(item);
-            result.operatingTotal += data.total;
+            for (let i = 0; i < data.periodValues.length; i++) {
+                result.operatingTotal[i] += data.periodValues[i];
+            }
             sectionCounts.OPERATING++;
         } else if (data.section === 'INVESTING') {
             investingItems.push(item);
-            result.investingTotal += data.total;
+            for (let i = 0; i < data.periodValues.length; i++) {
+                result.investingTotal[i] += data.periodValues[i];
+            }
             sectionCounts.INVESTING++;
         } else if (data.section === 'FINANCING') {
             financingItems.push(item);
-            result.financingTotal += data.total;
+            for (let i = 0; i < data.periodValues.length; i++) {
+                result.financingTotal[i] += data.periodValues[i];
+            }
             sectionCounts.FINANCING++;
         }
 
-        global.logger.logInfo(`[CF TRANSFORMER] "${key}" → ${data.section} (${data.total.toFixed(2)})`);
+        global.logger.logInfo(`[CF TRANSFORMER] "${data.lineItem}" → ${data.section}/${data.subSection || 'none'} (total: ${data.total.toFixed(2)})`);
     }
 
-    // Log section distribution
     global.logger.logInfo(`[CF TRANSFORMER] Section distribution: Operating=${sectionCounts.OPERATING}, Investing=${sectionCounts.INVESTING}, Financing=${sectionCounts.FINANCING}`);
 
-    // Add default items if sections are empty (should not happen with real data)
+    // Add default items if sections are empty
     if (operatingItems.length === 0) {
         operatingItems.push({
             label: 'No operating activities found',
-            amount: 0,
+            periodValues: new Array(result.periods.length).fill(0),
+            total: 0,
             flowType: 'inflow',
             indent: 1
         });
@@ -81,7 +83,8 @@ function transformToIFRSCashFlow(dataMap) {
     if (investingItems.length === 0) {
         investingItems.push({
             label: 'No investing activities found',
-            amount: 0,
+            periodValues: new Array(result.periods.length).fill(0),
+            total: 0,
             flowType: 'inflow',
             indent: 1
         });
@@ -90,7 +93,8 @@ function transformToIFRSCashFlow(dataMap) {
     if (financingItems.length === 0) {
         financingItems.push({
             label: 'No financing activities found',
-            amount: 0,
+            periodValues: new Array(result.periods.length).fill(0),
+            total: 0,
             flowType: 'inflow',
             indent: 1
         });
@@ -112,15 +116,16 @@ function transformToIFRSCashFlow(dataMap) {
         items: financingItems
     });
 
-    // Calculate totals
-    result.netChange = result.operatingTotal + result.investingTotal + result.financingTotal;
-    result.cashEnding = result.cashBeginning + result.netChange + result.fxEffects;
+    // Calculate totals for each period
+    for (let i = 0; i < result.periods.length; i++) {
+        result.netChange[i] = result.operatingTotal[i] + result.investingTotal[i] + result.financingTotal[i];
+        result.cashEnding[i] = result.cashBeginning[i] + result.netChange[i] + result.fxEffects[i];
+    }
 
     global.logger.logInfo('[CF TRANSFORMER] Transformation complete');
-    global.logger.logInfo(`[CF TRANSFORMER] Operating: ${result.operatingTotal.toFixed(2)}`);
-    global.logger.logInfo(`[CF TRANSFORMER] Investing: ${result.investingTotal.toFixed(2)}`);
-    global.logger.logInfo(`[CF TRANSFORMER] Financing: ${result.financingTotal.toFixed(2)}`);
-    global.logger.logInfo(`[CF TRANSFORMER] Net Change: ${result.netChange.toFixed(2)}`);
+    global.logger.logInfo(`[CF TRANSFORMER] Operating totals: ${result.operatingTotal.map(v => v.toFixed(2)).join(', ')}`);
+    global.logger.logInfo(`[CF TRANSFORMER] Investing totals: ${result.investingTotal.map(v => v.toFixed(2)).join(', ')}`);
+    global.logger.logInfo(`[CF TRANSFORMER] Financing totals: ${result.financingTotal.map(v => v.toFixed(2)).join(', ')}`);
 
     return result;
 }

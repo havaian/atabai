@@ -1,4 +1,4 @@
-// processors/cashFlow.js
+// processors/cashFlow.js - FIXED WITH PERIOD SUPPORT
 
 const { readExcelFile } = require('./readers/excelReader');
 const { extractCashFlowData } = require('./extractors/cashFlow');
@@ -38,18 +38,19 @@ async function processCashFlowTemplate(input) {
 
         const sheet = normalizedWorkbook.sheets[0];
 
-        // Step 2: Extract data from the sheet
+        // Step 2: Extract data from the sheet (now includes periods)
         const extracted = extractCashFlowData(sheet);
 
-        // Step 3: Transform to IFRS structure
-        const ifrsStructure = transformToIFRSCashFlow(extracted.dataMap);
+        // Step 3: Transform to IFRS structure (pass periods)
+        const ifrsStructure = transformToIFRSCashFlow(extracted.dataMap, extracted.periods);
 
-        // Step 4: Style the output (now async due to logo loading)
+        // Step 4: Style the output (now handles multiple period columns)
         const styledData = {
             title: 'STATEMENT OF CASH FLOWS (IFRS)',
             companyName: extracted.metadata.companyName,
             period: extracted.metadata.period || 'For the period ended',
             inn: extracted.metadata.inn,
+            periods: ifrsStructure.periods,  // Pass periods to styler
             sections: ifrsStructure.sections,
             operatingTotal: ifrsStructure.operatingTotal,
             investingTotal: ifrsStructure.investingTotal,

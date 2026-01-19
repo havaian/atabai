@@ -1,23 +1,18 @@
-// utils/stylers/cashFlow.js - PROFESSIONAL TEMPLATE VERSION
+// utils/stylers/cashFlow.js - FIXED WITH MULTI-PERIOD SUPPORT
 
 const ExcelJS = require('exceljs');
 const path = require('path');
 const fs = require('fs');
 
-/**
- * Professional Cash Flow Statement Styler
- * Creates multi-period format matching industry standards
- */
-
 async function styleCashFlowReport(data) {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Cash Flow Statement');
 
-    // Determine period columns - aggregate monthly data into periods
-    const periods = aggregateToPeriods(data);
+    // Use periods from data (extracted from file)
+    const periods = data.periods || [{ label: 'Total', columnIndex: 1 }];
     const periodCount = periods.length;
 
-    // Set column widths: Description column + period columns
+    // Set column widths
     const columns = [{ width: 50 }]; // Description column
     for (let i = 0; i < periodCount; i++) {
         columns.push({ width: 15 }); // Period columns
@@ -61,6 +56,8 @@ async function styleCashFlowReport(data) {
             companyRow.getCell(2).alignment = { horizontal: 'left', vertical: 'center' };
             companyRow.height = 30;
             currentRow += 2;
+        } else {
+            currentRow += 1;
         }
     } catch (error) {
         global.logger.logWarn('[CF STYLER] Could not load logo:', error.message);
@@ -105,7 +102,7 @@ async function styleCashFlowReport(data) {
     headerRow.getCell(1).fill = {
         type: 'pattern',
         pattern: 'solid',
-        fgColor: { argb: 'FF1F4E78' } // Professional blue
+        fgColor: { argb: 'FF1F4E78' }
     };
 
     // Period headers
@@ -150,12 +147,6 @@ async function styleCashFlowReport(data) {
     return workbook;
 }
 
-function aggregateToPeriods(data) {
-    // For now, create a single "Total" column
-    // TODO: In future, split into months/quarters/years based on data
-    return [{ label: 'Amount', data: null }];
-}
-
 function addSection(worksheet, startRow, sectionTitle, periods, sectionData, isOperating) {
     let currentRow = startRow;
 
@@ -167,62 +158,41 @@ function addSection(worksheet, startRow, sectionTitle, periods, sectionData, isO
     headerRow.getCell(1).fill = {
         type: 'pattern',
         pattern: 'solid',
-        fgColor: { argb: 'FF4472C4' } // Professional blue
+        fgColor: { argb: 'FF1F4E78' }
     };
 
-    // Fill header across all columns
-    for (let i = 2; i <= periods.length + 1; i++) {
-        headerRow.getCell(i).fill = {
+    for (let i = 0; i < periods.length; i++) {
+        headerRow.getCell(i + 2).fill = {
             type: 'pattern',
             pattern: 'solid',
-            fgColor: { argb: 'FF4472C4' }
+            fgColor: { argb: 'FF1F4E78' }
         };
     }
     headerRow.height = 20;
     currentRow++;
 
-    // Line items
+    // Section items
     if (sectionData && sectionData.items) {
         for (const item of sectionData.items) {
-            const row = worksheet.getRow(currentRow);
+            const itemRow = worksheet.getRow(currentRow);
 
-            // Line item description with indentation
-            const indent = item.indent || 1;
-            row.getCell(1).value = item.label;
-            row.getCell(1).font = {
-                name: 'Arial',
-                size: 10,
-                bold: item.isGroupHeader || false
-            };
-            row.getCell(1).alignment = {
-                horizontal: 'left',
-                vertical: 'center',
-                indent: indent + 1
-            };
+            // Item label
+            itemRow.getCell(1).value = item.label;
+            itemRow.getCell(1).font = { name: 'Arial', size: 10 };
+            itemRow.getCell(1).alignment = { horizontal: 'left', vertical: 'center', indent: item.indent || 1 };
 
-            // Amount
-            const amountCell = row.getCell(2);
-            amountCell.value = item.amount;
-            amountCell.numFmt = '#,##0.00';
-            amountCell.alignment = { horizontal: 'right', vertical: 'center' };
+            // Period values
+            for (let i = 0; i < periods.length; i++) {
+                const cell = itemRow.getCell(i + 2);
+                const value = item.periodValues ? item.periodValues[i] : 0;
+                cell.value = value;
+                cell.numFmt = '#,##0.00';
+                cell.alignment = { horizontal: 'right', vertical: 'center' };
 
-            // Color coding for inflows/outflows
-            if (item.amount < 0) {
-                amountCell.font = { name: 'Arial', size: 10, color: { argb: 'FFFF0000' } }; // Red for outflows
-            } else if (item.amount > 0 && !item.isGroupHeader) {
-                amountCell.font = { name: 'Arial', size: 10, color: { argb: 'FF008000' } }; // Green for inflows
-            } else {
-                amountCell.font = { name: 'Arial', size: 10 };
-            }
-
-            // Borders
-            for (let i = 1; i <= periods.length + 1; i++) {
-                row.getCell(i).border = {
-                    top: { style: 'thin', color: { argb: 'FFD0D0D0' } },
-                    left: { style: 'thin', color: { argb: 'FFD0D0D0' } },
-                    bottom: { style: 'thin', color: { argb: 'FFD0D0D0' } },
-                    right: { style: 'thin', color: { argb: 'FFD0D0D0' } }
-                };
+                // Light gray background for negative values
+                if (value < 0) {
+                    cell.font = { name: 'Arial', size: 10, color: { argb: 'FFCC0000' } };
+                }
             }
 
             currentRow++;
@@ -232,35 +202,35 @@ function addSection(worksheet, startRow, sectionTitle, periods, sectionData, isO
     return currentRow;
 }
 
-function addSectionTotal(worksheet, row, label, periods, total) {
+function addSectionTotal(worksheet, row, label, periods, totalsArray) {
     const totalRow = worksheet.getRow(row);
 
+    // Total label
     totalRow.getCell(1).value = label;
-    totalRow.getCell(1).font = { name: 'Arial', size: 10, bold: true };
+    totalRow.getCell(1).font = { name: 'Arial', size: 11, bold: true };
     totalRow.getCell(1).alignment = { horizontal: 'left', vertical: 'center', indent: 1 };
     totalRow.getCell(1).fill = {
         type: 'pattern',
         pattern: 'solid',
-        fgColor: { argb: 'FFE7E6E6' }
+        fgColor: { argb: 'FFD9E1F2' }
     };
 
-    totalRow.getCell(2).value = total;
-    totalRow.getCell(2).numFmt = '#,##0.00';
-    totalRow.getCell(2).font = { name: 'Arial', size: 10, bold: true };
-    totalRow.getCell(2).alignment = { horizontal: 'right', vertical: 'center' };
-    totalRow.getCell(2).fill = {
-        type: 'pattern',
-        pattern: 'solid',
-        fgColor: { argb: 'FFE7E6E6' }
-    };
-
-    // Borders
-    for (let i = 1; i <= periods.length + 1; i++) {
-        totalRow.getCell(i).border = {
-            top: { style: 'medium', color: { argb: 'FF000000' } },
-            left: { style: 'thin', color: { argb: 'FF000000' } },
-            bottom: { style: 'double', color: { argb: 'FF000000' } },
-            right: { style: 'thin', color: { argb: 'FF000000' } }
+    // Total values for each period
+    for (let i = 0; i < periods.length; i++) {
+        const cell = totalRow.getCell(i + 2);
+        const value = totalsArray[i] || 0;
+        cell.value = value;
+        cell.numFmt = '#,##0.00';
+        cell.font = { name: 'Arial', size: 11, bold: true };
+        cell.alignment = { horizontal: 'right', vertical: 'center' };
+        cell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FFD9E1F2' }
+        };
+        cell.border = {
+            top: { style: 'thin' },
+            bottom: { style: 'medium' }
         };
     }
 
@@ -271,35 +241,50 @@ function addSectionTotal(worksheet, row, label, periods, total) {
 function addReconciliation(worksheet, startRow, periods, data) {
     let currentRow = startRow;
 
-    // Net increase line
+    // Net change
     const netRow = worksheet.getRow(currentRow);
     netRow.getCell(1).value = 'Net increase/(decrease) in cash and cash equivalents';
-    netRow.getCell(1).font = { name: 'Arial', size: 10, bold: true };
+    netRow.getCell(1).font = { name: 'Arial', size: 11, bold: true };
     netRow.getCell(1).alignment = { horizontal: 'left', vertical: 'center', indent: 1 };
+    netRow.getCell(1).fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FFFCE4D6' }
+    };
 
-    netRow.getCell(2).value = data.netChange;
-    netRow.getCell(2).numFmt = '#,##0.00';
-    netRow.getCell(2).font = { name: 'Arial', size: 10, bold: true };
-    netRow.getCell(2).alignment = { horizontal: 'right', vertical: 'center' };
-
-    for (let i = 1; i <= periods.length + 1; i++) {
-        netRow.getCell(i).border = {
-            top: { style: 'thin' },
+    for (let i = 0; i < periods.length; i++) {
+        const cell = netRow.getCell(i + 2);
+        cell.value = data.netChange[i] || 0;
+        cell.numFmt = '#,##0.00';
+        cell.font = { name: 'Arial', size: 11, bold: true };
+        cell.alignment = { horizontal: 'right', vertical: 'center' };
+        cell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FFFCE4D6' }
+        };
+        cell.border = {
+            top: { style: 'medium' },
             bottom: { style: 'thin' }
         };
     }
+    netRow.height = 22;
     currentRow++;
 
-    // FX effects (if non-zero)
-    if (Math.abs(data.fxEffects) > 0.01) {
+    // FX effects (if applicable)
+    const hasFxEffects = data.fxEffects && data.fxEffects.some(v => Math.abs(v) > 0.01);
+    if (hasFxEffects) {
         const fxRow = worksheet.getRow(currentRow);
         fxRow.getCell(1).value = 'Effect of exchange rate changes';
         fxRow.getCell(1).font = { name: 'Arial', size: 10 };
         fxRow.getCell(1).alignment = { horizontal: 'left', vertical: 'center', indent: 1 };
 
-        fxRow.getCell(2).value = data.fxEffects;
-        fxRow.getCell(2).numFmt = '#,##0.00';
-        fxRow.getCell(2).alignment = { horizontal: 'right', vertical: 'center' };
+        for (let i = 0; i < periods.length; i++) {
+            const cell = fxRow.getCell(i + 2);
+            cell.value = data.fxEffects[i] || 0;
+            cell.numFmt = '#,##0.00';
+            cell.alignment = { horizontal: 'right', vertical: 'center' };
+        }
         currentRow++;
     }
 
@@ -309,35 +294,37 @@ function addReconciliation(worksheet, startRow, periods, data) {
     beginRow.getCell(1).font = { name: 'Arial', size: 10 };
     beginRow.getCell(1).alignment = { horizontal: 'left', vertical: 'center', indent: 1 };
 
-    beginRow.getCell(2).value = data.cashBeginning;
-    beginRow.getCell(2).numFmt = '#,##0.00';
-    beginRow.getCell(2).alignment = { horizontal: 'right', vertical: 'center' };
+    for (let i = 0; i < periods.length; i++) {
+        const cell = beginRow.getCell(i + 2);
+        cell.value = data.cashBeginning[i] || 0;
+        cell.numFmt = '#,##0.00';
+        cell.alignment = { horizontal: 'right', vertical: 'center' };
+    }
     currentRow++;
 
     // Ending balance
     const endRow = worksheet.getRow(currentRow);
     endRow.getCell(1).value = 'Cash and cash equivalents at end of period';
-    endRow.getCell(1).font = { name: 'Arial', size: 11, bold: true };
+    endRow.getCell(1).font = { name: 'Arial', size: 11, bold: true, color: { argb: 'FFFFFFFF' } };
     endRow.getCell(1).alignment = { horizontal: 'left', vertical: 'center', indent: 1 };
     endRow.getCell(1).fill = {
         type: 'pattern',
         pattern: 'solid',
         fgColor: { argb: 'FF4472C4' }
     };
-    endRow.getCell(1).font.color = { argb: 'FFFFFFFF' };
 
-    endRow.getCell(2).value = data.cashEnding;
-    endRow.getCell(2).numFmt = '#,##0.00';
-    endRow.getCell(2).font = { name: 'Arial', size: 11, bold: true, color: { argb: 'FFFFFFFF' } };
-    endRow.getCell(2).alignment = { horizontal: 'right', vertical: 'center' };
-    endRow.getCell(2).fill = {
-        type: 'pattern',
-        pattern: 'solid',
-        fgColor: { argb: 'FF4472C4' }
-    };
-
-    for (let i = 1; i <= periods.length + 1; i++) {
-        endRow.getCell(i).border = {
+    for (let i = 0; i < periods.length; i++) {
+        const cell = endRow.getCell(i + 2);
+        cell.value = data.cashEnding[i] || 0;
+        cell.numFmt = '#,##0.00';
+        cell.font = { name: 'Arial', size: 11, bold: true, color: { argb: 'FFFFFFFF' } };
+        cell.alignment = { horizontal: 'right', vertical: 'center' };
+        cell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FF4472C4' }
+        };
+        cell.border = {
             top: { style: 'medium' },
             bottom: { style: 'double' }
         };

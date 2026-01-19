@@ -1,4 +1,4 @@
-// extractors/cashFlow.js - STRUCTURE-BASED VERSION
+// extractors/cashFlow.js - FIXED VERSION WITH PERIOD SUPPORT
 
 function extractCashFlowData(sheet) {
     global.logger.logInfo('[CF EXTRACTOR] Starting extraction...');
@@ -18,6 +18,7 @@ function extractCashFlowData(sheet) {
             inn: ''
         },
         dataMap: new Map(),
+        periods: [],  // Store period headers (months/years)
         sections: []
     };
 
@@ -70,7 +71,7 @@ function extractCashFlowData(sheet) {
 
     global.logger.logInfo(`[CF EXTRACTOR] Total rows: ${rowCount}`);
 
-    // Find where data starts
+    // Find where data starts and extract period headers
     let dataStartRow = -1;
     for (let i = 0; i < Math.min(10, rowCount); i++) {
         const cellA = getCellValue(i, 0);
@@ -78,9 +79,21 @@ function extractCashFlowData(sheet) {
 
         const cellStr = String(cellA).trim();
 
+        // Check if this is the header row with period labels
         if (cellStr === 'CF') {
+            // Extract period headers from columns B onwards
+            for (let col = 1; col < 30; col++) {
+                const periodHeader = getCellValue(i, col);
+                if (periodHeader === null || periodHeader === undefined) break;
+
+                result.periods.push({
+                    label: formatPeriodLabel(periodHeader),
+                    columnIndex: col
+                });
+            }
+
             dataStartRow = i + 1;
-            global.logger.logInfo(`[CF EXTRACTOR] Found "CF" marker at row ${i}, data starts at row ${dataStartRow}`);
+            global.logger.logInfo(`[CF EXTRACTOR] Found "CF" marker at row ${i}, extracted ${result.periods.length} periods`);
             break;
         }
 
@@ -96,10 +109,19 @@ function extractCashFlowData(sheet) {
         dataStartRow = 3;
     }
 
+    // If no periods found, create a default "Total" period
+    if (result.periods.length === 0) {
+        global.logger.logInfo('[CF EXTRACTOR] No period headers found, using single Total column');
+        result.periods.push({ label: 'Total', columnIndex: 1 });
+    }
+
+    global.logger.logInfo(`[CF EXTRACTOR] Periods: ${result.periods.map(p => p.label).join(', ')}`);
+
     // Process data rows
     let currentSection = null;
     let currentSubSection = null;
     let itemsExtracted = 0;
+    let uniqueKeyCounter = 0;
 
     for (let i = dataStartRow; i < rowCount; i++) {
         const lineItem = getCellValue(i, 0);
@@ -108,13 +130,13 @@ function extractCashFlowData(sheet) {
         const lineItemStr = String(lineItem).trim();
         if (!lineItemStr || lineItemStr.length === 0) continue;
 
-        // STOP at FCF - support Russian, Uzbek, English
+        // STOP at FCF
         if (isFCFMarker(lineItemStr)) {
             global.logger.logInfo(`[CF EXTRACTOR] Row ${i}: Found FCF marker "${lineItemStr}" - stopping extraction`);
             break;
         }
 
-        // Detect main sections - support Russian and Uzbek
+        // Detect main sections
         const detectedSection = detectSection(lineItemStr);
         if (detectedSection) {
             currentSection = detectedSection;
@@ -123,7 +145,7 @@ function extractCashFlowData(sheet) {
             continue;
         }
 
-        // Detect sub-sections (inflow/outflow) - support Russian and Uzbek
+        // Detect sub-sections (inflow/outflow)
         const detectedSubSection = detectSubSection(lineItemStr);
         if (detectedSubSection) {
             currentSubSection = detectedSubSection;
@@ -131,42 +153,38 @@ function extractCashFlowData(sheet) {
             continue;
         }
 
-        // Extract monthly values from columns B onwards (index 1+)
-        const values = [];
+        // Extract values for each period
+        const periodValues = [];
         let totalValue = 0;
-        let nonZeroCount = 0;
 
-        for (let col = 1; col < 30; col++) {
-            const cellValue = getCellValue(i, col);
-
-            if (cellValue === null || cellValue === undefined) {
-                if (values.length > 0) break;
-                continue;
-            }
-
+        for (const period of result.periods) {
+            const cellValue = getCellValue(i, period.columnIndex);
             const numValue = Number(cellValue) || 0;
-            values.push(numValue);
+            periodValues.push(numValue);
             totalValue += numValue;
-            if (Math.abs(numValue) > 0.01) nonZeroCount++;
         }
 
-        // Only store if we extracted some values and have a section
-        if (values.length > 0 && currentSection) {
+        // Only store if we have a section and non-zero data
+        if (currentSection) {
+            // Create unique key: section_subsection_lineItem_counter
+            // This prevents duplicates from overwriting each other
+            const uniqueKey = `${currentSection}_${currentSubSection || 'MAIN'}_${lineItemStr}_${uniqueKeyCounter++}`;
+
             const dataEntry = {
                 lineItem: lineItemStr,
                 section: currentSection,
                 subSection: currentSubSection,
-                values: values,
+                periodValues: periodValues,
                 total: totalValue,
-                isInflow: totalValue >= 0,
-                isOutflow: totalValue < 0,
+                isInflow: currentSubSection === 'INFLOW' || totalValue >= 0,
+                isOutflow: currentSubSection === 'OUTFLOW' || totalValue < 0,
                 row: i
             };
 
-            result.dataMap.set(lineItemStr, dataEntry);
+            result.dataMap.set(uniqueKey, dataEntry);
             itemsExtracted++;
 
-            global.logger.logInfo(`[CF EXTRACTOR] Row ${i}: "${lineItemStr}" = ${totalValue.toFixed(2)} (Section: ${currentSection}, ${values.length} months)`);
+            global.logger.logInfo(`[CF EXTRACTOR] Row ${i}: "${lineItemStr}" (${currentSection}/${currentSubSection || 'none'}) = ${totalValue.toFixed(2)}`);
         }
     }
 
@@ -180,20 +198,44 @@ function extractCashFlowData(sheet) {
 }
 
 /**
+ * Format period label from date or string
+ */
+function formatPeriodLabel(value) {
+    if (!value) return 'Total';
+
+    // If it's a date object
+    if (value instanceof Date) {
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        return `${months[value.getMonth()]} ${value.getFullYear()}`;
+    }
+
+    // If it's a string date
+    const dateStr = String(value);
+    if (dateStr.includes('2024') || dateStr.includes('2025') || dateStr.includes('2026')) {
+        // Try to parse as date
+        try {
+            const date = new Date(dateStr);
+            if (!isNaN(date.getTime())) {
+                const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                return `${months[date.getMonth()]} ${date.getFullYear()}`;
+            }
+        } catch (e) {
+            // Not a valid date
+        }
+    }
+
+    // Return as-is for budget labels or other text
+    return String(value);
+}
+
+/**
  * Detect if line is FCF marker - supports Russian, Uzbek, English
  */
 function isFCFMarker(text) {
     const lower = text.toLowerCase().trim();
-
-    // English
     if (lower === 'fcf' || lower === 'free cash flow') return true;
-
-    // Russian
     if (lower.includes('свободный денежный поток')) return true;
-
-    // Uzbek
     if (lower.includes('erkin pul oqimi')) return true;
-
     return false;
 }
 
@@ -203,23 +245,14 @@ function isFCFMarker(text) {
 function detectSection(text) {
     const lower = text.toLowerCase();
 
-    // Operating activities
-    // Russian: операционная деятельность, операционной деятельности
-    // Uzbek: operatsion faoliyat, operatsion faoliyati
     if (lower.includes('операцион') || lower.includes('operatsion')) {
         return 'OPERATING';
     }
 
-    // Investing activities
-    // Russian: инвестиционная деятельность, инвестиционной деятельности
-    // Uzbek: investitsion faoliyat, investitsion faoliyati
     if (lower.includes('инвестицион') || lower.includes('investitsion')) {
         return 'INVESTING';
     }
 
-    // Financing activities
-    // Russian: финансовая деятельность, финансовой деятельности
-    // Uzbek: moliyaviy faoliyat, moliyaviy faoliyati
     if (lower.includes('финансов') || lower.includes('moliyaviy')) {
         return 'FINANCING';
     }
@@ -233,16 +266,10 @@ function detectSection(text) {
 function detectSubSection(text) {
     const lower = text.toLowerCase();
 
-    // Inflow
-    // Russian: приток, притоки
-    // Uzbek: kiruvchi, tushum
     if (lower.includes('приток') || lower.includes('kiruvchi') || lower.includes('tushum')) {
         return 'INFLOW';
     }
 
-    // Outflow
-    // Russian: отток, оттоки
-    // Uzbek: chiquvchi, xarajat
     if (lower.includes('отток') || lower.includes('chiquvchi') || lower.includes('xarajat')) {
         return 'OUTFLOW';
     }
