@@ -101,8 +101,8 @@ async function styleCashFlowReport(data) {
         yearRow.getCell(1).value = '';
 
         for (const group of yearGroups) {
-            const startCol = group.startCol + 1;
-            const endCol = group.endCol + 1;
+            const startCol = group.startCol + 2;  // +2: column 1 is description, periods start at column 2
+            const endCol = group.endCol + 2;
 
             yearRow.getCell(startCol).value = group.year;
             yearRow.getCell(startCol).font = { name: 'Arial', size: 11, bold: true, color: { argb: 'FFFFFFFF' } };
