@@ -216,35 +216,46 @@ async function styleCashFlowReport(data) {
 function groupPeriodsByYear(periods) {
     const groups = [];
     let currentGroup = null;
-    let lastKnownYear = 'Total'; // Fallback if first column has no year
+    let fallbackYear = 'Total';
 
     for (let i = 0; i < periods.length; i++) {
         const label = periods[i].label;
-        let year = extractYear(label);
+        // Extract year from the combined label "Jan 2024" -> "2024"
+        let year = extractYear(label) || fallbackYear;
 
-        // If this specific cell has no year (like "янв"), 
-        // use the year from the previous columns.
-        if (!year) {
-            year = lastKnownYear;
-        } else {
-            lastKnownYear = year;
+        // Update fallback if we found a real year
+        if (year !== 'Total' && year !== 'Period') {
+            fallbackYear = year;
         }
 
         if (!currentGroup || year !== currentGroup.year) {
-            if (currentGroup) groups.push(currentGroup);
-            
+            if (currentGroup) {
+                groups.push(currentGroup);
+            }
             currentGroup = {
                 year: year,
                 startCol: i + 1,
                 endCol: i + 1
             };
         } else {
-            currentGroup.endCol = i + 1;
+            // Safety check: only extend if currentGroup was successfully created
+            if (currentGroup) {
+                currentGroup.endCol = i + 1;
+            }
         }
     }
 
-    if (currentGroup) groups.push(currentGroup);
+    if (currentGroup) {
+        groups.push(currentGroup);
+    }
     return groups;
+}
+
+function extractYear(label) {
+    if (!label) return null;
+    const str = String(label);
+    const match = str.match(/20\d{2}/);
+    return match ? match[0] : null;
 }
 
 /**

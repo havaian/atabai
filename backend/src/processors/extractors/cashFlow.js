@@ -111,13 +111,22 @@ function extractCashFlowData(sheet) {
             const headerStr = String(periodHeader).trim();
             if (headerStr.length === 0) break;
 
+            // NEW: Look one row UP to find the Year if the current row is a Month
+            let yearLabel = '';
+            if (periodHeaderRow > 0) {
+                const potentialYear = getCellValue(periodHeaderRow - 1, col);
+                const extractedYear = extractYear(potentialYear); // Use the helper below
+                if (extractedYear) yearLabel = extractedYear;
+            }
+
+            // Combine Month + Year for a unique, descriptive label
+            const fullLabel = yearLabel ? `${headerStr} ${yearLabel}` : headerStr;
+
             result.periods.push({
-                label: formatPeriodLabel(periodHeader),
+                label: formatPeriodLabel(fullLabel),
                 columnIndex: col
             });
         }
-
-        global.logger.logInfo(`[CF EXTRACTOR] Extracted ${result.periods.length} periods from row ${periodHeaderRow}`);
     }
 
     // Find where data starts
