@@ -215,27 +215,38 @@ async function styleCashFlowReport(data) {
  */
 function groupPeriodsByYear(periods) {
     const groups = [];
-    let currentYear = null;
+    let currentYear = undefined; // Use undefined for initial state
     let currentGroup = null;
 
     for (let i = 0; i < periods.length; i++) {
         const label = periods[i].label;
-        const year = extractYear(label);
+        const year = extractYear(label) || 'Total'; // Default to 'Total' if no year found
 
         if (year !== currentYear) {
-            // Start new group
+            // Push previous group if it exists
             if (currentGroup) {
                 groups.push(currentGroup);
             }
+            
+            // Start new group
             currentYear = year;
             currentGroup = {
-                year: year || 'Total',
-                startCol: i + 1,  // +1 because column 0 is description
+                year: year,
+                startCol: i + 1,
                 endCol: i + 1
             };
         } else {
-            // Extend current group
-            currentGroup.endCol = i + 1;
+            // Extend current group - added safety check
+            if (currentGroup) {
+                currentGroup.endCol = i + 1;
+            } else {
+                // Fallback initialization if something went wrong
+                currentGroup = {
+                    year: year,
+                    startCol: i + 1,
+                    endCol: i + 1
+                };
+            }
         }
     }
 
