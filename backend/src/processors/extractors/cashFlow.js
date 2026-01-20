@@ -1,4 +1,4 @@
-// extractors/cashFlow.js - NO HARDCODED LIMITS
+// extractors/cashFlow.js - PRIORITIZE MONTHS OVER YEARS
 
 function extractCashFlowData(sheet) {
     global.logger.logInfo('[CF EXTRACTOR] Starting extraction...');
@@ -72,44 +72,63 @@ function extractCashFlowData(sheet) {
 
     global.logger.logInfo(`[CF EXTRACTOR] Total rows: ${rowCount}`);
 
-    // Find period header row - search until we find it, NO HARDCODED LIMIT
+    // FIXED: Find period header row - PRIORITIZE MONTHS over years
     let periodHeaderRow = -1;
     let dataStartRow = -1;
 
+    // First pass: Look for MONTHS specifically
     for (let i = 0; i < rowCount; i++) {
         const cellB = getCellValue(i, 1);
         const cellC = getCellValue(i, 2);
 
-        // Check if this row has period headers
-        if (isPeriodHeaderRow(cellB, cellC)) {
+        if (hasMonthNames(cellB, cellC)) {
             periodHeaderRow = i;
-            global.logger.logInfo(`[CF EXTRACTOR] Found period headers at row ${i}`);
+            global.logger.logInfo(`[CF EXTRACTOR] Found MONTH headers at row ${i}`);
+            break;
+        }
+    }
 
-            // Extract ALL periods from this row
-            for (let col = 1; col < 100; col++) {  // Up to 100 columns (no arbitrary limit)
-                const periodHeader = getCellValue(i, col);
-                if (periodHeader === null || periodHeader === undefined) break;
+    // Second pass: If no months found, look for years/quarters
+    if (periodHeaderRow === -1) {
+        for (let i = 0; i < rowCount; i++) {
+            const cellB = getCellValue(i, 1);
+            const cellC = getCellValue(i, 2);
 
-                const headerStr = String(periodHeader).trim();
-                if (headerStr.length === 0) break;
-
-                result.periods.push({
-                    label: formatPeriodLabel(periodHeader),
-                    columnIndex: col
-                });
+            if (hasYearsOrQuarters(cellB, cellC)) {
+                periodHeaderRow = i;
+                global.logger.logInfo(`[CF EXTRACTOR] Found YEAR/QUARTER headers at row ${i}`);
+                break;
             }
+        }
+    }
 
-            global.logger.logInfo(`[CF EXTRACTOR] Extracted ${result.periods.length} periods from row ${i}`);
-            break;  // Found it, stop searching
+    // Extract periods from the found row
+    if (periodHeaderRow !== -1) {
+        for (let col = 1; col < 100; col++) {
+            const periodHeader = getCellValue(periodHeaderRow, col);
+            if (periodHeader === null || periodHeader === undefined) break;
+
+            const headerStr = String(periodHeader).trim();
+            if (headerStr.length === 0) break;
+
+            result.periods.push({
+                label: formatPeriodLabel(periodHeader),
+                columnIndex: col
+            });
         }
 
-        // Also look for where data starts (first section header)
+        global.logger.logInfo(`[CF EXTRACTOR] Extracted ${result.periods.length} periods from row ${periodHeaderRow}`);
+    }
+
+    // Find where data starts
+    for (let i = 0; i < rowCount; i++) {
         const cellA = getCellValue(i, 0);
         if (cellA) {
             const cellStr = String(cellA).trim();
-            if (isSectionHeader(cellStr, 'OPERATING') && dataStartRow === -1) {
+            if (isSectionHeader(cellStr, 'OPERATING')) {
                 dataStartRow = i;
                 global.logger.logInfo(`[CF EXTRACTOR] Found data start at row ${i}`);
+                break;
             }
         }
     }
@@ -144,13 +163,13 @@ function extractCashFlowData(sheet) {
 
         // Skip "CF" row
         if (lineItemStr === 'CF') {
-            global.logger.logInfo(`[CF EXTRACTOR] Row ${i}: Skipping "CF" marker row (subtotal)`);
+            global.logger.logInfo(`[CF EXTRACTOR] Row ${i}: Skipping "CF" marker`);
             continue;
         }
 
         // Check for FCF
         if (isFCFMarker(lineItemStr)) {
-            global.logger.logInfo(`[CF EXTRACTOR] Row ${i}: Found FCF marker "${lineItemStr}"`);
+            global.logger.logInfo(`[CF EXTRACTOR] Row ${i}: Found FCF "${lineItemStr}"`);
             inReconciliation = true;
 
             const periodValues = [];
@@ -246,9 +265,9 @@ function extractCashFlowData(sheet) {
 }
 
 /**
- * Check if a row contains period headers
+ * Check if row contains MONTH names (high priority)
  */
-function isPeriodHeaderRow(cellB, cellC) {
+function hasMonthNames(cellB, cellC) {
     if (!cellB) return false;
 
     const b = String(cellB).toLowerCase().trim();
@@ -266,13 +285,27 @@ function isPeriodHeaderRow(cellB, cellC) {
     const uzbekMonths = ['yan', 'fev', 'mar', 'apr', 'may', 'iyun', 'iyul', 'avg', 'sen', 'okt', 'noy', 'dek'];
     if (uzbekMonths.some(month => b.includes(month))) return true;
 
-    // Years or quarters
-    if (b.match(/20\d{2}/) || b.match(/q[1-4]/i) || b.includes('квартал')) return true;
-
-    // Validate with next cell
+    // Validate with next cell (should also be a month)
     if (c && (russianMonths.some(m => c.includes(m)) || englishMonths.some(m => c.includes(m)) || uzbekMonths.some(m => c.includes(m)))) {
         return true;
     }
+
+    return false;
+}
+
+/**
+ * Check if row contains YEARS or QUARTERS (lower priority)
+ */
+function hasYearsOrQuarters(cellB, cellC) {
+    if (!cellB) return false;
+
+    const b = String(cellB).toLowerCase().trim();
+
+    // Years
+    if (b.match(/20\d{2}/)) return true;
+
+    // Quarters
+    if (b.match(/q[1-4]/i) || b.includes('квартал')) return true;
 
     return false;
 }
