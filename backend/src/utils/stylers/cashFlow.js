@@ -216,39 +216,34 @@ async function styleCashFlowReport(data) {
 function groupPeriodsByYear(periods) {
     const groups = [];
     let currentGroup = null;
+    let lastKnownYear = 'Total'; // Fallback if first column has no year
 
     for (let i = 0; i < periods.length; i++) {
         const label = periods[i].label;
         let year = extractYear(label);
 
-        // If extractYear couldn't find a year, we look at the neighbors
-        // or default to a generic "Period" label to prevent the crash
-        if (!year) year = 'Period'; 
+        // If this specific cell has no year (like "янв"), 
+        // use the year from the previous columns.
+        if (!year) {
+            year = lastKnownYear;
+        } else {
+            lastKnownYear = year;
+        }
 
         if (!currentGroup || year !== currentGroup.year) {
-            // If the current label is "Total" but the group is already active,
-            // we might want to check if we should actually close it.
-            // For your case: if we see a year like "2024", we start it.
+            if (currentGroup) groups.push(currentGroup);
             
-            if (currentGroup) {
-                groups.push(currentGroup);
-            }
-
             currentGroup = {
                 year: year,
                 startCol: i + 1,
                 endCol: i + 1
             };
         } else {
-            // Same year/label, just extend the merge range
             currentGroup.endCol = i + 1;
         }
     }
 
-    if (currentGroup) {
-        groups.push(currentGroup);
-    }
-
+    if (currentGroup) groups.push(currentGroup);
     return groups;
 }
 
@@ -257,16 +252,16 @@ function groupPeriodsByYear(periods) {
  */
 function extractYear(label) {
     if (!label) return null;
-
     const str = String(label).trim();
 
-    // 1. Look for 4-digit year (e.g., "2024" or "Итого 2024")
+    // Matches "2024", "Итого 2024", or "Total 2024"
     const match = str.match(/20\d{2}/);
     if (match) return match[0];
 
-    // 2. If it's just "Total" or "Итого", we return a placeholder 
-    // The grouper will then look at the sequence to decide if it's a new group
-    if (str.toLowerCase() === 'total' || str.toLowerCase() === 'итого') {
+    // Explicitly handle "Total" or "Period" as a group name if no digits found
+    if (str.toLowerCase().includes('total') || 
+        str.toLowerCase().includes('итого') || 
+        str.toLowerCase() === 'period') {
         return 'Total';
     }
 
