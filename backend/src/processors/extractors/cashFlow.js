@@ -1,4 +1,4 @@
-// extractors/cashFlow.js - FIXED VERSION WITH PERIOD SUPPORT
+// extractors/cashFlow.js - FINAL WITH CF SKIP AND FCF CAPTURE
 
 function extractCashFlowData(sheet) {
     global.logger.logInfo('[CF EXTRACTOR] Starting extraction...');
@@ -18,7 +18,8 @@ function extractCashFlowData(sheet) {
             inn: ''
         },
         dataMap: new Map(),
-        periods: [],  // Store period headers (months/years)
+        periods: [],
+        reconciliationItems: new Map(),  // For FCF, metal flows, etc.
         sections: []
     };
 
@@ -79,9 +80,8 @@ function extractCashFlowData(sheet) {
 
         const cellStr = String(cellA).trim();
 
-        // Check if this is the header row with period labels
         if (cellStr === 'CF') {
-            // Extract period headers from columns B onwards
+            // Extract period headers
             for (let col = 1; col < 30; col++) {
                 const periodHeader = getCellValue(i, col);
                 if (periodHeader === null || periodHeader === undefined) break;
@@ -99,7 +99,7 @@ function extractCashFlowData(sheet) {
 
         if (isSectionHeader(cellStr, 'OPERATING')) {
             dataStartRow = i;
-            global.logger.logInfo(`[CF EXTRACTOR] Found Operating section at row ${i}, data starts at row ${dataStartRow}`);
+            global.logger.logInfo(`[CF EXTRACTOR] Found Operating section at row ${i}`);
             break;
         }
     }
@@ -109,7 +109,6 @@ function extractCashFlowData(sheet) {
         dataStartRow = 3;
     }
 
-    // If no periods found, create a default "Total" period
     if (result.periods.length === 0) {
         global.logger.logInfo('[CF EXTRACTOR] No period headers found, using single Total column');
         result.periods.push({ label: 'Total', columnIndex: 1 });
@@ -122,6 +121,7 @@ function extractCashFlowData(sheet) {
     let currentSubSection = null;
     let itemsExtracted = 0;
     let uniqueKeyCounter = 0;
+    let inReconciliation = false;  // After we hit FCF, we're in reconciliation zone
 
     for (let i = dataStartRow; i < rowCount; i++) {
         const lineItem = getCellValue(i, 0);
@@ -130,9 +130,58 @@ function extractCashFlowData(sheet) {
         const lineItemStr = String(lineItem).trim();
         if (!lineItemStr || lineItemStr.length === 0) continue;
 
-        // STOP at FCF
+        // SKIP "CF" row if it appears as data (it's a calculated subtotal)
+        if (lineItemStr === 'CF') {
+            global.logger.logInfo(`[CF EXTRACTOR] Row ${i}: Skipping "CF" marker row (subtotal)`);
+            continue;
+        }
+
+        // CHECK for FCF - this marks start of reconciliation section
         if (isFCFMarker(lineItemStr)) {
-            global.logger.logInfo(`[CF EXTRACTOR] Row ${i}: Found FCF marker "${lineItemStr}" - stopping extraction`);
+            global.logger.logInfo(`[CF EXTRACTOR] Row ${i}: Found FCF marker "${lineItemStr}" - switching to reconciliation mode`);
+            inReconciliation = true;
+
+            // Extract FCF values
+            const periodValues = [];
+            for (const period of result.periods) {
+                const cellValue = getCellValue(i, period.columnIndex);
+                const numValue = Number(cellValue) || 0;
+                periodValues.push(numValue);
+            }
+
+            result.reconciliationItems.set('FCF', {
+                lineItem: lineItemStr,
+                periodValues: periodValues,
+                total: periodValues.reduce((sum, val) => sum + val, 0),
+                type: 'FCF'
+            });
+
+            continue;  // Continue processing for reconciliation items
+        }
+
+        // If we're in reconciliation mode, check for reconciliation items
+        if (inReconciliation) {
+            if (isReconciliationItem(lineItemStr)) {
+                const periodValues = [];
+                for (const period of result.periods) {
+                    const cellValue = getCellValue(i, period.columnIndex);
+                    const numValue = Number(cellValue) || 0;
+                    periodValues.push(numValue);
+                }
+
+                const reconcilKey = `RECONCIL_${uniqueKeyCounter++}`;
+                result.reconciliationItems.set(reconcilKey, {
+                    lineItem: lineItemStr,
+                    periodValues: periodValues,
+                    total: periodValues.reduce((sum, val) => sum + val, 0),
+                    type: 'ADJUSTMENT'
+                });
+
+                global.logger.logInfo(`[CF EXTRACTOR] Row ${i}: Reconciliation item "${lineItemStr}"`);
+                continue;
+            }
+            // If it's not a recognized reconciliation item, stop processing
+            global.logger.logInfo(`[CF EXTRACTOR] Row ${i}: End of reconciliation section`);
             break;
         }
 
@@ -145,7 +194,7 @@ function extractCashFlowData(sheet) {
             continue;
         }
 
-        // Detect sub-sections (inflow/outflow)
+        // Detect sub-sections
         const detectedSubSection = detectSubSection(lineItemStr);
         if (detectedSubSection) {
             currentSubSection = detectedSubSection;
@@ -164,10 +213,8 @@ function extractCashFlowData(sheet) {
             totalValue += numValue;
         }
 
-        // Only store if we have a section and non-zero data
+        // Only store if we have a section
         if (currentSection) {
-            // Create unique key: section_subsection_lineItem_counter
-            // This prevents duplicates from overwriting each other
             const uniqueKey = `${currentSection}_${currentSubSection || 'MAIN'}_${lineItemStr}_${uniqueKeyCounter++}`;
 
             const dataEntry = {
@@ -188,31 +235,43 @@ function extractCashFlowData(sheet) {
         }
     }
 
-    global.logger.logInfo(`[CF EXTRACTOR] Extraction complete. Items extracted: ${itemsExtracted}`);
-
-    if (itemsExtracted === 0) {
-        global.logger.logWarn('[CF EXTRACTOR] WARNING: No items extracted! Check file format.');
-    }
+    global.logger.logInfo(`[CF EXTRACTOR] Extraction complete. Items: ${itemsExtracted}, Reconciliation items: ${result.reconciliationItems.size}`);
 
     return result;
 }
 
 /**
- * Format period label from date or string
+ * Check if item is a reconciliation item
  */
+function isReconciliationItem(text) {
+    const lower = text.toLowerCase();
+
+    // Metal flows and related
+    if (lower.includes('металл') || lower.includes('metall')) return true;
+    if (lower.includes('прогон') || lower.includes('progon')) return true;
+
+    // Schemes and adjustments
+    if (lower.includes('схем') || lower.includes('sxem')) return true;
+    if (lower.includes('корректир') || lower.includes('korrektir')) return true;
+
+    // Specific reconciliation markers
+    if (lower.includes('движение дс')) return true;
+    if (lower.includes('остатки')) return true;
+    if (lower.includes('qoldiq')) return true;  // Uzbek for "balance"
+
+    return false;
+}
+
 function formatPeriodLabel(value) {
     if (!value) return 'Total';
 
-    // If it's a date object
     if (value instanceof Date) {
         const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
         return `${months[value.getMonth()]} ${value.getFullYear()}`;
     }
 
-    // If it's a string date
     const dateStr = String(value);
     if (dateStr.includes('2024') || dateStr.includes('2025') || dateStr.includes('2026')) {
-        // Try to parse as date
         try {
             const date = new Date(dateStr);
             if (!isNaN(date.getTime())) {
@@ -224,13 +283,9 @@ function formatPeriodLabel(value) {
         }
     }
 
-    // Return as-is for budget labels or other text
     return String(value);
 }
 
-/**
- * Detect if line is FCF marker - supports Russian, Uzbek, English
- */
 function isFCFMarker(text) {
     const lower = text.toLowerCase().trim();
     if (lower === 'fcf' || lower === 'free cash flow') return true;
@@ -239,9 +294,6 @@ function isFCFMarker(text) {
     return false;
 }
 
-/**
- * Detect section header - supports Russian and Uzbek
- */
 function detectSection(text) {
     const lower = text.toLowerCase();
 
@@ -260,9 +312,6 @@ function detectSection(text) {
     return null;
 }
 
-/**
- * Detect sub-section (inflow/outflow) - supports Russian and Uzbek
- */
 function detectSubSection(text) {
     const lower = text.toLowerCase();
 
@@ -277,9 +326,6 @@ function detectSubSection(text) {
     return null;
 }
 
-/**
- * Check if text is a section header
- */
 function isSectionHeader(text, sectionType) {
     const section = detectSection(text);
     return section === sectionType;

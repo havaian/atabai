@@ -1,20 +1,10 @@
-// processors/cashFlow.js - FIXED WITH PERIOD SUPPORT
+// processors/cashFlow.js - WITH RECONCILIATION SUPPORT
 
 const { readExcelFile } = require('./readers/excelReader');
 const { extractCashFlowData } = require('./extractors/cashFlow');
 const { transformToIFRSCashFlow } = require('./transformers/cashFlow');
 const { styleCashFlowReport } = require('../utils/stylers/cashFlow');
 
-/**
- * Cash Flow Processor - Modular Architecture
- * Orchestrates the processing pipeline for cash flow statements
- */
-
-/**
- * Process cash flow from file path, buffer, or ExcelJS Workbook
- * @param {string|Buffer|ExcelJS.Workbook} input - File path, buffer, or ExcelJS Workbook
- * @returns {Object} Processing result with workbook and summary
- */
 async function processCashFlowTemplate(input) {
     const result = {
         workbook: null,
@@ -29,7 +19,6 @@ async function processCashFlowTemplate(input) {
     };
 
     try {
-        // Step 1: Read Excel file (supports .xlsx, .xls, and ExcelJS Workbook)
         const normalizedWorkbook = await readExcelFile(input);
 
         if (normalizedWorkbook.sheetCount === 0) {
@@ -38,24 +27,29 @@ async function processCashFlowTemplate(input) {
 
         const sheet = normalizedWorkbook.sheets[0];
 
-        // Step 2: Extract data from the sheet (now includes periods)
+        // Extract (now includes reconciliationItems)
         const extracted = extractCashFlowData(sheet);
 
-        // Step 3: Transform to IFRS structure (pass periods)
-        const ifrsStructure = transformToIFRSCashFlow(extracted.dataMap, extracted.periods);
+        // Transform (now accepts reconciliationItems)
+        const ifrsStructure = transformToIFRSCashFlow(
+            extracted.dataMap,
+            extracted.periods,
+            extracted.reconciliationItems
+        );
 
-        // Step 4: Style the output (now handles multiple period columns)
+        // Style
         const styledData = {
             title: 'STATEMENT OF CASH FLOWS (IFRS)',
             companyName: extracted.metadata.companyName,
             period: extracted.metadata.period || 'For the period ended',
             inn: extracted.metadata.inn,
-            periods: ifrsStructure.periods,  // Pass periods to styler
+            periods: ifrsStructure.periods,
             sections: ifrsStructure.sections,
             operatingTotal: ifrsStructure.operatingTotal,
             investingTotal: ifrsStructure.investingTotal,
             financingTotal: ifrsStructure.financingTotal,
             netChange: ifrsStructure.netChange,
+            reconciliation: ifrsStructure.reconciliation,  // Pass reconciliation items
             fxEffects: ifrsStructure.fxEffects,
             cashBeginning: ifrsStructure.cashBeginning,
             cashEnding: ifrsStructure.cashEnding
@@ -63,7 +57,6 @@ async function processCashFlowTemplate(input) {
 
         result.workbook = await styleCashFlowReport(styledData);
 
-        // Update summary
         result.summary.transformations = extracted.dataMap.size;
         result.summary.changes = ifrsStructure.sections.reduce((sum, s) => sum + s.items.length, 0);
         result.summary.originalRows = extracted.dataMap.size;

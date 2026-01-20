@@ -1,8 +1,9 @@
-// transformers/cashFlow.js - FIXED WITH PERIOD SUPPORT
+// transformers/cashFlow.js - WITH RECONCILIATION SECTION
 
-function transformToIFRSCashFlow(dataMap, periods) {
+function transformToIFRSCashFlow(dataMap, periods, reconciliationItems) {
     global.logger.logInfo('[CF TRANSFORMER] Starting transformation...');
     global.logger.logInfo(`[CF TRANSFORMER] Input items: ${dataMap.size}`);
+    global.logger.logInfo(`[CF TRANSFORMER] Reconciliation items: ${reconciliationItems?.size || 0}`);
     global.logger.logInfo(`[CF TRANSFORMER] Periods: ${periods.length}`);
 
     const result = {
@@ -12,20 +13,20 @@ function transformToIFRSCashFlow(dataMap, periods) {
         investingTotal: new Array(periods?.length || 1).fill(0),
         financingTotal: new Array(periods?.length || 1).fill(0),
         netChange: new Array(periods?.length || 1).fill(0),
+        reconciliation: [],  // FCF, metal flows, etc.
         fxEffects: new Array(periods?.length || 1).fill(0),
         cashBeginning: new Array(periods?.length || 1).fill(0),
         cashEnding: new Array(periods?.length || 1).fill(0)
     };
 
-    // Organize data by sections
     const operatingItems = [];
     const investingItems = [];
     const financingItems = [];
 
     let sectionCounts = { OPERATING: 0, INVESTING: 0, FINANCING: 0 };
 
+    // Process main cash flow items
     for (const [key, data] of dataMap.entries()) {
-        // Keep original item name
         const label = data.lineItem;
 
         const item = {
@@ -34,16 +35,14 @@ function transformToIFRSCashFlow(dataMap, periods) {
             total: data.total,
             flowType: data.total < 0 ? 'outflow' : 'inflow',
             indent: 1,
-            subSection: data.subSection  // Preserve subsection for grouping
+            subSection: data.subSection
         };
 
-        // Add sub-item markers for detail lines
         if (data.subSection) {
             item.indent = 2;
             item.isSubItem = true;
         }
 
-        // Route to appropriate section
         if (data.section === 'OPERATING') {
             operatingItems.push(item);
             for (let i = 0; i < data.periodValues.length; i++) {
@@ -63,13 +62,24 @@ function transformToIFRSCashFlow(dataMap, periods) {
             }
             sectionCounts.FINANCING++;
         }
+    }
 
-        global.logger.logInfo(`[CF TRANSFORMER] "${data.lineItem}" → ${data.section}/${data.subSection || 'none'} (total: ${data.total.toFixed(2)})`);
+    // Process reconciliation items (FCF, metal flows, etc.)
+    if (reconciliationItems && reconciliationItems.size > 0) {
+        for (const [key, data] of reconciliationItems.entries()) {
+            result.reconciliation.push({
+                label: data.lineItem,
+                periodValues: data.periodValues,
+                total: data.total,
+                type: data.type  // 'FCF' or 'ADJUSTMENT'
+            });
+            global.logger.logInfo(`[CF TRANSFORMER] Reconciliation: "${data.lineItem}" (${data.type})`);
+        }
     }
 
     global.logger.logInfo(`[CF TRANSFORMER] Section distribution: Operating=${sectionCounts.OPERATING}, Investing=${sectionCounts.INVESTING}, Financing=${sectionCounts.FINANCING}`);
 
-    // Add default items if sections are empty
+    // Add defaults if empty
     if (operatingItems.length === 0) {
         operatingItems.push({
             label: 'No operating activities found',
@@ -100,7 +110,6 @@ function transformToIFRSCashFlow(dataMap, periods) {
         });
     }
 
-    // Build sections
     result.sections.push({
         name: 'OPERATING ACTIVITIES',
         items: operatingItems
@@ -116,16 +125,13 @@ function transformToIFRSCashFlow(dataMap, periods) {
         items: financingItems
     });
 
-    // Calculate totals for each period
+    // Calculate totals
     for (let i = 0; i < result.periods.length; i++) {
         result.netChange[i] = result.operatingTotal[i] + result.investingTotal[i] + result.financingTotal[i];
         result.cashEnding[i] = result.cashBeginning[i] + result.netChange[i] + result.fxEffects[i];
     }
 
     global.logger.logInfo('[CF TRANSFORMER] Transformation complete');
-    global.logger.logInfo(`[CF TRANSFORMER] Operating totals: ${result.operatingTotal.map(v => v.toFixed(2)).join(', ')}`);
-    global.logger.logInfo(`[CF TRANSFORMER] Investing totals: ${result.investingTotal.map(v => v.toFixed(2)).join(', ')}`);
-    global.logger.logInfo(`[CF TRANSFORMER] Financing totals: ${result.financingTotal.map(v => v.toFixed(2)).join(', ')}`);
 
     return result;
 }
