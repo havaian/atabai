@@ -1,4 +1,4 @@
-// utils/stylers/cashFlow.js - WITH RECONCILIATION SECTION
+// utils/stylers/cashFlow.js - WITH YEAR ROW
 
 const ExcelJS = require('exceljs');
 const path = require('path');
@@ -92,7 +92,56 @@ async function styleCashFlowReport(data) {
 
     currentRow++;
 
-    // === HEADERS ===
+    // === YEAR ROW (new) ===
+    // Group periods by year and create merged cells
+    const yearGroups = groupPeriodsByYear(periods);
+
+    if (yearGroups.length > 1) {  // Only add year row if we have multiple years
+        const yearRow = worksheet.getRow(currentRow);
+
+        // First cell empty
+        yearRow.getCell(1).value = '';
+
+        for (const group of yearGroups) {
+            const startCol = group.startCol + 1;  // +1 because column 1 is description
+            const endCol = group.endCol + 1;
+
+            // Set year value in first cell of the group
+            yearRow.getCell(startCol).value = group.year;
+            yearRow.getCell(startCol).font = { name: 'Arial', size: 11, bold: true, color: { argb: 'FFFFFFFF' } };
+            yearRow.getCell(startCol).alignment = { horizontal: 'center', vertical: 'center' };
+            yearRow.getCell(startCol).fill = {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: 'FF4472C4' }  // Blue background for years
+            };
+
+            // Merge cells for this year group
+            if (startCol < endCol) {
+                worksheet.mergeCells(currentRow, startCol, currentRow, endCol);
+            }
+
+            // Apply fill to all cells in the merged range
+            for (let col = startCol; col <= endCol; col++) {
+                yearRow.getCell(col).fill = {
+                    type: 'pattern',
+                    pattern: 'solid',
+                    fgColor: { argb: 'FF4472C4' }
+                };
+                yearRow.getCell(col).border = {
+                    top: { style: 'thin', color: { argb: 'FFFFFFFF' } },
+                    left: { style: 'thin', color: { argb: 'FFFFFFFF' } },
+                    bottom: { style: 'thin', color: { argb: 'FFFFFFFF' } },
+                    right: { style: 'thin', color: { argb: 'FFFFFFFF' } }
+                };
+            }
+        }
+
+        yearRow.height = 22;
+        currentRow++;
+    }
+
+    // === MONTH/PERIOD ROW ===
     const headerRow = worksheet.getRow(currentRow);
     headerRow.getCell(1).value = 'Cash Flow Statement';
     headerRow.getCell(1).font = { name: 'Arial', size: 11, bold: true, color: { argb: 'FFFFFFFF' } };
@@ -150,7 +199,7 @@ async function styleCashFlowReport(data) {
     currentRow = addSectionTotalWithFormulas(worksheet, currentRow, 'Net cash from financing activities', periods, sectionRanges.financing);
     currentRow++;
 
-    // === RECONCILIATION (FCF, Metal flows, etc.) ===
+    // === RECONCILIATION ===
     if (data.reconciliation && data.reconciliation.length > 0) {
         currentRow = addReconciliationSection(worksheet, currentRow, periods, data.reconciliation);
     }
@@ -159,6 +208,69 @@ async function styleCashFlowReport(data) {
     currentRow = addFinalReconciliation(worksheet, currentRow, periods, data, sectionRanges);
 
     return workbook;
+}
+
+/**
+ * Group periods by year for the year header row
+ */
+function groupPeriodsByYear(periods) {
+    const groups = [];
+    let currentYear = null;
+    let currentGroup = null;
+
+    for (let i = 0; i < periods.length; i++) {
+        const label = periods[i].label;
+        const year = extractYear(label);
+
+        if (year !== currentYear) {
+            // Start new group
+            if (currentGroup) {
+                groups.push(currentGroup);
+            }
+            currentYear = year;
+            currentGroup = {
+                year: year || 'Total',
+                startCol: i + 1,  // +1 because column 0 is description
+                endCol: i + 1
+            };
+        } else {
+            // Extend current group
+            currentGroup.endCol = i + 1;
+        }
+    }
+
+    // Add last group
+    if (currentGroup) {
+        groups.push(currentGroup);
+    }
+
+    return groups;
+}
+
+/**
+ * Extract year from period label
+ */
+function extractYear(label) {
+    if (!label) return null;
+
+    const str = String(label);
+
+    // Look for 4-digit year
+    const match = str.match(/20\d{2}/);
+    if (match) {
+        return match[0];
+    }
+
+    // Check if it's a total column
+    if (str.toLowerCase().includes('итого') || str.toLowerCase().includes('total')) {
+        // Extract year from total label if present
+        const totalMatch = str.match(/20\d{2}/);
+        if (totalMatch) {
+            return totalMatch[0];
+        }
+    }
+
+    return null;
 }
 
 function addSection(worksheet, startRow, sectionTitle, periods, sectionData, isOperating) {
@@ -250,7 +362,6 @@ function addSectionTotalWithFormulas(worksheet, row, label, periods, range) {
 function addReconciliationSection(worksheet, startRow, periods, reconciliationItems) {
     let currentRow = startRow;
 
-    // Section header
     const headerRow = worksheet.getRow(currentRow);
     headerRow.getCell(1).value = 'RECONCILIATION TO FREE CASH FLOW:';
     headerRow.getCell(1).font = { name: 'Arial', size: 11, bold: true, color: { argb: 'FFFFFFFF' } };
@@ -258,7 +369,7 @@ function addReconciliationSection(worksheet, startRow, periods, reconciliationIt
     headerRow.getCell(1).fill = {
         type: 'pattern',
         pattern: 'solid',
-        fgColor: { argb: 'FF70AD47' }  // Green for reconciliation
+        fgColor: { argb: 'FF70AD47' }
     };
 
     for (let i = 0; i < periods.length; i++) {
@@ -271,7 +382,6 @@ function addReconciliationSection(worksheet, startRow, periods, reconciliationIt
     headerRow.height = 20;
     currentRow++;
 
-    // Add each reconciliation item
     for (const item of reconciliationItems) {
         const itemRow = worksheet.getRow(currentRow);
 
@@ -301,7 +411,7 @@ function addReconciliationSection(worksheet, startRow, periods, reconciliationIt
         currentRow++;
     }
 
-    currentRow++;  // Blank line
+    currentRow++;
     return currentRow;
 }
 
@@ -312,7 +422,6 @@ function addFinalReconciliation(worksheet, startRow, periods, data, sectionRange
     const investingTotalRow = sectionRanges.investing.end + 1;
     const financingTotalRow = sectionRanges.financing.end + 1;
 
-    // Net change
     const netRow = worksheet.getRow(currentRow);
     netRow.getCell(1).value = 'Net increase/(decrease) in cash and cash equivalents';
     netRow.getCell(1).font = { name: 'Arial', size: 11, bold: true };
@@ -346,7 +455,6 @@ function addFinalReconciliation(worksheet, startRow, periods, data, sectionRange
     const netChangeRow = currentRow;
     currentRow++;
 
-    // FX effects
     let fxEffectsRow = null;
     const hasFxEffects = data.fxEffects && data.fxEffects.some(v => Math.abs(v) > 0.01);
     if (hasFxEffects) {
@@ -365,7 +473,6 @@ function addFinalReconciliation(worksheet, startRow, periods, data, sectionRange
         currentRow++;
     }
 
-    // Beginning balance
     const beginRow = worksheet.getRow(currentRow);
     beginRow.getCell(1).value = 'Cash and cash equivalents at beginning of period';
     beginRow.getCell(1).font = { name: 'Arial', size: 10 };
@@ -380,7 +487,6 @@ function addFinalReconciliation(worksheet, startRow, periods, data, sectionRange
     const beginBalanceRow = currentRow;
     currentRow++;
 
-    // Ending balance
     const endRow = worksheet.getRow(currentRow);
     endRow.getCell(1).value = 'Cash and cash equivalents at end of period';
     endRow.getCell(1).font = { name: 'Arial', size: 11, bold: true, color: { argb: 'FFFFFFFF' } };
