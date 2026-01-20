@@ -1,4 +1,4 @@
-// utils/stylers/cashFlow.js - WITH YEAR ROW
+// utils/stylers/cashFlow.js - FIX NULL ERROR
 
 const ExcelJS = require('exceljs');
 const path = require('path');
@@ -92,36 +92,31 @@ async function styleCashFlowReport(data) {
 
     currentRow++;
 
-    // === YEAR ROW (new) ===
-    // Group periods by year and create merged cells
+    // === YEAR ROW ===
     const yearGroups = groupPeriodsByYear(periods);
 
-    if (yearGroups.length > 1) {  // Only add year row if we have multiple years
+    if (yearGroups.length > 1) {
         const yearRow = worksheet.getRow(currentRow);
 
-        // First cell empty
         yearRow.getCell(1).value = '';
 
         for (const group of yearGroups) {
-            const startCol = group.startCol + 1;  // +1 because column 1 is description
+            const startCol = group.startCol + 1;
             const endCol = group.endCol + 1;
 
-            // Set year value in first cell of the group
             yearRow.getCell(startCol).value = group.year;
             yearRow.getCell(startCol).font = { name: 'Arial', size: 11, bold: true, color: { argb: 'FFFFFFFF' } };
             yearRow.getCell(startCol).alignment = { horizontal: 'center', vertical: 'center' };
             yearRow.getCell(startCol).fill = {
                 type: 'pattern',
                 pattern: 'solid',
-                fgColor: { argb: 'FF4472C4' }  // Blue background for years
+                fgColor: { argb: 'FF4472C4' }
             };
 
-            // Merge cells for this year group
             if (startCol < endCol) {
                 worksheet.mergeCells(currentRow, startCol, currentRow, endCol);
             }
 
-            // Apply fill to all cells in the merged range
             for (let col = startCol; col <= endCol; col++) {
                 yearRow.getCell(col).fill = {
                     type: 'pattern',
@@ -211,7 +206,7 @@ async function styleCashFlowReport(data) {
 }
 
 /**
- * Group periods by year for the year header row
+ * Group periods by year - FIXED NULL ERROR
  */
 function groupPeriodsByYear(periods) {
     const groups = [];
@@ -230,12 +225,22 @@ function groupPeriodsByYear(periods) {
             currentYear = year;
             currentGroup = {
                 year: year || 'Total',
-                startCol: i + 1,  // +1 because column 0 is description
-                endCol: i + 1
+                startCol: i,
+                endCol: i
             };
         } else {
             // Extend current group
-            currentGroup.endCol = i + 1;
+            // FIX: Check if currentGroup exists before setting endCol
+            if (currentGroup) {
+                currentGroup.endCol = i;
+            } else {
+                // This shouldn't happen, but safeguard
+                currentGroup = {
+                    year: year || 'Total',
+                    startCol: i,
+                    endCol: i
+                };
+            }
         }
     }
 
@@ -259,15 +264,6 @@ function extractYear(label) {
     const match = str.match(/20\d{2}/);
     if (match) {
         return match[0];
-    }
-
-    // Check if it's a total column
-    if (str.toLowerCase().includes('итого') || str.toLowerCase().includes('total')) {
-        // Extract year from total label if present
-        const totalMatch = str.match(/20\d{2}/);
-        if (totalMatch) {
-            return totalMatch[0];
-        }
     }
 
     return null;
