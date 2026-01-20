@@ -337,7 +337,7 @@ class AuthController {
                     subscriptionType: user.subscriptionType,
                     filesProcessedThisMonth: user.filesProcessedThisMonth,
                     monthlyLimit: await getFileLimit(user.subscriptionType),
-                    canProcessFiles: user.canProcessFiles(),
+                    canProcessFiles: await user.canProcessFiles(),
                     preferences: user.preferences,
                     lastLoginAt: user.lastLoginAt,
                     createdAt: user.createdAt
@@ -427,7 +427,7 @@ class AuthController {
             // Revoke the current access token
             if (token) {
                 // Calculate token expiration time for blacklist
-                const decoded = await authService.verifyAccessToken(token);
+                const decoded = await authService.verifyAccessToken(token, user);
                 const expiresIn = decoded.exp - Math.floor(Date.now() / 1000);
 
                 if (expiresIn > 0) {
