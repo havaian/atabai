@@ -345,7 +345,11 @@ class AuthController {
             });
 
         } catch (error) {
-            global.logger.logError('Error fetching user profile:', error);
+            global.logger.logError('Error fetching user profile:', {
+                message: error.message,
+                stack: error.stack,
+                name: error.name
+            });
             res.status(500).json({
                 error: 'PROFILE_FETCH_FAILED',
                 message: 'Failed to fetch user profile'
