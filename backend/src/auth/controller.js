@@ -51,7 +51,7 @@ class AuthController {
             });
         }
     }
-    
+
     /**
      * Handle Google OAuth callback
      * POST /api/auth/google/callback
@@ -109,7 +109,7 @@ class AuthController {
                 photos: [{ value: googleProfile.picture }]
             });
 
-            global.logger.logInfo('🔧 User found/created:', user.email);
+            global.logger.logInfo(`🔧 User found/created: ${user.email}`);
             await user.updateLastLogin();
 
             // Generate tokens
@@ -235,6 +235,9 @@ class AuthController {
         }
     }
 
+    // Updated refreshToken method for auth controller
+    // Replace your existing refreshToken method with this
+
     /**
      * Refresh access token
      * POST /api/auth/refresh
@@ -250,11 +253,19 @@ class AuthController {
                 });
             }
 
-            // Verify refresh token
-            const decoded = await authService.verifyRefreshToken(refreshToken);
+            // STEP 1: Decode refresh token to get userId (without verification)
+            const decoded = authService.decodeToken(refreshToken);
+            if (!decoded || !decoded.userId) {
+                return res.status(401).json({
+                    error: 'INVALID_REFRESH_TOKEN',
+                    message: 'Invalid refresh token format'
+                });
+            }
 
-            // Find user
-            const user = await User.findById(decoded.userId);
+            // STEP 2: Find user with their secret
+            const user = await User.findById(decoded.userId)
+                .select('+refreshTokenSecret +refreshTokenSecretCreatedAt');
+
             if (!user || !user.isActive) {
                 return res.status(401).json({
                     error: 'USER_NOT_FOUND',
@@ -262,10 +273,31 @@ class AuthController {
                 });
             }
 
+            // STEP 3: Verify refresh token with user's personal secret
+            try {
+                await authService.verifyRefreshToken(refreshToken, user);
+            } catch (verifyError) {
+                if (verifyError.message === 'REFRESH_TOKEN_EXPIRED') {
+                    return res.status(401).json({
+                        error: 'REFRESH_TOKEN_EXPIRED',
+                        message: 'Refresh token has expired. Please login again.'
+                    });
+                }
+
+                if (verifyError.message === 'INVALID_REFRESH_TOKEN') {
+                    return res.status(401).json({
+                        error: 'INVALID_REFRESH_TOKEN',
+                        message: 'Invalid refresh token'
+                    });
+                }
+
+                throw verifyError;
+            }
+
             // Reset monthly counter if needed
             await user.resetMonthlyCounterIfNeeded();
 
-            // Generate new access token
+            // Generate new access token (user already has secret loaded)
             const newAccessToken = await authService.generateAccessToken(user);
 
             global.logger.logInfo(`Access token refreshed for user: ${user.email}`);
@@ -278,20 +310,6 @@ class AuthController {
 
         } catch (error) {
             global.logger.logWarn(`Token refresh failed: ${error.message}`);
-
-            if (error.message === 'REFRESH_TOKEN_EXPIRED') {
-                return res.status(401).json({
-                    error: 'REFRESH_TOKEN_EXPIRED',
-                    message: 'Refresh token has expired. Please login again.'
-                });
-            }
-
-            if (error.message === 'INVALID_REFRESH_TOKEN') {
-                return res.status(401).json({
-                    error: 'INVALID_REFRESH_TOKEN',
-                    message: 'Invalid refresh token'
-                });
-            }
 
             res.status(500).json({
                 error: 'TOKEN_REFRESH_FAILED',

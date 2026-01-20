@@ -5,7 +5,7 @@ const { getFileLimit } = require('../config/subscription');
 
 /**
  * JWT Authentication Middleware
- * Validates JWT token and attaches user to request
+ * Validates JWT token using user's personal secret and attaches user to request
  */
 const authenticateJWT = async (req, res, next) => {
     try {
@@ -28,16 +28,46 @@ const authenticateJWT = async (req, res, next) => {
             });
         }
 
-        // Verify token
-        const decoded = await authService.verifyAccessToken(token);
+        // STEP 1: Decode token without verification to get userId
+        const decoded = authService.decodeToken(token);
+        if (!decoded || !decoded.userId) {
+            return res.status(401).json({
+                error: 'INVALID_TOKEN',
+                message: 'Invalid token format'
+            });
+        }
 
-        // Find user
-        const user = await User.findById(decoded.userId);
+        // STEP 2: Find user with their secret
+        const user = await User.findById(decoded.userId)
+            .select('+refreshTokenSecret +refreshTokenSecretCreatedAt');
+
         if (!user || !user.isActive) {
             return res.status(401).json({
                 error: 'USER_NOT_FOUND',
                 message: 'User not found or inactive'
             });
+        }
+
+        // STEP 3: Verify token with user's personal secret
+        try {
+            await authService.verifyAccessToken(token, user);
+        } catch (verifyError) {
+            // Token verification failed - could be expired or invalid
+            if (verifyError.message === 'ACCESS_TOKEN_EXPIRED') {
+                return res.status(401).json({
+                    error: 'ACCESS_TOKEN_EXPIRED',
+                    message: 'Access token has expired'
+                });
+            }
+
+            if (verifyError.message === 'INVALID_ACCESS_TOKEN') {
+                return res.status(401).json({
+                    error: 'INVALID_ACCESS_TOKEN',
+                    message: 'Invalid access token'
+                });
+            }
+
+            throw verifyError;
         }
 
         // Reset monthly counter if needed
@@ -50,20 +80,6 @@ const authenticateJWT = async (req, res, next) => {
         next();
     } catch (error) {
         global.logger.logWarn(`JWT authentication failed: ${error.message}`);
-
-        if (error.message === 'ACCESS_TOKEN_EXPIRED') {
-            return res.status(401).json({
-                error: 'ACCESS_TOKEN_EXPIRED',
-                message: 'Access token has expired'
-            });
-        }
-
-        if (error.message === 'INVALID_ACCESS_TOKEN') {
-            return res.status(401).json({
-                error: 'INVALID_ACCESS_TOKEN',
-                message: 'Invalid access token'
-            });
-        }
 
         return res.status(401).json({
             error: 'AUTHENTICATION_FAILED',
@@ -91,15 +107,29 @@ const optionalAuth = async (req, res, next) => {
             return next(); // Token revoked, continue without user
         }
 
-        // Verify token
-        const decoded = await authService.verifyAccessToken(token);
+        // Decode token to get userId
+        const decoded = authService.decodeToken(token);
+        if (!decoded || !decoded.userId) {
+            return next(); // Invalid token format, continue without user
+        }
 
-        // Find user
-        const user = await User.findById(decoded.userId);
-        if (user && user.isActive) {
+        // Find user with their secret
+        const user = await User.findById(decoded.userId)
+            .select('+refreshTokenSecret +refreshTokenSecretCreatedAt');
+
+        if (!user || !user.isActive) {
+            return next(); // User not found, continue without user
+        }
+
+        // Verify token with user's personal secret
+        try {
+            await authService.verifyAccessToken(token, user);
             await user.resetMonthlyCounterIfNeeded();
             req.user = user;
             req.token = token;
+        } catch (error) {
+            // Verification failed, continue without user
+            global.logger.logDebug(`Optional auth verification failed: ${error.message}`);
         }
 
         next();
@@ -114,8 +144,8 @@ const optionalAuth = async (req, res, next) => {
  * Subscription check middleware
  * Ensures user has required subscription level
  */
-const requireSubscription = (requiredLevel = 'basic') => {
-    return (req, res, next) => {
+const requireSubscription = (requiredType = 'premium') => {
+    return async (req, res, next) => {
         if (!req.user) {
             return res.status(401).json({
                 error: 'AUTHENTICATION_REQUIRED',
@@ -123,16 +153,24 @@ const requireSubscription = (requiredLevel = 'basic') => {
             });
         }
 
-        const userLevel = req.user.subscriptionType;
-        const levels = { basic: 1, premium: 2 };
+        const user = req.user;
 
-        if (levels[userLevel] < levels[requiredLevel]) {
+        // Check if user has required subscription
+        if (requiredType === 'premium' && user.subscriptionType !== 'premium') {
             return res.status(403).json({
-                error: 'INSUFFICIENT_SUBSCRIPTION',
-                message: `${requiredLevel} subscription required`,
-                userSubscription: userLevel,
-                requiredSubscription: requiredLevel
+                error: 'PREMIUM_REQUIRED',
+                message: 'Premium subscription required for this feature'
             });
+        }
+
+        // Check if premium subscription is active
+        if (user.subscriptionType === 'premium') {
+            if (!user.subscriptionExpiresAt || user.subscriptionExpiresAt < new Date()) {
+                return res.status(403).json({
+                    error: 'SUBSCRIPTION_EXPIRED',
+                    message: 'Your premium subscription has expired'
+                });
+            }
         }
 
         next();
@@ -141,36 +179,46 @@ const requireSubscription = (requiredLevel = 'basic') => {
 
 /**
  * File processing limit check middleware
- * Ensures user hasn't exceeded monthly processing limit
+ * Checks if user can process files based on their monthly limit
  */
 const checkFileProcessingLimit = async (req, res, next) => {
-    if (!req.user) {
-        return res.status(401).json({
-            error: 'AUTHENTICATION_REQUIRED',
-            message: 'Authentication required'
+    try {
+        if (!req.user) {
+            return res.status(401).json({
+                error: 'AUTHENTICATION_REQUIRED',
+                message: 'Authentication required'
+            });
+        }
+
+        const user = req.user;
+        const canProcess = await user.canProcessFiles();
+
+        if (!canProcess) {
+            const limit = await getFileLimit(user.subscriptionType);
+            return res.status(403).json({
+                error: 'MONTHLY_LIMIT_REACHED',
+                message: 'Monthly file processing limit reached',
+                limit: limit,
+                processed: user.filesProcessedThisMonth,
+                resetDate: user.monthlyResetDate
+            });
+        }
+
+        next();
+    } catch (error) {
+        global.logger.logError('Error checking file processing limit:', error);
+        res.status(500).json({
+            error: 'LIMIT_CHECK_FAILED',
+            message: 'Failed to check processing limit'
         });
     }
-
-    if (!req.user.canProcessFiles()) {
-        const limit = await getFileLimit(req.user.subscriptionType);
-
-        return res.status(403).json({
-            error: 'PROCESSING_LIMIT_EXCEEDED',
-            message: 'Monthly file processing limit exceeded',
-            currentCount: req.user.filesProcessedThisMonth,
-            limit,
-            subscriptionType: req.user.subscriptionType
-        });
-    }
-
-    next();
 };
 
 /**
- * Admin check middleware (for future use)
+ * Admin check middleware
  * Ensures user has admin privileges
  */
-const requireAdmin = (req, res, next) => {
+const requireAdmin = async (req, res, next) => {
     if (!req.user) {
         return res.status(401).json({
             error: 'AUTHENTICATION_REQUIRED',

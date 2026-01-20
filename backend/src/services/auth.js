@@ -3,14 +3,10 @@ const { promisify } = require('util');
 
 class AuthService {
     constructor() {
-        this.jwtSecret = process.env.JWT_SECRET;
+        // Keep global secrets as fallback for system operations
+        this.jwtSecret = process.env.JWT_SECRET || 'fallback-secret-change-me';
         this.jwtExpiresIn = process.env.JWT_EXPIRES_IN || '7d';
-        this.refreshSecret = process.env.JWT_REFRESH_SECRET;
         this.refreshExpiresIn = process.env.JWT_REFRESH_EXPIRES_IN || '30d';
-
-        if (!this.jwtSecret || !this.refreshSecret) {
-            throw new Error('JWT secrets are not configured');
-        }
 
         // Promisify JWT methods
         this.signAsync = promisify(jwt.sign);
@@ -18,12 +14,15 @@ class AuthService {
     }
 
     /**
-     * Generate access token for user
-     * @param {Object} user - User object
+     * Generate access token for user using their personal secret
+     * @param {Object} user - User object (must have refreshTokenSecret loaded)
      * @returns {Promise<string>} Access token
      */
     async generateAccessToken(user) {
         try {
+            // Ensure user has a secret
+            const secret = await user.getRefreshTokenSecret();
+
             const payload = {
                 userId: user._id.toString(),
                 email: user.email,
@@ -31,7 +30,7 @@ class AuthService {
                 iat: Math.floor(Date.now() / 1000)
             };
 
-            const token = await this.signAsync(payload, this.jwtSecret, {
+            const token = await this.signAsync(payload, secret, {
                 expiresIn: this.jwtExpiresIn,
                 issuer: 'atabai-api',
                 audience: 'atabai-client'
@@ -46,19 +45,22 @@ class AuthService {
     }
 
     /**
-     * Generate refresh token for user
-     * @param {Object} user - User object
+     * Generate refresh token for user using their personal secret
+     * @param {Object} user - User object (must have refreshTokenSecret loaded)
      * @returns {Promise<string>} Refresh token
      */
     async generateRefreshToken(user) {
         try {
+            // Ensure user has a secret
+            const secret = await user.getRefreshTokenSecret();
+
             const payload = {
                 userId: user._id.toString(),
                 type: 'refresh',
                 iat: Math.floor(Date.now() / 1000)
             };
 
-            const token = await this.signAsync(payload, this.refreshSecret, {
+            const token = await this.signAsync(payload, secret, {
                 expiresIn: this.refreshExpiresIn,
                 issuer: 'atabai-api',
                 audience: 'atabai-client'
@@ -74,11 +76,14 @@ class AuthService {
 
     /**
      * Generate both access and refresh tokens
-     * @param {Object} user - User object
+     * @param {Object} user - User object (must have refreshTokenSecret loaded)
      * @returns {Promise<Object>} Object with accessToken and refreshToken
      */
     async generateTokenPair(user) {
         try {
+            // Ensure user has their secret loaded
+            await user.getRefreshTokenSecret();
+
             const [accessToken, refreshToken] = await Promise.all([
                 this.generateAccessToken(user),
                 this.generateRefreshToken(user)
@@ -92,13 +97,21 @@ class AuthService {
     }
 
     /**
-     * Verify access token
+     * Verify access token using user's personal secret
      * @param {string} token - Access token to verify
+     * @param {Object} user - User object (must have refreshTokenSecret loaded)
      * @returns {Promise<Object>} Decoded token payload
      */
-    async verifyAccessToken(token) {
+    async verifyAccessToken(token, user = null) {
         try {
-            const decoded = await this.verifyAsync(token, this.jwtSecret, {
+            // If user is provided, verify with their secret
+            let secret = this.jwtSecret; // Fallback to global secret
+
+            if (user) {
+                secret = await user.getRefreshTokenSecret();
+            }
+
+            const decoded = await this.verifyAsync(token, secret, {
                 issuer: 'atabai-api',
                 audience: 'atabai-client'
             });
@@ -120,13 +133,21 @@ class AuthService {
     }
 
     /**
-     * Verify refresh token
+     * Verify refresh token using user's personal secret
      * @param {string} token - Refresh token to verify
+     * @param {Object} user - User object (must have refreshTokenSecret loaded)
      * @returns {Promise<Object>} Decoded token payload
      */
-    async verifyRefreshToken(token) {
+    async verifyRefreshToken(token, user = null) {
         try {
-            const decoded = await this.verifyAsync(token, this.refreshSecret, {
+            // If user is provided, verify with their secret
+            let secret = this.jwtSecret; // Fallback to global secret
+
+            if (user) {
+                secret = await user.getRefreshTokenSecret();
+            }
+
+            const decoded = await this.verifyAsync(token, secret, {
                 issuer: 'atabai-api',
                 audience: 'atabai-client'
             });
@@ -148,6 +169,20 @@ class AuthService {
 
             global.logger.logError('Error verifying refresh token:', error);
             throw new Error('TOKEN_VERIFICATION_FAILED');
+        }
+    }
+
+    /**
+     * Decode token without verification (to get userId)
+     * @param {string} token - JWT token
+     * @returns {Object|null} Decoded payload or null
+     */
+    decodeToken(token) {
+        try {
+            return jwt.decode(token);
+        } catch (error) {
+            global.logger.logWarn('Failed to decode token:', error);
+            return null;
         }
     }
 
@@ -177,58 +212,44 @@ class AuthService {
     createUserSession(user, accessToken, refreshToken) {
         return {
             user: {
-                id: user._id,
+                id: user._id.toString(),
                 email: user.email,
                 name: user.name,
                 picture: user.picture,
                 subscriptionType: user.subscriptionType,
-                filesProcessedThisMonth: user.filesProcessedThisMonth,
-                preferences: user.preferences,
-                canProcessFiles: user.canProcessFiles()
+                filesProcessedThisMonth: user.filesProcessedThisMonth
             },
             accessToken,
-            refreshToken,
-            expiresIn: this.jwtExpiresIn
+            refreshToken
         };
     }
 
     /**
-     * Revoke token by adding to blacklist (Redis implementation)
-     * @param {string} token - Token to revoke
-     * @param {number} expiresIn - Token expiration time in seconds
-     * @returns {Promise<void>}
+     * Check if token is blacklisted (placeholder for future Redis implementation)
+     * @param {string} token - Token to check
+     * @returns {Promise<boolean>}
      */
-    async revokeToken(token, expiresIn = 3600) {
-        try {
-            // TODO: Implement Redis blacklist
-            // For now, just log the revocation
-            global.logger.logInfo(`Token revoked (would be added to blacklist): ${token.substring(0, 20)}...`);
-
-            // In production, add to Redis:
-            // await redisClient.setex(`blacklist:${token}`, expiresIn, 'revoked');
-        } catch (error) {
-            global.logger.logError('Error revoking token:', error);
-            // Don't throw - token revocation failure shouldn't break logout
-        }
+    async isTokenBlacklisted(token) {
+        // TODO: Implement Redis-based token blacklist
+        // For now, return false
+        return false;
     }
 
     /**
-     * Check if token is blacklisted
-     * @param {string} token - Token to check
-     * @returns {Promise<boolean>} True if blacklisted
+     * Revoke token by adding to blacklist (placeholder for future Redis implementation)
+     * @param {string} token - Token to revoke
+     * @param {number} expiresIn - TTL in seconds
+     * @returns {Promise<void>}
      */
-    async isTokenBlacklisted(token) {
+    async revokeToken(token, expiresIn) {
         try {
-            // TODO: Implement Redis blacklist check
-            // For now, always return false
-            return false;
+            // TODO: Implement Redis-based token blacklist
+            // await redis.setex(`blacklist:${token}`, expiresIn, '1');
 
-            // In production, check Redis:
-            // const result = await redisClient.get(`blacklist:${token}`);
-            // return result === 'revoked';
+            global.logger.logInfo(`Token revoked (would be added to blacklist): ${token.substring(0, 20)}...`);
         } catch (error) {
-            global.logger.logError('Error checking token blacklist:', error);
-            return false; // Fail open for availability
+            global.logger.logError('Error revoking token:', error);
+            // Don't throw error, token revocation failure shouldn't break logout
         }
     }
 }
