@@ -215,47 +215,36 @@ async function styleCashFlowReport(data) {
  */
 function groupPeriodsByYear(periods) {
     const groups = [];
+    let currentYear = null;
     let currentGroup = null;
-    let fallbackYear = 'Total';
 
     for (let i = 0; i < periods.length; i++) {
         const label = periods[i].label;
-        // Extract year from the combined label "Jan 2024" -> "2024"
-        let year = extractYear(label) || fallbackYear;
+        const year = extractYear(label);
 
-        // Update fallback if we found a real year
-        if (year !== 'Total' && year !== 'Period') {
-            fallbackYear = year;
-        }
-
-        if (!currentGroup || year !== currentGroup.year) {
+        if (year !== currentYear) {
+            // Start new group
             if (currentGroup) {
                 groups.push(currentGroup);
             }
+            currentYear = year;
             currentGroup = {
-                year: year,
-                startCol: i + 1,
+                year: year || 'Total',
+                startCol: i + 1,  // +1 because column 0 is description
                 endCol: i + 1
             };
         } else {
-            // Safety check: only extend if currentGroup was successfully created
-            if (currentGroup) {
-                currentGroup.endCol = i + 1;
-            }
+            // Extend current group
+            currentGroup.endCol = i + 1;
         }
     }
 
+    // Add last group
     if (currentGroup) {
         groups.push(currentGroup);
     }
-    return groups;
-}
 
-function extractYear(label) {
-    if (!label) return null;
-    const str = String(label);
-    const match = str.match(/20\d{2}/);
-    return match ? match[0] : null;
+    return groups;
 }
 
 /**
@@ -263,17 +252,22 @@ function extractYear(label) {
  */
 function extractYear(label) {
     if (!label) return null;
-    const str = String(label).trim();
 
-    // Matches "2024", "Итого 2024", or "Total 2024"
+    const str = String(label);
+
+    // Look for 4-digit year
     const match = str.match(/20\d{2}/);
-    if (match) return match[0];
+    if (match) {
+        return match[0];
+    }
 
-    // Explicitly handle "Total" or "Period" as a group name if no digits found
-    if (str.toLowerCase().includes('total') || 
-        str.toLowerCase().includes('итого') || 
-        str.toLowerCase() === 'period') {
-        return 'Total';
+    // Check if it's a total column
+    if (str.toLowerCase().includes('итого') || str.toLowerCase().includes('total')) {
+        // Extract year from total label if present
+        const totalMatch = str.match(/20\d{2}/);
+        if (totalMatch) {
+            return totalMatch[0];
+        }
     }
 
     return null;
