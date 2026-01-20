@@ -215,42 +215,36 @@ async function styleCashFlowReport(data) {
  */
 function groupPeriodsByYear(periods) {
     const groups = [];
-    let currentYear = undefined; // Use undefined for initial state
     let currentGroup = null;
 
     for (let i = 0; i < periods.length; i++) {
         const label = periods[i].label;
-        const year = extractYear(label) || 'Total'; // Default to 'Total' if no year found
+        let year = extractYear(label);
 
-        if (year !== currentYear) {
-            // Push previous group if it exists
+        // If extractYear couldn't find a year, we look at the neighbors
+        // or default to a generic "Period" label to prevent the crash
+        if (!year) year = 'Period'; 
+
+        if (!currentGroup || year !== currentGroup.year) {
+            // If the current label is "Total" but the group is already active,
+            // we might want to check if we should actually close it.
+            // For your case: if we see a year like "2024", we start it.
+            
             if (currentGroup) {
                 groups.push(currentGroup);
             }
-            
-            // Start new group
-            currentYear = year;
+
             currentGroup = {
                 year: year,
                 startCol: i + 1,
                 endCol: i + 1
             };
         } else {
-            // Extend current group - added safety check
-            if (currentGroup) {
-                currentGroup.endCol = i + 1;
-            } else {
-                // Fallback initialization if something went wrong
-                currentGroup = {
-                    year: year,
-                    startCol: i + 1,
-                    endCol: i + 1
-                };
-            }
+            // Same year/label, just extend the merge range
+            currentGroup.endCol = i + 1;
         }
     }
 
-    // Add last group
     if (currentGroup) {
         groups.push(currentGroup);
     }
@@ -264,21 +258,16 @@ function groupPeriodsByYear(periods) {
 function extractYear(label) {
     if (!label) return null;
 
-    const str = String(label);
+    const str = String(label).trim();
 
-    // Look for 4-digit year
+    // 1. Look for 4-digit year (e.g., "2024" or "Итого 2024")
     const match = str.match(/20\d{2}/);
-    if (match) {
-        return match[0];
-    }
+    if (match) return match[0];
 
-    // Check if it's a total column
-    if (str.toLowerCase().includes('итого') || str.toLowerCase().includes('total')) {
-        // Extract year from total label if present
-        const totalMatch = str.match(/20\d{2}/);
-        if (totalMatch) {
-            return totalMatch[0];
-        }
+    // 2. If it's just "Total" or "Итого", we return a placeholder 
+    // The grouper will then look at the sequence to decide if it's a new group
+    if (str.toLowerCase() === 'total' || str.toLowerCase() === 'итого') {
+        return 'Total';
     }
 
     return null;
