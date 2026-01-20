@@ -1,4 +1,4 @@
-// utils/stylers/cashFlow.js - FIX NULL ERROR
+// utils/stylers/cashFlow.js - FIX YEAR GROUPING
 
 const ExcelJS = require('exceljs');
 const path = require('path');
@@ -206,40 +206,53 @@ async function styleCashFlowReport(data) {
 }
 
 /**
- * Group periods by year - FIXED NULL ERROR
+ * Group periods by year - FIXED LOGIC
+ * Strategy: Look forward to find year, apply it backward to all months
  */
 function groupPeriodsByYear(periods) {
+    // Step 1: Extract years from all periods
+    const years = periods.map(p => extractYear(p.label));
+
+    // Step 2: Fill nulls by looking FORWARD and applying year backward
+    for (let i = 0; i < years.length; i++) {
+        if (!years[i]) {
+            // Look forward for next year
+            let foundYear = null;
+            for (let j = i + 1; j < years.length; j++) {
+                if (years[j]) {
+                    foundYear = years[j];
+                    break;
+                }
+            }
+
+            // Apply found year (or keep null if no year found ahead)
+            if (foundYear) {
+                years[i] = foundYear;
+            }
+        }
+    }
+
+    // Step 3: Group consecutive periods with same year
     const groups = [];
     let currentYear = null;
     let currentGroup = null;
 
-    for (let i = 0; i < periods.length; i++) {
-        const label = periods[i].label;
-        const year = extractYear(label);
-
-        if (year !== currentYear) {
-            // Start new group
+    for (let i = 0; i < years.length; i++) {
+        if (years[i] !== currentYear) {
+            // Year changed - start new group
             if (currentGroup) {
                 groups.push(currentGroup);
             }
-            currentYear = year;
+            currentYear = years[i];
             currentGroup = {
-                year: year || 'Total',
+                year: currentYear || 'Total',
                 startCol: i,
                 endCol: i
             };
         } else {
-            // Extend current group
-            // FIX: Check if currentGroup exists before setting endCol
+            // Same year - extend current group
             if (currentGroup) {
                 currentGroup.endCol = i;
-            } else {
-                // This shouldn't happen, but safeguard
-                currentGroup = {
-                    year: year || 'Total',
-                    startCol: i,
-                    endCol: i
-                };
             }
         }
     }
@@ -259,14 +272,9 @@ function extractYear(label) {
     if (!label) return null;
 
     const str = String(label);
-
-    // Look for 4-digit year
     const match = str.match(/20\d{2}/);
-    if (match) {
-        return match[0];
-    }
 
-    return null;
+    return match ? match[0] : null;
 }
 
 function addSection(worksheet, startRow, sectionTitle, periods, sectionData, isOperating) {
