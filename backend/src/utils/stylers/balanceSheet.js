@@ -1,93 +1,81 @@
+// utils/stylers/balanceSheet.js - UPDATED TO USE SHARED FONT CONFIG
+
 const ExcelJS = require('exceljs');
 const path = require('path');
 const fs = require('fs');
+const {
+    FONT_PRESETS,
+    BRAND_COLORS,
+    ALIGNMENT_PRESETS,
+    FILL_PRESETS,
+    BORDER_PRESETS
+} = require('./fontConfig');
 
 /**
  * Universal Excel Styler Module
  * Handles all formatting and styling for IFRS reports
- * Separates data generation from presentation
+ * Now uses shared font configuration for consistency
  */
 
-// Define style presets
+// Define style presets using shared font configuration
 const STYLE_PRESETS = {
     // Professional IFRS balance sheet style
     balanceSheet: {
         title: {
-            font: { name: 'Arial', size: 14, bold: true },
-            alignment: { horizontal: 'center', vertical: 'center' },
+            font: FONT_PRESETS.title,
+            alignment: ALIGNMENT_PRESETS.center,
             fill: null
         },
         subtitle: {
-            font: { name: 'Arial', size: 12, bold: true },
-            alignment: { horizontal: 'center', vertical: 'center' },
+            font: FONT_PRESETS.subtitle,
+            alignment: ALIGNMENT_PRESETS.center,
             fill: null
         },
         metadata: {
-            font: { name: 'Arial', size: 10 },
-            alignment: { horizontal: 'center', vertical: 'center' },
+            font: FONT_PRESETS.metadata,
+            alignment: ALIGNMENT_PRESETS.center,
             fill: null
         },
         columnHeader: {
-            font: { name: 'Arial', size: 10, bold: true, color: { argb: 'FFFFFFFF' } },
-            alignment: { horizontal: 'center', vertical: 'center', wrapText: true },
-            fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF366092' } },
-            border: {
-                top: { style: 'thin' },
-                left: { style: 'thin' },
-                bottom: { style: 'thin' },
-                right: { style: 'thin' }
-            }
+            font: FONT_PRESETS.columnHeader,
+            alignment: { ...ALIGNMENT_PRESETS.center, wrapText: true },
+            fill: {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: BRAND_COLORS.headerBlue }
+            },
+            border: BORDER_PRESETS.thin
         },
         sectionHeader: {
-            font: { name: 'Arial', size: 11, bold: true },
-            alignment: { horizontal: 'left', vertical: 'center' },
-            fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD9E1F2' } },
-            border: {
-                top: { style: 'thin' },
-                left: { style: 'thin' },
-                bottom: { style: 'thin' },
-                right: { style: 'thin' }
-            }
+            font: FONT_PRESETS.sectionHeader,
+            alignment: ALIGNMENT_PRESETS.left,
+            fill: FILL_PRESETS.lightBlue,
+            border: BORDER_PRESETS.thin
         },
         dataCell: {
-            font: { name: 'Arial', size: 10 },
-            alignment: { horizontal: 'left', vertical: 'center' },
+            font: FONT_PRESETS.normalData,
+            alignment: ALIGNMENT_PRESETS.left,
             fill: null,
-            border: {
-                top: { style: 'thin' },
-                left: { style: 'thin' },
-                bottom: { style: 'thin' },
-                right: { style: 'thin' }
-            }
+            border: BORDER_PRESETS.thin
         },
         numberCell: {
-            font: { name: 'Arial', size: 10 },
-            alignment: { horizontal: 'right', vertical: 'center' },
+            font: FONT_PRESETS.normalData,
+            alignment: ALIGNMENT_PRESETS.right,
             fill: null,
-            border: {
-                top: { style: 'thin' },
-                left: { style: 'thin' },
-                bottom: { style: 'thin' },
-                right: { style: 'thin' }
-            },
+            border: BORDER_PRESETS.thin,
             numFmt: '#,##0.00'
         },
         totalRow: {
-            font: { name: 'Arial', size: 10, bold: true },
-            alignment: { horizontal: 'right', vertical: 'center' },
-            fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF2F2F2' } },
-            border: {
-                top: { style: 'thin' },
-                left: { style: 'thin' },
-                bottom: { style: 'thin' },
-                right: { style: 'thin' }
-            },
+            font: FONT_PRESETS.boldData,
+            alignment: ALIGNMENT_PRESETS.right,
+            fill: FILL_PRESETS.gray,
+            border: BORDER_PRESETS.thin,
             numFmt: '#,##0.00'
         },
         grandTotal: {
-            font: { name: 'Arial', size: 11, bold: true },
-            alignment: { horizontal: 'right', vertical: 'center' },
-            fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE7E6E6' } },
+            font: FONT_PRESETS.grandTotal,
+            alignment: ALIGNMENT_PRESETS.right,
+            fill: FILL_PRESETS.darkGray,
             border: {
                 top: { style: 'medium' },
                 left: { style: 'thin' },
@@ -95,6 +83,11 @@ const STYLE_PRESETS = {
                 right: { style: 'thin' }
             },
             numFmt: '#,##0.00'
+        },
+        watermark: {
+            font: FONT_PRESETS.watermark,
+            alignment: ALIGNMENT_PRESETS.right,
+            fill: null
         }
     },
 
@@ -102,24 +95,24 @@ const STYLE_PRESETS = {
     flatReport: {
         title: {
             font: { name: 'Calibri', size: 11, bold: false },
-            alignment: { horizontal: 'left', vertical: 'center' },
+            alignment: ALIGNMENT_PRESETS.left,
             fill: null
         },
         columnHeader: {
             font: { name: 'Calibri', size: 11, bold: false },
-            alignment: { horizontal: 'left', vertical: 'center' },
+            alignment: ALIGNMENT_PRESETS.left,
             fill: null,
             border: null
         },
         dataCell: {
             font: { name: 'Calibri', size: 11, bold: false },
-            alignment: { horizontal: 'left', vertical: 'center' },
+            alignment: ALIGNMENT_PRESETS.left,
             fill: null,
             border: null
         },
         numberCell: {
             font: { name: 'Calibri', size: 11, bold: false },
-            alignment: { horizontal: 'right', vertical: 'center' },
+            alignment: ALIGNMENT_PRESETS.right,
             fill: null,
             border: null,
             numFmt: '#,##0.00'
@@ -236,23 +229,7 @@ async function createStyledBalanceSheet(data) {
 
     // === LOGO AND COMPANY BRANDING ===
     try {
-        // Try multiple possible paths for the logo
-        const possiblePaths = [
-            path.join(__dirname, '../../public/assets/images/icons/logo.png'),
-            path.join(__dirname, '../../../frontend/public/images/icons/logo.png'),
-            path.join(__dirname, '../../frontend/public/images/icons/logo.png'),
-            '/app/public/assets/images/icons/logo.png',
-            '/app/frontend/public/images/icons/logo.png'
-        ];
-
-        let logoPath = null;
-        for (const testPath of possiblePaths) {
-            if (fs.existsSync(testPath)) {
-                logoPath = testPath;
-                global.logger.logInfo(`[BALANCE SHEET STYLER] Logo found at: ${logoPath}`);
-                break;
-            }
-        }
+        let logoPath = path.join(__dirname, '../../../public/assets/images/icons/logo-text-lc.svg');
 
         if (logoPath) {
             const imageId = workbook.addImage({
@@ -260,37 +237,18 @@ async function createStyledBalanceSheet(data) {
                 extension: 'png',
             });
 
-            // Add logo to top-left (square dimensions to match actual image 3299x3190)
+            // Add logo to top-left
             worksheet.addImage(imageId, {
                 tl: { col: 0, row: 0 },
-                ext: { width: 40, height: 40 }  // Square dimensions for square logo
+                ext: { width: 40, height: 40 }
             });
-
-            // Company name next to logo
-            const companyRow = worksheet.getRow(currentRow);
-            companyRow.getCell(2).value = 'ATABAI';
-            companyRow.getCell(2).font = { name: 'Arial', size: 16, bold: true, color: { argb: 'FF9500FF' } };
-            companyRow.getCell(2).alignment = { horizontal: 'left', vertical: 'center' };
-            companyRow.height = 30;
             currentRow += 2;
         } else {
-            global.logger.logWarn('[BALANCE SHEET STYLER] Logo not found in any expected location');
-            // Add company name without logo
-            const companyRow = worksheet.getRow(currentRow);
-            companyRow.getCell(1).value = 'ATABAI';
-            companyRow.getCell(1).font = { name: 'Arial', size: 16, bold: true, color: { argb: 'FF9500FF' } };
-            companyRow.getCell(1).alignment = { horizontal: 'center', vertical: 'center' };
-            worksheet.mergeCells(`A${currentRow}:C${currentRow}`);
+            global.logger.logWarn('[BALANCE SHEET STYLER] Logo not found');
             currentRow += 2;
         }
     } catch (error) {
         global.logger.logWarn('[BALANCE SHEET STYLER] Could not load logo:', error.message);
-        // Add company name as fallback
-        const companyRow = worksheet.getRow(currentRow);
-        companyRow.getCell(1).value = 'ATABAI';
-        companyRow.getCell(1).font = { name: 'Arial', size: 16, bold: true, color: { argb: 'FF9500FF' } };
-        companyRow.getCell(1).alignment = { horizontal: 'center', vertical: 'center' };
-        worksheet.mergeCells(`A${currentRow}:C${currentRow}`);
         currentRow += 2;
     }
 
@@ -354,20 +312,10 @@ async function createStyledBalanceSheet(data) {
         section.items.forEach(item => {
             const row = worksheet.getRow(currentRow);
 
-            // // IFRS Code
-            // const codeCell = row.getCell(1);
-            // codeCell.value = item.code;
-            // applyStyle(codeCell, styles.dataCell);
-
             // Line Item
             const labelCell = row.getCell(1);
             labelCell.value = item.label;
             applyStyle(labelCell, styles.dataCell);
-
-            // // NSBU Code
-            // const nsbuCell = row.getCell(3);
-            // nsbuCell.value = item.nsbuCode || item.code;
-            // applyStyle(nsbuCell, styles.dataCell);
 
             // Beginning Balance
             const startCell = row.getCell(2);
@@ -390,7 +338,7 @@ async function createStyledBalanceSheet(data) {
 
             totalRow.getCell(1).value = `Total ${section.name}`;
             applyStyle(totalRow.getCell(1), styles.totalRow);
-            totalRow.getCell(1).alignment = { horizontal: 'left', vertical: 'center' };
+            totalRow.getCell(1).alignment = ALIGNMENT_PRESETS.left;
 
             // Use SUM formula for beginning balance
             totalRow.getCell(2).value = { formula: `SUM(B${sectionStartRow}:B${sectionEndRow})` };
@@ -422,7 +370,7 @@ async function createStyledBalanceSheet(data) {
 
         totalAssetsRow.getCell(1).value = 'TOTAL ASSETS';
         applyStyle(totalAssetsRow.getCell(1), styles.grandTotal);
-        totalAssetsRow.getCell(1).alignment = { horizontal: 'left', vertical: 'center' };
+        totalAssetsRow.getCell(1).alignment = ALIGNMENT_PRESETS.left;
 
         // Create formula that sums all asset section totals
         const assetRefs = assetSectionTotalRows.map(row => `B${row}`).join('+');
@@ -442,7 +390,7 @@ async function createStyledBalanceSheet(data) {
 
         totalEquityRow.getCell(1).value = 'TOTAL EQUITY AND LIABILITIES';
         applyStyle(totalEquityRow.getCell(1), styles.grandTotal);
-        totalEquityRow.getCell(1).alignment = { horizontal: 'left', vertical: 'center' };
+        totalEquityRow.getCell(1).alignment = ALIGNMENT_PRESETS.left;
 
         // Create formula that sums all equity/liability section totals
         const equityRefs = equityLiabSectionTotalRows.map(row => `B${row}`).join('+');
@@ -456,10 +404,15 @@ async function createStyledBalanceSheet(data) {
         currentRow++;
     }
 
+    // === ATABAI WATERMARK ===
+    currentRow += 2;
+    const watermarkRow = worksheet.getRow(currentRow);
+    watermarkRow.getCell(1).value = 'Processed by ATABAI';
+    applyStyle(watermarkRow.getCell(1), styles.watermark);
+    worksheet.mergeCells(currentRow, 1, currentRow, 3);
+
     // === COLUMN WIDTHS ===
-    // worksheet.getColumn(1).width = 15;  // IFRS Code
     worksheet.getColumn(1).width = 50;  // Line Item
-    // worksheet.getColumn(3).width = 15;  // NSBU Code
     worksheet.getColumn(2).width = 20;  // Beginning Balance
     worksheet.getColumn(3).width = 20;  // Ending Balance
 
@@ -521,7 +474,7 @@ function createFlatReport(data) {
                 const cell = excelRow.getCell(index + 1);
                 cell.value = value;
 
-                // Apply number formatting to numeric columns (except first column which is usually text)
+                // Apply number formatting to numeric columns (except first column)
                 if (index > 0 && typeof value === 'number') {
                     applyStyle(cell, styles.numberCell);
                 } else {

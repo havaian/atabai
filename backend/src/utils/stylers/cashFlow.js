@@ -1,60 +1,44 @@
-// utils/stylers/cashFlow.js - FIX YEAR GROUPING
+// utils/stylers/cashFlow.js - WITH ADDITIONAL SOURCES, NO CASH RECONCILIATION, USING SHARED FONTS
 
 const ExcelJS = require('exceljs');
 const path = require('path');
 const fs = require('fs');
+const {
+    FONT_PRESETS,
+    BRAND_COLORS,
+    PRIMARY_FONT,
+} = require('./fontConfig');
 
 async function styleCashFlowReport(data) {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Cash Flow Statement');
 
-    const periods = data.periods || [{ label: 'Total', columnIndex: 1 }];
+    const periods = data.periods || [];
     const periodCount = periods.length;
 
-    global.logger.logInfo(`[CF STYLER] Creating output with ${periodCount} period columns`);
-
-    const columns = [{ width: 50 }];
+    // === COLUMN WIDTHS ===
+    worksheet.getColumn(1).width = 50;
     for (let i = 0; i < periodCount; i++) {
-        columns.push({ width: 15 });
+        worksheet.getColumn(i + 2).width = 18;
     }
-    worksheet.columns = columns;
 
     let currentRow = 1;
 
     // === LOGO ===
     try {
-        const possiblePaths = [
-            path.join(__dirname, '../../public/assets/images/icons/logo.png'),
-            path.join(__dirname, '../../../frontend/public/images/icons/logo.png'),
-            path.join(__dirname, '../../frontend/public/images/icons/logo.png'),
-            '/app/public/assets/images/icons/logo.png',
-            '/app/frontend/public/images/icons/logo.png'
-        ];
-
-        let logoPath = null;
-        for (const testPath of possiblePaths) {
-            if (fs.existsSync(testPath)) {
-                logoPath = testPath;
-                break;
-            }
-        }
-
-        if (logoPath) {
+        let logoPath = path.join(__dirname, '../../../public/assets/images/icons/logo-text-lc.svg');
+        if (fs.existsSync(logoPath)) {
             const imageId = workbook.addImage({
                 filename: logoPath,
-                extension: 'png',
+                extension: 'png'
             });
 
             worksheet.addImage(imageId, {
                 tl: { col: 0, row: 0 },
-                ext: { width: 40, height: 40 }
+                ext: { width: 150, height: 40 }
             });
 
-            const companyRow = worksheet.getRow(currentRow);
-            companyRow.getCell(2).value = 'ATABAI';
-            companyRow.getCell(2).font = { name: 'Arial', size: 16, bold: true, color: { argb: 'FF9500FF' } };
-            companyRow.getCell(2).alignment = { horizontal: 'left', vertical: 'center' };
-            companyRow.height = 30;
+            worksheet.getRow(1).height = 30;
             currentRow += 2;
         } else {
             currentRow += 1;
@@ -67,7 +51,7 @@ async function styleCashFlowReport(data) {
     // === TITLE ===
     const titleRow = worksheet.getRow(currentRow);
     titleRow.getCell(1).value = 'STATEMENT OF CASH FLOWS (IFRS)';
-    titleRow.getCell(1).font = { name: 'Arial', size: 14, bold: true, color: { argb: 'FF1F4E78' } };
+    titleRow.getCell(1).font = { name: PRIMARY_FONT, size: 14, bold: true, color: { argb: BRAND_COLORS.black } };
     titleRow.getCell(1).alignment = { horizontal: 'center', vertical: 'center' };
     worksheet.mergeCells(currentRow, 1, currentRow, periodCount + 1);
     currentRow++;
@@ -75,7 +59,7 @@ async function styleCashFlowReport(data) {
     if (data.companyName) {
         const nameRow = worksheet.getRow(currentRow);
         nameRow.getCell(1).value = data.companyName;
-        nameRow.getCell(1).font = { name: 'Arial', size: 12, bold: true };
+        nameRow.getCell(1).font = { name: PRIMARY_FONT, size: 12, bold: true };
         nameRow.getCell(1).alignment = { horizontal: 'center' };
         worksheet.mergeCells(currentRow, 1, currentRow, periodCount + 1);
         currentRow++;
@@ -84,7 +68,7 @@ async function styleCashFlowReport(data) {
     if (data.period) {
         const periodRow = worksheet.getRow(currentRow);
         periodRow.getCell(1).value = data.period;
-        periodRow.getCell(1).font = { name: 'Arial', size: 10 };
+        periodRow.getCell(1).font = { name: PRIMARY_FONT, size: 10 };
         periodRow.getCell(1).alignment = { horizontal: 'center' };
         worksheet.mergeCells(currentRow, 1, currentRow, periodCount + 1);
         currentRow++;
@@ -97,167 +81,223 @@ async function styleCashFlowReport(data) {
 
     if (yearGroups.length > 1) {
         const yearRow = worksheet.getRow(currentRow);
-
         yearRow.getCell(1).value = '';
 
         for (const group of yearGroups) {
-            const startCol = group.startCol + 2;  // +2: column 1 is description, periods start at column 2
+            const startCol = group.startCol + 2;
             const endCol = group.endCol + 2;
 
             yearRow.getCell(startCol).value = group.year;
-            yearRow.getCell(startCol).font = { name: 'Arial', size: 11, bold: true, color: { argb: 'FFFFFFFF' } };
+            yearRow.getCell(startCol).font = { name: PRIMARY_FONT, size: 11, bold: true, color: { argb: BRAND_COLORS.white } };
             yearRow.getCell(startCol).alignment = { horizontal: 'center', vertical: 'center' };
             yearRow.getCell(startCol).fill = {
                 type: 'pattern',
                 pattern: 'solid',
-                fgColor: { argb: 'FF4472C4' }
+                fgColor: { argb: BRAND_COLORS.headerBlue }
             };
 
             if (startCol < endCol) {
                 worksheet.mergeCells(currentRow, startCol, currentRow, endCol);
-            }
-
-            for (let col = startCol; col <= endCol; col++) {
-                yearRow.getCell(col).fill = {
-                    type: 'pattern',
-                    pattern: 'solid',
-                    fgColor: { argb: 'FF4472C4' }
-                };
-                yearRow.getCell(col).border = {
-                    top: { style: 'thin', color: { argb: 'FFFFFFFF' } },
-                    left: { style: 'thin', color: { argb: 'FFFFFFFF' } },
-                    bottom: { style: 'thin', color: { argb: 'FFFFFFFF' } },
-                    right: { style: 'thin', color: { argb: 'FFFFFFFF' } }
-                };
+                for (let col = startCol + 1; col <= endCol; col++) {
+                    yearRow.getCell(col).fill = {
+                        type: 'pattern',
+                        pattern: 'solid',
+                        fgColor: { argb: BRAND_COLORS.headerBlue }
+                    };
+                }
             }
         }
 
-        yearRow.height = 22;
+        yearRow.height = 20;
         currentRow++;
     }
 
-    // === MONTH/PERIOD ROW ===
+    // === PERIOD HEADER ROW ===
     const headerRow = worksheet.getRow(currentRow);
-    headerRow.getCell(1).value = 'Cash Flow Statement';
-    headerRow.getCell(1).font = { name: 'Arial', size: 11, bold: true, color: { argb: 'FFFFFFFF' } };
-    headerRow.getCell(1).alignment = { horizontal: 'left', vertical: 'center' };
+    headerRow.getCell(1).value = 'Cash Flow Activities';
+    headerRow.getCell(1).font = { name: PRIMARY_FONT, size: 11, bold: true, color: { argb: BRAND_COLORS.white } };
+    headerRow.getCell(1).alignment = { horizontal: 'left', vertical: 'center', indent: 1 };
     headerRow.getCell(1).fill = {
         type: 'pattern',
         pattern: 'solid',
-        fgColor: { argb: 'FF1F4E78' }
+        fgColor: { argb: BRAND_COLORS.headerBlue }
     };
 
-    for (let i = 0; i < periodCount; i++) {
+    for (let i = 0; i < periods.length; i++) {
         const cell = headerRow.getCell(i + 2);
         cell.value = periods[i].label;
-        cell.font = { name: 'Arial', size: 10, bold: true, color: { argb: 'FFFFFFFF' } };
+        cell.font = { name: PRIMARY_FONT, size: 10, bold: true, color: { argb: BRAND_COLORS.white } };
         cell.alignment = { horizontal: 'center', vertical: 'center' };
         cell.fill = {
             type: 'pattern',
             pattern: 'solid',
-            fgColor: { argb: 'FF1F4E78' }
-        };
-        cell.border = {
-            top: { style: 'thin', color: { argb: 'FFFFFFFF' } },
-            left: { style: 'thin', color: { argb: 'FFFFFFFF' } },
-            bottom: { style: 'thin', color: { argb: 'FFFFFFFF' } },
-            right: { style: 'thin', color: { argb: 'FFFFFFFF' } }
+            fgColor: { argb: BRAND_COLORS.headerBlue }
         };
     }
-    headerRow.height = 25;
+
+    headerRow.height = 22;
     currentRow++;
 
+    // === TRACK SECTION RANGES FOR FORMULAS ===
     const sectionRanges = {
         operating: { start: 0, end: 0 },
         investing: { start: 0, end: 0 },
-        financing: { start: 0, end: 0 }
+        financing: { start: 0, end: 0 },
+        additionalSources: { start: 0, end: 0 }
     };
 
-    // === OPERATING ===
-    sectionRanges.operating.start = currentRow + 1;
-    currentRow = addSection(worksheet, currentRow, 'CASH FLOWS FROM OPERATING ACTIVITIES:', periods, data.sections[0], true);
-    sectionRanges.operating.end = currentRow - 1;
-    currentRow = addSectionTotalWithFormulas(worksheet, currentRow, 'Net cash from operating activities', periods, sectionRanges.operating);
-    currentRow++;
+    // === CASH FLOW SECTIONS ===
+    for (const section of data.sections) {
+        const sectionStartRow = currentRow;
 
-    // === INVESTING ===
-    sectionRanges.investing.start = currentRow + 1;
-    currentRow = addSection(worksheet, currentRow, 'CASH FLOWS FROM INVESTING ACTIVITIES:', periods, data.sections[1], false);
-    sectionRanges.investing.end = currentRow - 1;
-    currentRow = addSectionTotalWithFormulas(worksheet, currentRow, 'Net cash from investing activities', periods, sectionRanges.investing);
-    currentRow++;
+        const sectionHeaderRow = worksheet.getRow(currentRow);
+        sectionHeaderRow.getCell(1).value = `CASH FLOWS FROM ${section.name}:`;
+        sectionHeaderRow.getCell(1).font = { name: PRIMARY_FONT, size: 11, bold: true, color: { argb: BRAND_COLORS.white } };
+        sectionHeaderRow.getCell(1).alignment = { horizontal: 'left', vertical: 'center', indent: 1 };
+        sectionHeaderRow.getCell(1).fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: BRAND_COLORS.sectionBlue }
+        };
 
-    // === FINANCING ===
-    sectionRanges.financing.start = currentRow + 1;
-    currentRow = addSection(worksheet, currentRow, 'CASH FLOWS FROM FINANCING ACTIVITIES:', periods, data.sections[2], false);
-    sectionRanges.financing.end = currentRow - 1;
-    currentRow = addSectionTotalWithFormulas(worksheet, currentRow, 'Net cash from financing activities', periods, sectionRanges.financing);
-    currentRow++;
+        for (let i = 0; i < periods.length; i++) {
+            sectionHeaderRow.getCell(i + 2).fill = {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: BRAND_COLORS.sectionBlue }
+            };
+        }
+        sectionHeaderRow.height = 20;
+        currentRow++;
 
-    // === RECONCILIATION ===
+        const itemsStartRow = currentRow;
+
+        for (const item of section.items) {
+            const itemRow = worksheet.getRow(currentRow);
+
+            itemRow.getCell(1).value = item.label;
+            itemRow.getCell(1).font = { name: PRIMARY_FONT, size: 10 };
+            itemRow.getCell(1).alignment = {
+                horizontal: 'left',
+                vertical: 'center',
+                indent: item.isCategory ? 1 : (item.indent || 1)
+            };
+
+            if (item.isCategory) {
+                itemRow.getCell(1).font = { name: PRIMARY_FONT, size: 10, bold: true };
+            }
+
+            for (let i = 0; i < periods.length; i++) {
+                const cell = itemRow.getCell(i + 2);
+                const value = item.periodValues ? item.periodValues[i] : 0;
+
+                // Don't show values for category headers
+                if (!item.isCategory) {
+                    cell.value = value;
+                    cell.numFmt = '#,##0.00';
+                    cell.alignment = { horizontal: 'right', vertical: 'center' };
+
+                    if (value < 0) {
+                        cell.font = { name: PRIMARY_FONT, size: 10, color: { argb: BRAND_COLORS.red } };
+                    }
+                }
+            }
+
+            currentRow++;
+        }
+
+        const itemsEndRow = currentRow - 1;
+
+        // Store range
+        if (section.name === 'OPERATING ACTIVITIES') {
+            sectionRanges.operating.start = itemsStartRow;
+            sectionRanges.operating.end = itemsEndRow;
+        } else if (section.name === 'INVESTING ACTIVITIES') {
+            sectionRanges.investing.start = itemsStartRow;
+            sectionRanges.investing.end = itemsEndRow;
+        } else if (section.name === 'FINANCING ACTIVITIES') {
+            sectionRanges.financing.start = itemsStartRow;
+            sectionRanges.financing.end = itemsEndRow;
+        } else if (section.name === 'ADDITIONAL SOURCES OF CASH FLOW') {
+            sectionRanges.additionalSources.start = itemsStartRow;
+            sectionRanges.additionalSources.end = itemsEndRow;
+        }
+
+        // Add section total with formulas
+        let sectionTotal = null;
+        if (section.name === 'OPERATING ACTIVITIES') {
+            sectionTotal = data.operatingTotal;
+        } else if (section.name === 'INVESTING ACTIVITIES') {
+            sectionTotal = data.investingTotal;
+        } else if (section.name === 'FINANCING ACTIVITIES') {
+            sectionTotal = data.financingTotal;
+        } else if (section.name === 'ADDITIONAL SOURCES OF CASH FLOW') {
+            sectionTotal = data.additionalSourcesTotal;
+        }
+
+        if (sectionTotal) {
+            currentRow = addSectionTotalWithFormulas(
+                worksheet,
+                currentRow,
+                `Net cash from ${section.name.toLowerCase()}`,
+                periods,
+                { start: itemsStartRow, end: itemsEndRow }
+            );
+        }
+
+        currentRow++;
+    }
+
+    // === NO MORE NET CHANGE, CASH BEGINNING, CASH ENDING ===
+    // User requested removal of these lines
+
+    // === RECONCILIATION (FCF ONLY) ===
     if (data.reconciliation && data.reconciliation.length > 0) {
+        currentRow++;
         currentRow = addReconciliationSection(worksheet, currentRow, periods, data.reconciliation);
     }
 
-    // === FINAL RECONCILIATION ===
-    currentRow = addFinalReconciliation(worksheet, currentRow, periods, data, sectionRanges);
+    // === ATABAI WATERMARK ===
+    currentRow += 2;
+    const watermarkRow = worksheet.getRow(currentRow);
+    watermarkRow.getCell(1).value = 'Processed by ATABAI';
+    watermarkRow.getCell(1).font = {
+        name: PRIMARY_FONT,
+        size: 9,
+        italic: true,
+        color: { argb: BRAND_COLORS.primary }
+    };
+    watermarkRow.getCell(1).alignment = { horizontal: 'right' };
+    worksheet.mergeCells(currentRow, 1, currentRow, periodCount + 1);
 
     return workbook;
 }
 
-/**
- * Group periods by year - FIXED LOGIC
- * Strategy: Look forward to find year, apply it backward to all months
- */
 function groupPeriodsByYear(periods) {
-    // Step 1: Extract years from all periods
-    const years = periods.map(p => extractYear(p.label));
-
-    // Step 2: Fill nulls by looking FORWARD and applying year backward
-    for (let i = 0; i < years.length; i++) {
-        if (!years[i]) {
-            // Look forward for next year
-            let foundYear = null;
-            for (let j = i + 1; j < years.length; j++) {
-                if (years[j]) {
-                    foundYear = years[j];
-                    break;
-                }
-            }
-
-            // Apply found year (or keep null if no year found ahead)
-            if (foundYear) {
-                years[i] = foundYear;
-            }
-        }
-    }
-
-    // Step 3: Group consecutive periods with same year
     const groups = [];
     let currentYear = null;
     let currentGroup = null;
 
-    for (let i = 0; i < years.length; i++) {
-        if (years[i] !== currentYear) {
-            // Year changed - start new group
+    for (let i = 0; i < periods.length; i++) {
+        const period = periods[i];
+        const yearMatch = period.label.match(/\b(20\d{2})\b/);
+        const year = yearMatch ? yearMatch[1] : 'Total';
+
+        if (year !== currentYear) {
             if (currentGroup) {
                 groups.push(currentGroup);
             }
-            currentYear = years[i];
             currentGroup = {
-                year: currentYear || 'Total',
+                year: year,
                 startCol: i,
                 endCol: i
             };
+            currentYear = year;
         } else {
-            // Same year - extend current group
-            if (currentGroup) {
-                currentGroup.endCol = i;
-            }
+            currentGroup.endCol = i;
         }
     }
 
-    // Add last group
     if (currentGroup) {
         groups.push(currentGroup);
     }
@@ -265,78 +305,26 @@ function groupPeriodsByYear(periods) {
     return groups;
 }
 
-/**
- * Extract year from period label
- */
-function extractYear(label) {
-    if (!label) return null;
-
-    const str = String(label);
-    const match = str.match(/20\d{2}/);
-
-    return match ? match[0] : null;
-}
-
-function addSection(worksheet, startRow, sectionTitle, periods, sectionData, isOperating) {
-    let currentRow = startRow;
-
-    const headerRow = worksheet.getRow(currentRow);
-    headerRow.getCell(1).value = sectionTitle;
-    headerRow.getCell(1).font = { name: 'Arial', size: 11, bold: true, color: { argb: 'FFFFFFFF' } };
-    headerRow.getCell(1).alignment = { horizontal: 'left', vertical: 'center', indent: 1 };
-    headerRow.getCell(1).fill = {
-        type: 'pattern',
-        pattern: 'solid',
-        fgColor: { argb: 'FF1F4E78' }
-    };
-
-    for (let i = 0; i < periods.length; i++) {
-        headerRow.getCell(i + 2).fill = {
-            type: 'pattern',
-            pattern: 'solid',
-            fgColor: { argb: 'FF1F4E78' }
-        };
+function getColumnLetter(col) {
+    let letter = '';
+    while (col > 0) {
+        const remainder = (col - 1) % 26;
+        letter = String.fromCharCode(65 + remainder) + letter;
+        col = Math.floor((col - 1) / 26);
     }
-    headerRow.height = 20;
-    currentRow++;
-
-    if (sectionData && sectionData.items) {
-        for (const item of sectionData.items) {
-            const itemRow = worksheet.getRow(currentRow);
-
-            itemRow.getCell(1).value = item.label;
-            itemRow.getCell(1).font = { name: 'Arial', size: 10 };
-            itemRow.getCell(1).alignment = { horizontal: 'left', vertical: 'center', indent: item.indent || 1 };
-
-            for (let i = 0; i < periods.length; i++) {
-                const cell = itemRow.getCell(i + 2);
-                const value = item.periodValues ? item.periodValues[i] : 0;
-                cell.value = value;
-                cell.numFmt = '#,##0.00';
-                cell.alignment = { horizontal: 'right', vertical: 'center' };
-
-                if (value < 0) {
-                    cell.font = { name: 'Arial', size: 10, color: { argb: 'FFCC0000' } };
-                }
-            }
-
-            currentRow++;
-        }
-    }
-
-    return currentRow;
+    return letter;
 }
 
 function addSectionTotalWithFormulas(worksheet, row, label, periods, range) {
     const totalRow = worksheet.getRow(row);
 
     totalRow.getCell(1).value = label;
-    totalRow.getCell(1).font = { name: 'Arial', size: 11, bold: true };
+    totalRow.getCell(1).font = { name: PRIMARY_FONT, size: 11, bold: true };
     totalRow.getCell(1).alignment = { horizontal: 'left', vertical: 'center', indent: 1 };
     totalRow.getCell(1).fill = {
         type: 'pattern',
         pattern: 'solid',
-        fgColor: { argb: 'FFD9E1F2' }
+        fgColor: { argb: BRAND_COLORS.lightBlue }
     };
 
     for (let i = 0; i < periods.length; i++) {
@@ -346,12 +334,12 @@ function addSectionTotalWithFormulas(worksheet, row, label, periods, range) {
         const formula = `=SUM(${colLetter}${range.start}:${colLetter}${range.end})`;
         cell.value = { formula: formula };
         cell.numFmt = '#,##0.00';
-        cell.font = { name: 'Arial', size: 11, bold: true };
+        cell.font = { name: PRIMARY_FONT, size: 11, bold: true };
         cell.alignment = { horizontal: 'right', vertical: 'center' };
         cell.fill = {
             type: 'pattern',
             pattern: 'solid',
-            fgColor: { argb: 'FFD9E1F2' }
+            fgColor: { argb: BRAND_COLORS.lightBlue }
         };
         cell.border = {
             top: { style: 'thin' },
@@ -368,29 +356,30 @@ function addReconciliationSection(worksheet, startRow, periods, reconciliationIt
 
     const headerRow = worksheet.getRow(currentRow);
     headerRow.getCell(1).value = 'RECONCILIATION TO FREE CASH FLOW:';
-    headerRow.getCell(1).font = { name: 'Arial', size: 11, bold: true, color: { argb: 'FFFFFFFF' } };
+    headerRow.getCell(1).font = { name: PRIMARY_FONT, size: 11, bold: true, color: { argb: BRAND_COLORS.white } };
     headerRow.getCell(1).alignment = { horizontal: 'left', vertical: 'center', indent: 1 };
     headerRow.getCell(1).fill = {
         type: 'pattern',
         pattern: 'solid',
-        fgColor: { argb: 'FF70AD47' }
+        fgColor: { argb: BRAND_COLORS.green }
     };
 
     for (let i = 0; i < periods.length; i++) {
         headerRow.getCell(i + 2).fill = {
             type: 'pattern',
             pattern: 'solid',
-            fgColor: { argb: 'FF70AD47' }
+            fgColor: { argb: BRAND_COLORS.green }
         };
     }
     headerRow.height = 20;
     currentRow++;
 
+    // Only FCF items (no Остатки на начало/конец)
     for (const item of reconciliationItems) {
         const itemRow = worksheet.getRow(currentRow);
 
         itemRow.getCell(1).value = item.label;
-        itemRow.getCell(1).font = { name: 'Arial', size: 10, bold: item.type === 'FCF' };
+        itemRow.getCell(1).font = { name: PRIMARY_FONT, size: 10, bold: item.type === 'FCF' };
         itemRow.getCell(1).alignment = { horizontal: 'left', vertical: 'center', indent: item.type === 'FCF' ? 1 : 2 };
 
         for (let i = 0; i < periods.length; i++) {
@@ -401,14 +390,14 @@ function addReconciliationSection(worksheet, startRow, periods, reconciliationIt
             cell.alignment = { horizontal: 'right', vertical: 'center' };
 
             if (item.type === 'FCF') {
-                cell.font = { name: 'Arial', size: 10, bold: true };
+                cell.font = { name: PRIMARY_FONT, size: 10, bold: true };
                 cell.fill = {
                     type: 'pattern',
                     pattern: 'solid',
-                    fgColor: { argb: 'FFE2EFDA' }
+                    fgColor: { argb: BRAND_COLORS.lightGreen }
                 };
             } else if (value < 0) {
-                cell.font = { name: 'Arial', size: 10, color: { argb: 'FFCC0000' } };
+                cell.font = { name: PRIMARY_FONT, size: 10, color: { argb: BRAND_COLORS.red } };
             }
         }
 
@@ -417,128 +406,6 @@ function addReconciliationSection(worksheet, startRow, periods, reconciliationIt
 
     currentRow++;
     return currentRow;
-}
-
-function addFinalReconciliation(worksheet, startRow, periods, data, sectionRanges) {
-    let currentRow = startRow;
-
-    const operatingTotalRow = sectionRanges.operating.end + 1;
-    const investingTotalRow = sectionRanges.investing.end + 1;
-    const financingTotalRow = sectionRanges.financing.end + 1;
-
-    const netRow = worksheet.getRow(currentRow);
-    netRow.getCell(1).value = 'Net increase/(decrease) in cash and cash equivalents';
-    netRow.getCell(1).font = { name: 'Arial', size: 11, bold: true };
-    netRow.getCell(1).alignment = { horizontal: 'left', vertical: 'center', indent: 1 };
-    netRow.getCell(1).fill = {
-        type: 'pattern',
-        pattern: 'solid',
-        fgColor: { argb: 'FFFCE4D6' }
-    };
-
-    for (let i = 0; i < periods.length; i++) {
-        const cell = netRow.getCell(i + 2);
-        const colLetter = getColumnLetter(i + 2);
-
-        const formula = `=${colLetter}${operatingTotalRow}+${colLetter}${investingTotalRow}+${colLetter}${financingTotalRow}`;
-        cell.value = { formula: formula };
-        cell.numFmt = '#,##0.00';
-        cell.font = { name: 'Arial', size: 11, bold: true };
-        cell.alignment = { horizontal: 'right', vertical: 'center' };
-        cell.fill = {
-            type: 'pattern',
-            pattern: 'solid',
-            fgColor: { argb: 'FFFCE4D6' }
-        };
-        cell.border = {
-            top: { style: 'medium' },
-            bottom: { style: 'thin' }
-        };
-    }
-    netRow.height = 22;
-    const netChangeRow = currentRow;
-    currentRow++;
-
-    let fxEffectsRow = null;
-    const hasFxEffects = data.fxEffects && data.fxEffects.some(v => Math.abs(v) > 0.01);
-    if (hasFxEffects) {
-        fxEffectsRow = currentRow;
-        const fxRow = worksheet.getRow(currentRow);
-        fxRow.getCell(1).value = 'Effect of exchange rate changes';
-        fxRow.getCell(1).font = { name: 'Arial', size: 10 };
-        fxRow.getCell(1).alignment = { horizontal: 'left', vertical: 'center', indent: 1 };
-
-        for (let i = 0; i < periods.length; i++) {
-            const cell = fxRow.getCell(i + 2);
-            cell.value = data.fxEffects[i] || 0;
-            cell.numFmt = '#,##0.00';
-            cell.alignment = { horizontal: 'right', vertical: 'center' };
-        }
-        currentRow++;
-    }
-
-    const beginRow = worksheet.getRow(currentRow);
-    beginRow.getCell(1).value = 'Cash and cash equivalents at beginning of period';
-    beginRow.getCell(1).font = { name: 'Arial', size: 10 };
-    beginRow.getCell(1).alignment = { horizontal: 'left', vertical: 'center', indent: 1 };
-
-    for (let i = 0; i < periods.length; i++) {
-        const cell = beginRow.getCell(i + 2);
-        cell.value = data.cashBeginning[i] || 0;
-        cell.numFmt = '#,##0.00';
-        cell.alignment = { horizontal: 'right', vertical: 'center' };
-    }
-    const beginBalanceRow = currentRow;
-    currentRow++;
-
-    const endRow = worksheet.getRow(currentRow);
-    endRow.getCell(1).value = 'Cash and cash equivalents at end of period';
-    endRow.getCell(1).font = { name: 'Arial', size: 11, bold: true, color: { argb: 'FFFFFFFF' } };
-    endRow.getCell(1).alignment = { horizontal: 'left', vertical: 'center', indent: 1 };
-    endRow.getCell(1).fill = {
-        type: 'pattern',
-        pattern: 'solid',
-        fgColor: { argb: 'FF4472C4' }
-    };
-
-    for (let i = 0; i < periods.length; i++) {
-        const cell = endRow.getCell(i + 2);
-        const colLetter = getColumnLetter(i + 2);
-
-        let formula;
-        if (fxEffectsRow) {
-            formula = `=${colLetter}${beginBalanceRow}+${colLetter}${netChangeRow}+${colLetter}${fxEffectsRow}`;
-        } else {
-            formula = `=${colLetter}${beginBalanceRow}+${colLetter}${netChangeRow}`;
-        }
-
-        cell.value = { formula: formula };
-        cell.numFmt = '#,##0.00';
-        cell.font = { name: 'Arial', size: 11, bold: true, color: { argb: 'FFFFFFFF' } };
-        cell.alignment = { horizontal: 'right', vertical: 'center' };
-        cell.fill = {
-            type: 'pattern',
-            pattern: 'solid',
-            fgColor: { argb: 'FF4472C4' }
-        };
-        cell.border = {
-            top: { style: 'medium' },
-            bottom: { style: 'double' }
-        };
-    }
-    endRow.height = 22;
-
-    return currentRow + 1;
-}
-
-function getColumnLetter(columnNumber) {
-    let letter = '';
-    while (columnNumber > 0) {
-        const remainder = (columnNumber - 1) % 26;
-        letter = String.fromCharCode(65 + remainder) + letter;
-        columnNumber = Math.floor((columnNumber - 1) / 26);
-    }
-    return letter;
 }
 
 module.exports = {

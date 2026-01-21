@@ -1,4 +1,4 @@
-// extractors/cashFlow.js - PRIORITIZE MONTHS OVER YEARS
+// extractors/cashFlow.js - WITH ADDITIONAL SOURCES OF CASH FLOW
 
 function extractCashFlowData(sheet) {
     global.logger.logInfo('[CF EXTRACTOR] Starting extraction...');
@@ -20,6 +20,7 @@ function extractCashFlowData(sheet) {
         dataMap: new Map(),
         periods: [],
         reconciliationItems: new Map(),
+        additionalSourcesItems: new Map(),  // NEW: For metal flows, etc.
         sections: []
     };
 
@@ -152,6 +153,7 @@ function extractCashFlowData(sheet) {
     let currentSubSection = null;
     let itemsExtracted = 0;
     let uniqueKeyCounter = 0;
+    let inAdditionalSources = false;
     let inReconciliation = false;
 
     for (let i = dataStartRow; i < rowCount; i++) {
@@ -161,15 +163,9 @@ function extractCashFlowData(sheet) {
         const lineItemStr = String(lineItem).trim();
         if (!lineItemStr || lineItemStr.length === 0) continue;
 
-        // Skip "CF" row
-        if (lineItemStr === 'CF') {
-            global.logger.logInfo(`[CF EXTRACTOR] Row ${i}: Skipping "CF" marker`);
-            continue;
-        }
-
-        // Check for FCF
+        // Check for FCF - THIS IS THE LAST THING WE EXTRACT
         if (isFCFMarker(lineItemStr)) {
-            global.logger.logInfo(`[CF EXTRACTOR] Row ${i}: Found FCF "${lineItemStr}"`);
+            global.logger.logInfo(`[CF EXTRACTOR] Row ${i}: Found FCF "${lineItemStr}" - STOPPING EXTRACTION`);
             inReconciliation = true;
 
             const periodValues = [];
@@ -186,82 +182,106 @@ function extractCashFlowData(sheet) {
                 type: 'FCF'
             });
 
-            continue;
-        }
-
-        // Reconciliation items
-        if (inReconciliation) {
-            if (isReconciliationItem(lineItemStr)) {
-                const periodValues = [];
-                for (const period of result.periods) {
-                    const cellValue = getCellValue(i, period.columnIndex);
-                    const numValue = Number(cellValue) || 0;
-                    periodValues.push(numValue);
-                }
-
-                const reconcilKey = `RECONCIL_${uniqueKeyCounter++}`;
-                result.reconciliationItems.set(reconcilKey, {
-                    lineItem: lineItemStr,
-                    periodValues: periodValues,
-                    total: periodValues.reduce((sum, val) => sum + val, 0),
-                    type: 'ADJUSTMENT'
-                });
-
-                global.logger.logInfo(`[CF EXTRACTOR] Row ${i}: Reconciliation "${lineItemStr}"`);
-                continue;
-            }
-            global.logger.logInfo(`[CF EXTRACTOR] Row ${i}: End of reconciliation`);
+            // STOP EXTRACTION AFTER FCF
             break;
         }
 
-        // Detect sections
-        const detectedSection = detectSection(lineItemStr);
-        if (detectedSection) {
-            currentSection = detectedSection;
+        // Check for "CF" marker - START OF ADDITIONAL SOURCES
+        if (lineItemStr === 'CF') {
+            global.logger.logInfo(`[CF EXTRACTOR] Row ${i}: Found "CF" marker - STARTING ADDITIONAL SOURCES`);
+            inAdditionalSources = true;
+            currentSection = null;
             currentSubSection = null;
-            global.logger.logInfo(`[CF EXTRACTOR] Row ${i}: ${detectedSection} ACTIVITIES`);
             continue;
         }
 
-        const detectedSubSection = detectSubSection(lineItemStr);
-        if (detectedSubSection) {
-            currentSubSection = detectedSubSection;
-            global.logger.logInfo(`[CF EXTRACTOR] Row ${i}: ${detectedSubSection}`);
-            continue;
-        }
+        // Additional sources section (between CF and FCF)
+        if (inAdditionalSources && !inReconciliation) {
+            const periodValues = [];
+            for (const period of result.periods) {
+                const cellValue = getCellValue(i, period.columnIndex);
+                const numValue = Number(cellValue) || 0;
+                periodValues.push(numValue);
+            }
 
-        // Extract values
-        const periodValues = [];
-        let totalValue = 0;
+            // Check if this is a category or subcategory
+            const isCategory = isAdditionalSourcesCategory(lineItemStr);
 
-        for (const period of result.periods) {
-            const cellValue = getCellValue(i, period.columnIndex);
-            const numValue = Number(cellValue) || 0;
-            periodValues.push(numValue);
-            totalValue += numValue;
-        }
-
-        if (currentSection) {
-            const uniqueKey = `${currentSection}_${currentSubSection || 'MAIN'}_${lineItemStr}_${uniqueKeyCounter++}`;
-
-            result.dataMap.set(uniqueKey, {
+            const additionalKey = `ADDITIONAL_${uniqueKeyCounter++}`;
+            result.additionalSourcesItems.set(additionalKey, {
                 lineItem: lineItemStr,
-                section: currentSection,
-                subSection: currentSubSection,
                 periodValues: periodValues,
-                total: totalValue,
-                isInflow: currentSubSection === 'INFLOW' || totalValue >= 0,
-                isOutflow: currentSubSection === 'OUTFLOW' || totalValue < 0,
-                row: i
+                total: periodValues.reduce((sum, val) => sum + val, 0),
+                isCategory: isCategory,
+                indent: isCategory ? 0 : 1
             });
 
-            itemsExtracted++;
+            global.logger.logInfo(`[CF EXTRACTOR] Row ${i}: Additional source "${lineItemStr}"`);
+            continue;
+        }
+
+        // Detect sections (only before CF marker)
+        if (!inAdditionalSources) {
+            const detectedSection = detectSection(lineItemStr);
+            if (detectedSection) {
+                currentSection = detectedSection;
+                currentSubSection = null;
+                global.logger.logInfo(`[CF EXTRACTOR] Row ${i}: ${detectedSection} ACTIVITIES`);
+                continue;
+            }
+
+            const detectedSubSection = detectSubSection(lineItemStr);
+            if (detectedSubSection) {
+                currentSubSection = detectedSubSection;
+                global.logger.logInfo(`[CF EXTRACTOR] Row ${i}: ${detectedSubSection}`);
+                continue;
+            }
+
+            // Extract values
+            const periodValues = [];
+            let totalValue = 0;
+
+            for (const period of result.periods) {
+                const cellValue = getCellValue(i, period.columnIndex);
+                const numValue = Number(cellValue) || 0;
+                periodValues.push(numValue);
+                totalValue += numValue;
+            }
+
+            if (currentSection) {
+                const uniqueKey = `${currentSection}_${currentSubSection || 'MAIN'}_${lineItemStr}_${uniqueKeyCounter++}`;
+
+                result.dataMap.set(uniqueKey, {
+                    lineItem: lineItemStr,
+                    section: currentSection,
+                    subSection: currentSubSection,
+                    periodValues: periodValues,
+                    total: totalValue,
+                    isInflow: currentSubSection === 'INFLOW' || totalValue >= 0,
+                    isOutflow: currentSubSection === 'OUTFLOW' || totalValue < 0,
+                    row: i
+                });
+
+                itemsExtracted++;
+            }
         }
     }
 
-    global.logger.logInfo(`[CF EXTRACTOR] Complete. Items: ${itemsExtracted}, Reconciliation: ${result.reconciliationItems.size}`);
+    global.logger.logInfo(`[CF EXTRACTOR] Complete. Items: ${itemsExtracted}, Additional Sources: ${result.additionalSourcesItems.size}, Reconciliation: ${result.reconciliationItems.size}`);
 
     return result;
+}
+
+/**
+ * Check if this line is a category header for additional sources
+ */
+function isAdditionalSourcesCategory(text) {
+    const lower = text.toLowerCase();
+
+    // Main category
+    if (lower.includes('движение дс') || lower.includes('pul oqimi harakati')) return true;
+
+    return false;
 }
 
 /**
@@ -306,20 +326,6 @@ function hasYearsOrQuarters(cellB, cellC) {
 
     // Quarters
     if (b.match(/q[1-4]/i) || b.includes('квартал')) return true;
-
-    return false;
-}
-
-function isReconciliationItem(text) {
-    const lower = text.toLowerCase();
-
-    if (lower.includes('металл') || lower.includes('metall')) return true;
-    if (lower.includes('прогон') || lower.includes('progon')) return true;
-    if (lower.includes('схем') || lower.includes('sxem')) return true;
-    if (lower.includes('корректир') || lower.includes('korrektir')) return true;
-    if (lower.includes('движение дс')) return true;
-    if (lower.includes('остатки')) return true;
-    if (lower.includes('qoldiq')) return true;
 
     return false;
 }

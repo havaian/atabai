@@ -1,4 +1,4 @@
-// processors/cashFlow.js - WITH RECONCILIATION SUPPORT
+// processors/cashFlow.js - WITH ADDITIONAL SOURCES SUPPORT
 
 const { readExcelFile } = require('./readers/excelReader');
 const { extractCashFlowData } = require('./extractors/cashFlow');
@@ -27,14 +27,15 @@ async function processCashFlowTemplate(input) {
 
         const sheet = normalizedWorkbook.sheets[0];
 
-        // Extract (now includes reconciliationItems)
+        // Extract (now includes additionalSourcesItems)
         const extracted = extractCashFlowData(sheet);
 
-        // Transform (now accepts reconciliationItems)
+        // Transform (now accepts additionalSourcesItems)
         const ifrsStructure = transformToIFRSCashFlow(
             extracted.dataMap,
             extracted.periods,
-            extracted.reconciliationItems
+            extracted.reconciliationItems,
+            extracted.additionalSourcesItems  // NEW
         );
 
         // Style
@@ -48,8 +49,9 @@ async function processCashFlowTemplate(input) {
             operatingTotal: ifrsStructure.operatingTotal,
             investingTotal: ifrsStructure.investingTotal,
             financingTotal: ifrsStructure.financingTotal,
+            additionalSourcesTotal: ifrsStructure.additionalSourcesTotal,  // NEW
             netChange: ifrsStructure.netChange,
-            reconciliation: ifrsStructure.reconciliation,  // Pass reconciliation items
+            reconciliation: ifrsStructure.reconciliation,  // Pass reconciliation items (FCF only)
             fxEffects: ifrsStructure.fxEffects,
             cashBeginning: ifrsStructure.cashBeginning,
             cashEnding: ifrsStructure.cashEnding
