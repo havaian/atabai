@@ -229,7 +229,7 @@ async function createStyledBalanceSheet(data) {
 
     // === LOGO AND COMPANY BRANDING ===
     try {
-        let logoPath = path.join(__dirname, '../../../public/assets/images/icons/logo-text-lc.svg');
+        let logoPath = path.join(__dirname, '../../../public/assets/images/icons/logo-text-lc.png');
 
         if (logoPath) {
             const imageId = workbook.addImage({
