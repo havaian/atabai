@@ -275,33 +275,41 @@ async function styleCashFlowReport(data) {
 
 function groupPeriodsByYear(periods) {
     const groups = [];
+    
+    // First, assign years to each period by looking for summary columns
+    const periodYears = [];
     let currentYear = null;
-    let currentGroup = null;
-
+    
     for (let i = 0; i < periods.length; i++) {
         const period = periods[i];
         const yearMatch = period.label.match(/\b(20\d{2})\b/);
-        const year = yearMatch ? yearMatch[1] : 'Total';
-
-        if (year !== currentYear) {
-            if (currentGroup) {
-                groups.push(currentGroup);
-            }
-            currentGroup = {
-                year: year,
-                startCol: i,
-                endCol: i
-            };
-            currentYear = year;
-        } else {
-            currentGroup.endCol = i;
+        
+        if (yearMatch) {
+            // Found a year (likely in "Итого 2024" or similar)
+            currentYear = yearMatch[1];
         }
+        
+        periodYears[i] = currentYear;
     }
-
-    if (currentGroup) {
-        groups.push(currentGroup);
+    
+    // Now group consecutive periods with the same year
+    let i = 0;
+    while (i < periods.length) {
+        const year = periodYears[i];
+        const startCol = i;
+        
+        // Find end of this year group
+        while (i < periods.length && periodYears[i] === year) {
+            i++;
+        }
+        
+        groups.push({
+            year: year || 'Unknown',
+            startCol: startCol,
+            endCol: i - 1
+        });
     }
-
+    
     return groups;
 }
 
