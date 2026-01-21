@@ -26,7 +26,7 @@ async function styleCashFlowReport(data) {
 
     // === LOGO ===
     try {
-        let logoPath = path.join(__dirname, '../../../public/assets/images/icons/logo-text-lc.png');
+        let logoPath = path.join(__dirname, '../../../public/assets/images/icons/logo-text-uc.png');
         if (fs.existsSync(logoPath)) {
             const imageId = workbook.addImage({
                 filename: logoPath,
