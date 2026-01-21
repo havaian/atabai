@@ -276,23 +276,24 @@ async function styleCashFlowReport(data) {
 function groupPeriodsByYear(periods) {
     const groups = [];
     
-    // First, assign years to each period by looking for summary columns
+    // First, assign years to each period by working backwards from summary columns
     const periodYears = [];
     let currentYear = null;
     
-    for (let i = 0; i < periods.length; i++) {
+    // Scan backwards so that when we find "Итого 2024", we can assign 2024 to preceding months
+    for (let i = periods.length - 1; i >= 0; i--) {
         const period = periods[i];
         const yearMatch = period.label.match(/\b(20\d{2})\b/);
         
         if (yearMatch) {
-            // Found a year (likely in "Итого 2024" or similar)
+            // Found a year (in "Итого 2024" or similar)
             currentYear = yearMatch[1];
         }
         
         periodYears[i] = currentYear;
     }
     
-    // Now group consecutive periods with the same year
+    // Now group consecutive periods with the same year (forward pass)
     let i = 0;
     while (i < periods.length) {
         const year = periodYears[i];
