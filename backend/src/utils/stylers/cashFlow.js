@@ -1,4 +1,4 @@
-// utils/stylers/cashFlow.js - WITH ADDITIONAL SOURCES, NO CASH RECONCILIATION, USING SHARED FONTS
+// utils/stylers/cashFlow.js
 
 const ExcelJS = require('exceljs');
 const path = require('path');
@@ -148,6 +148,20 @@ async function styleCashFlowReport(data) {
 
     // === CASH FLOW SECTIONS ===
     for (const section of data.sections) {
+        // Check if this is a summary section (CF or FCF)
+        if (section.isSummary) {
+            currentRow = addSummarySection(
+                worksheet,
+                currentRow,
+                section.name,
+                section.items[0].label,
+                periods,
+                section.items[0].periodValues
+            );
+            currentRow++;
+            continue;
+        }
+
         const sectionStartRow = currentRow;
 
         const sectionHeaderRow = worksheet.getRow(currentRow);
@@ -218,7 +232,7 @@ async function styleCashFlowReport(data) {
         } else if (section.name === 'FINANCING ACTIVITIES') {
             sectionRanges.financing.start = itemsStartRow;
             sectionRanges.financing.end = itemsEndRow;
-        } else if (section.name === 'ADDITIONAL SOURCES OF CASH FLOW') {
+        } else if (section.name === 'ADDITIONAL SOURCES') {
             sectionRanges.additionalSources.start = itemsStartRow;
             sectionRanges.additionalSources.end = itemsEndRow;
         }
@@ -231,7 +245,7 @@ async function styleCashFlowReport(data) {
             sectionTotal = data.investingTotal;
         } else if (section.name === 'FINANCING ACTIVITIES') {
             sectionTotal = data.financingTotal;
-        } else if (section.name === 'ADDITIONAL SOURCES OF CASH FLOW') {
+        } else if (section.name === 'ADDITIONAL SOURCES') {
             sectionTotal = data.additionalSourcesTotal;
         }
 
@@ -246,15 +260,6 @@ async function styleCashFlowReport(data) {
         }
 
         currentRow++;
-    }
-
-    // === NO MORE NET CHANGE, CASH BEGINNING, CASH ENDING ===
-    // User requested removal of these lines
-
-    // === RECONCILIATION (FCF ONLY) ===
-    if (data.reconciliation && data.reconciliation.length > 0) {
-        currentRow++;
-        currentRow = addReconciliationSection(worksheet, currentRow, periods, data.reconciliation);
     }
 
     // === ATABAI WATERMARK ===
@@ -360,60 +365,69 @@ function addSectionTotalWithFormulas(worksheet, row, label, periods, range) {
     return row + 1;
 }
 
-function addReconciliationSection(worksheet, startRow, periods, reconciliationItems) {
+function addSummarySection(worksheet, startRow, sectionName, label, periods, periodValues) {
     let currentRow = startRow;
 
+    // Header row with special color for CF/FCF
     const headerRow = worksheet.getRow(currentRow);
-    headerRow.getCell(1).value = 'RECONCILIATION TO FREE CASH FLOW:';
-    headerRow.getCell(1).font = { name: PRIMARY_FONT, size: 11, bold: true, color: { argb: BRAND_COLORS.white } };
+    headerRow.getCell(1).value = sectionName;
+    headerRow.getCell(1).font = { name: PRIMARY_FONT, size: 12, bold: true, color: { argb: BRAND_COLORS.white } };
     headerRow.getCell(1).alignment = { horizontal: 'left', vertical: 'center', indent: 1 };
+    
+    const headerColor = sectionName === 'FCF' ? BRAND_COLORS.green : BRAND_COLORS.primary;
     headerRow.getCell(1).fill = {
         type: 'pattern',
         pattern: 'solid',
-        fgColor: { argb: BRAND_COLORS.green }
+        fgColor: { argb: headerColor }
     };
 
     for (let i = 0; i < periods.length; i++) {
         headerRow.getCell(i + 2).fill = {
             type: 'pattern',
             pattern: 'solid',
-            fgColor: { argb: BRAND_COLORS.green }
+            fgColor: { argb: headerColor }
         };
     }
-    headerRow.height = 20;
+    headerRow.height = 22;
     currentRow++;
 
-    // Only FCF items (no Остатки на начало/конец)
-    for (const item of reconciliationItems) {
-        const itemRow = worksheet.getRow(currentRow);
+    // Value row
+    const valueRow = worksheet.getRow(currentRow);
+    valueRow.getCell(1).value = label;
+    valueRow.getCell(1).font = { name: PRIMARY_FONT, size: 11, bold: true };
+    valueRow.getCell(1).alignment = { horizontal: 'left', vertical: 'center', indent: 1 };
 
-        itemRow.getCell(1).value = item.label;
-        itemRow.getCell(1).font = { name: PRIMARY_FONT, size: 10, bold: item.type === 'FCF' };
-        itemRow.getCell(1).alignment = { horizontal: 'left', vertical: 'center', indent: item.type === 'FCF' ? 1 : 2 };
+    const bgColor = sectionName === 'FCF' ? BRAND_COLORS.lightGreen : BRAND_COLORS.lightBlue;
+    valueRow.getCell(1).fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: bgColor }
+    };
 
-        for (let i = 0; i < periods.length; i++) {
-            const cell = itemRow.getCell(i + 2);
-            const value = item.periodValues[i];
-            cell.value = value;
-            cell.numFmt = '#,##0.00';
-            cell.alignment = { horizontal: 'right', vertical: 'center' };
+    for (let i = 0; i < periods.length; i++) {
+        const cell = valueRow.getCell(i + 2);
+        cell.value = periodValues[i];
+        cell.numFmt = '#,##0.00';
+        cell.font = { name: PRIMARY_FONT, size: 11, bold: true };
+        cell.alignment = { horizontal: 'right', vertical: 'center' };
+        cell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: bgColor }
+        };
+        cell.border = {
+            top: { style: 'thin' },
+            bottom: { style: 'double' }
+        };
 
-            if (item.type === 'FCF') {
-                cell.font = { name: PRIMARY_FONT, size: 10, bold: true };
-                cell.fill = {
-                    type: 'pattern',
-                    pattern: 'solid',
-                    fgColor: { argb: BRAND_COLORS.lightGreen }
-                };
-            } else if (value < 0) {
-                cell.font = { name: PRIMARY_FONT, size: 10, color: { argb: BRAND_COLORS.red } };
-            }
+        if (periodValues[i] < 0) {
+            cell.font = { name: PRIMARY_FONT, size: 11, bold: true, color: { argb: BRAND_COLORS.red } };
         }
-
-        currentRow++;
     }
 
+    valueRow.height = 24;
     currentRow++;
+
     return currentRow;
 }
 

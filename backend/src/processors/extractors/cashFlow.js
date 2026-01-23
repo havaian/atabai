@@ -1,4 +1,4 @@
-// extractors/cashFlow.js - WITH ADDITIONAL SOURCES OF CASH FLOW
+// extractors/cashFlow.js
 
 function extractCashFlowData(sheet) {
     global.logger.logInfo('[CF EXTRACTOR] Starting extraction...');

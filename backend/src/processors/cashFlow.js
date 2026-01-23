@@ -1,4 +1,4 @@
-// processors/cashFlow.js - WITH ADDITIONAL SOURCES SUPPORT
+// processors/cashFlow.js
 
 const { readExcelFile } = require('./readers/excelReader');
 const { extractCashFlowData } = require('./extractors/cashFlow');

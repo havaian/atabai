@@ -1,10 +1,9 @@
-// transformers/cashFlow.js - WITH ADDITIONAL SOURCES OF CASH FLOW SECTION
+// transformers/cashFlow.js
 
 function transformToIFRSCashFlow(dataMap, periods, reconciliationItems, additionalSourcesItems) {
     global.logger.logInfo('[CF TRANSFORMER] Starting transformation...');
     global.logger.logInfo(`[CF TRANSFORMER] Input items: ${dataMap.size}`);
     global.logger.logInfo(`[CF TRANSFORMER] Additional sources: ${additionalSourcesItems?.size || 0}`);
-    global.logger.logInfo(`[CF TRANSFORMER] Reconciliation items: ${reconciliationItems?.size || 0}`);
     global.logger.logInfo(`[CF TRANSFORMER] Periods: ${periods.length}`);
 
     const result = {
@@ -13,12 +12,9 @@ function transformToIFRSCashFlow(dataMap, periods, reconciliationItems, addition
         operatingTotal: new Array(periods?.length || 1).fill(0),
         investingTotal: new Array(periods?.length || 1).fill(0),
         financingTotal: new Array(periods?.length || 1).fill(0),
-        additionalSourcesTotal: new Array(periods?.length || 1).fill(0),
-        netChange: new Array(periods?.length || 1).fill(0),
-        reconciliation: [],  // FCF only
-        fxEffects: new Array(periods?.length || 1).fill(0),
-        cashBeginning: new Array(periods?.length || 1).fill(0),
-        cashEnding: new Array(periods?.length || 1).fill(0)
+        cfTotal: new Array(periods?.length || 1).fill(0),  // NEW: CF = Op + Inv + Fin
+        fcfTotal: new Array(periods?.length || 1).fill(0), // NEW: FCF = Op + Inv
+        additionalSourcesTotal: new Array(periods?.length || 1).fill(0)
     };
 
     const operatingItems = [];
@@ -93,19 +89,6 @@ function transformToIFRSCashFlow(dataMap, periods, reconciliationItems, addition
         }
     }
 
-    // Process reconciliation items (FCF only)
-    if (reconciliationItems && reconciliationItems.size > 0) {
-        for (const [key, data] of reconciliationItems.entries()) {
-            result.reconciliation.push({
-                label: data.lineItem,
-                periodValues: data.periodValues,
-                total: data.total,
-                type: data.type  // 'FCF'
-            });
-            global.logger.logInfo(`[CF TRANSFORMER] Reconciliation: "${data.lineItem}" (${data.type})`);
-        }
-    }
-
     global.logger.logInfo(`[CF TRANSFORMER] Section distribution: Operating=${sectionCounts.OPERATING}, Investing=${sectionCounts.INVESTING}, Financing=${sectionCounts.FINANCING}, Additional Sources=${sectionCounts.ADDITIONAL_SOURCES}`);
 
     // Add defaults if empty
@@ -139,6 +122,7 @@ function transformToIFRSCashFlow(dataMap, periods, reconciliationItems, addition
         });
     }
 
+    // Build sections array
     result.sections.push({
         name: 'OPERATING ACTIVITIES',
         items: operatingItems
@@ -154,16 +138,47 @@ function transformToIFRSCashFlow(dataMap, periods, reconciliationItems, addition
         items: financingItems
     });
 
+    // Calculate CF and FCF totals
+    for (let i = 0; i < result.periods.length; i++) {
+        result.cfTotal[i] = result.operatingTotal[i] + result.investingTotal[i] + result.financingTotal[i];
+        result.fcfTotal[i] = result.operatingTotal[i] + result.investingTotal[i];
+    }
+
+    // Add CF section
+    result.sections.push({
+        name: 'CF',
+        items: [{
+            label: 'Cash Flow (Operating + Investing + Financing)',
+            periodValues: result.cfTotal,
+            total: result.cfTotal.reduce((sum, val) => sum + val, 0),
+            flowType: 'summary',
+            indent: 1
+        }],
+        isSummary: true
+    });
+
+    // Add FCF section
+    result.sections.push({
+        name: 'FCF',
+        items: [{
+            label: 'Free Cash Flow (Operating + Investing)',
+            periodValues: result.fcfTotal,
+            total: result.fcfTotal.reduce((sum, val) => sum + val, 0),
+            flowType: 'summary',
+            indent: 1
+        }],
+        isSummary: true
+    });
+
     // Add additional sources section if items exist
     if (additionalSourcesItemsList.length > 0) {
         result.sections.push({
-            name: 'ADDITIONAL SOURCES OF CASH FLOW',
+            name: 'ADDITIONAL SOURCES',
             items: additionalSourcesItemsList
         });
     } else {
-        // Add placeholder if no data
         result.sections.push({
-            name: 'ADDITIONAL SOURCES OF CASH FLOW',
+            name: 'ADDITIONAL SOURCES',
             items: [{
                 label: 'No other additional source of cash flow',
                 periodValues: new Array(result.periods.length).fill(0),
@@ -172,11 +187,6 @@ function transformToIFRSCashFlow(dataMap, periods, reconciliationItems, addition
                 indent: 1
             }]
         });
-    }
-
-    // Calculate totals - DO NOT include net change, cash beginning/ending
-    for (let i = 0; i < result.periods.length; i++) {
-        result.netChange[i] = result.operatingTotal[i] + result.investingTotal[i] + result.financingTotal[i] + result.additionalSourcesTotal[i];
     }
 
     global.logger.logInfo('[CF TRANSFORMER] Transformation complete');
