@@ -1,4 +1,4 @@
-// extractors/cashFlow.js
+// extractors/cashFlow.js - PROPERLY FIXED: Keeps additional sources, fixes CF marker detection
 
 function extractCashFlowData(sheet) {
     global.logger.logInfo('[CF EXTRACTOR] Starting extraction...');
@@ -155,6 +155,7 @@ function extractCashFlowData(sheet) {
     let uniqueKeyCounter = 0;
     let inAdditionalSources = false;
     let inReconciliation = false;
+    let mainSectionsComplete = false;
 
     for (let i = dataStartRow; i < rowCount; i++) {
         const lineItem = getCellValue(i, 0);
@@ -187,8 +188,14 @@ function extractCashFlowData(sheet) {
         }
 
         // Check for "CF" marker - START OF ADDITIONAL SOURCES
-        // FIXED: Only trigger if we're past the header and have extracted some items
-        if (lineItemStr === 'CF' && i > periodHeaderRow + 1 && itemsExtracted > 0) {
+        // CRITICAL FIX: Only trigger if:
+        // 1. We're in the data section (not header row)
+        // 2. We've completed the main 3 sections (Operating, Investing, Financing)
+        // 3. The line has ONLY "CF" (not part of a longer label)
+        if (lineItemStr === 'CF' &&
+            i >= dataStartRow &&
+            mainSectionsComplete &&
+            !currentSection) {
             global.logger.logInfo(`[CF EXTRACTOR] Row ${i}: Found "CF" marker - STARTING ADDITIONAL SOURCES`);
             inAdditionalSources = true;
             currentSection = null;
@@ -228,6 +235,52 @@ function extractCashFlowData(sheet) {
                 currentSection = detectedSection;
                 currentSubSection = null;
                 global.logger.logInfo(`[CF EXTRACTOR] Row ${i}: ${detectedSection} ACTIVITIES`);
+
+                // Check if we've seen all 3 main sections
+                if (detectedSection === 'FINANCING') {
+                    mainSectionsComplete = true;
+                    global.logger.logInfo(`[CF EXTRACTOR] Main sections (Op/Inv/Fin) complete`);
+                }
+
+                // CRITICAL FIX: Check if this row ALSO has values to extract
+                // Some files have section headers with data on the same row
+                let hasValues = false;
+                for (const period of result.periods) {
+                    const cellValue = getCellValue(i, period.columnIndex);
+                    const numValue = Number(cellValue) || 0;
+                    if (numValue !== 0) {
+                        hasValues = true;
+                        break;
+                    }
+                }
+
+                // If the section header row has values, extract them
+                if (hasValues) {
+                    global.logger.logInfo(`[CF EXTRACTOR] Row ${i}: Section header "${lineItemStr}" also has values - extracting`);
+
+                    const periodValues = [];
+                    let totalValue = 0;
+                    for (const period of result.periods) {
+                        const cellValue = getCellValue(i, period.columnIndex);
+                        const numValue = Number(cellValue) || 0;
+                        periodValues.push(numValue);
+                        totalValue += numValue;
+                    }
+
+                    const uniqueKey = `${currentSection}_${currentSubSection || 'MAIN'}_${lineItemStr}_${uniqueKeyCounter++}`;
+                    result.dataMap.set(uniqueKey, {
+                        lineItem: lineItemStr,
+                        section: currentSection,
+                        subSection: currentSubSection,
+                        periodValues: periodValues,
+                        total: totalValue,
+                        isInflow: currentSubSection === 'INFLOW' || totalValue >= 0,
+                        isOutflow: currentSubSection === 'OUTFLOW' || totalValue < 0,
+                        row: i
+                    });
+                    itemsExtracted++;
+                }
+
                 continue;
             }
 
