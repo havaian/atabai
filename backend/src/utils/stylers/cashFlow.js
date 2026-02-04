@@ -26,7 +26,7 @@ async function styleCashFlowReport(data) {
     }
 
     let currentRow = 1;
-    let dataRowCounter = 0; // Track data rows for alternating colors
+    let dataRowCounter = 0; // Start at 0 so first row is white, second is blue, etc.
 
     // === LOGO ===
     try {
@@ -87,6 +87,14 @@ async function styleCashFlowReport(data) {
         const yearRow = worksheet.getRow(currentRow);
         yearRow.getCell(1).value = '';
 
+        // Apply alternating color to year row
+        const yearFill = (dataRowCounter % 2 === 0) ? null : {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: BRAND_COLORS.lightBlue }
+        };
+        yearRow.getCell(1).fill = yearFill;
+
         for (const group of yearGroups) {
             const startCol = group.startCol + 2;
             const endCol = group.endCol + 2;
@@ -94,6 +102,7 @@ async function styleCashFlowReport(data) {
             yearRow.getCell(startCol).value = group.year;
             yearRow.getCell(startCol).font = { name: PRIMARY_FONT, size: 11, bold: true };
             yearRow.getCell(startCol).alignment = { horizontal: 'center', vertical: 'center' };
+            yearRow.getCell(startCol).fill = yearFill;
 
             if (startCol < endCol) {
                 worksheet.mergeCells(currentRow, startCol, currentRow, endCol);
@@ -102,6 +111,7 @@ async function styleCashFlowReport(data) {
 
         yearRow.height = 20;
         currentRow++;
+        dataRowCounter++; // Increment counter so next row alternates
     }
 
     // === PERIOD HEADER ROW ===
@@ -110,15 +120,25 @@ async function styleCashFlowReport(data) {
     headerRow.getCell(1).font = { name: PRIMARY_FONT, size: 11, bold: true };
     headerRow.getCell(1).alignment = { horizontal: 'left', vertical: 'center', indent: 1 };
 
+    // Apply alternating color to period header
+    const headerFill = (dataRowCounter % 2 === 0) ? null : {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: BRAND_COLORS.lightBlue }
+    };
+    headerRow.getCell(1).fill = headerFill;
+
     for (let i = 0; i < periods.length; i++) {
         const cell = headerRow.getCell(i + 2);
         cell.value = periods[i].label;
         cell.font = { name: PRIMARY_FONT, size: 10, bold: true };
         cell.alignment = { horizontal: 'center', vertical: 'center' };
+        cell.fill = headerFill;
     }
 
     headerRow.height = 22;
     currentRow++;
+    dataRowCounter++; // Increment counter so next row alternates
 
     // === TRACK SECTION TOTAL ROWS FOR CF/FCF FORMULAS ===
     const sectionTotalRows = {
@@ -133,7 +153,7 @@ async function styleCashFlowReport(data) {
         if (section.isSummary) {
             const isCF = section.name === 'CF';
             const isFCF = section.name === 'FCF';
-
+            
             if (isCF) {
                 currentRow = addCalculatedSection(
                     worksheet,
@@ -166,19 +186,19 @@ async function styleCashFlowReport(data) {
         sectionHeaderRow.getCell(1).value = `CASH FLOWS FROM ${section.name}:`;
         sectionHeaderRow.getCell(1).font = { name: PRIMARY_FONT, size: 11, bold: true };
         sectionHeaderRow.getCell(1).alignment = { horizontal: 'left', vertical: 'center', indent: 1 };
-
+        
         // Alternating color for section header
         const sectionFill = (dataRowCounter % 2 === 0) ? null : {
             type: 'pattern',
             pattern: 'solid',
             fgColor: { argb: BRAND_COLORS.lightBlue }
         };
-
+        
         sectionHeaderRow.getCell(1).fill = sectionFill;
         for (let i = 0; i < periods.length; i++) {
             sectionHeaderRow.getCell(i + 2).fill = sectionFill;
         }
-
+        
         sectionHeaderRow.height = 20;
         currentRow++;
         dataRowCounter++;
@@ -279,37 +299,37 @@ async function styleCashFlowReport(data) {
 
 function groupPeriodsByYear(periods) {
     const groups = [];
-
+    
     const periodYears = [];
     let currentYear = null;
-
+    
     for (let i = periods.length - 1; i >= 0; i--) {
         const period = periods[i];
         const yearMatch = period.label.match(/\b(20\d{2})\b/);
-
+        
         if (yearMatch) {
             currentYear = yearMatch[1];
         }
-
+        
         periodYears[i] = currentYear;
     }
-
+    
     let i = 0;
     while (i < periods.length) {
         const year = periodYears[i];
         const startCol = i;
-
+        
         while (i < periods.length && periodYears[i] === year) {
             i++;
         }
-
+        
         groups.push({
             year: year || 'Unknown',
             startCol: startCol,
             endCol: i - 1
         });
     }
-
+    
     return groups;
 }
 
@@ -329,13 +349,13 @@ function addSectionTotalWithFormulas(worksheet, row, label, periods, range, data
     totalRow.getCell(1).value = label;
     totalRow.getCell(1).font = { name: PRIMARY_FONT, size: 11, bold: true };
     totalRow.getCell(1).alignment = { horizontal: 'left', vertical: 'center', indent: 1 };
-
+    
     const totalFill = (dataRowCounter % 2 === 0) ? null : {
         type: 'pattern',
         pattern: 'solid',
         fgColor: { argb: BRAND_COLORS.lightBlue }
     };
-
+    
     totalRow.getCell(1).fill = totalFill;
 
     for (let i = 0; i < periods.length; i++) {
@@ -366,13 +386,13 @@ function addCalculatedSection(worksheet, startRow, sectionName, label, periods, 
     headerRow.getCell(1).value = sectionName;
     headerRow.getCell(1).font = { name: PRIMARY_FONT, size: 12, bold: true };
     headerRow.getCell(1).alignment = { horizontal: 'left', vertical: 'center', indent: 1 };
-
+    
     const headerFill = (dataRowCounter % 2 === 0) ? null : {
         type: 'pattern',
         pattern: 'solid',
         fgColor: { argb: BRAND_COLORS.lightBlue }
     };
-
+    
     headerRow.getCell(1).fill = headerFill;
 
     for (let i = 0; i < periods.length; i++) {
@@ -386,22 +406,22 @@ function addCalculatedSection(worksheet, startRow, sectionName, label, periods, 
     valueRow.getCell(1).value = label;
     valueRow.getCell(1).font = { name: PRIMARY_FONT, size: 11, bold: true };
     valueRow.getCell(1).alignment = { horizontal: 'left', vertical: 'center', indent: 1 };
-
+    
     const valueFill = ((dataRowCounter + 1) % 2 === 0) ? null : {
         type: 'pattern',
         pattern: 'solid',
         fgColor: { argb: BRAND_COLORS.lightBlue }
     };
-
+    
     valueRow.getCell(1).fill = valueFill;
 
     for (let i = 0; i < periods.length; i++) {
         const cell = valueRow.getCell(i + 2);
         const colLetter = getColumnLetter(i + 2);
-
+        
         const rowRefs = sourceRows.map(r => `${colLetter}${r}`).join('+');
         const formula = `=${rowRefs}`;
-
+        
         cell.value = { formula: formula };
         cell.numFmt = NUM_FMT_WITH_BRACKETS;
         cell.font = { name: PRIMARY_FONT, size: 11, bold: true };

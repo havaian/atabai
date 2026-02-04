@@ -24,7 +24,7 @@
  * Primary brand font
  * Must match the font used in ATABAI branding materials
  */
-const PRIMARY_FONT = 'Montserrat';
+const PRIMARY_FONT = 'Calibri';
 
 /**
  * Fallback font (universally available)
@@ -35,7 +35,7 @@ const FALLBACK_FONT = 'Arial';
 /**
  * Secondary font for specific use cases (if needed)
  */
-const SECONDARY_FONT = 'Calibri';
+const SECONDARY_FONT = 'Times New Roman';
 
 // === ATABAI BRAND COLORS ===
 
