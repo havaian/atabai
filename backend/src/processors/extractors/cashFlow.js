@@ -20,7 +20,7 @@ function extractCashFlowData(sheet) {
         dataMap: new Map(),
         periods: [],
         reconciliationItems: new Map(),
-        additionalSourcesItems: new Map(),  // NEW: For metal flows, etc.
+        additionalSourcesItems: new Map(),
         sections: []
     };
 
@@ -73,7 +73,7 @@ function extractCashFlowData(sheet) {
 
     global.logger.logInfo(`[CF EXTRACTOR] Total rows: ${rowCount}`);
 
-    // FIXED: Find period header row - PRIORITIZE MONTHS over years
+    // Find period header row - PRIORITIZE MONTHS over years
     let periodHeaderRow = -1;
     let dataStartRow = -1;
 
@@ -187,7 +187,8 @@ function extractCashFlowData(sheet) {
         }
 
         // Check for "CF" marker - START OF ADDITIONAL SOURCES
-        if (lineItemStr === 'CF') {
+        // FIXED: Only trigger if we're past the header and have extracted some items
+        if (lineItemStr === 'CF' && i > periodHeaderRow + 1 && itemsExtracted > 0) {
             global.logger.logInfo(`[CF EXTRACTOR] Row ${i}: Found "CF" marker - STARTING ADDITIONAL SOURCES`);
             inAdditionalSources = true;
             currentSection = null;

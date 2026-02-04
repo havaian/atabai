@@ -1,4 +1,4 @@
-// utils/stylers/cashFlow.js
+// utils/stylers/cashFlow.js - WITH FORMULAS FOR CF/FCF AND BLUE-ONLY COLOR SCHEME
 
 const ExcelJS = require('exceljs');
 const path = require('path');
@@ -138,31 +138,49 @@ async function styleCashFlowReport(data) {
     headerRow.height = 22;
     currentRow++;
 
-    // === TRACK SECTION RANGES FOR FORMULAS ===
-    const sectionRanges = {
-        operating: { start: 0, end: 0 },
-        investing: { start: 0, end: 0 },
-        financing: { start: 0, end: 0 },
-        additionalSources: { start: 0, end: 0 }
+    // === TRACK SECTION TOTAL ROWS FOR CF/FCF FORMULAS ===
+    const sectionTotalRows = {
+        operating: 0,
+        investing: 0,
+        financing: 0,
+        additionalSources: 0
     };
 
     // === CASH FLOW SECTIONS ===
     for (const section of data.sections) {
         // Check if this is a summary section (CF or FCF)
         if (section.isSummary) {
-            currentRow = addSummarySection(
-                worksheet,
-                currentRow,
-                section.name,
-                section.items[0].label,
-                periods,
-                section.items[0].periodValues
-            );
+            const isFC = section.name === 'FCF';
+            const isCF = section.name === 'CF';
+
+            if (isCF) {
+                // CF = Operating + Investing + Financing
+                currentRow = addCalculatedSection(
+                    worksheet,
+                    currentRow,
+                    'CF',
+                    'Cash Flow (Operating + Investing + Financing)',
+                    periods,
+                    [sectionTotalRows.operating, sectionTotalRows.investing, sectionTotalRows.financing],
+                    BRAND_COLORS.sectionBlue,
+                    BRAND_COLORS.lightBlue
+                );
+            } else if (isFC) {
+                // FCF = Operating + Investing
+                currentRow = addCalculatedSection(
+                    worksheet,
+                    currentRow,
+                    'FCF',
+                    'Free Cash Flow (Operating + Investing)',
+                    periods,
+                    [sectionTotalRows.operating, sectionTotalRows.investing],
+                    BRAND_COLORS.sectionBlue,
+                    BRAND_COLORS.lightBlue
+                );
+            }
             currentRow++;
             continue;
         }
-
-        const sectionStartRow = currentRow;
 
         const sectionHeaderRow = worksheet.getRow(currentRow);
         sectionHeaderRow.getCell(1).value = `CASH FLOWS FROM ${section.name}:`;
@@ -222,34 +240,25 @@ async function styleCashFlowReport(data) {
 
         const itemsEndRow = currentRow - 1;
 
-        // Store range
-        if (section.name === 'OPERATING ACTIVITIES') {
-            sectionRanges.operating.start = itemsStartRow;
-            sectionRanges.operating.end = itemsEndRow;
-        } else if (section.name === 'INVESTING ACTIVITIES') {
-            sectionRanges.investing.start = itemsStartRow;
-            sectionRanges.investing.end = itemsEndRow;
-        } else if (section.name === 'FINANCING ACTIVITIES') {
-            sectionRanges.financing.start = itemsStartRow;
-            sectionRanges.financing.end = itemsEndRow;
-        } else if (section.name === 'ADDITIONAL SOURCES') {
-            sectionRanges.additionalSources.start = itemsStartRow;
-            sectionRanges.additionalSources.end = itemsEndRow;
-        }
-
         // Add section total with formulas
         let sectionTotal = null;
+        let sectionKey = null;
+
         if (section.name === 'OPERATING ACTIVITIES') {
             sectionTotal = data.operatingTotal;
+            sectionKey = 'operating';
         } else if (section.name === 'INVESTING ACTIVITIES') {
             sectionTotal = data.investingTotal;
+            sectionKey = 'investing';
         } else if (section.name === 'FINANCING ACTIVITIES') {
             sectionTotal = data.financingTotal;
+            sectionKey = 'financing';
         } else if (section.name === 'ADDITIONAL SOURCES') {
             sectionTotal = data.additionalSourcesTotal;
+            sectionKey = 'additionalSources';
         }
 
-        if (sectionTotal) {
+        if (sectionTotal && sectionKey) {
             currentRow = addSectionTotalWithFormulas(
                 worksheet,
                 currentRow,
@@ -257,6 +266,9 @@ async function styleCashFlowReport(data) {
                 periods,
                 { start: itemsStartRow, end: itemsEndRow }
             );
+
+            // Store the row number for CF/FCF formulas
+            sectionTotalRows[sectionKey] = currentRow - 1;
         }
 
         currentRow++;
@@ -280,42 +292,42 @@ async function styleCashFlowReport(data) {
 
 function groupPeriodsByYear(periods) {
     const groups = [];
-    
+
     // First, assign years to each period by working backwards from summary columns
     const periodYears = [];
     let currentYear = null;
-    
+
     // Scan backwards so that when we find "Итого 2024", we can assign 2024 to preceding months
     for (let i = periods.length - 1; i >= 0; i--) {
         const period = periods[i];
         const yearMatch = period.label.match(/\b(20\d{2})\b/);
-        
+
         if (yearMatch) {
             // Found a year (in "Итого 2024" or similar)
             currentYear = yearMatch[1];
         }
-        
+
         periodYears[i] = currentYear;
     }
-    
+
     // Now group consecutive periods with the same year (forward pass)
     let i = 0;
     while (i < periods.length) {
         const year = periodYears[i];
         const startCol = i;
-        
+
         // Find end of this year group
         while (i < periods.length && periodYears[i] === year) {
             i++;
         }
-        
+
         groups.push({
             year: year || 'Unknown',
             startCol: startCol,
             endCol: i - 1
         });
     }
-    
+
     return groups;
 }
 
@@ -365,16 +377,14 @@ function addSectionTotalWithFormulas(worksheet, row, label, periods, range) {
     return row + 1;
 }
 
-function addSummarySection(worksheet, startRow, sectionName, label, periods, periodValues) {
+function addCalculatedSection(worksheet, startRow, sectionName, label, periods, sourceRows, headerColor, bgColor) {
     let currentRow = startRow;
 
-    // Header row with special color for CF/FCF
+    // Header row
     const headerRow = worksheet.getRow(currentRow);
     headerRow.getCell(1).value = sectionName;
     headerRow.getCell(1).font = { name: PRIMARY_FONT, size: 12, bold: true, color: { argb: BRAND_COLORS.white } };
     headerRow.getCell(1).alignment = { horizontal: 'left', vertical: 'center', indent: 1 };
-    
-    const headerColor = sectionName === 'FCF' ? BRAND_COLORS.green : BRAND_COLORS.primary;
     headerRow.getCell(1).fill = {
         type: 'pattern',
         pattern: 'solid',
@@ -391,13 +401,11 @@ function addSummarySection(worksheet, startRow, sectionName, label, periods, per
     headerRow.height = 22;
     currentRow++;
 
-    // Value row
+    // Value row with formula
     const valueRow = worksheet.getRow(currentRow);
     valueRow.getCell(1).value = label;
     valueRow.getCell(1).font = { name: PRIMARY_FONT, size: 11, bold: true };
     valueRow.getCell(1).alignment = { horizontal: 'left', vertical: 'center', indent: 1 };
-
-    const bgColor = sectionName === 'FCF' ? BRAND_COLORS.lightGreen : BRAND_COLORS.lightBlue;
     valueRow.getCell(1).fill = {
         type: 'pattern',
         pattern: 'solid',
@@ -406,7 +414,13 @@ function addSummarySection(worksheet, startRow, sectionName, label, periods, per
 
     for (let i = 0; i < periods.length; i++) {
         const cell = valueRow.getCell(i + 2);
-        cell.value = periodValues[i];
+        const colLetter = getColumnLetter(i + 2);
+
+        // Build formula summing the source rows
+        const rowRefs = sourceRows.map(r => `${colLetter}${r}`).join('+');
+        const formula = `=${rowRefs}`;
+
+        cell.value = { formula: formula };
         cell.numFmt = '#,##0.00';
         cell.font = { name: PRIMARY_FONT, size: 11, bold: true };
         cell.alignment = { horizontal: 'right', vertical: 'center' };
@@ -419,10 +433,6 @@ function addSummarySection(worksheet, startRow, sectionName, label, periods, per
             top: { style: 'thin' },
             bottom: { style: 'double' }
         };
-
-        if (periodValues[i] < 0) {
-            cell.font = { name: PRIMARY_FONT, size: 11, bold: true, color: { argb: BRAND_COLORS.red } };
-        }
     }
 
     valueRow.height = 24;

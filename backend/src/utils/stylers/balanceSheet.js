@@ -1,4 +1,4 @@
-// utils/stylers/balanceSheet.js - UPDATED TO USE SHARED FONT CONFIG
+// utils/stylers/balanceSheet.js - UPDATED TO USE BLUE-ONLY COLOR SCHEME
 
 const ExcelJS = require('exceljs');
 const path = require('path');
@@ -49,7 +49,11 @@ const STYLE_PRESETS = {
         sectionHeader: {
             font: FONT_PRESETS.sectionHeader,
             alignment: ALIGNMENT_PRESETS.left,
-            fill: FILL_PRESETS.lightBlue,
+            fill: {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: BRAND_COLORS.sectionBlue }
+            },
             border: BORDER_PRESETS.thin
         },
         dataCell: {
@@ -68,14 +72,22 @@ const STYLE_PRESETS = {
         totalRow: {
             font: FONT_PRESETS.boldData,
             alignment: ALIGNMENT_PRESETS.right,
-            fill: FILL_PRESETS.gray,
+            fill: {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: BRAND_COLORS.lightBlue }
+            },
             border: BORDER_PRESETS.thin,
             numFmt: '#,##0.00'
         },
         grandTotal: {
             font: FONT_PRESETS.grandTotal,
             alignment: ALIGNMENT_PRESETS.right,
-            fill: FILL_PRESETS.darkGray,
+            fill: {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: BRAND_COLORS.lightBlue }
+            },
             border: {
                 top: { style: 'medium' },
                 left: { style: 'thin' },

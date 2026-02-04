@@ -12,8 +12,8 @@ function transformToIFRSCashFlow(dataMap, periods, reconciliationItems, addition
         operatingTotal: new Array(periods?.length || 1).fill(0),
         investingTotal: new Array(periods?.length || 1).fill(0),
         financingTotal: new Array(periods?.length || 1).fill(0),
-        cfTotal: new Array(periods?.length || 1).fill(0),  // NEW: CF = Op + Inv + Fin
-        fcfTotal: new Array(periods?.length || 1).fill(0), // NEW: FCF = Op + Inv
+        cfTotal: new Array(periods?.length || 1).fill(0),  // CF = Op + Inv + Fin
+        fcfTotal: new Array(periods?.length || 1).fill(0), // FCF = Op + Inv
         additionalSourcesTotal: new Array(periods?.length || 1).fill(0)
     };
 
@@ -144,7 +144,7 @@ function transformToIFRSCashFlow(dataMap, periods, reconciliationItems, addition
         result.fcfTotal[i] = result.operatingTotal[i] + result.investingTotal[i];
     }
 
-    // Add CF section
+    // Add CF section (will use formulas in styler)
     result.sections.push({
         name: 'CF',
         items: [{
@@ -157,7 +157,7 @@ function transformToIFRSCashFlow(dataMap, periods, reconciliationItems, addition
         isSummary: true
     });
 
-    // Add FCF section
+    // Add FCF section (will use formulas in styler)
     result.sections.push({
         name: 'FCF',
         items: [{
