@@ -770,6 +770,7 @@
   "common": {
     "goHome": "Go Home",
     "loading": "Loading...",
+    "uploading": "Uploading...",
     "error": "Error",
     "success": "Success",
     "cancel": "Cancel",

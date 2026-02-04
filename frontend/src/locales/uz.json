@@ -781,6 +781,7 @@
   "common": {
     "goHome": "Bosh sahifaga",
     "loading": "Yuklanmoqda...",
+    "uploading": "Yuklanmoqda...",
     "error": "Xatolik",
     "success": "Muvaffaqiyat",
     "cancel": "Bekor qilish",
