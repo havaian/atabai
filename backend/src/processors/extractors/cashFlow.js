@@ -251,31 +251,56 @@ function extractCashFlowData(sheet) {
                 currentSubSection = detectedSubSection;
                 global.logger.logInfo(`[CF EXTRACTOR] Row ${i}: ${detectedSubSection}`);
 
-                // Check if this subsection header row has values
-                const periodValues = [];
-                let totalValue = 0;
-                for (const period of result.periods) {
-                    const cellValue = getCellValue(i, period.columnIndex);
-                    const numValue = Number(cellValue) || 0;
-                    periodValues.push(numValue);
-                    totalValue += numValue;
+                // Check if there are child items below this subsection
+                // If the next non-empty row is NOT a section/subsection header, it's a child item
+                let hasChildItems = false;
+                for (let j = i + 1; j < rowCount; j++) {
+                    const nextItem = getCellValue(j, 0);
+                    if (!nextItem) continue;
+
+                    const nextItemStr = String(nextItem).trim();
+                    if (!nextItemStr) continue;
+
+                    // Check if next item is a section/subsection header
+                    if (detectSection(nextItemStr) || detectSubSection(nextItemStr) || isFCFMarker(nextItemStr)) {
+                        // Next item is a header, so this subsection has NO children
+                        hasChildItems = false;
+                        break;
+                    } else {
+                        // Next item is a regular line item, so this subsection HAS children
+                        hasChildItems = true;
+                        break;
+                    }
                 }
 
-                // If subsection header has values, extract them
-                if (totalValue !== 0) {
-                    global.logger.logInfo(`[CF EXTRACTOR] Row ${i}: Subsection "${lineItemStr}" has values - extracting`);
-                    const uniqueKey = `${currentSection}_${currentSubSection}_${lineItemStr}_${uniqueKeyCounter++}`;
-                    result.dataMap.set(uniqueKey, {
-                        lineItem: lineItemStr,
-                        section: currentSection,
-                        subSection: currentSubSection,
-                        periodValues: periodValues,
-                        total: totalValue,
-                        isInflow: currentSubSection === 'INFLOW' || totalValue >= 0,
-                        isOutflow: currentSubSection === 'OUTFLOW' || totalValue < 0,
-                        row: i
-                    });
-                    itemsExtracted++;
+                // Only extract subsection header if it has NO children AND has values
+                if (!hasChildItems) {
+                    const periodValues = [];
+                    let totalValue = 0;
+                    for (const period of result.periods) {
+                        const cellValue = getCellValue(i, period.columnIndex);
+                        const numValue = Number(cellValue) || 0;
+                        periodValues.push(numValue);
+                        totalValue += numValue;
+                    }
+
+                    if (totalValue !== 0) {
+                        global.logger.logInfo(`[CF EXTRACTOR] Row ${i}: Subsection "${lineItemStr}" has NO children but has values - extracting`);
+                        const uniqueKey = `${currentSection}_${currentSubSection}_${lineItemStr}_${uniqueKeyCounter++}`;
+                        result.dataMap.set(uniqueKey, {
+                            lineItem: lineItemStr,
+                            section: currentSection,
+                            subSection: currentSubSection,
+                            periodValues: periodValues,
+                            total: totalValue,
+                            isInflow: currentSubSection === 'INFLOW' || totalValue >= 0,
+                            isOutflow: currentSubSection === 'OUTFLOW' || totalValue < 0,
+                            row: i
+                        });
+                        itemsExtracted++;
+                    }
+                } else {
+                    global.logger.logInfo(`[CF EXTRACTOR] Row ${i}: Subsection "${lineItemStr}" has children - skipping subsection header`);
                 }
 
                 continue;
