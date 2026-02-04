@@ -67,7 +67,7 @@ const STYLE_PRESETS = {
             alignment: ALIGNMENT_PRESETS.right,
             fill: null,
             border: BORDER_PRESETS.thin,
-            numFmt: '#,##0.00'
+            numFmt: '#,##0.00;(#,##0.00)'
         },
         totalRow: {
             font: FONT_PRESETS.boldData,
@@ -78,7 +78,7 @@ const STYLE_PRESETS = {
                 fgColor: { argb: BRAND_COLORS.lightBlue }
             },
             border: BORDER_PRESETS.thin,
-            numFmt: '#,##0.00'
+            numFmt: '#,##0.00;(#,##0.00)'
         },
         grandTotal: {
             font: FONT_PRESETS.grandTotal,
@@ -94,7 +94,7 @@ const STYLE_PRESETS = {
                 bottom: { style: 'medium' },
                 right: { style: 'thin' }
             },
-            numFmt: '#,##0.00'
+            numFmt: '#,##0.00;(#,##0.00)'
         },
         watermark: {
             font: FONT_PRESETS.watermark,
@@ -308,14 +308,28 @@ async function createStyledBalanceSheet(data) {
     });
     currentRow++;
 
+    // Track data row counter for alternating colors
+    let dataRowCounter = 0;
+
     // === DATA SECTIONS ===
     data.sections.forEach(section => {
         // Section header
         worksheet.mergeCells(`A${currentRow}:C${currentRow}`);
         const sectionCell = worksheet.getCell(`A${currentRow}`);
         sectionCell.value = section.name;
-        applyStyle(sectionCell, styles.sectionHeader);
+        sectionCell.font = FONT_PRESETS.sectionHeader;
+        sectionCell.alignment = ALIGNMENT_PRESETS.left;
+        sectionCell.border = BORDER_PRESETS.thin;
+
+        // Alternating fill for section header
+        const sectionFill = (dataRowCounter % 2 === 0) ? null : {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: BRAND_COLORS.lightBlue }
+        };
+        sectionCell.fill = sectionFill;
         currentRow++;
+        dataRowCounter++;
 
         // Track first and last data row for this section
         const sectionStartRow = currentRow;
@@ -324,22 +338,41 @@ async function createStyledBalanceSheet(data) {
         section.items.forEach(item => {
             const row = worksheet.getRow(currentRow);
 
+            // Alternating fill for data rows
+            const rowFill = (dataRowCounter % 2 === 0) ? null : {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: BRAND_COLORS.lightBlue }
+            };
+
             // Line Item
             const labelCell = row.getCell(1);
             labelCell.value = item.label;
-            applyStyle(labelCell, styles.dataCell);
+            labelCell.font = FONT_PRESETS.normalData;
+            labelCell.alignment = ALIGNMENT_PRESETS.left;
+            labelCell.border = BORDER_PRESETS.thin;
+            labelCell.fill = rowFill;
 
             // Beginning Balance
             const startCell = row.getCell(2);
             startCell.value = item.start;
-            applyStyle(startCell, styles.numberCell);
+            startCell.font = FONT_PRESETS.normalData;
+            startCell.alignment = ALIGNMENT_PRESETS.right;
+            startCell.border = BORDER_PRESETS.thin;
+            startCell.numFmt = '#,##0.00;(#,##0.00)';
+            startCell.fill = rowFill;
 
             // Ending Balance
             const endCell = row.getCell(3);
             endCell.value = item.end;
-            applyStyle(endCell, styles.numberCell);
+            endCell.font = FONT_PRESETS.normalData;
+            endCell.alignment = ALIGNMENT_PRESETS.right;
+            endCell.border = BORDER_PRESETS.thin;
+            endCell.numFmt = '#,##0.00;(#,##0.00)';
+            endCell.fill = rowFill;
 
             currentRow++;
+            dataRowCounter++;
         });
 
         const sectionEndRow = currentRow - 1;
@@ -348,17 +381,34 @@ async function createStyledBalanceSheet(data) {
         if (section.items.length > 0) {
             const totalRow = worksheet.getRow(currentRow);
 
+            // Alternating fill for total row
+            const totalFill = (dataRowCounter % 2 === 0) ? null : {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: BRAND_COLORS.lightBlue }
+            };
+
             totalRow.getCell(1).value = `Total ${section.name}`;
-            applyStyle(totalRow.getCell(1), styles.totalRow);
+            totalRow.getCell(1).font = FONT_PRESETS.boldData;
             totalRow.getCell(1).alignment = ALIGNMENT_PRESETS.left;
+            totalRow.getCell(1).border = BORDER_PRESETS.thin;
+            totalRow.getCell(1).fill = totalFill;
 
             // Use SUM formula for beginning balance
             totalRow.getCell(2).value = { formula: `SUM(B${sectionStartRow}:B${sectionEndRow})` };
-            applyStyle(totalRow.getCell(2), styles.totalRow);
+            totalRow.getCell(2).font = FONT_PRESETS.boldData;
+            totalRow.getCell(2).alignment = ALIGNMENT_PRESETS.right;
+            totalRow.getCell(2).border = BORDER_PRESETS.thin;
+            totalRow.getCell(2).numFmt = '#,##0.00;(#,##0.00)';
+            totalRow.getCell(2).fill = totalFill;
 
             // Use SUM formula for ending balance
             totalRow.getCell(3).value = { formula: `SUM(C${sectionStartRow}:C${sectionEndRow})` };
-            applyStyle(totalRow.getCell(3), styles.totalRow);
+            totalRow.getCell(3).font = FONT_PRESETS.boldData;
+            totalRow.getCell(3).alignment = ALIGNMENT_PRESETS.right;
+            totalRow.getCell(3).border = BORDER_PRESETS.thin;
+            totalRow.getCell(3).numFmt = '#,##0.00;(#,##0.00)';
+            totalRow.getCell(3).fill = totalFill;
 
             // Track this total row for grand totals
             if (section.name.includes('ASSETS')) {
@@ -368,6 +418,7 @@ async function createStyledBalanceSheet(data) {
             }
 
             currentRow++;
+            dataRowCounter++;
         }
 
         // Empty row after section
@@ -380,38 +431,101 @@ async function createStyledBalanceSheet(data) {
     if (assetSectionTotalRows.length > 0) {
         const totalAssetsRow = worksheet.getRow(currentRow);
 
+        const assetsFill = (dataRowCounter % 2 === 0) ? null : {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: BRAND_COLORS.lightBlue }
+        };
+
         totalAssetsRow.getCell(1).value = 'TOTAL ASSETS';
-        applyStyle(totalAssetsRow.getCell(1), styles.grandTotal);
+        totalAssetsRow.getCell(1).font = FONT_PRESETS.grandTotal;
         totalAssetsRow.getCell(1).alignment = ALIGNMENT_PRESETS.left;
+        totalAssetsRow.getCell(1).border = {
+            top: { style: 'medium' },
+            left: { style: 'thin' },
+            bottom: { style: 'medium' },
+            right: { style: 'thin' }
+        };
+        totalAssetsRow.getCell(1).fill = assetsFill;
 
         // Create formula that sums all asset section totals
         const assetRefs = assetSectionTotalRows.map(row => `B${row}`).join('+');
         totalAssetsRow.getCell(2).value = { formula: assetRefs };
-        applyStyle(totalAssetsRow.getCell(2), styles.grandTotal);
+        totalAssetsRow.getCell(2).font = FONT_PRESETS.grandTotal;
+        totalAssetsRow.getCell(2).alignment = ALIGNMENT_PRESETS.right;
+        totalAssetsRow.getCell(2).border = {
+            top: { style: 'medium' },
+            left: { style: 'thin' },
+            bottom: { style: 'medium' },
+            right: { style: 'thin' }
+        };
+        totalAssetsRow.getCell(2).numFmt = '#,##0.00;(#,##0.00)';
+        totalAssetsRow.getCell(2).fill = assetsFill;
 
         const assetRefsEnd = assetSectionTotalRows.map(row => `C${row}`).join('+');
         totalAssetsRow.getCell(3).value = { formula: assetRefsEnd };
-        applyStyle(totalAssetsRow.getCell(3), styles.grandTotal);
+        totalAssetsRow.getCell(3).font = FONT_PRESETS.grandTotal;
+        totalAssetsRow.getCell(3).alignment = ALIGNMENT_PRESETS.right;
+        totalAssetsRow.getCell(3).border = {
+            top: { style: 'medium' },
+            left: { style: 'thin' },
+            bottom: { style: 'medium' },
+            right: { style: 'thin' }
+        };
+        totalAssetsRow.getCell(3).numFmt = '#,##0.00;(#,##0.00)';
+        totalAssetsRow.getCell(3).fill = assetsFill;
 
         currentRow++;
+        dataRowCounter++;
     }
 
     // TOTAL EQUITY AND LIABILITIES
     if (equityLiabSectionTotalRows.length > 0) {
         const totalEquityRow = worksheet.getRow(currentRow);
 
+        const equityFill = (dataRowCounter % 2 === 0) ? null : {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: BRAND_COLORS.lightBlue }
+        };
+
         totalEquityRow.getCell(1).value = 'TOTAL EQUITY AND LIABILITIES';
-        applyStyle(totalEquityRow.getCell(1), styles.grandTotal);
+        totalEquityRow.getCell(1).font = FONT_PRESETS.grandTotal;
         totalEquityRow.getCell(1).alignment = ALIGNMENT_PRESETS.left;
+        totalEquityRow.getCell(1).border = {
+            top: { style: 'medium' },
+            left: { style: 'thin' },
+            bottom: { style: 'medium' },
+            right: { style: 'thin' }
+        };
+        totalEquityRow.getCell(1).fill = equityFill;
 
         // Create formula that sums all equity/liability section totals
         const equityRefs = equityLiabSectionTotalRows.map(row => `B${row}`).join('+');
         totalEquityRow.getCell(2).value = { formula: equityRefs };
-        applyStyle(totalEquityRow.getCell(2), styles.grandTotal);
+        totalEquityRow.getCell(2).font = FONT_PRESETS.grandTotal;
+        totalEquityRow.getCell(2).alignment = ALIGNMENT_PRESETS.right;
+        totalEquityRow.getCell(2).border = {
+            top: { style: 'medium' },
+            left: { style: 'thin' },
+            bottom: { style: 'medium' },
+            right: { style: 'thin' }
+        };
+        totalEquityRow.getCell(2).numFmt = '#,##0.00;(#,##0.00)';
+        totalEquityRow.getCell(2).fill = equityFill;
 
         const equityRefsEnd = equityLiabSectionTotalRows.map(row => `C${row}`).join('+');
         totalEquityRow.getCell(3).value = { formula: equityRefsEnd };
-        applyStyle(totalEquityRow.getCell(3), styles.grandTotal);
+        totalEquityRow.getCell(3).font = FONT_PRESETS.grandTotal;
+        totalEquityRow.getCell(3).alignment = ALIGNMENT_PRESETS.right;
+        totalEquityRow.getCell(3).border = {
+            top: { style: 'medium' },
+            left: { style: 'thin' },
+            bottom: { style: 'medium' },
+            right: { style: 'thin' }
+        };
+        totalEquityRow.getCell(3).numFmt = '#,##0.00;(#,##0.00)';
+        totalEquityRow.getCell(3).fill = equityFill;
 
         currentRow++;
     }
