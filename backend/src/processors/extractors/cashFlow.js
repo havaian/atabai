@@ -242,32 +242,29 @@ function extractCashFlowData(sheet) {
                     global.logger.logInfo(`[CF EXTRACTOR] Main sections (Op/Inv/Fin) complete`);
                 }
 
-                // CRITICAL FIX: Check if this row ALSO has values to extract
-                // Some files have section headers with data on the same row
-                let hasValues = false;
+                // Don't extract the section header itself - just continue
+                continue;
+            }
+
+            const detectedSubSection = detectSubSection(lineItemStr);
+            if (detectedSubSection) {
+                currentSubSection = detectedSubSection;
+                global.logger.logInfo(`[CF EXTRACTOR] Row ${i}: ${detectedSubSection}`);
+
+                // Check if this subsection header row has values
+                const periodValues = [];
+                let totalValue = 0;
                 for (const period of result.periods) {
                     const cellValue = getCellValue(i, period.columnIndex);
                     const numValue = Number(cellValue) || 0;
-                    if (numValue !== 0) {
-                        hasValues = true;
-                        break;
-                    }
+                    periodValues.push(numValue);
+                    totalValue += numValue;
                 }
 
-                // If the section header row has values, extract them
-                if (hasValues) {
-                    global.logger.logInfo(`[CF EXTRACTOR] Row ${i}: Section header "${lineItemStr}" also has values - extracting`);
-
-                    const periodValues = [];
-                    let totalValue = 0;
-                    for (const period of result.periods) {
-                        const cellValue = getCellValue(i, period.columnIndex);
-                        const numValue = Number(cellValue) || 0;
-                        periodValues.push(numValue);
-                        totalValue += numValue;
-                    }
-
-                    const uniqueKey = `${currentSection}_${currentSubSection || 'MAIN'}_${lineItemStr}_${uniqueKeyCounter++}`;
+                // If subsection header has values, extract them
+                if (totalValue !== 0) {
+                    global.logger.logInfo(`[CF EXTRACTOR] Row ${i}: Subsection "${lineItemStr}" has values - extracting`);
+                    const uniqueKey = `${currentSection}_${currentSubSection}_${lineItemStr}_${uniqueKeyCounter++}`;
                     result.dataMap.set(uniqueKey, {
                         lineItem: lineItemStr,
                         section: currentSection,
@@ -281,13 +278,6 @@ function extractCashFlowData(sheet) {
                     itemsExtracted++;
                 }
 
-                continue;
-            }
-
-            const detectedSubSection = detectSubSection(lineItemStr);
-            if (detectedSubSection) {
-                currentSubSection = detectedSubSection;
-                global.logger.logInfo(`[CF EXTRACTOR] Row ${i}: ${detectedSubSection}`);
                 continue;
             }
 

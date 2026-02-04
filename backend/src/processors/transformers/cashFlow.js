@@ -1,8 +1,9 @@
-// transformers/cashFlow.js - FINAL: Works with simplified extractor (no CF/FCF extraction)
+// transformers/cashFlow.js
 
-function transformToIFRSCashFlow(dataMap, periods) {
+function transformToIFRSCashFlow(dataMap, periods, reconciliationItems, additionalSourcesItems) {
     global.logger.logInfo('[CF TRANSFORMER] Starting transformation...');
     global.logger.logInfo(`[CF TRANSFORMER] Input items: ${dataMap.size}`);
+    global.logger.logInfo(`[CF TRANSFORMER] Additional sources: ${additionalSourcesItems?.size || 0}`);
     global.logger.logInfo(`[CF TRANSFORMER] Periods: ${periods.length}`);
 
     const result = {
@@ -11,19 +12,41 @@ function transformToIFRSCashFlow(dataMap, periods) {
         operatingTotal: new Array(periods?.length || 1).fill(0),
         investingTotal: new Array(periods?.length || 1).fill(0),
         financingTotal: new Array(periods?.length || 1).fill(0),
-        cfTotal: new Array(periods?.length || 1).fill(0),
-        fcfTotal: new Array(periods?.length || 1).fill(0)
+        cfTotal: new Array(periods?.length || 1).fill(0),  // CF = Op + Inv + Fin
+        fcfTotal: new Array(periods?.length || 1).fill(0), // FCF = Op + Inv
+        additionalSourcesTotal: new Array(periods?.length || 1).fill(0)
     };
 
     const operatingItems = [];
     const investingItems = [];
     const financingItems = [];
+    const additionalSourcesItemsList = [];
 
-    let sectionCounts = { OPERATING: 0, INVESTING: 0, FINANCING: 0 };
+    let sectionCounts = { OPERATING: 0, INVESTING: 0, FINANCING: 0, ADDITIONAL_SOURCES: 0 };
 
     // Process main cash flow items
     for (const [key, data] of dataMap.entries()) {
-        const label = data.lineItem;
+        let label = data.lineItem;
+
+        // Replace subsection headers with generic labels
+        const lowerLabel = label.toLowerCase();
+        if (lowerLabel.includes('приток') || lowerLabel.includes('притоки')) {
+            if (data.section === 'OPERATING') {
+                label = 'Operating cash inflows';
+            } else if (data.section === 'INVESTING') {
+                label = 'Investment proceeds';
+            } else if (data.section === 'FINANCING') {
+                label = 'Financing cash inflows';
+            }
+        } else if (lowerLabel.includes('отток') || lowerLabel.includes('оттоки')) {
+            if (data.section === 'OPERATING') {
+                label = 'Operating cash outflows';
+            } else if (data.section === 'INVESTING') {
+                label = 'Investment payments';
+            } else if (data.section === 'FINANCING') {
+                label = 'Financing cash outflows';
+            }
+        }
 
         const item = {
             label: label,
@@ -60,7 +83,33 @@ function transformToIFRSCashFlow(dataMap, periods) {
         }
     }
 
-    global.logger.logInfo(`[CF TRANSFORMER] Section distribution: Operating=${sectionCounts.OPERATING}, Investing=${sectionCounts.INVESTING}, Financing=${sectionCounts.FINANCING}`);
+    // Process additional sources items
+    if (additionalSourcesItems && additionalSourcesItems.size > 0) {
+        for (const [key, data] of additionalSourcesItems.entries()) {
+            const item = {
+                label: data.lineItem,
+                periodValues: data.periodValues,
+                total: data.total,
+                flowType: data.total < 0 ? 'outflow' : 'inflow',
+                indent: data.indent || 1,
+                isCategory: data.isCategory || false
+            };
+
+            additionalSourcesItemsList.push(item);
+
+            // Only add to totals if it's not a category header
+            if (!data.isCategory) {
+                for (let i = 0; i < data.periodValues.length; i++) {
+                    result.additionalSourcesTotal[i] += data.periodValues[i];
+                }
+            }
+
+            sectionCounts.ADDITIONAL_SOURCES++;
+            global.logger.logInfo(`[CF TRANSFORMER] Additional source: "${data.lineItem}"`);
+        }
+    }
+
+    global.logger.logInfo(`[CF TRANSFORMER] Section distribution: Operating=${sectionCounts.OPERATING}, Investing=${sectionCounts.INVESTING}, Financing=${sectionCounts.FINANCING}, Additional Sources=${sectionCounts.ADDITIONAL_SOURCES}`);
 
     // Add defaults if empty
     if (operatingItems.length === 0) {
@@ -140,6 +189,25 @@ function transformToIFRSCashFlow(dataMap, periods) {
         }],
         isSummary: true
     });
+
+    // Add additional sources section if items exist
+    if (additionalSourcesItemsList.length > 0) {
+        result.sections.push({
+            name: 'ADDITIONAL SOURCES',
+            items: additionalSourcesItemsList
+        });
+    } else {
+        result.sections.push({
+            name: 'ADDITIONAL SOURCES',
+            items: [{
+                label: 'No other additional source of cash flow',
+                periodValues: new Array(result.periods.length).fill(0),
+                total: 0,
+                flowType: 'inflow',
+                indent: 1
+            }]
+        });
+    }
 
     global.logger.logInfo('[CF TRANSFORMER] Transformation complete');
 
