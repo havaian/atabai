@@ -12,8 +12,7 @@ const fs = require('fs');
 const {
     FONT_PRESETS,
     BRAND_COLORS,
-    PRIMARY_FONT,
-    logFontConfiguration,
+    PRIMARY_FONT
 } = require('./fontConfig');
 
 // ─── Style constants ──────────────────────────────────────────────────────────
@@ -94,8 +93,6 @@ function colLetter(index) {
  * @returns {ExcelJS.Workbook}
  */
 async function styleProfitLossReport(data) {
-    logFontConfiguration();
-
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('IFRS P&L Statement');
 
