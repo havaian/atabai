@@ -195,8 +195,8 @@ async function styleProfitLossReport(data) {
         const startExcel = layoutToExcel[sumRange.from];
         const endExcel = layoutToExcel[sumRange.to - 1];
         const c = colLetter(col);
-        if (startExcel === endExcel) return `=SUM(${c}${startExcel})`;
-        return `=SUM(${c}${startExcel}:${c}${endExcel})`;
+        if (startExcel === endExcel) return { formula: `=SUM(${c}${startExcel})` };
+        return { formula: `=SUM(${c}${startExcel}:${c}${endExcel})` };;
     }
 
     /**
@@ -213,9 +213,9 @@ async function styleProfitLossReport(data) {
             return layoutToExcel[ref];
         }).filter(Boolean);
 
-        if (resolved.length === 0) return '=0';
+        if (resolved.length === 0) return { formula: '=0' };
         const c = colLetter(col);
-        return '=' + resolved.map((r) => `${c}${r}`).join('+');
+        return { formula: '=' + resolved.map((r) => `${c}${r}`).join('+') };
     }
 
     for (let li = 0; li < layoutRows.length; li++) {
