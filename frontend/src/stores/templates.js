@@ -80,6 +80,16 @@ export const useTemplatesStore = defineStore('templates', () => {
                 icon: BanknotesIcon,
                 description: 'Transform NSBU cash flow statement to IFRS format according to IAS 7 standards',
                 subscriptionRequired: 'basic'
+            },
+            {
+                id: 'profitLoss',
+                key: 'profitLoss',
+                name: 'Profit & Loss Transformation',
+                standard: 'IFRS',
+                category: 'Financial Statements',
+                icon: DocumentTextIcon,
+                description: 'Transform NSBU profit & loss (PnL budget) report to IFRS format',
+                subscriptionRequired: 'basic'
             }
         ]
 
@@ -328,6 +338,43 @@ export const useTemplatesStore = defineStore('templates', () => {
                     label: 'Outflow Amount',
                     placeholder: 'Cash payments'
                 }
+            ],
+            'profitLoss': [
+                {
+                    name: 'period',
+                    type: 'text',
+                    required: true,
+                    label: 'Report Period',
+                    placeholder: 'e.g., Q1 2025'
+                },
+                {
+                    name: 'revenue',
+                    type: 'number',
+                    required: true,
+                    label: 'Total Revenue',
+                    placeholder: 'Total revenue amount'
+                },
+                {
+                    name: 'directCosts',
+                    type: 'number',
+                    required: true,
+                    label: 'Direct Costs',
+                    placeholder: 'Total direct/subcontractor costs'
+                },
+                {
+                    name: 'overheadExpenses',
+                    type: 'number',
+                    required: false,
+                    label: 'Overhead Expenses',
+                    placeholder: 'Project overhead costs'
+                },
+                {
+                    name: 'adminExpenses',
+                    type: 'number',
+                    required: false,
+                    label: 'Admin Expenses',
+                    placeholder: 'Administrative and general expenses'
+                }
             ]
         }
 
@@ -360,6 +407,11 @@ export const useTemplatesStore = defineStore('templates', () => {
                 en: 'Upload your NSBU cash flow statement with inflow and outflow columns. The template will map all activities to IFRS cash flow format according to IAS 7.',
                 ru: 'Загрузите отчет о движении денежных средств НСБУ с колонками притока и оттока. Шаблон сопоставит все операции с форматом движения денежных средств МСФО согласно IAS 7.',
                 uz: 'Pul oqimlarining NSBU hisobotini kirish va chiqish ustunlari bilan yuklang. Shablon barcha faoliyatni IAS 7 ga muvofiq IFRS pul oqimlari formatiga moslaydi.'
+            },
+            'profitLoss': {
+                en: 'Upload your NSBU profit & loss (PnL budget) report. The system detects revenue and expense sections automatically and restructures the data into IFRS P&L format.',
+                ru: 'Загрузите отчёт о прибылях и убытках в формате НСБУ (бюджет ПиУ). Система автоматически определит разделы доходов и расходов и преобразует данные в формат МСФО.',
+                uz: 'NSBU formatidagi foyda va zararlar hisobotini (PnL byudjeti) yuklang. Tizim daromad va xarajat bo\'limlarini avtomatik aniqlaydi va ma\'lumotlarni IFRS P&L formatiga o\'zgartiradi.'
             }
         }
 
@@ -416,6 +468,16 @@ export const useTemplatesStore = defineStore('templates', () => {
                 {
                     name: 'Comparative Cash Flow',
                     description: 'Multi-period cash flow analysis with IFRS classification'
+                }
+            ],
+            'profitLoss': [
+                {
+                    name: 'Standard P&L Mapping',
+                    description: 'Complete NSBU to IFRS P&L transformation for a quarterly budget report'
+                },
+                {
+                    name: 'Multi-project P&L',
+                    description: 'Monthly P&L with multiple construction projects mapped to IFRS sections'
                 }
             ]
         }

@@ -248,6 +248,22 @@
       }
     }
   },
+  "templates": {
+    "depreciation": "Asosiy vositalar amortizatsiyasi",
+    "depreciationDescription": "IAS 16 standartlariga muvofiq yuqori aniqlik va talablar bajarilishi bilan amortizatsiya hisob-kitoblarini avtomatlashtirish",
+    "discounts": "Chegirma hisob-kitoblari",
+    "discountsDescription": "IFRS 15 bo'yicha avtomatik tan etish qoidalari bilan daromad chegirmalari va tuzatishlarini hisoblash",
+    "impairment": "Aktivlar qadrsizlanishi",
+    "impairmentDescription": "IAS 36 talablariga muvofiq kompleks qadrsizlanish testlari va hisob-kitoblarini o'tkazish",
+    "reports": "Moliyaviy hisobotlar",
+    "reportsDescription": "Avtomatik muvofiqlik tekshiruvlari bilan XMHS ga mos kompleks moliyaviy hisobotlarni yaratish",
+    "balanceSheet": "Balans transformatsiyasi",
+    "balanceSheetDescription": "NSBUdan IFRS formatiga balans transformatsiyasi IAS 1 standartiga muvofiq",
+    "cashFlow": "Pul oqimlari hisobotini transformatsiyasi",
+    "cashFlowDescription": "NSBU pul oqimlari hisobotini IAS 7 standartlariga muvofiq IFRS formatiga o'zgartirish",
+    "profitLoss": "Foyda va zararlar hisobotini transformatsiyasi",
+    "profitLossDescription": "NSBU PnL byudjeti hisobotini daromad va xarajatlar tasnifi bilan IFRS formatiga o'zgartirish"
+  },
   "features": {
     "title": "ATABAI nima uchun ajoyib",
     "automation": {
@@ -274,20 +290,6 @@
       "title": "Universal",
       "description": "Har qanday turdagi hisob-kitob va hisobot uchun mos"
     }
-  },
-  "templates": {
-    "depreciation": "Asosiy vositalar amortizatsiyasi",
-    "depreciationDescription": "IAS 16 standartlariga muvofiq yuqori aniqlik va talablar bajarilishi bilan amortizatsiya hisob-kitoblarini avtomatlashtirish",
-    "discounts": "Chegirma hisob-kitoblari",
-    "discountsDescription": "IFRS 15 bo'yicha avtomatik tan etish qoidalari bilan daromad chegirmalari va tuzatishlarini hisoblash",
-    "impairment": "Aktivlar qadrsizlanishi",
-    "impairmentDescription": "IAS 36 talablariga muvofiq kompleks qadrsizlanish testlari va hisob-kitoblarini o'tkazish",
-    "reports": "Moliyaviy hisobotlar",
-    "reportsDescription": "Avtomatik muvofiqlik tekshiruvlari bilan XMHS ga mos kompleks moliyaviy hisobotlarni yaratish",
-    "balanceSheet": "Balans transformatsiyasi",
-    "balanceSheetDescription": "NSBUdan IFRS formatiga balans transformatsiyasi IAS 1 standartiga muvofiq",
-    "cashFlow": "Pul oqimlari hisobotini transformatsiyasi",
-    "cashFlowDescription": "NSBU pul oqimlari hisobotini IAS 7 standartlariga muvofiq IFRS formatiga o'zgartirish"
   },
   "pricing": {
     "title": "ATABAI vaqt va pulni tejashga yordam beradi",
@@ -413,6 +415,12 @@
         "2": "Faoliyat operatsion, investitsion va moliyaviy toifalarga ajratiladi",
         "3": "Operatsion pul oqimlarini taqdim etishda to'g'ridan-to'g'ri usul qo'llaniladi",
         "4": "Kirish va chiqishga ega qatorlar uchun sof summalar avtomatik hisoblanadi"
+      },
+      "profitLoss": {
+        "1": "NSBU formatidagi foyda va zararlar hisobotini (PnL byudjeti) yuklang",
+        "2": "Kutilayotgan bo'limlar: ДОХОДЫ (Daromad), РАСХОДЫ / ПРЯМЫЕ РАСХОДЫ (Xarajatlar), loyiha qatorlari",
+        "3": "Oylik ustunlar (yan–dek) avtomatik aniqlanadi — choraklik va yillik formatlar qo'llab-quvvatlanadi",
+        "4": "Sodda tuzilmalar (PL_2 uslubi) ham, murakkab loyiha ierarxiyalari (PL_1 uslubi) ham avtomatik ishlaydi"
       }
     },
     "dropZone": {
@@ -420,6 +428,15 @@
       "subtitle": "yoki fayllarni tanlash uchun bosing",
       "chooseFile": "Fayl tanlash",
       "supportedFormats": "10MB gacha .xlsx va .xls fayllarini qo'llab-quvvatlaydi"
+    },
+    "selectedFile": {
+      "processFile": "Faylni qayta ishlash",
+      "processing": "Qayta ishlanmoqda...",
+      "chooseDifferent": "Boshqa fayl tanlash"
+    },
+    "sampleFormat": {
+      "title": "Namuna Excel formati",
+      "description": "Sizning Excel faylingiz shunga o'xshash ustun tuzilishiga ega bo'lishi kerak. Tizim avtomatik ravishda ustunlarni aniqlaydi va XMHS transformatsiyalarini qo'llaydi."
     },
     "sampleHeaders": {
       "depreciation": [
@@ -449,12 +466,8 @@
         "Davr boshida (so'm)",
         "Davr oxirida (so'm)"
       ],
-      "cashFlow": [
-        "Qator nomi",
-        "Kirish (so'm)",
-        "Chiqish (so'm)",
-        "Davr"
-      ]
+      "cashFlow": ["Qator nomi", "Kirish (so'm)", "Chiqish (so'm)", "Davr"],
+      "profitLoss": ["Qator nomi", "Yan", "Fev", "Mar", "Q1 Jami"]
     },
     "sampleData": {
       "depreciation": [
@@ -522,16 +535,37 @@
         ["Xaridorlardan tushgan pul", "1,340,638,713,954", "", "2024"],
         ["Yetkazib beruvchilarga to'langan", "", "1,014,597,002,120", "2024"],
         ["To'langan soliqlar", "44,790,796,191", "111,219,623,676", "2024"]
+      ],
+      "profitLoss": [
+        [
+          "ДОХОДЫ",
+          "13,401,292,006",
+          "16,267,193,950",
+          "24,940,189,708",
+          "54,608,675,664"
+        ],
+        [
+          "  Loyiha A",
+          "3,984,766,273",
+          "6,556,622,772",
+          "14,583,296,586",
+          "25,124,685,631"
+        ],
+        [
+          "ПРЯМЫЕ РАСХОДЫ",
+          "-10,231,003,458",
+          "-12,765,430,110",
+          "-19,382,540,020",
+          "-42,378,973,588"
+        ],
+        [
+          "Loyiha sarflari",
+          "-1,284,505,663",
+          "-1,284,505,663",
+          "-1,284,505,663",
+          "-3,853,516,989"
+        ]
       ]
-    },
-    "selectedFile": {
-      "processFile": "Faylni qayta ishlash",
-      "processing": "Qayta ishlanmoqda...",
-      "chooseDifferent": "Boshqa fayl tanlash"
-    },
-    "sampleFormat": {
-      "title": "Namuna Excel formati",
-      "description": "Sizning Excel faylingiz shunga o'xshash ustun tuzilishiga ega bo'lishi kerak. Tizim avtomatik ravishda ustunlarni aniqlaydi va XMHS transformatsiyalarini qo'llaydi."
     },
     "recentFiles": {
       "title": "Oxirgi {template} fayllari",
@@ -606,7 +640,7 @@
     "title": "Fayl natijalari",
     "error": {
       "title": "Faylni yuklashda xatolik",
-      "fetchFailed": "Fayl tafsilotlarini yuklashda xatolik. Iltimos, qayta urinib ko'ring."
+      "fetchFailed": "Fayl tafsilotlarini yuklashda xatolik. Iltimos, qaytadan urinib ko'ring."
     },
     "overview": {
       "title": "Umumiy ko'rinish",
@@ -667,6 +701,12 @@
         "changes": "185",
         "formulasLabel": "Sof hisob-kitoblar",
         "formulas": "24"
+      },
+      "profitLoss": {
+        "1": "Foyda va zararlar hisoboti NSBU byudjetidan IAS 1 ga muvofiq IFRS tuzilmasiga o'zgartirildi",
+        "2": "Daromad IFRS 15 ga muvofiq qurilish xizmatlaridan shartnoma daromadi sifatida tasniflanadi",
+        "3": "Xarajatlar IAS 1 ga muvofiq sotish tannarxi, operatsion xarajatlar va amortizatsiyaga bo'linadi",
+        "4": "EBITDA, EBIT va sof foyda to'liq shaffoflik uchun Excel formulalari orqali hisoblanadi"
       }
     },
     "pagination": {

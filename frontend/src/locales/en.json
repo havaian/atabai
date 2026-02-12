@@ -260,7 +260,9 @@
     "balanceSheet": "Balance Sheet Transformation",
     "balanceSheetDescription": "Transform Regional Standard balance sheet to IFRS format according to IAS 1 standards",
     "cashFlow": "Cash Flow Transformation",
-    "cashFlowDescription": "Transform Regional Standard cash flow statement to IFRS format according to IAS 7 standards"
+    "cashFlowDescription": "Transform Regional Standard cash flow statement to IFRS format according to IAS 7 standards",
+    "profitLoss": "Profit & Loss Transformation",
+    "profitLossDescription": "Transform NSBU profit & loss (PnL) budget report to IFRS format with revenue and expense classification"
   },
   "features": {
     "title": "Why ATABAI is great",
@@ -413,6 +415,12 @@
         "2": "Activities are classified into operating, investing, and financing categories",
         "3": "Direct method is used to present operating cash flows where applicable",
         "4": "Net amounts are calculated automatically for items with both inflows and outflows"
+      },
+      "profitLoss": {
+        "1": "Upload your NSBU profit & loss (PnL budget) report in Excel format",
+        "2": "Expected sections: ДОХОДЫ (Revenue), РАСХОДЫ/ПРЯМЫЕ РАСХОДЫ (Expenses), project-level line items",
+        "3": "Monthly columns (Jan–Dec) are detected automatically — both quarterly and annual layouts supported",
+        "4": "Both simple structures (PL_2 style) and nested project hierarchies (PL_1 style) are handled automatically"
       }
     },
     "dropZone": {
@@ -458,12 +466,8 @@
         "Beginning Balance (UZS)",
         "Ending Balance (UZS)"
       ],
-      "cashFlow": [
-        "Line Item",
-        "Inflow (UZS)",
-        "Outflow (UZS)",
-        "Period"
-      ]
+      "cashFlow": ["Line Item", "Inflow (UZS)", "Outflow (UZS)", "Period"],
+      "profitLoss": ["Line Item", "Jan", "Feb", "Mar", "Q1 Total"]
     },
     "sampleData": {
       "depreciation": [
@@ -520,6 +524,36 @@
         ["Cash receipts from customers", "1,340,638,713,954", "", "2024"],
         ["Cash paid to suppliers", "", "1,014,597,002,120", "2024"],
         ["Income taxes paid", "44,790,796,191", "111,219,623,676", "2024"]
+      ],
+      "profitLoss": [
+        [
+          "ДОХОДЫ",
+          "13,401,292,006",
+          "16,267,193,950",
+          "24,940,189,708",
+          "54,608,675,664"
+        ],
+        [
+          "  Project A",
+          "3,984,766,273",
+          "6,556,622,772",
+          "14,583,296,586",
+          "25,124,685,631"
+        ],
+        [
+          "ПРЯМЫЕ РАСХОДЫ",
+          "-10,231,003,458",
+          "-12,765,430,110",
+          "-19,382,540,020",
+          "-42,378,973,588"
+        ],
+        [
+          "Накладные проекта",
+          "-1,284,505,663",
+          "-1,284,505,663",
+          "-1,284,505,663",
+          "-3,853,516,989"
+        ]
       ]
     },
     "recentFiles": {
@@ -656,6 +690,12 @@
         "changes": "185",
         "formulasLabel": "Net calculations",
         "formulas": "24"
+      },
+      "profitLoss": {
+        "1": "P&L statement transformed from NSBU budget format to IFRS structure per IAS 1",
+        "2": "Revenue is classified as contract revenue from construction services per IFRS 15",
+        "3": "Expenses are classified into Cost of Sales, Operating Expenses, and D&A per IAS 1",
+        "4": "EBITDA, EBIT, and Net Profit are calculated using Excel formulas for full auditability"
       }
     },
     "pagination": {
