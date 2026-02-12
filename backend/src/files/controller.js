@@ -7,6 +7,7 @@ const File = require('./model');
 const ProcessingJob = require('../jobs/model');
 const { processBalanceSheetTemplate } = require('../processors/balanceSheet');
 const { processCashFlowTemplate } = require('../processors/cashFlow');
+const { processProfitLossTemplate } = require('../processors/profitLoss');
 const templateTypes = require('../utils/templateTypes')
 
 /**
@@ -576,6 +577,10 @@ async function processFileAsync(fileRecord, processingJob) {
             
             case 'cashFlow':
                 result = await processCashFlowTemplate(filePath);
+                break;
+                
+            case 'profitLoss':
+                result = await processProfitLossTemplate(filePath);
                 break;
             
             default:
