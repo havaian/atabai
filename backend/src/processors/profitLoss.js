@@ -4,10 +4,10 @@
 
 'use strict';
 
-const { readExcelFile } = require('./readers/excelReader');
-const { extractProfitLossData } = require('./extractors/profitLoss');
+const { readExcelFile }          = require('./readers/excelReader');
+const { extractProfitLossData }  = require('./extractors/profitLoss');
 const { transformToIFRSProfitLoss } = require('./transformers/profitLoss');
-const { styleProfitLossReport } = require('../utils/stylers/profitLoss');
+const { styleProfitLossReport }  = require('../utils/stylers/profitLoss');
 
 /**
  * Process a Profit & Loss report from NSBU format to IFRS format.
@@ -58,10 +58,10 @@ async function processProfitLossTemplate(input) {
 
         // ── Summary ───────────────────────────────────────────────────────────
         result.summary.transformations = extracted.revenueItems.length + extracted.cogsItems.length;
-        result.summary.changes = ifrsLayout.rows.filter((r) => r.type === 'item').length;
-        result.summary.originalRows = extracted.revenueItems.length + extracted.cogsItems.length;
-        result.summary.processedRows = ifrsLayout.rows.length;
-        result.summary.worksheets = ['IFRS P&L Statement'];
+        result.summary.changes         = ifrsLayout.rows.filter((r) => r.type === 'item').length;
+        result.summary.originalRows    = extracted.revenueItems.length + extracted.cogsItems.length;
+        result.summary.processedRows   = ifrsLayout.rows.length;
+        result.summary.worksheets      = [];
 
         global.logger.logInfo('[PL PROCESSOR] Processing complete');
         return result;
