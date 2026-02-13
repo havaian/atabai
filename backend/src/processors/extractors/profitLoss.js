@@ -26,6 +26,7 @@ const REVENUE_SKIP_PATTERNS = [
     /^Доходы от ген/i,        // "Доходы от генуслуг" - captured separately
     /^Генуслуги/i,            // "Генуслуги, 3%" etc. - part of gen services total
     /^Ген услуги/i,           // PL_2 gen services header
+    /\(ВГО\)/i,               // Intercompany eliminations (e.g. "Кранчи (ВГО)") - excluded from totals in source
 ];
 
 // ─── Aggregate/total row labels to skip in COGS section ──────────────────────
@@ -44,6 +45,7 @@ const COGS_SKIP_PATTERNS = [
     /^ЕСП строителей/i,
     /^Валовая прибыль/i,
     /^ВАЛОВАЯ ПРИБЫЛЬ/i,
+    /\(ВГО\)/i,               // Intercompany eliminations (e.g. "Кранчи (ВГО)", "БТБС (ВГО)") - excluded from totals in source
 ];
 
 // ─── Globally skip regardless of section ─────────────────────────────────────
@@ -274,7 +276,7 @@ function extractRowValues(ri, periods, getCellValue) {
 /**
  * Collect project-level leaf items from a row range.
  * Skips rows matching globalPatterns + sectionPatterns.
- * Includes ВГО items per business rule.
+ * ВГО (intercompany) items are excluded via sectionSkipPatterns.
  */
 function collectProjectItems(fromRow, toRow, periods, getCellValue, sectionSkipPatterns) {
     const items = [];
