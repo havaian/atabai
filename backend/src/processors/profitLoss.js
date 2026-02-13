@@ -61,9 +61,7 @@ async function processProfitLossTemplate(input) {
         result.summary.changes         = ifrsLayout.rows.filter((r) => r.type === 'item').length;
         result.summary.originalRows    = extracted.revenueItems.length + extracted.cogsItems.length;
         result.summary.processedRows   = ifrsLayout.rows.length;
-        result.summary.worksheets      = [];
-
-        global.logger.logInfo('[PL PROCESSOR] Processing complete');
+        
         return result;
 
     } catch (error) {
