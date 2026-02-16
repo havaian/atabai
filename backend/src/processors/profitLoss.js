@@ -7,7 +7,7 @@
 const { readExcelFile }          = require('./readers/excelReader');
 const { extractProfitLossData }  = require('./extractors/profitLoss');
 const { transformToIFRSProfitLoss } = require('./transformers/profitLoss');
-const { styleProfitLossReport }  = require('../utils/stylers/profitLoss');
+const { styleProfitLossReport }  = require('./stylers/profitLoss');
 
 /**
  * Process a Profit & Loss report from NSBU format to IFRS format.

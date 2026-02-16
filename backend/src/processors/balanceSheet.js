@@ -3,7 +3,7 @@
 const { readExcelFile } = require('./readers/excelReader');
 const { extractBalanceSheetData } = require('./extractors/balanceSheet');
 const { transformToIFRSStructure } = require('./transformers/balanceSheet');
-const { styleReport } = require('../utils/stylers/balanceSheet');
+const { styleReport } = require('./stylers/balanceSheet');
 
 /**
  * Balance Sheet Processor - Modular Architecture

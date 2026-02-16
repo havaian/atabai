@@ -12,7 +12,8 @@ const fs = require('fs');
 const {
     FONT_PRESETS,
     BRAND_COLORS,
-    PRIMARY_FONT
+    PRIMARY_FONT,
+    logFontConfiguration,
 } = require('./fontConfig');
 
 // ─── Style constants ──────────────────────────────────────────────────────────
@@ -93,6 +94,8 @@ function colLetter(index) {
  * @returns {ExcelJS.Workbook}
  */
 async function styleProfitLossReport(data) {
+    logFontConfiguration();
+
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('IFRS P&L Statement');
 
@@ -188,15 +191,38 @@ async function styleProfitLossReport(data) {
     }
 
     /**
-     * Build an Excel SUM formula referencing consecutive layout rows.
+     * Build an Excel SUM formula referencing only 'item' rows in the range.
+     * Subheader rows are skipped — they carry no values and must not be summed.
      * sumRange: { from, to } (exclusive) indices into layoutRows[].
+     *
+     * If all item rows are contiguous in Excel we emit a single range for brevity.
+     * If subheaders break the sequence we enumerate individual cell refs inside SUM.
      */
     function buildSumFormula(sumRange, col) {
-        const startExcel = layoutToExcel[sumRange.from];
-        const endExcel = layoutToExcel[sumRange.to - 1];
         const c = colLetter(col);
-        if (startExcel === endExcel) return { formula: `=SUM(${c}${startExcel})` };
-        return { formula: `=SUM(${c}${startExcel}:${c}${endExcel})` };;
+
+        // Collect Excel row numbers for item rows only
+        const itemExcelRows = [];
+        for (let li = sumRange.from; li < sumRange.to; li++) {
+            if (layoutRows[li].type === 'item') {
+                itemExcelRows.push(layoutToExcel[li]);
+            }
+        }
+
+        if (itemExcelRows.length === 0) return `=0`;
+        if (itemExcelRows.length === 1) return `=${c}${itemExcelRows[0]}`;
+
+        // Check contiguity in Excel row numbers
+        let contiguous = true;
+        for (let i = 1; i < itemExcelRows.length; i++) {
+            if (itemExcelRows[i] !== itemExcelRows[i - 1] + 1) { contiguous = false; break; }
+        }
+
+        if (contiguous) {
+            return `=SUM(${c}${itemExcelRows[0]}:${c}${itemExcelRows[itemExcelRows.length - 1]})`;
+        }
+        // Non-contiguous: enumerate refs inside SUM
+        return `=SUM(${itemExcelRows.map(r => `${c}${r}`).join(',')})`;
     }
 
     /**
@@ -213,9 +239,9 @@ async function styleProfitLossReport(data) {
             return layoutToExcel[ref];
         }).filter(Boolean);
 
-        if (resolved.length === 0) return { formula: '=0' };
+        if (resolved.length === 0) return '=0';
         const c = colLetter(col);
-        return { formula: '=' + resolved.map((r) => `${c}${r}`).join('+') };
+        return '=' + resolved.map((r) => `${c}${r}`).join('+');
     }
 
     for (let li = 0; li < layoutRows.length; li++) {

@@ -7,6 +7,12 @@ const ExcelJS = require('exceljs');
  * Universal Excel Reader
  * Handles .xlsx, .xls, and ExcelJS Workbook objects
  * Returns a normalized data structure that extractors can work with
+ *
+ * Cell objects in normalized sheets include:
+ *   value   – resolved cell value (formula results unwrapped, rich text joined)
+ *   bold    – true if the label column cell has bold font (used for subheader detection)
+ *   indent  – cell alignment indent level (0 = no indent)
+ *   rawValue, type, formula, column, row – as before
  */
 
 /**
@@ -16,12 +22,19 @@ const ExcelJS = require('exceljs');
  */
 async function readExcelFile(input) {
     try {
-        // Check if input is already an ExcelJS Workbook
+        // Already an ExcelJS Workbook — normalize directly
         if (input && input.worksheets && Array.isArray(input.worksheets)) {
             return await normalizeExcelJSWorkbook(input);
         }
 
-        // Read the workbook using xlsx library (supports both .xlsx and .xls)
+        // .xlsx file path — use ExcelJS so we get font.bold and alignment.indent
+        if (typeof input === 'string' && input.toLowerCase().endsWith('.xlsx')) {
+            const excelJsWb = new ExcelJS.Workbook();
+            await excelJsWb.xlsx.readFile(input);
+            return await normalizeExcelJSWorkbook(excelJsWb);
+        }
+
+        // Fallback: XLSX library (handles .xls and Buffer inputs)
         const workbook = XLSX.read(input, {
             type: Buffer.isBuffer(input) ? 'buffer' : 'file',
             cellStyles: true,
@@ -60,7 +73,8 @@ async function normalizeExcelJSWorkbook(workbook) {
 }
 
 /**
- * Normalize ExcelJS worksheet to common format
+ * Normalize ExcelJS worksheet to common format.
+ * Each cell object includes `bold` and `indent` for subheader detection.
  * @param {ExcelJS.Worksheet} worksheet - ExcelJS worksheet
  * @returns {Object} Normalized worksheet
  */
@@ -81,7 +95,9 @@ function normalizeExcelJSWorksheet(worksheet) {
                 type: cell.type,
                 formula: cell.formula,
                 column: colNumber,
-                row: rowNumber
+                row: rowNumber,
+                bold: cell.font?.bold === true,
+                indent: cell.alignment?.indent ?? 0,
             });
         });
 
@@ -93,7 +109,9 @@ function normalizeExcelJSWorksheet(worksheet) {
                 type: null,
                 formula: null,
                 column: rowData.length + 1,
-                row: rowNumber
+                row: rowNumber,
+                bold: false,
+                indent: 0,
             });
         }
 
@@ -152,7 +170,9 @@ function getCellValueFromExcelJS(cell) {
 }
 
 /**
- * Normalize XLSX workbook to a common format
+ * Normalize XLSX workbook to a common format.
+ * Used as fallback for .xls files and Buffer inputs.
+ * bold/indent are best-effort from cell style data (may not be available for all files).
  * @param {Object} workbook - XLSX workbook object
  * @returns {Object} Normalized workbook
  */
@@ -178,7 +198,7 @@ function normalizeXLSXWorkbook(workbook) {
 }
 
 /**
- * Normalize XLSX worksheet to a common data structure
+ * Normalize XLSX worksheet to a common data structure.
  * @param {Object} worksheet - XLSX worksheet object
  * @returns {Object} Normalized worksheet with row/column access
  */
@@ -199,7 +219,10 @@ function normalizeXLSXWorksheet(worksheet) {
                 type: cell ? cell.t : null,
                 formula: cell ? cell.f : null,
                 column: C + 1, // 1-indexed for compatibility
-                row: R + 1     // 1-indexed for compatibility
+                row: R + 1,    // 1-indexed for compatibility
+                // Best-effort: XLSX library populates cell.s when cellStyles: true
+                bold: cell?.s?.font?.bold === true,
+                indent: cell?.s?.alignment?.indent ?? 0,
             });
         }
         data.push(row);

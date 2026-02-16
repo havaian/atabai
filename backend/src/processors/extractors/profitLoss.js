@@ -23,10 +23,10 @@ const REVENUE_SKIP_PATTERNS = [
     /^Внешний Заказчик[- ]/i,
     /^Проекты завершающиеся/i,
     /^Проекты не учтенные/i,
-    /^Доходы от ген/i,        // "Доходы от генуслуг" - captured separately
-    /^Генуслуги/i,            // "Генуслуги, 3%" etc. - part of gen services total
-    /^Ген услуги/i,           // PL_2 gen services header
+    /^Доходы от ген/i,        // "Доходы от генуслуг" header/subtotal row - sub-items collected individually
+    /^Ген услуги/i,           // PL_2 gen services aggregate header
     /\(ВГО\)/i,               // Intercompany eliminations (e.g. "Кранчи (ВГО)") - excluded from totals in source
+    // NOTE: "Генуслуги, 3%" and "Генуслуги, 5%" are NOT skipped - they are leaf revenue items
 ];
 
 // ─── Aggregate/total row labels to skip in COGS section ──────────────────────
@@ -110,7 +110,9 @@ function matchesAny(label, patterns) {
  * Build a getCellValue function and rows array from the normalized sheet.
  */
 function buildSheetAccessor(sheet) {
-    let rows, rowCount, getCellValue;
+    let rows, rowCount, getCellValue, getCellMeta;
+
+    const _emptyMeta = () => ({ value: null, bold: false, indent: 0 });
 
     if (sheet.data && Array.isArray(sheet.data)) {
         rows = sheet.data;
@@ -125,6 +127,14 @@ function buildSheetAccessor(sheet) {
                     const cell = row.cells[ci];
                     return cell ? resolveValue(cell.value) : null;
                 };
+                getCellMeta = (ri, ci) => {
+                    if (ri >= rows.length) return _emptyMeta();
+                    const row = rows[ri];
+                    if (!row || !row.cells) return _emptyMeta();
+                    const cell = row.cells[ci];
+                    if (!cell) return _emptyMeta();
+                    return { value: resolveValue(cell.value), bold: cell.bold ?? false, indent: cell.indent ?? 0 };
+                };
             } else if (Array.isArray(rows[0])) {
                 // [[cell, cell, ...], ...] format
                 getCellValue = (ri, ci) => {
@@ -137,11 +147,24 @@ function buildSheetAccessor(sheet) {
                     }
                     return cell !== undefined ? cell : null;
                 };
+                getCellMeta = (ri, ci) => {
+                    if (ri >= rows.length) return _emptyMeta();
+                    const row = rows[ri];
+                    if (!Array.isArray(row) || ci >= row.length) return _emptyMeta();
+                    const cell = row[ci];
+                    if (!cell || typeof cell !== 'object') return _emptyMeta();
+                    return {
+                        value: resolveValue(cell.value !== undefined ? cell.value : cell),
+                        bold: cell.bold ?? false,
+                        indent: cell.indent ?? 0,
+                    };
+                };
             } else {
                 throw new Error('[PL EXTRACTOR] Unknown sheet.data row structure');
             }
         } else {
             getCellValue = () => null;
+            getCellMeta = () => _emptyMeta();
         }
     } else if (sheet.rows && Array.isArray(sheet.rows)) {
         rows = sheet.rows;
@@ -153,11 +176,19 @@ function buildSheetAccessor(sheet) {
             const cell = row.cells[ci];
             return cell ? resolveValue(cell.value) : null;
         };
+        getCellMeta = (ri, ci) => {
+            if (ri >= rows.length) return _emptyMeta();
+            const row = rows[ri];
+            if (!row || !row.cells) return _emptyMeta();
+            const cell = row.cells[ci];
+            if (!cell) return _emptyMeta();
+            return { value: resolveValue(cell.value), bold: cell.bold ?? false, indent: cell.indent ?? 0 };
+        };
     } else {
         throw new Error('[PL EXTRACTOR] Unable to read sheet structure');
     }
 
-    return { rows, rowCount, getCellValue };
+    return { rows, rowCount, getCellValue, getCellMeta };
 }
 
 /**
@@ -251,7 +282,20 @@ function findSectionBoundaries(rowCount, getCellValue) {
 }
 
 /**
+ * Extract label + formatting metadata from column 0 of a row.
+ * Returns null if the cell is empty.
+ */
+function getLabelMeta(ri, getCellMeta) {
+    const meta = getCellMeta(ri, 0);
+    if (!meta.value) return null;
+    const str = String(meta.value).trim();
+    if (!str) return null;
+    return { label: str, bold: meta.bold, indent: meta.indent };
+}
+
+/**
  * Extract label from a row as a clean string, or null.
+ * Kept for functions that don't need formatting (overhead/admin collectors).
  */
 function getLabel(ri, getCellValue) {
     const raw = getCellValue(ri, 0);
@@ -274,28 +318,45 @@ function extractRowValues(ri, periods, getCellValue) {
 }
 
 /**
- * Collect project-level leaf items from a row range.
- * Skips rows matching globalPatterns + sectionPatterns.
- * ВГО (intercompany) items are excluded via sectionSkipPatterns.
+ * Collect project-level items from a row range.
+ *
+ * Detection priority:
+ *   1. Bold font  -> subheader/aggregate row. Rendered as label only, NOT included in sum.
+ *   2. Hardcoded skip patterns -> safety net for poorly-formatted files without bold.
+ *   3. Everything else -> leaf item, included in sum.
+ *
+ * Returns items: { name, values, isSubheader }
+ *   isSubheader: true  -> rendered as subheader label, values empty, never summed
+ *   isSubheader: false -> rendered as data row, values included in Total formula
  */
-function collectProjectItems(fromRow, toRow, periods, getCellValue, sectionSkipPatterns) {
+function collectProjectItems(fromRow, toRow, periods, getCellValue, getCellMeta, sectionSkipPatterns) {
     const items = [];
     for (let ri = fromRow; ri < toRow; ri++) {
-        const label = getLabel(ri, getCellValue);
-        if (!label) continue;
+        const labelMeta = getLabelMeta(ri, getCellMeta);
+        if (!labelMeta) continue;
+        const { label, bold } = labelMeta;
 
-        // Global skip
+        // Always skip global patterns (EBITDA totals, % rows, etc.)
         if (matchesAny(label, GLOBAL_SKIP_PATTERNS)) continue;
 
-        // Row of all -1 values = hidden helper row
+        // Hidden helper rows (value exactly -1)
         const firstVal = getCellValue(ri, periods[0]?.colIndex ?? 1);
         if (firstVal === -1) continue;
 
-        // Section-specific skip
+        // Bold = aggregate/subheader row (primary, formatting-based signal)
+        if (bold) {
+            // Still drop top-level section aggregates to avoid polluting label list
+            if (matchesAny(label, sectionSkipPatterns)) continue;
+            // Subheader: visual label only, no numeric values, not summed
+            items.push({ name: label, values: [], isSubheader: true });
+            continue;
+        }
+
+        // Hardcoded skip patterns: fallback for non-bold aggregates in poorly-formatted files
         if (matchesAny(label, sectionSkipPatterns)) continue;
 
         const values = extractRowValues(ri, periods, getCellValue);
-        items.push({ name: label, values });
+        items.push({ name: label, values, isSubheader: false });
     }
     return items;
 }
@@ -430,7 +491,7 @@ function collectOtherIncomeItems(fromRow, toRow, periods, getCellValue) {
 function extractProfitLossData(sheet) {
     global.logger.logInfo('[PL EXTRACTOR] Starting extraction');
 
-    const { rows, rowCount, getCellValue } = buildSheetAccessor(sheet);
+    const { rows, rowCount, getCellValue, getCellMeta } = buildSheetAccessor(sheet);
     global.logger.logInfo(`[PL EXTRACTOR] Total rows: ${rowCount}`);
 
     // ── Period detection ──────────────────────────────────────────────────────
@@ -464,13 +525,13 @@ function extractProfitLossData(sheet) {
 
     // Revenue items (leaf project items, including ВГО adjustments)
     const revenueItems = collectProjectItems(
-        revStart + 1, cogsStart, periods, getCellValue, REVENUE_SKIP_PATTERNS
+        revStart + 1, cogsStart, periods, getCellValue, getCellMeta, REVENUE_SKIP_PATTERNS
     );
     global.logger.logInfo(`[PL EXTRACTOR] Revenue items: ${revenueItems.length}`);
 
     // COGS items
     const cogsItems = collectProjectItems(
-        cogsStart + 1, overheadStart, periods, getCellValue, COGS_SKIP_PATTERNS
+        cogsStart + 1, overheadStart, periods, getCellValue, getCellMeta, COGS_SKIP_PATTERNS
     );
     global.logger.logInfo(`[PL EXTRACTOR] COGS items: ${cogsItems.length}`);
 

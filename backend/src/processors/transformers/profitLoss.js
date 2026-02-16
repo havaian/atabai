@@ -29,7 +29,6 @@ function transformToIFRSProfitLoss(extracted) {
         periods,
         revenueItems,
         cogsItems,
-        genServices,
         overheadFOT,
         overheadESP,
         overheadOther,
@@ -61,9 +60,14 @@ function transformToIFRSProfitLoss(extracted) {
     rows.push({ type: 'title', label: 'I. REVENUE' });
     rows.push({ type: 'subheader', label: 'Contract revenue from construction services' });
 
-    const revenueStart = rows.length; // index into rows[] of first revenue item
+    const revenueStart = rows.length; // index of first summed item (subheaders excluded from sum)
     for (const item of revenueItems) {
-        rows.push({ type: 'item', label: `  ${item.name}`, values: norm(item.values) });
+        if (item.isSubheader) {
+            // Bold group label from source — render as subheader, never enters sum formula
+            rows.push({ type: 'subheader', label: item.name });
+        } else {
+            rows.push({ type: 'item', label: `  ${item.name}`, values: norm(item.values) });
+        }
     }
     const revenueEnd = rows.length; // exclusive end
 
@@ -80,7 +84,11 @@ function transformToIFRSProfitLoss(extracted) {
 
     const cogsStart = rows.length;
     for (const item of cogsItems) {
-        rows.push({ type: 'item', label: `  ${item.name}`, values: norm(item.values) });
+        if (item.isSubheader) {
+            rows.push({ type: 'subheader', label: item.name });
+        } else {
+            rows.push({ type: 'item', label: `  ${item.name}`, values: norm(item.values) });
+        }
     }
     const cogsEnd = rows.length;
 
@@ -142,28 +150,12 @@ function transformToIFRSProfitLoss(extracted) {
     });
     rows.push({ type: 'blank' });
 
-    const genServicesIndex = rows.length;
-    rows.push({
-        type: 'item',
-        label: 'General contractor service fees',
-        values: norm(genServices),
-    });
-    rows.push({ type: 'blank' });
-
-    const totalOpAdminIndex = rows.length;
-    rows.push({
-        type: 'calculated',
-        label: 'Total Operating and Admin Expenses',
-        addRefs: [totalOpExpIndex, genServicesIndex],
-    });
-    rows.push({ type: 'blank' });
-
     // ─── V. EBITDA ────────────────────────────────────────────────────────────
     const ebitdaIndex = rows.length;
     rows.push({
         type: 'calculated',
         label: 'V. EBITDA (Operating Profit before D&A)',
-        addRefs: ['grossProfit', totalOpAdminIndex],
+        addRefs: ['grossProfit', totalOpExpIndex],
     });
     rows.push({ type: 'blank' });
 
