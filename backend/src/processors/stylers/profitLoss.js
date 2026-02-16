@@ -5,7 +5,7 @@
 
 'use strict';
 
-const ExcelJS        = require('exceljs');
+const ExcelJS = require('exceljs');
 const { addLogoRow } = require('./logoHelper');
 
 const {
@@ -80,20 +80,8 @@ async function styleProfitLossReport(data) {
     let dataRowCounter = 0; // for alternating colours
 
     // ── Logo / Header ─────────────────────────────────────────────────────────
-    const logoFound = await tryAddLogo(workbook, worksheet, periodCount);
-
-    if (logoFound) {
-        worksheet.getRow(excelRow).height = 44;
-        excelRow += 2;
-    } else {
-        const logoRow = worksheet.getRow(excelRow);
-        logoRow.getCell(1).value = 'ATABAI';
-        logoRow.getCell(1).font = { name: PRIMARY_FONT, size: 16, bold: true, color: { argb: BRAND_COLORS.primary } };
-        logoRow.getCell(1).alignment = ALIGN_CENTER;
-        worksheet.mergeCells(excelRow, 1, excelRow, periodCount + 1);
-        logoRow.height = 36;
-        excelRow += 2;
-    }
+    await addLogoRow(workbook, worksheet, excelRow, periodCount + 1);
+    excelRow += 2; // logo row + blank spacer
 
     // ── Report title ──────────────────────────────────────────────────────────
     const titleText = data.title || 'PROFIT & LOSS STATEMENT (IFRS)';
