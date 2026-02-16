@@ -1,10 +1,11 @@
-// utils/stylers/cashFlow.js - WITH ALTERNATING ROWS AND BRACKETED NEGATIVES
+// src/processors/stylers/cashFlow.js
+// Renders the IFRS Cash Flow layout descriptor produced by the transformer
+// into a styled ExcelJS workbook. Follows the same alternating-row
+// colour pattern used by other stylers.
 
-const ExcelJS = require('exceljs');
-const path = require('path');
-const fs = require('fs');
+const ExcelJS        = require('exceljs');
+const { addLogoRow } = require('./logoHelper');
 const {
-    FONT_PRESETS,
     BRAND_COLORS,
     PRIMARY_FONT,
 } = require('./fontConfig');
@@ -25,32 +26,12 @@ async function styleCashFlowReport(data) {
         worksheet.getColumn(i + 2).width = 18;
     }
 
-    let currentRow = 1;
-    let dataRowCounter = 0; // Start at 0 so first row is white, second is blue, etc.
+    let currentRow     = 1;
+    let dataRowCounter = 0;
 
     // === LOGO ===
-    try {
-        let logoPath = '/app/public/assets/images/icons/logo-text-uc.png';
-        if (fs.existsSync(logoPath)) {
-            const imageId = workbook.addImage({
-                filename: logoPath,
-                extension: 'png'
-            });
-
-            worksheet.addImage(imageId, {
-                tl: { col: 0, row: 0 },
-                ext: { width: 188, height: 50 }
-            });
-
-            worksheet.getRow(1).height = 50;
-            currentRow += 2;
-        } else {
-            currentRow += 1;
-        }
-    } catch (error) {
-        global.logger.logWarn('[CF STYLER] Could not load logo:', error.message);
-        currentRow += 1;
-    }
+    await addLogoRow(workbook, worksheet, currentRow, periodCount + 1);
+    currentRow += 2; // logo row + blank spacer
 
     // === TITLE ===
     const titleRow = worksheet.getRow(currentRow);
@@ -193,12 +174,12 @@ async function styleCashFlowReport(data) {
             pattern: 'solid',
             fgColor: { argb: BRAND_COLORS.lightBlue }
         };
-        
+
         sectionHeaderRow.getCell(1).fill = sectionFill;
         for (let i = 0; i < periods.length; i++) {
             sectionHeaderRow.getCell(i + 2).fill = sectionFill;
         }
-        
+
         sectionHeaderRow.height = 20;
         currentRow++;
         dataRowCounter++;
@@ -302,7 +283,7 @@ function groupPeriodsByYear(periods) {
     
     const periodYears = [];
     let currentYear = null;
-    
+
     for (let i = periods.length - 1; i >= 0; i--) {
         const period = periods[i];
         const yearMatch = period.label.match(/\b(20\d{2})\b/);
@@ -313,7 +294,7 @@ function groupPeriodsByYear(periods) {
         
         periodYears[i] = currentYear;
     }
-    
+
     let i = 0;
     while (i < periods.length) {
         const year = periodYears[i];
@@ -329,7 +310,7 @@ function groupPeriodsByYear(periods) {
             endCol: i - 1
         });
     }
-    
+
     return groups;
 }
 
@@ -355,7 +336,7 @@ function addSectionTotalWithFormulas(worksheet, row, label, periods, range, data
         pattern: 'solid',
         fgColor: { argb: BRAND_COLORS.lightBlue }
     };
-    
+
     totalRow.getCell(1).fill = totalFill;
 
     for (let i = 0; i < periods.length; i++) {
@@ -392,7 +373,7 @@ function addCalculatedSection(worksheet, startRow, sectionName, label, periods, 
         pattern: 'solid',
         fgColor: { argb: BRAND_COLORS.lightBlue }
     };
-    
+
     headerRow.getCell(1).fill = headerFill;
 
     for (let i = 0; i < periods.length; i++) {
@@ -412,7 +393,7 @@ function addCalculatedSection(worksheet, startRow, sectionName, label, periods, 
         pattern: 'solid',
         fgColor: { argb: BRAND_COLORS.lightBlue }
     };
-    
+
     valueRow.getCell(1).fill = valueFill;
 
     for (let i = 0; i < periods.length; i++) {
@@ -421,7 +402,7 @@ function addCalculatedSection(worksheet, startRow, sectionName, label, periods, 
         
         const rowRefs = sourceRows.map(r => `${colLetter}${r}`).join('+');
         const formula = `=${rowRefs}`;
-        
+
         cell.value = { formula: formula };
         cell.numFmt = NUM_FMT_WITH_BRACKETS;
         cell.font = { name: PRIMARY_FONT, size: 11, bold: true };

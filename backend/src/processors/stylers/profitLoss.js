@@ -1,18 +1,16 @@
-// utils/stylers/profitLoss.js
+// src/processors/stylers/profitLoss.js
 // Renders the IFRS P&L layout descriptor produced by the transformer
 // into a styled ExcelJS workbook. Follows the same alternating-row
 // colour pattern used by the cash flow styler.
 
 'use strict';
 
-const ExcelJS = require('exceljs');
-const path = require('path');
-const fs = require('fs');
+const ExcelJS        = require('exceljs');
+const { addLogoRow } = require('./logoHelper');
 
 const {
-    FONT_PRESETS,
     BRAND_COLORS,
-    PRIMARY_FONT
+    PRIMARY_FONT,
 } = require('./fontConfig');
 
 // ─── Style constants ──────────────────────────────────────────────────────────
@@ -32,39 +30,9 @@ const FILL_TOTAL = { type: 'pattern', pattern: 'solid', fgColor: { argb: BRAND_C
 const BORDER_THIN = { style: 'thin', color: { argb: 'FFBFBFBF' } };
 const BORDER_MEDIUM = { style: 'medium', color: { argb: 'FF8EA9C1' } };
 
-const ALIGN_LEFT = { horizontal: 'left', vertical: 'middle', indent: 0 };
-const ALIGN_RIGHT = { horizontal: 'right', vertical: 'middle' };
-const ALIGN_CENTER = { horizontal: 'center', vertical: 'middle' };
-
-// ─── Logo helper ──────────────────────────────────────────────────────────────
-
-async function tryAddLogo(workbook, worksheet, periodCount) {
-    const logoPath = '/app/public/assets/images/icons/logo-text-uc.png';
-
-    if (fs.existsSync(logoPath)) {
-        try {
-            const logoId = workbook.addImage({ 
-                    filename: logoPath, 
-                    extension: 'png' 
-                });
-
-            worksheet.addImage(logoId, {
-                tl: { col: 0, row: 0 },
-                ext: { width: 188, height: 50 }
-            });
-
-            worksheet.getRow(1).height = 50;
-
-            global.logger.logInfo(`[PL STYLER] Logo loaded from: ${logoPath}`);
-            return true;
-        } catch {
-            // try next path
-        }
-    }
-
-    global.logger.logWarn('[PL STYLER] Logo not found, using text fallback');
-    return false;
-}
+const ALIGN_LEFT     = { horizontal: 'left',  vertical: 'middle', indent: 0 };
+const ALIGN_RIGHT    = { horizontal: 'right', vertical: 'middle' };
+const ALIGN_CENTER   = { horizontal: 'center', vertical: 'middle' };
 
 // ─── Excel column letter helper ───────────────────────────────────────────────
 

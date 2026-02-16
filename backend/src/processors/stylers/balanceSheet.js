@@ -1,8 +1,10 @@
-// utils/stylers/balanceSheet.js - UPDATED TO USE BLUE-ONLY COLOR SCHEME
+// src/processors/stylers/balanceSheet.js
+// Renders the IFRS Balance Sheet layout descriptor produced by the transformer
+// into a styled ExcelJS workbook. Follows the same alternating-row
+// colour pattern used by other stylers.
 
-const ExcelJS = require('exceljs');
-const path = require('path');
-const fs = require('fs');
+const ExcelJS        = require('exceljs');
+const { addLogoRow } = require('./logoHelper');
 const {
     FONT_PRESETS,
     BRAND_COLORS,
@@ -239,31 +241,9 @@ async function createStyledBalanceSheet(data) {
     const assetSectionTotalRows = [];
     const equityLiabSectionTotalRows = [];
 
-    // === LOGO AND COMPANY BRANDING ===
-    try {
-        let logoPath = '/app/public/assets/images/icons/logo-text-uc.png';
-
-        if (fs.existsSync(logoPath)) {
-            const imageId = workbook.addImage({
-                filename: logoPath,
-                extension: 'png',
-            });
-
-            worksheet.addImage(imageId, {
-                tl: { col: 0, row: 0 },
-                ext: { width: 188, height: 50 }
-            });
-
-            worksheet.getRow(1).height = 50;
-            currentRow += 2;
-        } else {
-            global.logger.logWarn('[BALANCE SHEET STYLER] Logo not found');
-            currentRow += 2;
-        }
-    } catch (error) {
-        global.logger.logWarn('[BALANCE SHEET STYLER] Could not load logo:', error.message);
-        currentRow += 2;
-    }
+    // === LOGO ===
+    await addLogoRow(workbook, worksheet, currentRow, 3);
+    currentRow += 2; // logo row + blank spacer
 
     // === HEADER SECTION ===
 
