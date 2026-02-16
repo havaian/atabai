@@ -251,10 +251,10 @@ async function createStyledBalanceSheet(data) {
 
             worksheet.addImage(imageId, {
                 tl: { col: 0, row: 0 },
-                ext: { width: 150, height: 50 }
+                ext: { width: 188, height: 50 }
             });
 
-            worksheet.getRow(1).height = 30;
+            worksheet.getRow(1).height = 50;
             currentRow += 2;
         } else {
             global.logger.logWarn('[BALANCE SHEET STYLER] Logo not found');

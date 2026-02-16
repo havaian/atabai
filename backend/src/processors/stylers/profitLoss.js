@@ -50,10 +50,10 @@ async function tryAddLogo(workbook, worksheet, periodCount) {
 
             worksheet.addImage(logoId, {
                 tl: { col: 0, row: 0 },
-                ext: { width: 150, height: 50 }
+                ext: { width: 188, height: 50 }
             });
 
-            worksheet.getRow(1).height = 30;
+            worksheet.getRow(1).height = 50;
 
             global.logger.logInfo(`[PL STYLER] Logo loaded from: ${logoPath}`);
             return true;
