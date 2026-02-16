@@ -3,7 +3,7 @@
 const { readExcelFile } = require('./readers/excelReader');
 const { extractCashFlowData } = require('./extractors/cashFlow');
 const { transformToIFRSCashFlow } = require('./transformers/cashFlow');
-const { styleCashFlowReport } = require('../utils/stylers/cashFlow');
+const { styleCashFlowReport } = require('./stylers/cashFlow');
 
 async function processCashFlowTemplate(input) {
     const result = {
