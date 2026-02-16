@@ -48,7 +48,7 @@ async function tryAddLogo(workbook, worksheet, periodCount) {
                     extension: 'png' 
                 });
 
-            worksheet.addImage(imageId, {
+            worksheet.addImage(logoId, {
                 tl: { col: 0, row: 0 },
                 ext: { width: 150, height: 50 }
             });
