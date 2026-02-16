@@ -182,21 +182,30 @@ function transformToIFRSProfitLoss(extracted) {
     // ─── VIII. FINANCE INCOME / (COSTS) ──────────────────────────────────────
     rows.push({ type: 'title', label: 'VIII. FINANCE INCOME / (COSTS)' });
 
-    // Finance income: use financeIncomeItems if present, otherwise a zero line
-    const financeIncomeIndex = rows.length;
+    // Track range start for the Net finance total formula
+    const financeItemsStart = rows.length;
+
     if (financeIncomeItems && financeIncomeItems.length > 0) {
         for (const item of financeIncomeItems) {
             rows.push({ type: 'item', label: `  ${item.name}`, values: norm(item.values) });
         }
     } else {
-        rows.push({ type: 'item', label: 'Finance income', values: nullArr() });
+        rows.push({ type: 'item', label: '  Finance income', values: nullArr() });
     }
 
-    const financeCostsIndex = rows.length;
-    rows.push({ type: 'item', label: 'Finance costs', values: nullArr() });
+    // Finance costs placeholder (zero until source data provides it)
+    rows.push({ type: 'item', label: '  Finance costs', values: nullArr() });
 
+    const financeItemsEnd = rows.length; // exclusive
+
+    // Net finance result = SUM of all items above (income + costs)
+    // This is what feeds into PBT, so it must not be a static null row
     const netFinanceIndex = rows.length;
-    rows.push({ type: 'item', label: 'Net finance result', values: nullArr() });
+    rows.push({
+        type: 'total',
+        label: 'Net finance income / (costs)',
+        sumRange: { from: financeItemsStart, to: financeItemsEnd },
+    });
 
     rows.push({ type: 'blank' });
 
