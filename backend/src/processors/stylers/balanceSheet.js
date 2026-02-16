@@ -241,7 +241,7 @@ async function createStyledBalanceSheet(data) {
 
     // === LOGO AND COMPANY BRANDING ===
     try {
-        let logoPath = path.join(__dirname, '../../../public/assets/images/icons/logo-text-uc.png');
+        let logoPath = '/app/public/assets/images/icons/logo-text-uc.png';
 
         if (logoPath) {
             const imageId = workbook.addImage({

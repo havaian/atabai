@@ -40,15 +40,9 @@ const ALIGN_CENTER = { horizontal: 'center', vertical: 'middle' };
 // ─── Logo helper ──────────────────────────────────────────────────────────────
 
 async function tryAddLogo(workbook, worksheet, periodCount) {
-    const possiblePaths = [
-        path.join(__dirname, '../../../public/assets/images/icons/logo-text-uc.png'),
-        path.join(__dirname, '../../../public/assets/images/icons/logo.png'),
-        '/app/public/assets/images/icons/logo-text-uc.png',
-        '/app/public/assets/images/icons/logo.png',
-    ];
+    const logoPath = '/app/public/assets/images/icons/logo-text-uc.png';
 
-    for (const logoPath of possiblePaths) {
-        if (!fs.existsSync(logoPath)) continue;
+    if (!fs.existsSync(logoPath)) {
         try {
             const logoId = workbook.addImage({ filename: logoPath, extension: 'png' });
             worksheet.addImage(logoId, {
