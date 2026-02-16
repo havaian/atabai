@@ -210,10 +210,10 @@ async function styleProfitLossReport(data) {
         }
 
         if (contiguous) {
-            return `=SUM(${c}${itemExcelRows[0]}:${c}${itemExcelRows[itemExcelRows.length - 1]})`;
+            return { formula:`=SUM(${c}${itemExcelRows[0]}:${c}${itemExcelRows[itemExcelRows.length - 1]})` };
         }
         // Non-contiguous: enumerate refs inside SUM
-        return `=SUM(${itemExcelRows.map(r => `${c}${r}`).join(',')})`;
+        return { formula: `=SUM(${itemExcelRows.map(r => `${c}${r}`).join(',')})` };
     }
 
     /**
@@ -232,7 +232,7 @@ async function styleProfitLossReport(data) {
 
         if (resolved.length === 0) return '=0';
         const c = colLetter(col);
-        return '=' + resolved.map((r) => `${c}${r}`).join('+');
+        return { formula: '=' + resolved.map((r) => `${c}${r}`).join('+') };
     }
 
     for (let li = 0; li < layoutRows.length; li++) {
