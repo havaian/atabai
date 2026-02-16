@@ -243,17 +243,18 @@ async function createStyledBalanceSheet(data) {
     try {
         let logoPath = '/app/public/assets/images/icons/logo-text-uc.png';
 
-        if (logoPath) {
+        if (fs.existsSync(logoPath)) {
             const imageId = workbook.addImage({
                 filename: logoPath,
                 extension: 'png',
             });
 
-            // Add logo to top-left
             worksheet.addImage(imageId, {
                 tl: { col: 0, row: 0 },
-                ext: { width: 40, height: 40 }
+                ext: { width: 150, height: 50 }
             });
+
+            worksheet.getRow(1).height = 30;
             currentRow += 2;
         } else {
             global.logger.logWarn('[BALANCE SHEET STYLER] Logo not found');

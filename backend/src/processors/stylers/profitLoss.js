@@ -41,13 +41,20 @@ const ALIGN_CENTER = { horizontal: 'center', vertical: 'middle' };
 async function tryAddLogo(workbook, worksheet, periodCount) {
     const logoPath = '/app/public/assets/images/icons/logo-text-uc.png';
 
-    if (!fs.existsSync(logoPath)) {
+    if (fs.existsSync(logoPath)) {
         try {
-            const logoId = workbook.addImage({ filename: logoPath, extension: 'png' });
-            worksheet.addImage(logoId, {
+            const logoId = workbook.addImage({ 
+                    filename: logoPath, 
+                    extension: 'png' 
+                });
+
+            worksheet.addImage(imageId, {
                 tl: { col: 0, row: 0 },
-                ext: { width: 130, height: 44 },
+                ext: { width: 150, height: 50 }
             });
+
+            worksheet.getRow(1).height = 30;
+
             global.logger.logInfo(`[PL STYLER] Logo loaded from: ${logoPath}`);
             return true;
         } catch {
