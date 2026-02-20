@@ -46,12 +46,12 @@
                     </div>
 
                     <!-- Theme Toggle -->
-                    <button @click="themeStore.toggle()"
+                    <!-- <button @click="themeStore.toggle()"
                         class="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
                         :title="themeStore.isDark ? $t('settings.personal.themeLight') : $t('settings.personal.themeDark')">
                         <SunIcon v-if="themeStore.isDark" class="w-5 h-5 text-yellow-500" />
                         <MoonIcon v-else class="w-5 h-5 text-gray-600" />
-                    </button>
+                    </button> -->
 
                     <!-- Auth Buttons -->
                     <div v-if="!authStore.isAuthenticated" class="flex items-center space-x-4">
@@ -141,7 +141,7 @@
                 </div>
 
                 <!-- Theme Toggle (Mobile) -->
-                <div class="px-3 py-2">
+                <!-- <div class="px-3 py-2">
                     <div class="text-sm font-medium text-gray-500 mb-2">{{ $t('settings.personal.theme') }}</div>
                     <div class="grid grid-cols-3 gap-2">
                         <button @click="themeStore.setTheme('light')" :class="[
@@ -165,7 +165,7 @@
                             {{ $t('settings.personal.themeSystem') }}
                         </button>
                     </div>
-                </div>
+                </div> -->
 
                 <!-- Mobile Auth Section -->
                 <div class="border-t border-gray-200 pt-3">
