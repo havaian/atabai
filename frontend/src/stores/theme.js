@@ -58,7 +58,8 @@ export const useThemeStore = defineStore('theme', () => {
         try {
             const saved = localStorage.getItem(STORAGE_KEY)
             if (saved && ['light', 'dark', 'system'].includes(saved)) {
-                preference.value = saved
+                // preference.value = saved
+                preference.value = 'light'
             }
         } catch (e) {
             console.warn('Could not read theme from localStorage:', e)
@@ -83,7 +84,8 @@ export const useThemeStore = defineStore('theme', () => {
      * Used by Navbar toggle button. Ignores 'system' — picks opposite of current resolved theme.
      */
     function toggle() {
-        setTheme(isDark.value ? 'light' : 'dark')
+        // setTheme(isDark.value ? 'light' : 'dark')
+        setTheme('light')
     }
 
     return {
