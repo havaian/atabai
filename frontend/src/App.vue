@@ -37,10 +37,12 @@ import { onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { XMarkIcon } from '@heroicons/vue/24/outline'
 import { useAuthStore } from '@/stores/auth'
+import { useThemeStore } from '@/stores/theme'
 import Navbar from '@/components/layout/Navbar.vue'
 import Footer from '@/components/layout/Footer.vue'
 
 const authStore = useAuthStore()
+const themeStore = useThemeStore()
 const route = useRoute()
 
 // Computed properties to determine if navbar/footer should be shown
@@ -53,6 +55,9 @@ const showFooter = computed(() => {
 })
 
 onMounted(async () => {
+    // Initialize theme immediately (sync, no await needed)
+    themeStore.init()
+
     try {
         // Initialize auth store
         await authStore.checkAuth()

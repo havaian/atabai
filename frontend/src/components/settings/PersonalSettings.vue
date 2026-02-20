@@ -35,9 +35,10 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { ref, onMounted, onUnmounted, watch, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
+import { useThemeStore } from '@/stores/theme'
 
 // Icons
 import {
@@ -50,9 +51,13 @@ import {
 // Composables
 const { t } = useI18n()
 const authStore = useAuthStore()
+const themeStore = useThemeStore()
 
 // State
-const selectedTheme = ref('system')
+const selectedTheme = computed({
+    get: () => themeStore.preference,
+    set: (val) => themeStore.setTheme(val)
+})
 const showSaveNotification = ref(false)
 
 // Theme options formatted for custom Select component
@@ -74,50 +79,10 @@ const themeOptions = ref([
     }
 ])
 
-// Load theme preference from localStorage
-const loadThemePreference = () => {
-    const savedTheme = localStorage.getItem('atabai-theme')
-    if (savedTheme && ['light', 'dark', 'system'].includes(savedTheme)) {
-        selectedTheme.value = savedTheme
-    } else {
-        // Default to system
-        selectedTheme.value = 'system'
-    }
-}
-
-// Apply theme to document
-const applyTheme = (theme) => {
-    const html = document.documentElement
-
-    // Remove existing theme classes
-    html.classList.remove('dark', 'light')
-
-    if (theme === 'dark') {
-        html.classList.add('dark')
-    } else if (theme === 'light') {
-        html.classList.add('light')
-    } else {
-        // System theme - follow OS preference
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-        if (prefersDark) {
-            html.classList.add('dark')
-        } else {
-            html.classList.add('light')
-        }
-    }
-}
-
 // Update theme
 const updateTheme = (theme) => {
-    selectedTheme.value = theme
+    themeStore.setTheme(theme)
 
-    // Save to localStorage
-    localStorage.setItem('atabai-theme', theme)
-
-    // Apply theme
-    applyTheme(theme)
-
-    // Show save notification
     showSaveNotification.value = true
     setTimeout(() => {
         showSaveNotification.value = false
@@ -162,22 +127,5 @@ onMounted(() => {
             icon: ComputerDesktopIcon
         }
     ]
-
-    // Load and apply saved theme
-    loadThemePreference()
-    applyTheme(selectedTheme.value)
-
-    // Setup system theme watcher
-    const cleanupSystemWatcher = setupSystemThemeWatcher()
-
-    // Cleanup on component unmount
-    onUnmounted(() => {
-        cleanupSystemWatcher()
-    })
-})
-
-// Watch for theme changes and apply them
-watch(selectedTheme, (newTheme) => {
-    applyTheme(newTheme)
 })
 </script>
