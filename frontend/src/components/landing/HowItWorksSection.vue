@@ -2,9 +2,9 @@
     <section id="how-it-works" class="hiw-section">
         <div class="hiw-inner">
             <div class="hiw-header">
-                <span class="hiw-label">Процесс</span>
+                <span class="hiw-label">{{ $t('landing.hiw.label') }}</span>
                 <h2 class="hiw-title">{{ $t('howItWorks.title') }}</h2>
-                <p class="hiw-subtitle">Четыре простых шага от загрузки файла до готового МСФО отчёта</p>
+                <p class="hiw-subtitle">{{ $t('landing.hiw.subtitle') }}</p>
             </div>
 
             <div class="hiw-layout">
@@ -14,8 +14,8 @@
                         @click="activeStep = i">
                         <div class="hiw-num">{{ String(i + 1).padStart(2, '0') }}</div>
                         <div class="hiw-step-info">
-                            <div class="hiw-step-title">{{ step.title }}</div>
-                            <div class="hiw-step-desc">{{ step.desc }}</div>
+                            <div class="hiw-step-title">{{ $t(`howItWorks.step${i + 1}.title`) }}</div>
+                            <div class="hiw-step-desc">{{ $t(`howItWorks.step${i + 1}.description`) }}</div>
                         </div>
                     </div>
                 </div>
@@ -28,7 +28,7 @@
                             <div class="p-upload-zone">
                                 <CloudArrowUpIcon class="p-upload-icon" />
                                 <p class="p-upload-text">{{ $t('howItWorks.step1.uploadText') }}</p>
-                                <p class="p-upload-hint mono">или нажмите для выбора</p>
+                                <p class="p-upload-hint mono">{{ $t('howItWorks.step1.supportedFormats') }}</p>
                                 <div class="p-upload-chips">
                                     <span class="p-chip mono">.xlsx</span>
                                     <span class="p-chip mono">.xls</span>
@@ -39,13 +39,16 @@
 
                         <!-- Panel 1: Templates -->
                         <div v-else-if="activeStep === 1" key="templates" class="hiw-panel">
-                            <div class="p-tmpl-grid">
+                            <div class="p-tmpl-list">
                                 <button v-for="tmpl in templates" :key="tmpl.key"
-                                    :class="['p-tmpl-card', { 'p-tmpl-active': selectedTemplate === tmpl.key }]"
+                                    :class="['p-tmpl-item', { 'p-tmpl-active': selectedTemplate === tmpl.key }]"
                                     @click="selectedTemplate = tmpl.key">
-                                    <span class="p-tmpl-emoji">{{ tmpl.emoji }}</span>
-                                    <span class="p-tmpl-name">{{ $t(`howItWorks.step2.templates.${tmpl.key}`) }}</span>
-                                    <span class="p-tmpl-std mono">{{ tmpl.std }}</span>
+                                    <component :is="tmpl.icon" class="p-tmpl-icon" />
+                                    <div class="p-tmpl-info">
+                                        <span class="p-tmpl-name">{{ $t(`templates.${tmpl.key}`) }}</span>
+                                        <span class="p-tmpl-std mono">{{ tmpl.std }}</span>
+                                    </div>
+                                    <div v-if="selectedTemplate === tmpl.key" class="p-tmpl-check">✓</div>
                                 </button>
                             </div>
                         </div>
@@ -57,14 +60,14 @@
                                     <div class="p-proc-bar-fill"></div>
                                 </div>
                                 <div class="p-proc-steps">
-                                    <div class="p-proc-item"><span class="p-proc-check p-proc-done">✓</span>Файл
-                                        прочитан · 247 строк</div>
-                                    <div class="p-proc-item"><span class="p-proc-check p-proc-done">✓</span>Структура
-                                        определена · НСБУ</div>
-                                    <div class="p-proc-item"><span class="p-proc-check p-proc-done">✓</span>Маппинг
-                                        кодов МСФО · 34 статьи</div>
-                                    <div class="p-proc-item"><span class="p-proc-check p-proc-prog">⟳</span>Применение
-                                        формул IAS 16...</div>
+                                    <div class="p-proc-item"><span class="p-proc-check p-proc-done">✓</span><span>{{
+                                            $t('landing.hiw.proc.read') }}</span></div>
+                                    <div class="p-proc-item"><span class="p-proc-check p-proc-done">✓</span><span>{{
+                                            $t('landing.hiw.proc.structure') }}</span></div>
+                                    <div class="p-proc-item"><span class="p-proc-check p-proc-done">✓</span><span>{{
+                                            $t('landing.hiw.proc.mapping') }}</span></div>
+                                    <div class="p-proc-item"><span class="p-proc-check p-proc-prog">⟳</span><span>{{
+                                            $t('landing.hiw.proc.formulas') }}</span></div>
                                 </div>
                             </div>
                         </div>
@@ -75,20 +78,29 @@
                                 <div class="p-result-grid">
                                     <div class="p-res-sheet p-res-before mono">
                                         <div class="p-res-hd">
-                                            <div class="p-res-label p-res-label-r"><span class="p-res-dot"></span> До
-                                            </div><span class="p-res-tag p-res-tag-r">НСБУ</span>
+                                            <div class="p-res-label p-res-label-r"><span class="p-res-dot"></span> {{
+                                                $t('howItWorks.step4.before') }}</div><span
+                                                class="p-res-tag p-res-tag-r">НСБУ</span>
                                         </div>
                                         <div class="p-res-body">
                                             <div class="p-res-row p-res-row-h">
-                                                <div class="p-res-c">Статья</div>
-                                                <div class="p-res-c">Сумма</div>
+                                                <div class="p-res-c">{{
+                                                    $t('howItWorks.step4.spreadsheet.depreciation.before.headers.item')
+                                                    }}</div>
+                                                <div class="p-res-c">{{
+                                                    $t('howItWorks.step4.spreadsheet.depreciation.before.headers.amount')
+                                                    }}</div>
                                             </div>
                                             <div class="p-res-row">
-                                                <div class="p-res-c">Осн. средства</div>
+                                                <div class="p-res-c">{{
+                                                    $t('howItWorks.step4.spreadsheet.depreciation.before.data.ppe') }}
+                                                </div>
                                                 <div class="p-res-c">1,250,000</div>
                                             </div>
                                             <div class="p-res-row p-res-row-e">
-                                                <div class="p-res-c">⚠ Ошибка</div>
+                                                <div class="p-res-c">⚠ {{
+                                                    $t('howItWorks.step4.spreadsheet.depreciation.before.data.error') }}
+                                                </div>
                                                 <div class="p-res-c">±12%</div>
                                             </div>
                                         </div>
@@ -100,8 +112,9 @@
                                     </div>
                                     <div class="p-res-sheet p-res-after mono">
                                         <div class="p-res-hd">
-                                            <div class="p-res-label p-res-label-g"><span class="p-res-dot"></span> После
-                                            </div><span class="p-res-tag p-res-tag-g">IFRS</span>
+                                            <div class="p-res-label p-res-label-g"><span class="p-res-dot"></span> {{
+                                                $t('howItWorks.step4.after') }}</div><span
+                                                class="p-res-tag p-res-tag-g">IFRS</span>
                                         </div>
                                         <div class="p-res-body">
                                             <div class="p-res-row p-res-row-h">
@@ -114,12 +127,14 @@
                                             </div>
                                             <div class="p-res-row p-res-row-s">
                                                 <div class="p-res-c">✓ IAS 16</div>
-                                                <div class="p-res-c">Valid</div>
+                                                <div class="p-res-c">{{
+                                                    $t('howItWorks.step4.spreadsheet.depreciation.after.data.accurate')
+                                                    }}</div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="p-result-badge mono">✓ 12 изменений · 8 формул · IAS 16 compliant</div>
+                                <div class="p-result-badge mono">✓ {{ $t('landing.hiw.resultBadge') }}</div>
                             </div>
                         </div>
                     </Transition>
@@ -131,22 +146,28 @@
 
 <script setup>
 import { ref } from 'vue'
-import { CloudArrowUpIcon, ArrowRightIcon } from '@heroicons/vue/24/outline'
+import {
+    CloudArrowUpIcon,
+    ArrowRightIcon,
+    CalculatorIcon,
+    CurrencyDollarIcon,
+    ChartBarIcon
+} from '@heroicons/vue/24/outline'
 
 const activeStep = ref(0)
 const selectedTemplate = ref('depreciation')
 
 const steps = [
-    { title: 'Загрузите файлы', desc: 'Перетащите Excel файлы в формате НСБУ для автоматической обработки' },
-    { title: 'Выберите шаблон', desc: 'Укажите стандарт МСФО для трансформации данных' },
-    { title: 'Обработка', desc: 'ИИ анализирует, маппирует и применяет формулы МСФО' },
-    { title: 'Результат', desc: 'Готовый отчёт с полной аудируемостью через Excel формулы' }
+    { key: 'step1' },
+    { key: 'step2' },
+    { key: 'step3' },
+    { key: 'step4' }
 ]
 
 const templates = [
-    { key: 'depreciation', emoji: '📋', std: 'IAS 16' },
-    { key: 'discounts', emoji: '💰', std: 'IFRS 15' },
-    { key: 'impairment', emoji: '🔍', std: 'IAS 36' }
+    { key: 'depreciation', icon: CalculatorIcon, std: 'IAS 16' },
+    { key: 'discounts', icon: CurrencyDollarIcon, std: 'IFRS 15' },
+    { key: 'impairment', icon: ChartBarIcon, std: 'IAS 36' }
 ]
 </script>
 
@@ -338,7 +359,7 @@ const templates = [
     transform: translateY(-8px);
 }
 
-/* Upload */
+/* ===== PANEL 0: UPLOAD ===== */
 .p-upload-zone {
     display: flex;
     flex-direction: column;
@@ -391,45 +412,58 @@ const templates = [
     font-weight: 500;
 }
 
-/* Templates */
-.p-tmpl-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: .75rem;
-}
-
-.p-tmpl-card {
+/* ===== PANEL 1: TEMPLATES (list layout, no overflow) ===== */
+.p-tmpl-list {
     display: flex;
     flex-direction: column;
+    gap: .625rem;
+}
+
+.p-tmpl-item {
+    display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 1.5rem 1rem;
-    border-radius: 14px;
+    gap: .875rem;
+    padding: 1rem 1.25rem;
+    border-radius: 12px;
     border: 1px solid var(--landing-border);
     background: var(--landing-surface-2);
     cursor: pointer;
-    transition: all .3s;
+    transition: all .25s;
     font-family: inherit;
-    color: var(--landing-text-muted);
+    color: var(--landing-text-secondary);
+    width: 100%;
+    text-align: left;
 }
 
-.p-tmpl-card:hover {
+.p-tmpl-item:hover {
     border-color: var(--landing-border-accent);
 }
 
 .p-tmpl-active {
-    border-color: #9500FF !important;
+    border-color: #9500FF;
     background: rgba(149, 0, 255, 0.06);
-    color: #9500FF;
     box-shadow: 0 0 0 1px rgba(149, 0, 255, 0.15);
 }
 
-.p-tmpl-emoji {
-    font-size: 1.75rem;
+.p-tmpl-icon {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+    color: var(--landing-text-muted);
+}
+
+.p-tmpl-active .p-tmpl-icon {
+    color: #9500FF;
+}
+
+.p-tmpl-info {
+    flex: 1;
+    min-width: 0;
 }
 
 .p-tmpl-name {
-    font-size: .8rem;
+    display: block;
+    font-size: .85rem;
     font-weight: 600;
     color: var(--landing-text);
 }
@@ -439,11 +473,26 @@ const templates = [
 }
 
 .p-tmpl-std {
+    display: block;
     font-size: .65rem;
     color: var(--landing-text-muted);
+    margin-top: 2px;
 }
 
-/* Processing */
+.p-tmpl-check {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #9500FF;
+    color: #fff;
+    font-size: .7rem;
+    flex-shrink: 0;
+}
+
+/* ===== PANEL 2: PROCESSING ===== */
 .p-proc-bar {
     width: 100%;
     height: 8px;
@@ -524,11 +573,11 @@ const templates = [
     }
 }
 
-/* Result */
+/* ===== PANEL 3: RESULT ===== */
 .p-result-grid {
     display: grid;
     grid-template-columns: 1fr auto 1fr;
-    gap: 1rem;
+    gap: .75rem;
     align-items: center;
 }
 
@@ -559,7 +608,7 @@ const templates = [
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 10px 14px;
+    padding: 8px 12px;
     border-bottom: 1px solid var(--landing-border);
 }
 
@@ -567,7 +616,7 @@ const templates = [
     display: flex;
     align-items: center;
     gap: 6px;
-    font-size: .7rem;
+    font-size: .65rem;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: .05em;
@@ -612,10 +661,10 @@ const templates = [
 }
 
 .p-res-tag {
-    font-size: .6rem;
+    font-size: .55rem;
     font-weight: 500;
-    padding: 2px 7px;
-    border-radius: 5px;
+    padding: 2px 6px;
+    border-radius: 4px;
 }
 
 .p-res-tag-r {
@@ -639,7 +688,7 @@ const templates = [
 }
 
 .p-res-body {
-    font-size: .62rem;
+    font-size: .6rem;
 }
 
 .p-res-row {
@@ -664,11 +713,11 @@ const templates = [
     font-weight: 600;
     color: var(--landing-text-muted);
     text-transform: uppercase;
-    font-size: .58rem;
+    font-size: .55rem;
 }
 
 .p-res-c {
-    padding: 8px 12px;
+    padding: 7px 10px;
     color: var(--landing-text-secondary);
     white-space: nowrap;
     overflow: hidden;
@@ -700,8 +749,8 @@ const templates = [
 }
 
 .p-res-arrow-c {
-    width: 36px;
-    height: 36px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -714,7 +763,7 @@ const templates = [
 .p-result-badge {
     text-align: center;
     margin-top: 1rem;
-    font-size: .72rem;
+    font-size: .7rem;
     color: #16A34A;
     font-weight: 600;
     padding: 6px 14px;
@@ -737,11 +786,7 @@ const templates = [
     }
 
     .hiw-preview {
-        min-height: 320px;
-    }
-
-    .p-tmpl-grid {
-        grid-template-columns: 1fr;
+        min-height: 300px;
     }
 
     .p-result-grid {

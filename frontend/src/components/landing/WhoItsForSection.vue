@@ -2,18 +2,21 @@
     <section class="wif-section">
         <div class="wif-inner">
             <div class="wif-header">
-                <span class="wif-label">Для кого</span>
-                <h2 class="wif-title">Кому подходит ATABAI</h2>
-                <p class="wif-subtitle">Для компаний, которым нужна МСФО отчётность без лишних затрат</p>
+                <span class="wif-label">{{ $t('landing.wif.label') }}</span>
+                <h2 class="wif-title">{{ $t('landing.wif.title') }}</h2>
+                <p class="wif-subtitle">{{ $t('landing.wif.subtitle') }}</p>
             </div>
 
             <div class="wif-grid">
-                <div v-for="card in audiences" :key="card.title" class="wif-card">
-                    <span class="wif-emoji">{{ card.emoji }}</span>
-                    <h3 class="wif-card-title">{{ card.title }}</h3>
-                    <p class="wif-card-desc">{{ card.desc }}</p>
+                <div v-for="card in audiences" :key="card.key" class="wif-card">
+                    <div class="wif-icon-wrap">
+                        <component :is="card.icon" class="wif-icon" />
+                    </div>
+                    <h3 class="wif-card-title">{{ $t(`landing.wif.${card.key}.title`) }}</h3>
+                    <p class="wif-card-desc">{{ $t(`landing.wif.${card.key}.desc`) }}</p>
                     <div class="wif-tags">
-                        <span v-for="tag in card.tags" :key="tag" class="wif-tag mono">{{ tag }}</span>
+                        <span v-for="ti in card.tagCount" :key="ti" class="wif-tag mono">{{
+                            $t(`landing.wif.${card.key}.tag${ti}`) }}</span>
                     </div>
                 </div>
             </div>
@@ -22,24 +25,27 @@
 </template>
 
 <script setup>
+import {
+    BuildingOfficeIcon,
+    ChartBarSquareIcon,
+    GlobeAltIcon
+} from '@heroicons/vue/24/outline'
+
 const audiences = [
     {
-        emoji: '🏢',
-        title: 'МСП Узбекистана',
-        desc: 'Малые и средние предприятия, которые выходят на международный рынок и нуждаются в МСФО отчётности для партнёров и инвесторов.',
-        tags: ['Экспорт', 'Инвесторы', 'Кредиты']
+        key: 'sme',
+        icon: BuildingOfficeIcon,
+        tagCount: 3
     },
     {
-        emoji: '📊',
-        title: 'Бухгалтерские фирмы',
-        desc: 'Аудиторские и консалтинговые компании, обслуживающие клиентов с требованиями международной отчётности. Автоматизация рутины.',
-        tags: ['Аудит', 'Консалтинг', 'Масштаб']
+        key: 'accounting',
+        icon: ChartBarSquareIcon,
+        tagCount: 3
     },
     {
-        emoji: '🌍',
-        title: 'Международные компании',
-        desc: 'Компании с филиалами в Узбекистане, которым нужна консолидация отчётности в единый формат МСФО для головного офиса.',
-        tags: ['Консолидация', 'Филиалы', 'HQ']
+        key: 'international',
+        icon: GlobeAltIcon,
+        tagCount: 3
     }
 ]
 </script>
@@ -93,20 +99,23 @@ const audiences = [
     line-height: 1.6;
 }
 
-/* Grid */
+/* Grid - equal height cards */
 .wif-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 1.25rem;
+    align-items: stretch;
 }
 
-/* Card */
+/* Card - flex column for consistent alignment */
 .wif-card {
     border-radius: 20px;
     padding: 2rem;
     border: 1px solid var(--landing-border);
     background: var(--landing-surface);
     transition: all .3s;
+    display: flex;
+    flex-direction: column;
 }
 
 .wif-card:hover {
@@ -118,10 +127,23 @@ const audiences = [
     box-shadow: 0 8px 30px rgba(149, 0, 255, 0.1);
 }
 
-.wif-emoji {
-    font-size: 2.5rem;
+/* Icon instead of emoji */
+.wif-icon-wrap {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     margin-bottom: 1.25rem;
-    display: block;
+    color: #9500FF;
+    background: rgba(149, 0, 255, 0.06);
+    border: 1px solid var(--landing-border-accent);
+}
+
+.wif-icon {
+    width: 26px;
+    height: 26px;
 }
 
 .wif-card-title {
@@ -135,13 +157,15 @@ const audiences = [
     font-size: .85rem;
     color: var(--landing-text-secondary);
     line-height: 1.6;
-    margin-bottom: 1.25rem;
+    flex: 1;
 }
 
+/* Tags pinned to bottom */
 .wif-tags {
     display: flex;
     flex-wrap: wrap;
     gap: .4rem;
+    margin-top: 1.25rem;
 }
 
 .wif-tag {

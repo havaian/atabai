@@ -1,4 +1,56 @@
 {
+  
+  "landing": {
+    "hiw": {
+      "label": "Process",
+      "subtitle": "Four simple steps from file upload to a ready IFRS report",
+      "proc": {
+        "read": "File read · 247 rows",
+        "structure": "Structure detected · NSBU",
+        "mapping": "IFRS code mapping · 34 items",
+        "formulas": "Applying IAS 16 formulas..."
+      },
+      "resultBadge": "12 changes · 8 formulas · IAS 16 compliant"
+    },
+    "wif": {
+      "label": "Who it's for",
+      "title": "Who ATABAI is for",
+      "subtitle": "For companies that need IFRS reporting without the overhead",
+      "sme": {
+        "title": "Uzbek SMEs",
+        "desc": "Small and medium enterprises entering international markets that need IFRS reporting for partners and investors.",
+        "tag1": "Export",
+        "tag2": "Investors",
+        "tag3": "Loans"
+      },
+      "accounting": {
+        "title": "Accounting Firms",
+        "desc": "Audit and consulting firms serving clients with international reporting requirements. Automate the routine.",
+        "tag1": "Audit",
+        "tag2": "Consulting",
+        "tag3": "Scale"
+      },
+      "international": {
+        "title": "International Companies",
+        "desc": "Companies with subsidiaries in Uzbekistan that need consolidated reporting in a single IFRS format for headquarters.",
+        "tag1": "Consolidation",
+        "tag2": "Subsidiaries",
+        "tag3": "HQ"
+      }
+    },
+    "feat": {
+      "label": "Capabilities",
+      "title": "Why ATABAI",
+      "accuracyDesc": "All calculations via Excel formulas, not hardcoded values. Auditors can verify every cell. 99.9% accuracy in mapping and calculations.",
+      "hardcode": "Hardcode",
+      "formulas": "Formulas",
+      "auditReady": "Audit-ready",
+      "cloud": {
+        "title": "24/7 Access",
+        "desc": "Cloud platform — work whenever convenient, from anywhere, no installation needed."
+      }
+    }
+  },
   "auth": {
     "signInWithGoogle": "Sign in with Google",
     "signOut": "Sign Out",

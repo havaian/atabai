@@ -1,4 +1,55 @@
 {
+  "landing": {
+    "hiw": {
+      "label": "Jarayon",
+      "subtitle": "Faylni yuklashdan tayyor XMHS hisobotiga qadar to'rtta oddiy qadam",
+      "proc": {
+        "read": "Fayl o'qildi · 247 qator",
+        "structure": "Struktura aniqlandi · NSBH",
+        "mapping": "XMHS kodlarini moslashtirish · 34 ta modda",
+        "formulas": "XAS 16 formulalarini qo'llash..."
+      },
+      "resultBadge": "12 o'zgarish · 8 formula · IAS 16 compliant"
+    },
+    "wif": {
+      "label": "Kim uchun",
+      "title": "ATABAI kimga mos",
+      "subtitle": "XMHS hisobotiga ortiqcha xarajatlarsiz ehtiyoj sezadigan kompaniyalar uchun",
+      "sme": {
+        "title": "O'zbekiston KO'B",
+        "desc": "Xalqaro bozorga chiqayotgan va hamkorlar va investorlar uchun XMHS hisobotiga muhtoj kichik va o'rta korxonalar.",
+        "tag1": "Eksport",
+        "tag2": "Investorlar",
+        "tag3": "Kreditlar"
+      },
+      "accounting": {
+        "title": "Buxgalteriya firmalari",
+        "desc": "Xalqaro hisobot talablariga ega mijozlarga xizmat ko'rsatuvchi audit va konsalting kompaniyalari. Odatiy ishlarni avtomatlashtirish.",
+        "tag1": "Audit",
+        "tag2": "Konsalting",
+        "tag3": "Masshtab"
+      },
+      "international": {
+        "title": "Xalqaro kompaniyalar",
+        "desc": "O'zbekistonda filiallari bo'lgan va bosh ofis uchun yagona XMHS formatida konsolidatsiyalashgan hisobotga muhtoj kompaniyalar.",
+        "tag1": "Konsolidatsiya",
+        "tag2": "Filiallar",
+        "tag3": "HQ"
+      }
+    },
+    "feat": {
+      "label": "Imkoniyatlar",
+      "title": "Nega ATABAI",
+      "accuracyDesc": "Barcha hisob-kitoblar Excel formulalari orqali, qattiq kodlangan qiymatlar emas. Auditorlar har bir katakchani tekshirishi mumkin. 99.9% aniqlik.",
+      "hardcode": "Qattiq kod",
+      "formulas": "Formulalar",
+      "auditReady": "Auditga tayyor",
+      "cloud": {
+        "title": "24/7 kirish",
+        "desc": "Bulutli platforma — qulay vaqtda, istalgan joydan, o'rnatmasdan ishlang."
+      }
+    }
+  },
   "auth": {
     "signInWithGoogle": "Google orqali kirish",
     "signOut": "Chiqish",
