@@ -1,48 +1,16 @@
 <template>
-  <div class="min-h-screen bg-gray-50">
+  <div class="landing-page min-h-screen">
     <!-- Main Content -->
     <main>
-      <!-- Hero Section -->
-      <section class="flex flex-col items-center justify-center text-center mt-16 mx-auto px-4 max-md:px-2">
-        <div class="animate-fade-in">
-          <h1 class="text-black hero-title font-extrabold max-w-4xl md:max-w-3xl">
-            {{ $t('hero.title') }}
-          </h1>
-          <!-- Centered first CTA button -->
-          <div class="flex justify-center mt-15 md:mt-10 md:mb-15">
-            <button
-              @click="openCalendlyPopup"
-              class="btn-secondary pulse-glow min-w-60 min-h-14 flex items-center gap-2 justify-center md:px-5">
-              {{ $t('hero.bookDemo') }}
-            </button>
-          </div>
-        </div>
+      <!-- ===================== NEW HERO AREA ===================== -->
+      <div class="landing-hero-area">
+        <HeroSection @book-demo="openCalendlyPopup" />
+        <TransformVisual />
+        <StatsBar />
+        <TrustBadges />
+      </div>
 
-        <!-- Statistics Section -->
-        <div class="animate-fade-in [animation-delay:200ms] mt-27 md:mt-15">
-          <section class="w-full max-w-4xl mx-auto px-4 text-black">
-            <div class="stats-grid">
-              <div class="stat-card">
-                <div class="stat-number">~ 15 {{ $t('stats.seconds') }}</div>
-                <div class="stat-description">{{ $t('stats.analysisTime') }}</div>
-              </div>
-              <div class="stat-card">
-                <div class="stat-number">99.9%</div>
-                <div class="stat-description">{{ $t('stats.accuracy') }}</div>
-              </div>
-              <div class="stat-card">
-                <div class="stat-number">24 / 7</div>
-                <div class="stat-description">{{ $t('stats.availability') }}</div>
-              </div>
-              <div class="stat-card">
-                <div class="stat-number">60%</div>
-                <div class="stat-description">{{ $t('stats.timeSaving') }}</div>
-              </div>
-            </div>
-          </section>
-        </div>
-      </section>
-
+      <!-- ===================== EXISTING SECTIONS BELOW ===================== -->
       <!-- How It Works Section -->
       <div id="how-it-works" class="animate-fade-in [animation-delay:400ms]">
         <section class="mt-42 md:mt-10">
@@ -62,88 +30,71 @@
                 </p>
               </div>
               <div class="bg-white p-6 rounded-20">
-                <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-                  <CloudArrowUpIcon class="mx-auto h-12 w-12 text-gray-400" />
-                  <p class="mt-2 text-sm text-gray-600">{{ $t('howItWorks.step1.uploadText') }}</p>
-                  <p class="text-xs text-gray-500 mt-1">{{ $t('howItWorks.step1.supportedFormats') }}</p>
+                <div class="flex flex-col items-center justify-center py-8 border-2 border-dashed border-gray-300 rounded-lg">
+                  <CloudArrowUpIcon class="w-12 h-12 text-primary mb-4" />
+                  <p class="text-gray-600 font-medium">{{ $t('howItWorks.step1.uploadText') }}</p>
+                  <p class="text-gray-400 text-sm mt-2">{{ $t('howItWorks.step1.supportedFormats') }}</p>
                 </div>
               </div>
             </div>
 
             <!-- Step 2: Select Template -->
-            <div class="flex w-full gap-5 flex-wrap">
-              <div
-                class="bg-neutral-100 flex-1 basis-96 px-7 py-8 rounded-32 md:px-5 md:w-full transition-shadow duration-300">
-                <div class="mb-8">
-                  <h3 class="text-black text-2xl font-semibold leading-none tracking-tight">
-                    {{ $t('howItWorks.step2.title') }}
-                  </h3>
-                  <p class="text-black text-base font-medium leading-6 tracking-tight mt-2 whitespace-pre-line">
-                    {{ $t('howItWorks.step2.description') }}
-                  </p>
-                </div>
-                <div class="bg-white p-6 rounded-20">
-                  <div class="space-y-3">
-                    <div @click="selectTemplate('depreciation')"
-                      :class="['p-3 rounded-lg flex items-center justify-between cursor-pointer transition-colors duration-200',
-                        selectedTemplate === 'depreciation' ? 'bg-primary/10 border border-primary' : 'bg-gray-50 hover:bg-gray-100']">
-                      <span class="text-sm font-medium">{{ $t('templates.depreciation') }}</span>
-                      <span class="text-xs bg-primary text-white px-2 py-1 rounded">IAS 16</span>
-                    </div>
-                    <div @click="selectTemplate('discounts')"
-                      :class="['p-3 rounded-lg flex items-center justify-between cursor-pointer transition-colors duration-200',
-                        selectedTemplate === 'discounts' ? 'bg-primary/10 border border-primary' : 'bg-gray-50 hover:bg-gray-100']">
-                      <span class="text-sm font-medium">{{ $t('templates.discounts') }}</span>
-                      <span class="text-xs bg-primary text-white px-2 py-1 rounded">IFRS 15</span>
-                    </div>
-                    <div @click="selectTemplate('impairment')"
-                      :class="['p-3 rounded-lg flex items-center justify-between cursor-pointer transition-colors duration-200',
-                        selectedTemplate === 'impairment' ? 'bg-primary/10 border border-primary' : 'bg-gray-50 hover:bg-gray-100']">
-                      <span class="text-sm font-medium">{{ $t('templates.impairment') }}</span>
-                      <span class="text-xs bg-primary text-white px-2 py-1 rounded">IAS 36</span>
-                    </div>
-                  </div>
+            <div
+              class="bg-neutral-100 w-full px-8 py-8 rounded-32 md:px-5 hover:shadow-lg transition-shadow duration-300">
+              <div class="mb-8">
+                <h3 class="text-black text-2xl font-semibold leading-none tracking-tight">
+                  {{ $t('howItWorks.step2.title') }}
+                </h3>
+                <p class="text-black text-base font-medium leading-6 tracking-tight mt-2">
+                  {{ $t('howItWorks.step2.description') }}
+                </p>
+              </div>
+              <div class="bg-white p-4 rounded-20">
+                <div class="grid grid-cols-3 gap-3">
+                  <button
+                    v-for="template in ['depreciation', 'discounts', 'impairment']"
+                    :key="template"
+                    @click="selectTemplate(template)"
+                    :class="[
+                      'p-4 rounded-lg text-center transition-all duration-200',
+                      selectedTemplate === template
+                        ? 'bg-primary/10 border-2 border-primary'
+                        : 'bg-gray-50 border-2 border-transparent hover:border-gray-200'
+                    ]">
+                    <DocumentCheckIcon class="w-6 h-6 mx-auto mb-2" :class="selectedTemplate === template ? 'text-primary' : 'text-gray-400'" />
+                    <span class="text-xs font-medium" :class="selectedTemplate === template ? 'text-primary' : 'text-gray-600'">
+                      {{ $t(`howItWorks.step2.templates.${template}`) }}
+                    </span>
+                  </button>
                 </div>
               </div>
+            </div>
 
-              <!-- Step 3: Get Results -->
-              <div
-                class="bg-neutral-100 flex-1 basis-96 px-7 py-8 rounded-32 md:px-5 md:w-full transition-shadow duration-300">
-                <div class="mb-8">
-                  <h3 class="text-black text-2xl font-semibold leading-none tracking-tight">
-                    {{ $t('howItWorks.step3.title') }}
-                  </h3>
-                  <p class="text-black text-base font-medium leading-6 tracking-tight mt-2 whitespace-pre-line">
-                    {{ $t('howItWorks.step3.description') }}
-                  </p>
-                </div>
-                <div class="bg-white p-6 rounded-20">
-                  <div class="space-y-4">
-                    <div class="flex items-center justify-between p-3 bg-green-50 rounded-lg">
-                      <span class="text-sm">{{ $t(`howItWorks.templates.${selectedTemplate}.processed`) }}</span>
-                      <CheckCircleIcon class="h-5 w-5 text-green-500" />
+            <!-- Step 3: Get Results -->
+            <div
+              class="bg-neutral-100 w-full px-8 py-8 rounded-32 md:px-5 hover:shadow-lg transition-shadow duration-300">
+              <div class="mb-8">
+                <h3 class="text-black text-2xl font-semibold leading-none tracking-tight">
+                  {{ $t('howItWorks.step3.title') }}
+                </h3>
+                <p class="text-black text-base font-medium leading-6 tracking-tight mt-2">
+                  {{ $t('howItWorks.step3.description') }}
+                </p>
+              </div>
+              <div class="bg-white p-6 rounded-20">
+                <div class="flex items-center justify-between p-4 bg-green-50 rounded-lg">
+                  <div class="flex items-center space-x-3">
+                    <CheckCircleIcon class="w-8 h-8 text-green-500" />
+                    <div>
+                      <p class="font-medium text-green-700">{{ $t('howItWorks.step3.processed') }}</p>
+                      <p class="text-sm text-green-600">{{ $t('howItWorks.step3.changes') }}: 12 | {{ $t('howItWorks.step3.formulas') }}: 8</p>
                     </div>
-                    <div class="text-sm text-gray-600">
-                      <div class="flex justify-between">
-                        <span>{{ $t(`howItWorks.templates.${selectedTemplate}.changesLabel`) }}:</span>
-                        <span class="font-medium">{{ $t(`howItWorks.templates.${selectedTemplate}.changes`) }}</span>
-                      </div>
-                      <div class="flex justify-between">
-                        <span>{{ $t(`howItWorks.templates.${selectedTemplate}.formulasLabel`) }}:</span>
-                        <span class="font-medium">{{ $t(`howItWorks.templates.${selectedTemplate}.formulas`) }}</span>
-                      </div>
-                    </div>
-                    <button
-                      class="btn-primary bg-black text-white border-black hover:bg-transparent hover:text-black hover:border-black w-full">
-                      {{ $t('common.download') }}
-                    </button>
                   </div>
                 </div>
               </div>
             </div>
 
-
-            <!-- Step 4: Before/After Preview -->
+            <!-- Step 4: Before/After Comparison -->
             <div
               class="bg-neutral-100 w-full px-8 py-8 rounded-32 md:px-5 hover:shadow-lg transition-shadow duration-300">
               <div class="mb-8">
@@ -255,7 +206,7 @@
               </div>
             </div>
 
-            <!-- CTA Section -->
+            <!-- CTA Section inside How It Works -->
             <section
               class="bg-gradient-hero shadow-gradient-hero flex w-full flex-col overflow-hidden items-center mt-24 pt-12 pb-14 px-5 rounded-40 md:mt-10 md:rounded-32 hover:shadow-gradient-hero transition-shadow duration-300">
               <div class="flex w-full max-w-3xl flex-col items-center md:max-w-full">
@@ -389,6 +340,12 @@ import {
   ArrowRightIcon
 } from '@heroicons/vue/24/outline'
 
+// Landing section components
+import HeroSection from '@/components/landing/HeroSection.vue'
+import TransformVisual from '@/components/landing/TransformVisual.vue'
+import StatsBar from '@/components/landing/StatsBar.vue'
+import TrustBadges from '@/components/landing/TrustBadges.vue'
+
 // Composables
 import { useAuthStore } from '@/stores/auth'
 
@@ -432,23 +389,23 @@ const getBeforeData = () => {
       warning: [
         t('howItWorks.step4.spreadsheet.discounts.before.data.simple'),
         t('howItWorks.step4.spreadsheet.discounts.before.data.basic'),
-        t('howItWorks.step4.spreadsheet.discounts.before.data.nonifrs')
+        t('howItWorks.step4.spreadsheet.discounts.before.data.noIfrs')
       ]
     }
   } else {
     return {
       headers: [
         t('howItWorks.step4.spreadsheet.impairment.before.headers.asset'),
-        t('howItWorks.step4.spreadsheet.impairment.before.headers.carrying'),
-        t('howItWorks.step4.spreadsheet.impairment.before.headers.status')
+        t('howItWorks.step4.spreadsheet.impairment.before.headers.book'),
+        t('howItWorks.step4.spreadsheet.impairment.before.headers.note')
       ],
       rows: [
-        [t('howItWorks.step4.spreadsheet.impairment.before.data.equipment'), '800,000', t('howItWorks.step4.spreadsheet.impairment.before.data.untested')],
-        [t('howItWorks.step4.spreadsheet.impairment.before.data.buildings'), '1,200,000', t('howItWorks.step4.spreadsheet.impairment.before.data.untested')]
+        [t('howItWorks.step4.spreadsheet.impairment.before.data.equipment'), '800,000', t('howItWorks.step4.spreadsheet.impairment.before.data.notTested')],
+        [t('howItWorks.step4.spreadsheet.impairment.before.data.buildings'), '1,200,000', t('howItWorks.step4.spreadsheet.impairment.before.data.noReview')]
       ],
       warning: [
-        t('howItWorks.step4.spreadsheet.impairment.before.data.notesting'),
-        t('howItWorks.step4.spreadsheet.impairment.before.data.noias36'),
+        t('howItWorks.step4.spreadsheet.impairment.before.data.missing'),
+        t('howItWorks.step4.spreadsheet.impairment.before.data.noRecoverable'),
         t('howItWorks.step4.spreadsheet.impairment.before.data.risk')
       ]
     }
@@ -459,35 +416,35 @@ const getAfterData = () => {
   if (selectedTemplate.value === 'depreciation') {
     return {
       headers: [
-        t('howItWorks.step4.spreadsheet.depreciation.after.headers.assets'),
-        t('howItWorks.step4.spreadsheet.depreciation.after.headers.standard'),
+        t('howItWorks.step4.spreadsheet.depreciation.after.headers.ifrsCode'),
+        t('howItWorks.step4.spreadsheet.depreciation.after.headers.lineItem'),
         t('howItWorks.step4.spreadsheet.depreciation.after.headers.amount')
       ],
       rows: [
-        [t('howItWorks.step4.spreadsheet.depreciation.after.data.ppe'), 'IAS 16', '1,250,000'],
-        [t('howItWorks.step4.spreadsheet.depreciation.after.data.accumulated'), 'IAS 16', '-345,600']
+        ['IAS16.30', t('howItWorks.step4.spreadsheet.depreciation.after.data.ppeCost'), '1,250,000'],
+        ['IAS16.43', t('howItWorks.step4.spreadsheet.depreciation.after.data.accumDepr'), '-312,500']
       ],
       success: [
-        t('howItWorks.step4.spreadsheet.depreciation.after.data.automated'),
         t('howItWorks.step4.spreadsheet.depreciation.after.data.compliant'),
-        t('howItWorks.step4.spreadsheet.depreciation.after.data.accurate')
+        t('howItWorks.step4.spreadsheet.depreciation.after.data.straightLine'),
+        t('howItWorks.step4.spreadsheet.depreciation.after.data.validated')
       ]
     }
   } else if (selectedTemplate.value === 'discounts') {
     return {
       headers: [
+        t('howItWorks.step4.spreadsheet.discounts.after.headers.ifrsCode'),
         t('howItWorks.step4.spreadsheet.discounts.after.headers.revenue'),
-        t('howItWorks.step4.spreadsheet.discounts.after.headers.standard'),
         t('howItWorks.step4.spreadsheet.discounts.after.headers.amount')
       ],
       rows: [
-        [t('howItWorks.step4.spreadsheet.discounts.after.data.contracts'), 'IFRS 15', '475,000'],
-        [t('howItWorks.step4.spreadsheet.discounts.after.data.liabilities'), 'IFRS 15', '12,500']
+        ['IFRS15.47', t('howItWorks.step4.spreadsheet.discounts.after.data.revenue'), '500,000'],
+        ['IFRS15.52', t('howItWorks.step4.spreadsheet.discounts.after.data.variable'), '-25,000']
       ],
       success: [
-        t('howItWorks.step4.spreadsheet.discounts.after.data.performance'),
-        t('howItWorks.step4.spreadsheet.discounts.after.data.method'),
-        t('howItWorks.step4.spreadsheet.discounts.after.data.compliant')
+        t('howItWorks.step4.spreadsheet.discounts.after.data.fiveStep'),
+        t('howItWorks.step4.spreadsheet.discounts.after.data.recognized'),
+        t('howItWorks.step4.spreadsheet.discounts.after.data.validated')
       ]
     }
   } else {
@@ -519,7 +476,6 @@ function goToComingSoon() {
   router.push('/coming-soon')
 }
 
-
 const openCalendlyPopup = () => {
   if (window.Calendly) {
     window.Calendly.initPopupWidget({
@@ -548,6 +504,48 @@ onMounted(() => {
 </script>
 
 <style scoped>
+/* ===================================================================
+   LANDING PAGE THEME VARIABLES
+   All landing section components reference these via var(--landing-*)
+   =================================================================== */
+.landing-page {
+  /* Light theme (default) */
+  --landing-bg: #FAFAFA;
+  --landing-surface: #FFFFFF;
+  --landing-surface-2: #F5F3F7;
+  --landing-text: #111018;
+  --landing-text-secondary: #5C5670;
+  --landing-text-muted: #9890A8;
+  --landing-border: rgba(0, 0, 0, 0.06);
+  --landing-border-accent: rgba(149, 0, 255, 0.12);
+
+  background: var(--landing-bg);
+}
+
+:global(.dark) .landing-page {
+  /* Dark theme */
+  --landing-bg: #07060B;
+  --landing-surface: #0F0D15;
+  --landing-surface-2: #16131F;
+  --landing-text: #F0ECF6;
+  --landing-text-secondary: rgba(240, 236, 246, 0.55);
+  --landing-text-muted: rgba(240, 236, 246, 0.3);
+  --landing-border: rgba(149, 0, 255, 0.08);
+  --landing-border-accent: rgba(149, 0, 255, 0.12);
+
+  background: var(--landing-bg);
+}
+
+/* ===== NEW HERO AREA ===== */
+.landing-hero-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-bottom: 4rem;
+}
+
+/* ===== EXISTING SECTION STYLES (preserved from original) ===== */
+
 /* Custom gradient-inspired shadow */
 .shadow-gradient-hero {
   box-shadow: 0 10px 25px -3px rgba(149, 0, 255, 0.3),
@@ -567,7 +565,6 @@ onMounted(() => {
   border-radius: 8px;
   overflow: hidden;
   height: 240px;
-  /* Fixed height for consistency */
 }
 
 .spreadsheet-table {
@@ -576,7 +573,6 @@ onMounted(() => {
   border-collapse: collapse;
   font-size: 12px;
   table-layout: fixed;
-  /* Fixed layout for consistent column widths */
 }
 
 .spreadsheet-header {
@@ -588,9 +584,7 @@ onMounted(() => {
   font-size: 11px;
   color: #64748b;
   width: 40px;
-  /* Fixed width for column headers */
   height: 32px;
-  /* Fixed height */
 }
 
 .spreadsheet-cell {
@@ -601,7 +595,6 @@ onMounted(() => {
   font-size: 11px;
   vertical-align: top;
   height: 40px;
-  /* Fixed row height */
   word-wrap: break-word;
   overflow: hidden;
 }
@@ -640,291 +633,92 @@ onMounted(() => {
   opacity: 0;
 }
 
-.animate-fade-in.\[animation-delay\:200ms\] {
-  animation-delay: 200ms;
-}
-
-.animate-fade-in.\[animation-delay\:400ms\] {
-  animation-delay: 400ms;
-}
-
-.animate-fade-in.\[animation-delay\:600ms\] {
-  animation-delay: 600ms;
-}
-
-.animate-fade-in.\[animation-delay\:800ms\] {
-  animation-delay: 800ms;
-}
-
-.animate-fade-in.\[animation-delay\:1000ms\] {
-  animation-delay: 1000ms;
-}
+.animate-fade-in.\[animation-delay\:200ms\] { animation-delay: 200ms; }
+.animate-fade-in.\[animation-delay\:400ms\] { animation-delay: 400ms; }
+.animate-fade-in.\[animation-delay\:600ms\] { animation-delay: 600ms; }
+.animate-fade-in.\[animation-delay\:800ms\] { animation-delay: 800ms; }
+.animate-fade-in.\[animation-delay\:1000ms\] { animation-delay: 1000ms; }
 
 @keyframes fadeIn {
-  0% {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  0% { opacity: 0; transform: translateY(10px); }
+  100% { opacity: 1; transform: translateY(0); }
 }
 
 /* Smooth scrolling for anchor links */
-html {
-  scroll-behavior: smooth;
-}
+html { scroll-behavior: smooth; }
 
-/* Custom utility classes using proper CSS */
+/* Custom utility classes */
 .hero-title {
   font-size: clamp(2rem, 8vw, 4.25rem);
   line-height: 1.1;
   letter-spacing: -0.025em;
 }
 
-.text-44 {
-  font-size: 2.75rem;
-}
+.text-44 { font-size: 2.75rem; }
+.rounded-32 { border-radius: 2rem; }
+.rounded-40 { border-radius: 2.5rem; }
+.rounded-20 { border-radius: 1.25rem; }
+.w-65 { width: 16.25rem; }
+.h-65 { height: 16.25rem; }
+.mt-15 { margin-top: 3.75rem; }
+.mt-21 { margin-top: 5.25rem; }
+.mt-27 { margin-top: 6.75rem; }
+.mt-40 { margin-top: 10rem; }
+.mt-42 { margin-top: 10.5rem; }
+.mt-54 { margin-top: 13.5rem; }
+.mt-13 { margin-top: 3.25rem; }
+.py-31 { padding-top: 7.75rem; padding-bottom: 7.75rem; }
+.gap-5 { gap: 1.25rem; }
+.min-w-60 { min-width: 15rem; }
+.min-h-14 { min-height: 3.5rem; }
+.tracking-tight { letter-spacing: -0.025em; }
 
-.rounded-32 {
-  border-radius: 2rem;
-}
-
-.rounded-40 {
-  border-radius: 2.5rem;
-}
-
-.rounded-20 {
-  border-radius: 1.25rem;
-}
-
-.w-65 {
-  width: 16.25rem;
-}
-
-.h-65 {
-  height: 16.25rem;
-}
-
-.mt-15 {
-  margin-top: 3.75rem;
-}
-
-.mt-21 {
-  margin-top: 5.25rem;
-}
-
-.mt-27 {
-  margin-top: 6.75rem;
-}
-
-.mt-40 {
-  margin-top: 10rem;
-}
-
-.mt-42 {
-  margin-top: 10.5rem;
-}
-
-.mt-54 {
-  margin-top: 13.5rem;
-}
-
-.mt-13 {
-  margin-top: 3.25rem;
-}
-
-.py-31 {
-  padding-top: 7.75rem;
-  padding-bottom: 7.75rem;
-}
-
-.gap-5 {
-  gap: 1.25rem;
-}
-
-.min-w-60 {
-  min-width: 15rem;
-}
-
-.min-h-14 {
-  min-height: 3.5rem;
-}
-
-.tracking-tight {
-  letter-spacing: -0.025em;
-}
-
-.stats-grid, #features section > div {
+.stats-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.75rem;
-}
-
-@media (min-width: 512px) {
-  .stats-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1.25rem;
-  }
-}
-
-@media (min-width: 640px) {
-  .stats-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1.25rem;
-  }
-}
-
-@media (min-width: 768px) {
-  .stats-grid {
-    grid-template-columns: repeat(4, 1fr);
-    gap: 1.25rem;
-  }
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
 }
 
 .stat-card {
-  background: #f5f5f5;
-  padding: 1.5rem 1rem;
-  border-radius: 2rem;
+  text-align: center;
+  padding: 1.5rem;
+  border-radius: 1rem;
+  background: white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   transition: box-shadow 0.3s ease;
-  cursor: pointer;
 }
 
 .stat-card:hover {
-  box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-}
-
-@media (min-width: 512px) {
-  main {
-    padding: 0 2%;
-  }
-}
-
-@media (min-width: 640px) {
-  .stat-card {
-    padding: 2rem 1.75rem;
-  }
-}
-
-@media (min-width: 768px) {
-  .stat-card {
-    padding: 2rem 1.25rem;
-  }
+  box-shadow: 0 10px 25px -5px rgba(149, 0, 255, 0.15),
+    0 8px 10px -6px rgba(149, 0, 255, 0.1);
 }
 
 .stat-number {
-  font-size: 1.5rem;
-  font-weight: 600;
-  line-height: 1;
-  letter-spacing: -0.025em;
-}
-
-@media (min-width: 512px) {
-  .stat-number {
-    font-size: 2.75rem;
-  }
-}
-
-
-@media (min-width: 640px) {
-  .stat-number {
-    font-size: 2.75rem;
-  }
-}
-
-@media (min-width: 768px) {
-  .stat-number {
-    font-size: 1.875rem;
-  }
+  font-size: 2rem;
+  font-weight: 800;
+  color: #111;
+  letter-spacing: -0.02em;
 }
 
 .stat-description {
-  font-size: 1rem;
+  font-size: 0.875rem;
+  color: #6b7280;
   font-weight: 500;
-  line-height: 1.5;
-  letter-spacing: -0.025em;
-  margin-top: 1rem;
+  margin-top: 0.25rem;
 }
 
-@media (min-width: 510px) {
-  .stat-description {
-    font-size: 1.5rem;
-    line-height: 2;
-    margin-top: 1.5rem;
-  }
-}
-
-@media (min-width: 640px) {
-  .stat-description {
-    font-size: 1.5rem;
-    line-height: 2;
-    margin-top: 1.5rem;
-  }
-}
-
-@media (min-width: 768px) {
-  .stat-description {
-    font-size: 1.125rem;
-    line-height: 1.5;
-    margin-top: 1rem;
-  }
-}
-
-/* Responsive breakpoint adjustments */
 @media (max-width: 768px) {
-  .mt-15 {
-    margin-top: 2.5rem;
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
   }
 
-  .mt-21 {
-    margin-top: 2.5rem;
+  .stat-number {
+    font-size: 1.5rem;
   }
 
-  .mt-27 {
-    margin-top: 2.5rem;
-  }
-
-  .mt-40 {
-    margin-top: 2.5rem;
-  }
-
-  .mt-42 {
-    margin-top: 2.5rem;
-  }
-
-  .mt-54 {
-    margin-top: 2.5rem;
-  }
-
-  .py-31 {
-    padding-top: 5rem;
-    padding-bottom: 5rem;
-  }
-
-  .spreadsheet-container {
-    height: 200px;
-    /* Slightly smaller on mobile */
-  }
-
-  .spreadsheet-table {
-    font-size: 10px;
-  }
-
-  .spreadsheet-cell {
-    padding: 6px 8px;
-    font-size: 10px;
-    height: 36px;
-    /* Adjusted for mobile */
-  }
-
-  .spreadsheet-header {
-    padding: 6px;
-    font-size: 10px;
-    height: 28px;
-    /* Adjusted for mobile */
-    width: 35px;
-  }
+  .mt-42 { margin-top: 5rem; }
+  .mt-54 { margin-top: 6rem; }
+  .mt-40 { margin-top: 5rem; }
 }
 </style>
