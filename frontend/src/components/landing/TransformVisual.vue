@@ -102,29 +102,13 @@ import { ArrowRightIcon } from '@heroicons/vue/24/outline'
     box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04), 0 1px 4px rgba(0, 0, 0, 0.02);
 }
 
-:global(.dark) .sheet-card {
-    background: var(--landing-surface);
-    box-shadow: none;
-    border-color: var(--landing-border-accent);
-}
-
 .sheet-before {
     border-color: rgba(220, 38, 38, 0.12);
-}
-
-:global(.dark) .sheet-before {
-    border-color: var(--landing-border-accent);
-    box-shadow: 0 0 30px rgba(239, 68, 68, 0.06);
 }
 
 .sheet-after {
     border-color: rgba(22, 163, 74, 0.15);
     box-shadow: 0 4px 24px rgba(22, 163, 74, 0.06), 0 1px 4px rgba(0, 0, 0, 0.02);
-}
-
-:global(.dark) .sheet-after {
-    border-color: rgba(34, 197, 94, 0.15);
-    box-shadow: 0 0 30px rgba(34, 197, 94, 0.06);
 }
 
 /* Header */
@@ -135,11 +119,6 @@ import { ArrowRightIcon } from '@heroicons/vue/24/outline'
     padding: 12px 16px;
     border-bottom: 1px solid var(--landing-border);
     background: var(--landing-surface-2);
-}
-
-:global(.dark) .sheet-header {
-    border-bottom-color: var(--landing-border-accent);
-    background: transparent;
 }
 
 .sheet-label {
@@ -166,28 +145,12 @@ import { ArrowRightIcon } from '@heroicons/vue/24/outline'
     background: #DC2626;
 }
 
-:global(.dark) .sheet-label-nsbu {
-    color: #EF4444;
-}
-
-:global(.dark) .sheet-label-nsbu .sheet-label-dot {
-    background: #EF4444;
-}
-
 .sheet-label-ifrs {
     color: #16A34A;
 }
 
 .sheet-label-ifrs .sheet-label-dot {
     background: #16A34A;
-}
-
-:global(.dark) .sheet-label-ifrs {
-    color: #22C55E;
-}
-
-:global(.dark) .sheet-label-ifrs .sheet-label-dot {
-    background: #22C55E;
 }
 
 /* Tags */
@@ -204,19 +167,9 @@ import { ArrowRightIcon } from '@heroicons/vue/24/outline'
     color: #DC2626;
 }
 
-:global(.dark) .sheet-tag-nsbu {
-    background: rgba(239, 68, 68, 0.1);
-    color: #EF4444;
-}
-
 .sheet-tag-ifrs {
     background: rgba(22, 163, 74, 0.06);
     color: #16A34A;
-}
-
-:global(.dark) .sheet-tag-ifrs {
-    background: rgba(34, 197, 94, 0.1);
-    color: #22C55E;
 }
 
 /* Body & rows */
@@ -232,20 +185,12 @@ import { ArrowRightIcon } from '@heroicons/vue/24/outline'
     border-bottom: 1px solid var(--landing-border);
 }
 
-:global(.dark) .sheet-row {
-    border-bottom-color: rgba(149, 0, 255, 0.05);
-}
-
 .sheet-row:last-child {
     border-bottom: none;
 }
 
 .sheet-row-header {
     background: var(--landing-surface-2);
-}
-
-:global(.dark) .sheet-row-header {
-    background: rgba(149, 0, 255, 0.08);
 }
 
 .sheet-row-header .sheet-cell {
@@ -273,16 +218,8 @@ import { ArrowRightIcon } from '@heroicons/vue/24/outline'
     color: #DC2626;
 }
 
-:global(.dark) .sheet-row-error .sheet-cell {
-    color: rgba(239, 68, 68, 0.7);
-}
-
 .sheet-row-success .sheet-cell {
     color: #16A34A;
-}
-
-:global(.dark) .sheet-row-success .sheet-cell {
-    color: rgba(34, 197, 94, 0.7);
 }
 
 /* ===== ARROW CONNECTOR ===== */
@@ -307,11 +244,6 @@ import { ArrowRightIcon } from '@heroicons/vue/24/outline'
     background: var(--landing-surface);
     border: 1px solid var(--landing-border-accent);
     box-shadow: 0 2px 12px rgba(149, 0, 255, 0.08);
-}
-
-:global(.dark) .transform-arrow-circle {
-    background: rgba(149, 0, 255, 0.08);
-    box-shadow: none;
 }
 
 @keyframes tvArrowPulse {

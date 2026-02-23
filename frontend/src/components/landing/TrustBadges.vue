@@ -46,12 +46,6 @@ const badges = [
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
 }
 
-:global(.dark) .trust-badge {
-    border-color: rgba(149, 0, 255, 0.06);
-    background: var(--landing-surface);
-    box-shadow: none;
-}
-
 .trust-badge-icon {
     font-size: 0.85rem;
 }

@@ -250,10 +250,6 @@ const templates = [
     box-shadow: 0 4px 20px rgba(149, 0, 255, 0.06);
 }
 
-:global(.dark) .hiw-step.active {
-    box-shadow: 0 4px 20px rgba(149, 0, 255, 0.1);
-}
-
 .hiw-num {
     width: 36px;
     height: 36px;
@@ -550,11 +546,6 @@ const templates = [
     color: #16A34A;
 }
 
-:global(.dark) .p-proc-done {
-    background: rgba(34, 197, 94, 0.1);
-    color: #22C55E;
-}
-
 .p-proc-prog {
     background: rgba(149, 0, 255, 0.06);
     color: #9500FF;
@@ -592,16 +583,8 @@ const templates = [
     border-color: rgba(220, 38, 38, 0.12);
 }
 
-:global(.dark) .p-res-before {
-    border-color: rgba(239, 68, 68, 0.12);
-}
-
 .p-res-after {
     border-color: rgba(22, 163, 74, 0.12);
-}
-
-:global(.dark) .p-res-after {
-    border-color: rgba(34, 197, 94, 0.12);
 }
 
 .p-res-hd {
@@ -636,28 +619,12 @@ const templates = [
     background: #DC2626;
 }
 
-:global(.dark) .p-res-label-r {
-    color: #EF4444;
-}
-
-:global(.dark) .p-res-label-r .p-res-dot {
-    background: #EF4444;
-}
-
 .p-res-label-g {
     color: #16A34A;
 }
 
 .p-res-label-g .p-res-dot {
     background: #16A34A;
-}
-
-:global(.dark) .p-res-label-g {
-    color: #22C55E;
-}
-
-:global(.dark) .p-res-label-g .p-res-dot {
-    background: #22C55E;
 }
 
 .p-res-tag {
@@ -672,19 +639,9 @@ const templates = [
     color: #DC2626;
 }
 
-:global(.dark) .p-res-tag-r {
-    background: rgba(239, 68, 68, 0.1);
-    color: #EF4444;
-}
-
 .p-res-tag-g {
     background: rgba(22, 163, 74, 0.06);
     color: #16A34A;
-}
-
-:global(.dark) .p-res-tag-g {
-    background: rgba(34, 197, 94, 0.1);
-    color: #22C55E;
 }
 
 .p-res-body {
@@ -703,10 +660,6 @@ const templates = [
 
 .p-res-row-h {
     background: rgba(149, 0, 255, 0.04);
-}
-
-:global(.dark) .p-res-row-h {
-    background: rgba(149, 0, 255, 0.06);
 }
 
 .p-res-row-h .p-res-c {
@@ -729,17 +682,9 @@ const templates = [
     opacity: .8;
 }
 
-:global(.dark) .p-res-row-e .p-res-c {
-    color: rgba(239, 68, 68, 0.7);
-}
-
 .p-res-row-s .p-res-c {
     color: #16A34A;
     opacity: .8;
-}
-
-:global(.dark) .p-res-row-s .p-res-c {
-    color: rgba(34, 197, 94, 0.7);
 }
 
 .p-res-arrow {
@@ -769,11 +714,6 @@ const templates = [
     padding: 6px 14px;
     border-radius: 8px;
     background: rgba(22, 163, 74, 0.06);
-}
-
-:global(.dark) .p-result-badge {
-    color: #22C55E;
-    background: rgba(34, 197, 94, 0.06);
 }
 
 @media (max-width: 768px) {

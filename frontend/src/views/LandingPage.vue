@@ -83,20 +83,6 @@ onMounted(() => {
   background: var(--landing-bg);
 }
 
-:global(.dark) .landing-page {
-  /* Dark theme */
-  --landing-bg: #07060B;
-  --landing-surface: #0F0D15;
-  --landing-surface-2: #16131F;
-  --landing-text: #F0ECF6;
-  --landing-text-secondary: rgba(240, 236, 246, 0.55);
-  --landing-text-muted: rgba(240, 236, 246, 0.3);
-  --landing-border: rgba(149, 0, 255, 0.08);
-  --landing-border-accent: rgba(149, 0, 255, 0.12);
-
-  background: var(--landing-bg);
-}
-
 /* Hero area wrapper */
 .landing-hero-area {
   display: flex;

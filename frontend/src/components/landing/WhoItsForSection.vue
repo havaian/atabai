@@ -123,10 +123,6 @@ const audiences = [
     box-shadow: 0 8px 30px rgba(149, 0, 255, 0.06);
 }
 
-:global(.dark) .wif-card:hover {
-    box-shadow: 0 8px 30px rgba(149, 0, 255, 0.1);
-}
-
 /* Icon instead of emoji */
 .wif-icon-wrap {
     width: 52px;

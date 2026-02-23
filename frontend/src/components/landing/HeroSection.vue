@@ -71,17 +71,6 @@ function scrollToHowItWorks() {
     mask-image: radial-gradient(ellipse 60% 50% at 50% 40%, black 10%, transparent 60%);
     -webkit-mask-image: radial-gradient(ellipse 60% 50% at 50% 40%, black 10%, transparent 60%);
 }
-
-/* Dark: line grid */
-:global(.dark) .hero-bg-grid {
-    background-image:
-        linear-gradient(rgba(149, 0, 255, 0.04) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(149, 0, 255, 0.04) 1px, transparent 1px);
-    background-size: 60px 60px;
-    mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, black 20%, transparent 70%);
-    -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, black 20%, transparent 70%);
-}
-
 /* Glow orb — hidden in light, visible in dark */
 .hero-glow-orb {
     position: absolute;
@@ -93,12 +82,6 @@ function scrollToHowItWorks() {
     transform: translateX(-50%);
     pointer-events: none;
     opacity: 0;
-}
-
-:global(.dark) .hero-glow-orb {
-    opacity: 1;
-    background: radial-gradient(circle, rgba(149, 0, 255, 0.15) 0%, rgba(149, 0, 255, 0.05) 40%, transparent 70%);
-    animation: heroOrbPulse 6s ease-in-out infinite;
 }
 
 @keyframes heroOrbPulse {
@@ -116,14 +99,6 @@ function scrollToHowItWorks() {
 /* Particles — hidden in light, visible in dark */
 .hero-particles {
     display: none;
-}
-
-:global(.dark) .hero-particles {
-    display: block;
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    overflow: hidden;
 }
 
 .hero-particle {
@@ -232,11 +207,6 @@ function scrollToHowItWorks() {
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
 }
 
-:global(.dark) .hero-badge {
-    background: rgba(149, 0, 255, 0.08);
-    box-shadow: none;
-}
-
 .hero-badge-dot {
     width: 6px;
     height: 6px;
@@ -257,11 +227,6 @@ function scrollToHowItWorks() {
         opacity: 0.5;
     }
 }
-
-:global(.dark) .hero-badge-dot {
-    box-shadow: 0 0 12px rgba(149, 0, 255, 0.6);
-}
-
 /* Title */
 .hero-title {
     font-size: clamp(2.5rem, 6vw, 4.5rem);
@@ -277,12 +242,6 @@ function scrollToHowItWorks() {
     background: linear-gradient(135deg, #9500FF 0%, #B44DFF 50%, #7C3AED 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-
-:global(.dark) .hero-title-highlight {
-    background: linear-gradient(135deg, #9500FF 0%, #C084FC 100%);
-    -webkit-background-clip: text;
     background-clip: text;
 }
 
@@ -331,14 +290,6 @@ function scrollToHowItWorks() {
     background: #A020FF;
 }
 
-:global(.dark) .hero-btn-primary {
-    box-shadow: 0 0 30px rgba(149, 0, 255, 0.3), 0 4px 20px rgba(149, 0, 255, 0.2);
-}
-
-:global(.dark) .hero-btn-primary:hover {
-    box-shadow: 0 0 50px rgba(149, 0, 255, 0.5), 0 8px 30px rgba(149, 0, 255, 0.3);
-}
-
 .hero-btn-secondary {
     background: var(--landing-surface);
     color: var(--landing-text);
@@ -349,17 +300,6 @@ function scrollToHowItWorks() {
 .hero-btn-secondary:hover {
     border-color: var(--landing-border-accent);
     background: rgba(149, 0, 255, 0.06);
-}
-
-:global(.dark) .hero-btn-secondary {
-    background: var(--landing-surface-2);
-    border-color: var(--landing-border-accent);
-    box-shadow: none;
-}
-
-:global(.dark) .hero-btn-secondary:hover {
-    border-color: rgba(149, 0, 255, 0.3);
-    background: rgba(149, 0, 255, 0.08);
 }
 
 /* ===== ANIMATIONS ===== */

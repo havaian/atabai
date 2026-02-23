@@ -165,10 +165,6 @@ import {
     box-shadow: 0 8px 30px rgba(149, 0, 255, 0.06);
 }
 
-:global(.dark) .bf:hover {
-    box-shadow: 0 8px 30px rgba(149, 0, 255, 0.1);
-}
-
 /* Hero cards span 2 rows */
 .bf-hero {
     grid-row: span 2;

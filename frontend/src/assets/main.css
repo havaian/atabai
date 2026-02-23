@@ -8,17 +8,6 @@
     --atabai-violet: #9500ff;
 }
 
-/* Dark mode color variables */
-.dark {
-    --bg-primary: #1a1a1a;
-    --bg-secondary: #2d2d2d;
-    --bg-tertiary: #404040;
-    --text-primary: #e5e5e5;
-    --text-secondary: #a0a0a0;
-    --text-muted: #6b7280;
-    --border-color: #404040;
-}
-
 /* Global transition base - applied to base state, not hover */
 @layer base {
     * {
@@ -140,63 +129,6 @@
     .btn-auth:hover {
         @apply border-violet-700 transition-all duration-300 ease-out;
     }
-
-    /* Dark mode button styles */
-    .dark .btn-primary {
-        background-color: #e5e7eb;
-        color: #111827;
-    }
-
-    .dark .btn-primary:hover {
-        background-color: #ffffff;
-        color: #000000;
-    }
-
-    .dark .btn-secondary {
-        background-color: #374151;
-        color: #e5e7eb;
-        border-color: #374151;
-    }
-
-    .dark .btn-secondary:hover {
-        color: #ffffff;
-    }
-
-    .dark .btn-rounded {
-        background: linear-gradient(135deg, #2d2d2d 0%, #1a1a1a 100%);
-        color: #e5e7eb;
-    }
-
-    .dark .btn-rounded:hover {
-        background: transparent;
-        color: #e5e7eb;
-        border: thin solid #9500FF;
-    }
-
-    .dark .btn-circle {
-        background-color: #374151;
-        color: #e5e7eb;
-    }
-
-    .dark .btn-ghost {
-        background-color: #374151;
-        color: #d1d5db;
-    }
-
-    .dark .btn-ghost:hover {
-        background-color: #374151;
-        color: #f3f4f6;
-    }
-
-    .dark .btn-auth {
-        background-color: #374151;
-        color: #e5e7eb;
-        border-color: #4b5563;
-    }
-
-    .dark .btn-auth:hover {
-        border-color: #8b5cf6;
-    }
 }
 
 /* Custom gradient with toxic violet */
@@ -220,15 +152,6 @@
     box-shadow: 0 15px 35px -3px rgba(149, 0, 255, 0.4), 
                 0 8px 12px -2px rgba(124, 58, 237, 0.3),
                 0 25px 50px -4px rgba(91, 33, 182, 0.2);
-    }
-
-    /* Dark mode utilities */
-    .dark .bg-gradient-hero {
-        background: linear-gradient(to top, #9500FF 0%, #7c3aed 25%, #5b21b6 50%, #2d2d2d 75%, #1a1a1a 100%);
-    }
-
-    .dark .bg-gradient-hero-alt {
-        background: linear-gradient(to bottom, #9500FF, #1a1a1a);
     }
 }
 
@@ -330,58 +253,4 @@ button.rounded-full:hover {
 /* Micro interactions for buttons */
 .btn-micro {
     @apply transform transition-all duration-300 ease-out;
-}
-
-/* Dark mode base styles */
-.dark {
-    color-scheme: dark;
-}
-
-.dark body {
-    background-color: var(--bg-primary);
-    color: var(--text-primary);
-}
-
-.dark .bg-white {
-    background-color: var(--bg-secondary);
-}
-
-.dark .bg-gray-50 {
-    background-color: #374151;
-}
-
-.dark .bg-gray-100 {
-    background-color: #374151;
-}
-
-.dark .text-gray-900 {
-    color: var(--text-primary);
-}
-
-.dark .text-gray-800 {
-    color: #e5e7eb;
-}
-
-.dark .text-gray-700 {
-    color: var(--text-secondary);
-}
-
-.dark .text-black {
-    color: var(--text-primary);
-}
-
-.dark .border-gray-200 {
-    border-color: var(--border-color);
-}
-
-.dark .border-gray-300 {
-    border-color: #4b5563;
-}
-
-.dark .shadow-lg {
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.1);
-}
-
-.dark .shadow-xl {
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
 }

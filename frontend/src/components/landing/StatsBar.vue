@@ -71,11 +71,6 @@ const stats = [
     box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
 }
 
-:global(.dark) .stats-bar {
-    background: var(--landing-border-accent);
-    box-shadow: none;
-}
-
 .stats-item {
     padding: 1.5rem;
     text-align: center;
@@ -103,10 +98,6 @@ const stats = [
 .stats-old {
     text-decoration: line-through;
     color: rgba(220, 38, 38, 0.5);
-}
-
-:global(.dark) .stats-old {
-    color: rgba(239, 68, 68, 0.5);
 }
 
 .stats-arrow {
