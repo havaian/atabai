@@ -1,7 +1,7 @@
 import { createI18n } from 'vue-i18n'
 
 // Available locales configuration
-const availableLocales = [
+export const availableLocales = [
     { code: 'en', name: 'English', flag: 'gb' },
     { code: 'ru', name: 'Русский', flag: 'ru' },
     { code: 'uz', name: "O'zbek", flag: 'uz' },
