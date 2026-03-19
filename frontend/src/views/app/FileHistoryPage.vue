@@ -9,7 +9,7 @@
             </div>
             <button class="new-btn" @click="router.push('/app/upload')">
                 <PlusIcon class="w-4 h-4" />
-                {{ $t('processing.actions.uploadNew') }}
+                {{ $t('dashboard.newProject') }}
             </button>
         </div>
 
@@ -22,21 +22,21 @@
             </div>
 
             <!-- Status -->
-            <AppSelect v-model="filters.status" :options="statusOptions" placeholder="All statuses"
-                class="filter-select-comp" @change="applyFilters" />
+            <AppSelect v-model="filters.status" :options="statusOptions"
+                :placeholder="$t('history.filters.allStatuses')" class="filter-select-comp" @change="applyFilters" />
 
             <!-- Template -->
-            <AppSelect v-model="filters.templateType" :options="templateOptions" placeholder="All templates"
-                class="filter-select-comp" @change="applyFilters" />
+            <AppSelect v-model="filters.templateType" :options="templateOptions"
+                :placeholder="$t('history.filters.allTemplates')" class="filter-select-comp" @change="applyFilters" />
 
             <!-- Date range -->
-            <AppSelect v-model="filters.dateRange" :options="dateOptions" placeholder="All dates"
+            <AppSelect v-model="filters.dateRange" :options="dateOptions" :placeholder="$t('history.filters.allDates')"
                 class="filter-select-comp" @change="applyFilters" />
 
             <!-- Clear filters -->
             <button v-if="hasActiveFilters" class="clear-btn" @click="clearFilters">
                 <XMarkIcon class="w-3.5 h-3.5" />
-                {{ $t('history.clearAll') }}
+                {{ $t('history.filters.clearAll') }}
             </button>
 
             <!-- Count -->
@@ -54,7 +54,7 @@
         <!-- Error -->
         <div v-else-if="filesStore.error" class="state-error">
             <ExclamationTriangleIcon class="w-5 h-5" />
-            {{ $t('history.errors.fetchFailed') }}
+            {{ $t('history.error.fetchFailed') }}
             <button class="error-retry" @click="refreshFiles">{{ $t('common.retry') }}</button>
         </div>
 
@@ -112,7 +112,7 @@
                         <!-- Status -->
                         <td class="td td-status">
                             <span class="status-pill" :class="statusClass(file.status)">
-                                {{ file.status }}
+                                {{ $t('processing.status.' + file.status, file.status) }}
                             </span>
                         </td>
 
