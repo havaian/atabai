@@ -61,10 +61,10 @@
                     <img v-if="file.status === 'completed'" src="/images/icons/excel.svg"
                         class="recent-excel-icon flex-shrink-0" />
                     <div v-else class="recent-dot" :class="statusDotClass(file.status)"></div>
-                    <div class="recent-info">
-                        <span class="recent-name">{{ truncate(file.originalName, 22) }}</span>
-                        <span class="recent-meta">{{ formatDate(file.createdAt) }}</span>
-                    </div>
+                </div>
+                <div class="recent-info">
+                    <span class="recent-name">{{ truncate(file.originalName, 22) }}</span>
+                    <span class="recent-meta">{{ formatDate(file.createdAt) }}</span>
                 </div>
             </button>
         </div>
