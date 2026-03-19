@@ -9,7 +9,7 @@
             </div>
             <button class="new-btn" @click="router.push('/app/upload')">
                 <PlusIcon class="w-4 h-4" />
-                New file
+                {{ $t('processing.actions.uploadNew') }}
             </button>
         </div>
 
@@ -36,7 +36,7 @@
             <!-- Clear filters -->
             <button v-if="hasActiveFilters" class="clear-btn" @click="clearFilters">
                 <XMarkIcon class="w-3.5 h-3.5" />
-                Clear
+                {{ $t('history.clearAll') }}
             </button>
 
             <!-- Count -->
@@ -54,7 +54,7 @@
         <!-- Error -->
         <div v-else-if="filesStore.error" class="state-error">
             <ExclamationTriangleIcon class="w-5 h-5" />
-            Failed to load files.
+            {{ $t('history.errors.fetchFailed') }}
             <button class="error-retry" @click="refreshFiles">{{ $t('common.retry') }}</button>
         </div>
 
@@ -67,7 +67,7 @@
             <p class="empty-desc">{{ $t('history.empty.description') }}</p>
             <button class="new-btn" @click="router.push('/app/upload')">
                 <PlusIcon class="w-4 h-4" />
-                Upload first file
+                {{ $t('history.empty.uploadFirst') }}
             </button>
         </div>
 

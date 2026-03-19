@@ -324,7 +324,14 @@
     "profitLossForm2": "P&L Form 2 Transformation",
     "profitLossForm2Description": "Transform standard NSBU Form 2 (ОКУД 0710002) profit & loss statement to IFRS format",
     "equity": "Statement of Changes in Equity",
-    "equityDescription": "Generate IFRS Statement of Changes in Equity from a balance sheet or dedicated Form 4 file"
+    "equityDescription": "Generate IFRS Statement of Changes in Equity from a balance sheet or dedicated Form 4 file",
+    "category": {
+      "balanceSheet": "Financial Statements",
+      "cashFlow": "Financial Statements",
+      "profitLoss": "Financial Statements",
+      "profitLossForm2": "Financial Statements",
+      "equity": "Financial Statements"
+    }
   },
   "features": {
     "title": "Why ATABAI is great",

@@ -4,7 +4,7 @@
         <!-- Back -->
         <button class="back-btn" @click="router.push('/app/dashboard')">
             <ArrowLeftIcon class="w-4 h-4" />
-            Back
+            {{ $t('common.back') }}
         </button>
 
         <!-- No template selected guard -->
@@ -20,11 +20,16 @@
                     <component :is="currentTemplate?.icon" class="w-5 h-5" />
                 </div>
                 <div>
-                    <div class="template-header-name">{{ currentTemplate?.name }}</div>
+                    <div class="template-header-name">
+                        {{ currentTemplate?.key ? $t('templates.' + currentTemplate.key) : currentTemplate?.name }}
+                    </div>
                     <div class="template-header-meta">
                         <span class="badge">{{ currentTemplate?.standard }}</span>
                         <span class="meta-sep">·</span>
-                        <span class="meta-cat">{{ currentTemplate?.category }}</span>
+                        <span class="meta-cat">
+                            {{ currentTemplate?.key ? $t('templates.category.' + currentTemplate.key,
+                                currentTemplate?.category) : currentTemplate?.category }}
+                        </span>
                     </div>
                 </div>
             </div>
@@ -62,7 +67,7 @@
                 <div class="instructions">
                     <div class="instructions-title">
                         <InformationCircleIcon class="w-4 h-4" />
-                        Expected format
+                        {{ $t('upload.expectedFormat') }}
                     </div>
                     <ul class="instructions-list">
                         <li v-for="(line, i) in uploadInstructions" :key="i">{{ line }}</li>
@@ -73,11 +78,11 @@
                 <button class="upload-btn" :disabled="!selectedFile || isProcessing" @click="uploadFile">
                     <template v-if="isProcessing">
                         <div class="btn-spinner"></div>
-                        Processing…
+                        
                     </template>
                     <template v-else>
                         <BoltIcon class="w-4 h-4" />
-                        Transform to IFRS
+                        {{ $t('upload.transformBtn') }}
                     </template>
                 </button>
 

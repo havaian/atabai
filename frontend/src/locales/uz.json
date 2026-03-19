@@ -323,7 +323,14 @@
     "profitLossForm2": "FZH Shakl 2 Transformatsiyasi",
     "profitLossForm2Description": "Standart NSBU 2-shakl (ОКУД 0710002) foyda va zararlar hisobotini IFRS formatiga aylantirish",
     "equity": "Kapital o'zgarishlari to'g'risidagi hisobot",
-    "equityDescription": "Balans yoki alohida 4-shakl faylidan IFRS kapital o'zgarishlari to'g'risidagi hisobotini shakllantirish"
+    "equityDescription": "Balans yoki alohida 4-shakl faylidan IFRS kapital o'zgarishlari to'g'risidagi hisobotini shakllantirish",
+    "category": {
+      "balanceSheet": "Moliyaviy hisobotlar",
+      "cashFlow": "Moliyaviy hisobotlar",
+      "profitLoss": "Moliyaviy hisobotlar",
+      "profitLossForm2": "Moliyaviy hisobotlar",
+      "equity": "Moliyaviy hisobotlar"
+    }
   },
   "features": {
     "title": "ATABAI nima uchun ajoyib",
