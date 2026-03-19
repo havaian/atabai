@@ -503,7 +503,7 @@
         "1": "Upload your NSBU profit & loss (PnL budget) report in Excel format",
         "2": "Expected sections: ДОХОДЫ (Revenue), РАСХОДЫ/ПРЯМЫЕ РАСХОДЫ (Expenses), project-level line items",
         "3": "Monthly columns (Jan–Dec) are detected automatically — both quarterly and annual layouts supported",
-        "4": "Both simple structures (PL_2 style) and nested project hierarchies (PL_1 style) are handled automatically"
+        "4": "Both simple structures and nested project hierarchies are handled automatically"
       },
       "instructions": {
         "profitLossForm2": [
@@ -730,6 +730,8 @@
     "error": "Processing Error"
   },
   "results": {
+    "loadFailed": "Could not load file details.",
+    "deleteFailed": "Failed to delete file.",
     "templateUsed": "Template used",
     "processed": "Processed",
     "fileDetails": "File details",

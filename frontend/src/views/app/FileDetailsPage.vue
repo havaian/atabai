@@ -146,7 +146,7 @@ const file = ref(null)
 const isLoading = ref(true)
 const error = ref('')
 
-const fileId = computed(() => route.params.fileId)
+const fileId = route.params.fileId || route.params.id
 
 const templateLabel = computed(() => {
     const keys = {
@@ -212,7 +212,7 @@ function formatSize(bytes) {
 async function deleteFile() {
     if (!confirm(t('results.confirmDelete'))) return
     try {
-        await filesStore.deleteFile(fileId.value)
+        await filesStore.deleteFile(fileId)
         router.push('/app/dashboard')
     } catch (e) {
         error.value = t('results.deleteFailed')
@@ -221,7 +221,7 @@ async function deleteFile() {
 
 onMounted(async () => {
     try {
-        const data = await filesStore.getFileDetails(fileId.value)
+        const data = await filesStore.getFileDetails(fileId)
         // API returns { success: true, file: {...} }
         file.value = data?.file || data
     } catch (e) {

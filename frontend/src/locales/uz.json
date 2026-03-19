@@ -503,7 +503,7 @@
         "1": "NSBU formatidagi foyda va zararlar hisobotini (PnL byudjeti) yuklang",
         "2": "Kutilayotgan bo'limlar: ДОХОДЫ (Daromad), РАСХОДЫ / ПРЯМЫЕ РАСХОДЫ (Xarajatlar), loyiha qatorlari",
         "3": "Oylik ustunlar (yan–dek) avtomatik aniqlanadi — choraklik va yillik formatlar qo'llab-quvvatlanadi",
-        "4": "Sodda tuzilmalar (PL_2 uslubi) ham, murakkab loyiha ierarxiyalari (PL_1 uslubi) ham avtomatik ishlaydi"
+        "4": "Sodda tuzilmalar ham, murakkab loyiha ierarxiyalari ham avtomatik ishlaydi"
       },
       "instructions": {
         "profitLossForm2": [
@@ -741,6 +741,8 @@
     "error": "Qayta ishlash xatosi"
   },
   "results": {
+    "loadFailed": "Fayl tafsilotlarini yuklab bo'lib bo'lmadi.",
+    "deleteFailed": "Faylni o'chirib bo'lmadi.",
     "templateUsed": "Foydalanilgan shablon",
     "processed": "Qayta ishlandi",
     "fileDetails": "Fayl tafsilotlari",
