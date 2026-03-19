@@ -129,7 +129,13 @@
     "accuracy": "Accuracy",
     "avgTime": "Avg Time",
     "usage": "Usage",
-    "emptyState": "Here will be your recent files"
+    "emptyState": "Here will be your recent files",
+    "chooseTemplate": "Transform a report",
+    "viewAll": "View all",
+    "noFilesYet": "No files processed yet",
+    "emptyDesc": "Upload your first NSBU report to get started with IFRS transformation.",
+    "welcomeBack": "Welcome back!",
+    "noFilesYetSidebar": "No files yet"
   },
   "hero": {
     "title": "Automate IFRS. Powered by AI.",
@@ -314,7 +320,11 @@
     "cashFlow": "Cash Flow Transformation",
     "cashFlowDescription": "Transform Regional Standard cash flow statement to IFRS format according to IAS 7 standards",
     "profitLoss": "Profit & Loss Transformation",
-    "profitLossDescription": "Transform NSBU profit & loss (PnL) budget report to IFRS format with revenue and expense classification"
+    "profitLossDescription": "Transform NSBU profit & loss (PnL) budget report to IFRS format with revenue and expense classification",
+    "profitLossForm2": "P&L Form 2 Transformation",
+    "profitLossForm2Description": "Transform standard NSBU Form 2 (ОКУД 0710002) profit & loss statement to IFRS format",
+    "equity": "Statement of Changes in Equity",
+    "equityDescription": "Generate IFRS Statement of Changes in Equity from a balance sheet or dedicated Form 4 file"
   },
   "features": {
     "title": "Why ATABAI is great",

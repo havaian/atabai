@@ -128,7 +128,13 @@
     "accuracy": "Aniqlik",
     "avgTime": "O'rtacha vaqt",
     "usage": "Foydalanish",
-    "emptyState": "Bu yerda sizning fayllaringiz ko'rinadi"
+    "emptyState": "Bu yerda sizning fayllaringiz ko'rinadi",
+    "chooseTemplate": "Hisobotni o'zgartirish",
+    "viewAll": "Hammasini ko'rish",
+    "noFilesYet": "Hali hech qanday fayl qayta ishlanmagan",
+    "emptyDesc": "IFRS transformatsiyasini boshlash uchun birinchi NSBU hisobotingizni yuklang.",
+    "welcomeBack": "Xush kelibsiz!",
+    "noFilesYetSidebar": "Hali fayllar yo'q"
   },
   "hero": {
     "title": "XMHS ni avtomatlashtiring. Su'niy Intellekt bilan.",
@@ -313,7 +319,11 @@
     "cashFlow": "Pul oqimlari hisobotini transformatsiyasi",
     "cashFlowDescription": "NSBU pul oqimlari hisobotini IAS 7 standartlariga muvofiq IFRS formatiga o'zgartirish",
     "profitLoss": "Foyda va zararlar hisobotini transformatsiyasi",
-    "profitLossDescription": "NSBU PnL byudjeti hisobotini daromad va xarajatlar tasnifi bilan IFRS formatiga o'zgartirish"
+    "profitLossDescription": "NSBU PnL byudjeti hisobotini daromad va xarajatlar tasnifi bilan IFRS formatiga o'zgartirish",
+    "profitLossForm2": "FZH Shakl 2 Transformatsiyasi",
+    "profitLossForm2Description": "Standart NSBU 2-shakl (ОКУД 0710002) foyda va zararlar hisobotini IFRS formatiga aylantirish",
+    "equity": "Kapital o'zgarishlari to'g'risidagi hisobot",
+    "equityDescription": "Balans yoki alohida 4-shakl faylidan IFRS kapital o'zgarishlari to'g'risidagi hisobotini shakllantirish"
   },
   "features": {
     "title": "ATABAI nima uchun ajoyib",
