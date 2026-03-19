@@ -99,7 +99,7 @@
                 <ChevronDownIcon class="lang-chevron w-3.5 h-3.5" :class="{ 'rotated': isLangMenuOpen }" />
             </button>
             <button v-else class="lang-icon-btn" @click="toggleLangMenu" :title="currentLang.name">
-                <img class="lang-flag-lg" :src="currentLangFlagSrc" :alt="currentLang.name">
+                <img class="lang-flag" :src="currentLangFlagSrc" :alt="currentLang.name">
             </button>
             <Transition name="menu-pop">
                 <div v-if="isLangMenuOpen" class="lang-menu">
@@ -735,7 +735,7 @@ onUnmounted(() => window.removeEventListener('resize', onResize))
 }
 
 .lang-flag {
-    font-size: 16px;
+    width: 20px;
     line-height: 1;
     flex-shrink: 0;
 }
@@ -770,16 +770,6 @@ onUnmounted(() => window.removeEventListener('resize', onResize))
 
 .lang-icon-btn:hover {
     background: var(--sb-item-hover);
-}
-
-.lang-flag-lg {
-    font-size: 18px;
-    line-height: 1;
-    color: var(--toggle-icon);
-}
-
-.lang-icon-btn:hover .lang-flag-lg {
-    color: var(--sb-text-hover);
 }
 
 .lang-menu {
