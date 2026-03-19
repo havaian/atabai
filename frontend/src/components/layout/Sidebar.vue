@@ -143,7 +143,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
 import { useFilesStore } from '@/stores/files'
-import { useLocale } from '@/composables/useLocale'
+import { changeLocale } from '@/utils/i18n'
 import LogoComponent from '@/components/common/LogoComponent.vue'
 import {
     PlusIcon, ArchiveBoxIcon, DocumentTextIcon,
@@ -163,7 +163,6 @@ const route = useRoute()
 const { t } = useI18n()
 const authStore = useAuthStore()
 const filesStore = useFilesStore()
-const { changeLocale } = useLocale()
 
 const isLargeScreen = ref(window.innerWidth >= 1024)
 const isProfileMenuOpen = ref(false)
