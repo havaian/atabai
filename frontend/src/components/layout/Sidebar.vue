@@ -71,13 +71,13 @@
         <!-- Theme toggle -->
         <div class="theme-section" :class="{ 'theme-section-collapsed': !isSidebarOpen }">
             <div v-if="isSidebarOpen" class="theme-pill">
-                <button class="theme-pill-btn" :class="{ active: currentTheme === 'light' }" @click="setTheme('light')"
-                    :title="$t('settings.personal.themeLight')">
-                    <SunIcon class="w-3.5 h-3.5" />
+                <button class="theme-pill-btn" :class="{ active: currentTheme === 'light' }" @click="setTheme('light')">
+                    <SunIcon class="w-4 h-4" />
+                    {{ $t('settings.personal.themeLight') }}
                 </button>
-                <button class="theme-pill-btn" :class="{ active: currentTheme === 'dark' }" @click="setTheme('dark')"
-                    :title="$t('settings.personal.themeDark')">
-                    <MoonIcon class="w-3.5 h-3.5" />
+                <button class="theme-pill-btn" :class="{ active: currentTheme === 'dark' }" @click="setTheme('dark')">
+                    <MoonIcon class="w-4 h-4" />
+                    {{ $t('settings.personal.themeDark') }}
                 </button>
             </div>
             <button v-else class="theme-icon-btn" @click="toggleTheme"

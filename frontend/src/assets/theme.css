@@ -79,7 +79,8 @@
 }
 
 /* ── Dark ─────────────────────────────────────────────────────── */
-[data-theme="dark"] {
+[data-theme="dark"],
+html.dark {
     /* Workspace */
     --ws-bg: #0F0D18;
     --ws-surface: #171523;

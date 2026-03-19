@@ -122,14 +122,15 @@ const showSaved = ref(false)
 
 // ── Inline theme management (no store dependency) ─────────────────────────
 const THEME_KEY = 'atabai-theme'
-const currentTheme = ref(localStorage.getItem(THEME_KEY) || 'system')
+const currentTheme = ref(localStorage.getItem(THEME_KEY) || 'light')
 
 function applyTheme(value) {
     const resolved = value === 'system'
         ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
         : value
-    document.documentElement.classList.remove('dark', 'light')
-    document.documentElement.classList.add(resolved)
+    document.documentElement.setAttribute('data-theme', resolved)
+    if (resolved === 'dark') document.documentElement.classList.add('dark')
+    else document.documentElement.classList.remove('dark')
 }
 
 // Expose a proxy that Settings template references as themeStore.preference
