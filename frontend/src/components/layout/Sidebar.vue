@@ -144,7 +144,7 @@ import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
 import { useFilesStore } from '@/stores/files'
 import { changeLocale } from '@/utils/i18n'
-import LogoComponent from '@/components/common/LogoComponent.vue'
+import LogoComponent from '@/components/Logo.vue'
 import {
     PlusIcon, ArchiveBoxIcon, DocumentTextIcon,
     ArrowRightOnRectangleIcon, XMarkIcon,
