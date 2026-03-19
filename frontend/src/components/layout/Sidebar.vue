@@ -4,7 +4,7 @@
 
         <!-- Brand header -->
         <div class="sidebar-brand">
-            <router-link to="/" class="brand-link">
+            <router-link to="/" class="brand-link" :class="{ 'brand-link-collapsed': !isSidebarOpen }">
                 <LogoComponent class="brand-logo" />
             </router-link>
             <button class="collapse-btn" @click="$emit('toggle')" :title="isSidebarOpen ? 'Collapse' : 'Expand'">
@@ -29,7 +29,7 @@
                 @click="navigateTo('/app/dashboard')">
                 <SquaresFourIcon class="nav-icon" />
                 <Transition name="fade-slide">
-                    <span v-if="isSidebarOpen" class="nav-label">Dashboard</span>
+                    <span v-if="isSidebarOpen" class="nav-label">{{ $t('nav.dashboard') }}</span>
                 </Transition>
             </button>
             <button class="nav-item" :class="{ active: $route.path === '/app/history', 'icon-only': !isSidebarOpen }"
@@ -88,7 +88,7 @@
             <Transition name="menu-pop">
                 <div v-if="isProfileMenuOpen" class="profile-menu">
                     <!-- Language -->
-                    <div class="menu-section-label">Language</div>
+                    <div class="menu-section-label">{{ $t('nav.language') }}</div>
                     <button v-for="lang in languages" :key="lang.code" class="menu-item"
                         :class="{ active: selectedLanguage === lang.code }" @click="selectLanguage(lang.code)">
                         <span>{{ lang.flag }}</span>
@@ -97,7 +97,7 @@
                     <div class="menu-divider"></div>
                     <button class="menu-item menu-item-danger" @click="handleSignOut">
                         <ArrowRightOnRectangleIcon class="w-4 h-4" />
-                        Sign out
+                        {{ $t('auth.signOut') }}
                     </button>
                 </div>
             </Transition>
@@ -110,7 +110,7 @@
             <div class="mobile-drawer" @click.stop>
                 <div class="mobile-header">
                     <LogoComponent class="h-7 w-7" />
-                    <span class="brand-name">ATABAI</span>
+
                     <button class="mobile-close" @click="$emit('close')">
                         <XMarkIcon class="w-5 h-5" />
                     </button>
@@ -122,7 +122,7 @@
                 <nav class="sidebar-nav mt-2">
                     <button class="nav-item" @click="() => { navigateTo('/app/dashboard'); $emit('close') }">
                         <SquaresFourIcon class="nav-icon" />
-                        <span class="nav-label">Dashboard</span>
+                        <span class="nav-label">{{ $t('nav.dashboard') }}</span>
                     </button>
                     <button class="nav-item" @click="() => { navigateTo('/app/history'); $emit('close') }">
                         <ArchiveBoxIcon class="nav-icon" />
@@ -275,6 +275,12 @@ onUnmounted(() => window.removeEventListener('resize', onResize))
     width: 28px;
     height: 28px;
     flex-shrink: 0;
+}
+
+/* When collapsed: clip logo to icon-only width so wordmark doesn't overflow */
+.brand-link-collapsed {
+    width: 28px;
+    overflow: hidden;
 }
 
 .collapse-btn {
@@ -592,16 +598,26 @@ onUnmounted(() => window.removeEventListener('resize', onResize))
 
 /* ─── Profile menu ───────────────────────────────────────────────────────── */
 .profile-menu {
-    position: absolute;
-    bottom: calc(100% + 8px);
-    left: 12px;
-    right: 12px;
+    position: fixed;
+    bottom: 12px;
+    left: 72px;
+    /* just outside collapsed sidebar */
+    min-width: 200px;
     background: #1A1528;
     border: 1px solid rgba(149, 0, 255, 0.15);
     border-radius: 12px;
     padding: 8px;
-    box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.4);
-    z-index: 100;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    z-index: 200;
+}
+
+/* When expanded sidebar, anchor to bottom of profile row instead */
+.sidebar-shell:not(.collapsed) .profile-menu {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 12px;
+    right: 12px;
+    min-width: unset;
 }
 
 .menu-section-label {

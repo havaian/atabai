@@ -22,8 +22,8 @@
                     </div>
                 </div>
 
-                <h1 class="proc-title">Transforming to IFRS</h1>
-                <p class="proc-sub">Mapping NSBU accounts and generating the structured report…</p>
+                <h1 class="proc-title">{{ $t('processing.title') }}</h1>
+                <p class="proc-sub">{{ $t('processing.subtitle') }}</p>
 
                 <!-- Progress bar -->
                 <div class="proc-progress-wrap">
@@ -51,24 +51,24 @@
                     <CheckCircleIcon class="w-8 h-8" />
                 </div>
 
-                <h1 class="proc-title proc-title-done">Transformation complete</h1>
-                <p class="proc-sub">Your IFRS report is ready to download.</p>
+                <h1 class="proc-title proc-title-done">{{ $t('processing.status.completed') }}</h1>
+                <p class="proc-sub">{{ $t('processing.doneSubtitle') }}</p>
 
                 <!-- Result stats -->
                 <div v-if="jobResult" class="proc-result-stats">
                     <div class="proc-result-stat">
                         <div class="proc-result-val">{{ jobResult.transformations || 0 }}</div>
-                        <div class="proc-result-label">Rows transformed</div>
+                        <div class="proc-result-label">{{ $t('processing.rowsTransformed') }}</div>
                     </div>
                     <div class="proc-result-divider"></div>
                     <div class="proc-result-stat">
                         <div class="proc-result-val">{{ jobResult.changes || 0 }}</div>
-                        <div class="proc-result-label">Line items mapped</div>
+                        <div class="proc-result-label">{{ $t('processing.lineItemsMapped') }}</div>
                     </div>
                     <div v-if="processingDuration" class="proc-result-divider"></div>
                     <div v-if="processingDuration" class="proc-result-stat">
                         <div class="proc-result-val">{{ processingDuration }}</div>
-                        <div class="proc-result-label">Processing time</div>
+                        <div class="proc-result-label">{{ $t('processing.processingTime') }}</div>
                     </div>
                 </div>
 
@@ -76,7 +76,7 @@
                     <button class="proc-btn-primary" @click="downloadResults" :disabled="isDownloading">
                         <div v-if="isDownloading" class="btn-spinner"></div>
                         <ArrowDownTrayIcon v-else class="w-4 h-4" />
-                        {{ isDownloading ? 'Downloading…' : 'Download IFRS file' }}
+                        {{ isDownloading ? $t('common.downloading') : 'Download IFRS file' }}
                     </button>
                     <button class="proc-btn-secondary" @click="viewDetails">
                         <EyeIcon class="w-4 h-4" />
@@ -91,8 +91,8 @@
                     <XCircleIcon class="w-8 h-8" />
                 </div>
 
-                <h1 class="proc-title proc-title-fail">Processing failed</h1>
-                <p class="proc-sub">Something went wrong while transforming your file.</p>
+                <h1 class="proc-title proc-title-fail">{{ $t('processing.status.failed') }}</h1>
+                <p class="proc-sub">{{ $t('processing.failedSubtitle') }}</p>
 
                 <div v-if="errorMessage" class="proc-error-msg">
                     <ExclamationCircleIcon class="w-4 h-4 flex-shrink-0" />
@@ -103,7 +103,7 @@
                     <button class="proc-btn-primary" @click="retryProcessing" :disabled="isRetrying">
                         <div v-if="isRetrying" class="btn-spinner"></div>
                         <ArrowPathIcon v-else class="w-4 h-4" />
-                        {{ isRetrying ? 'Retrying…' : 'Retry' }}
+                        {{ isRetrying ? $t('common.retrying') : 'Retry' }}
                     </button>
                     <button class="proc-btn-secondary" @click="router.push('/app/upload')">
                         Upload different file

@@ -86,10 +86,10 @@
 
             <div class="files-table">
                 <div class="files-table-row files-table-head">
-                    <span>File</span>
-                    <span>Template</span>
-                    <span>Status</span>
-                    <span>Date</span>
+                    <span>{{ $t('history.table.fileName') }}</span>
+                    <span>{{ $t('history.table.template') }}</span>
+                    <span>{{ $t('history.table.status') }}</span>
+                    <span>{{ $t('history.table.processed') }}</span>
                     <span></span>
                 </div>
                 <div v-for="file in recentFiles.slice(0, 6)" :key="file.id" class="files-table-row files-table-data"
@@ -180,10 +180,10 @@ function formatDate(d) {
     const date = new Date(d)
     const now = new Date()
     const diffM = Math.floor((now - date) / 60000)
-    if (diffM < 1) return 'just now'
-    if (diffM < 60) return `${diffM}m ago`
-    if (diffM < 1440) return `${Math.floor(diffM / 60)}h ago`
-    if (diffM < 2880) return 'yesterday'
+    if (diffM < 1) return t('history.dateJustNow')
+    if (diffM < 60) return t('history.dateMinutesAgo', { n: diffM })
+    if (diffM < 1440) return t('history.dateHoursAgo', { n: Math.floor(diffM / 60) })
+    if (diffM < 2880) return t('history.dateYesterday')
     return date.toLocaleDateString()
 }
 

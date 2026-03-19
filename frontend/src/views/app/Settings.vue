@@ -3,8 +3,8 @@
 
         <!-- Header -->
         <div class="settings-header">
-            <h1 class="settings-title">Settings</h1>
-            <p class="settings-sub">Manage your account preferences</p>
+            <h1 class="settings-title">{{ $t('dashboard.settings') }}</h1>
+            <p class="settings-sub">{{ $t('settings.subtitle') }}</p>
         </div>
 
         <div class="settings-layout">
@@ -15,7 +15,7 @@
                     :class="{ active: activeTab === tab.key }" @click="activeTab = tab.key">
                     <component :is="tab.icon" class="w-4 h-4" />
                     {{ tab.label }}
-                    <span v-if="tab.soon" class="tab-soon">Soon</span>
+                    <span v-if="tab.soon" class="tab-soon">{{ $t('settings.soon') }}</span>
                 </button>
             </nav>
 
@@ -32,8 +32,8 @@
                     <!-- Profile info (read-only) -->
                     <div class="settings-row">
                         <div class="settings-row-label">
-                            <div class="row-label-title">Account</div>
-                            <div class="row-label-desc">Your Google account details</div>
+                            <div class="row-label-title">{{ $t('settings.account') }}</div>
+                            <div class="row-label-desc">{{ $t('settings.accountDesc') }}</div>
                         </div>
                         <div class="profile-display">
                             <img v-if="authStore.user?.picture" :src="authStore.user.picture" alt="avatar"
@@ -71,8 +71,8 @@
                     <!-- Subscription -->
                     <div class="settings-row">
                         <div class="settings-row-label">
-                            <div class="row-label-title">Plan</div>
-                            <div class="row-label-desc">Your current subscription</div>
+                            <div class="row-label-title">{{ $t('settings.plan') }}</div>
+                            <div class="row-label-desc">{{ $t('settings.planDesc') }}</div>
                         </div>
                         <div class="plan-display">
                             <span class="plan-badge">{{ authStore.subscriptionType?.toUpperCase() }}</span>

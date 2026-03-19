@@ -10,7 +10,7 @@
         <!-- Loading -->
         <div v-if="isLoading" class="results-loading">
             <div class="results-spinner"></div>
-            <span>Loading file details…</span>
+            <span>{{ $t('common.loading') }}</span>
         </div>
 
         <!-- Error -->
@@ -44,19 +44,19 @@
             <div v-if="file.status === 'completed'" class="result-stats">
                 <div class="result-stat">
                     <div class="result-stat-val">{{ file.transformations || 0 }}</div>
-                    <div class="result-stat-label">Rows transformed</div>
+                    <div class="result-stat-label">{{ $t('processing.rowsTransformed') }}</div>
                 </div>
                 <div class="result-stat">
                     <div class="result-stat-val">{{ file.changes || 0 }}</div>
-                    <div class="result-stat-label">Line items mapped</div>
+                    <div class="result-stat-label">{{ $t('processing.lineItemsMapped') }}</div>
                 </div>
                 <div class="result-stat">
                     <div class="result-stat-val">{{ templateLabel }}</div>
-                    <div class="result-stat-label">Template used</div>
+                    <div class="result-stat-label">{{ $t('results.templateUsed') }}</div>
                 </div>
                 <div class="result-stat">
                     <div class="result-stat-val">{{ formatDate(file.completedAt || file.createdAt) }}</div>
-                    <div class="result-stat-label">Processed</div>
+                    <div class="result-stat-label">{{ $t('results.processed') }}</div>
                 </div>
             </div>
 
@@ -73,30 +73,30 @@
 
             <!-- File info -->
             <div class="file-info-section">
-                <div class="file-info-header">File details</div>
+                <div class="file-info-header">{{ $t('results.fileDetails') }}</div>
                 <div class="file-info-grid">
                     <div class="file-info-row">
-                        <span class="info-label">Original file</span>
+                        <span class="info-label">{{ $t('results.originalFile') }}</span>
                         <span class="info-value">{{ file.originalName }}</span>
                     </div>
                     <div class="file-info-row">
-                        <span class="info-label">Template</span>
+                        <span class="info-label">{{ $t('results.template') }}</span>
                         <span class="info-value">{{ templateLabel }}</span>
                     </div>
                     <div class="file-info-row">
-                        <span class="info-label">Status</span>
+                        <span class="info-label">{{ $t('results.status') }}</span>
                         <span class="status-pill" :class="statusClass(file.status)">{{ file.status }}</span>
                     </div>
                     <div class="file-info-row">
-                        <span class="info-label">Uploaded</span>
+                        <span class="info-label">{{ $t('results.uploaded') }}</span>
                         <span class="info-value">{{ formatFullDate(file.createdAt) }}</span>
                     </div>
                     <div v-if="file.completedAt" class="file-info-row">
-                        <span class="info-label">Completed</span>
+                        <span class="info-label">{{ $t('results.completed') }}</span>
                         <span class="info-value">{{ formatFullDate(file.completedAt) }}</span>
                     </div>
                     <div v-if="file.fileSize" class="file-info-row">
-                        <span class="info-label">File size</span>
+                        <span class="info-label">{{ $t('results.fileSize') }}</span>
                         <span class="info-value">{{ formatSize(file.fileSize) }}</span>
                     </div>
                 </div>
@@ -166,11 +166,11 @@ const bannerClass = computed(() => ({
 
 const bannerTitle = computed(() => {
     const map = {
-        completed: 'Transformation complete',
-        failed: 'Processing failed',
-        processing: 'Processing…',
-        pending: 'Queued for processing',
-        uploaded: 'File uploaded, starting…',
+        completed: $t('processing.status.completed'),
+        failed: $t('processing.status.failed'),
+        processing: t('processing.status.processing'),
+        pending: t('processing.status.pending'),
+        uploaded: t('processing.status.uploaded'),
     }
     return map[file.value?.status] || 'Unknown status'
 })
@@ -207,7 +207,7 @@ function formatSize(bytes) {
 }
 
 async function deleteFile() {
-    if (!confirm('Delete this file? This cannot be undone.')) return
+    if (!confirm(t('results.confirmDelete'))) return
     try {
         await filesStore.deleteFile(fileId.value)
         router.push('/app/dashboard')
