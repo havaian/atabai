@@ -149,7 +149,9 @@ onUnmounted(() => document.removeEventListener('keydown', handleKeydown))
     z-index: 100;
     top: calc(100% + 6px);
     left: 0;
-    right: 0;
+    min-width: 100%;
+    width: max-content;
+    max-width: 320px;
     background: #1D1A2A;
     border: 1px solid rgba(149, 0, 255, 0.18);
     border-radius: 10px;

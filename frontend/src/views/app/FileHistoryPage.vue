@@ -27,7 +27,8 @@
 
             <!-- Template -->
             <AppSelect v-model="filters.templateType" :options="templateOptions"
-                :placeholder="$t('history.filters.allTemplates')" class="filter-select-comp" @change="applyFilters" />
+                :placeholder="$t('history.filters.allTemplates')" class="filter-select-comp filter-select-wide"
+                @change="applyFilters" />
 
             <!-- Date range -->
             <AppSelect v-model="filters.dateRange" :options="dateOptions" :placeholder="$t('history.filters.allDates')"
