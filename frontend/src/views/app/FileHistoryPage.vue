@@ -273,30 +273,30 @@ const visiblePages = computed(() => {
 })
 
 
-const statusOptions = [
-    { value: '', label: 'All statuses' },
-    { value: 'completed', label: 'Completed' },
-    { value: 'processing', label: 'Processing' },
-    { value: 'failed', label: 'Failed' },
-    { value: 'pending', label: 'Pending' },
-]
+const statusOptions = computed(() => [
+    { value: '', label: t('history.filters.allStatuses') },
+    { value: 'completed', label: t('processing.status.completed') },
+    { value: 'processing', label: t('processing.status.processing') },
+    { value: 'failed', label: t('processing.status.failed') },
+    { value: 'pending', label: t('processing.status.pending') },
+])
 
-const templateOptions = [
-    { value: '', label: 'All templates' },
-    { value: 'balanceSheet', label: 'Balance Sheet' },
-    { value: 'cashFlow', label: 'Cash Flow' },
-    { value: 'profitLoss', label: 'P&L (Budget)' },
-    { value: 'profitLossForm2', label: 'P&L (Form 2)' },
-    { value: 'equity', label: 'Changes in Equity' },
-]
+const templateOptions = computed(() => [
+    { value: '', label: t('history.filters.allTemplates') },
+    { value: 'balanceSheet', label: t('templates.balanceSheet') },
+    { value: 'cashFlow', label: t('templates.cashFlow') },
+    { value: 'profitLoss', label: t('templates.profitLoss') },
+    { value: 'profitLossForm2', label: t('templates.profitLossForm2') },
+    { value: 'equity', label: t('templates.equity') },
+])
 
-const dateOptions = [
-    { value: '', label: 'All dates' },
-    { value: 'today', label: 'Today' },
-    { value: 'week', label: 'This week' },
-    { value: 'month', label: 'This month' },
-    { value: 'quarter', label: 'Last 3 months' },
-]
+const dateOptions = computed(() => [
+    { value: '', label: t('history.filters.allDates') },
+    { value: 'today', label: t('history.filters.today') },
+    { value: 'week', label: t('history.filters.thisWeek') },
+    { value: 'month', label: t('history.filters.thisMonth') },
+    { value: 'quarter', label: t('history.filters.thisQuarter') },
+])
 
 const onSearch = debounce(() => applyFilters(), 250)
 
