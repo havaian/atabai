@@ -109,7 +109,6 @@
 import { ref, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
-import { useThemeStore } from '@/stores/theme'
 import {
     UserIcon, CreditCardIcon, ShieldCheckIcon,
     SunIcon, MoonIcon, ComputerDesktopIcon, CheckCircleIcon
@@ -117,10 +116,26 @@ import {
 
 const { t } = useI18n()
 const authStore = useAuthStore()
-const themeStore = useThemeStore()
 
 const activeTab = ref('personal')
 const showSaved = ref(false)
+
+// ── Inline theme management (no store dependency) ─────────────────────────
+const THEME_KEY = 'atabai-theme'
+const currentTheme = ref(localStorage.getItem(THEME_KEY) || 'system')
+
+function applyTheme(value) {
+    const resolved = value === 'system'
+        ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+        : value
+    document.documentElement.classList.remove('dark', 'light')
+    document.documentElement.classList.add(resolved)
+}
+
+// Expose a proxy that Settings template references as themeStore.preference
+const themeStore = {
+    get preference() { return currentTheme.value }
+}
 
 const tabs = [
     { key: 'personal', label: t('settings.tabs.personal'), icon: UserIcon },
@@ -142,7 +157,9 @@ const initials = computed(() => {
 })
 
 function selectTheme(value) {
-    themeStore.setTheme(value)
+    currentTheme.value = value
+    localStorage.setItem(THEME_KEY, value)
+    applyTheme(value)
     showSaved.value = true
     setTimeout(() => { showSaved.value = false }, 2500)
 }
