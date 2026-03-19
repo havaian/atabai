@@ -419,6 +419,12 @@
     "backToDashboard": "Bosh sahifaga qaytish"
   },
   "settings": {
+    "subtitle": "Hisob sozlamalarini boshqarish",
+    "soon": "Tez orada",
+    "account": "Hisob",
+    "accountDesc": "Google hisob ma'lumotlaringiz",
+    "plan": "Tarif",
+    "planDesc": "Joriy obunangiz",
     "tabs": {
       "personal": "Shaxsiy",
       "usage": "Foydalanish va reja",
@@ -655,6 +661,12 @@
     "supportedFormats": "50MB gacha .xlsx va .xls fayllarini qo'llab-quvvatlaydi"
   },
   "processing": {
+    "subtitle": "NSBU hisoblarini moslashtirish va strukturalashtirilgan hisobot yaratish…",
+    "doneSubtitle": "Sizning IFRS hisobotingiz yuklab olishga tayyor.",
+    "failedSubtitle": "Faylni transformatsiya qilishda xatolik yuz berdi.",
+    "rowsTransformed": "Qatorlar o'zgartirildi",
+    "lineItemsMapped": "Moddalar moslashtirildi",
+    "processingTime": "Qayta ishlash vaqti",
     "title": "Faylingizni qayta ishlash",
     "status": {
       "pending": "Kutilmoqda",
@@ -689,7 +701,8 @@
       "backToDashboard": "Panelga qaytish",
       "uploadNew": "Yangi fayl yuklash",
       "viewResults": "Natijalarni ko'rish",
-      "retryUpload": "Yana yuklash"
+      "retryUpload": "Yana yuklash",
+      "viewDetails": "Tafsilotlarni ko'rish"
     },
     "duration": "Qayta ishlash vaqti: {duration}",
     "timeFormat": {
@@ -714,6 +727,18 @@
     "error": "Qayta ishlash xatosi"
   },
   "results": {
+    "templateUsed": "Foydalanilgan shablon",
+    "processed": "Qayta ishlandi",
+    "fileDetails": "Fayl tafsilotlari",
+    "originalFile": "Asl fayl",
+    "template": "Shablon",
+    "status": "Holat",
+    "uploaded": "Yuklandi",
+    "completed": "Tugallandi",
+    "fileSize": "Fayl hajmi",
+    "notes": "Izohlar",
+    "processAnother": "Boshqa faylni qayta ishlash",
+    "confirmDelete": "Bu faylni o'chirishni istaysizmi? Bu amalni bekor qilib bo'lmaydi.",
     "title": "Fayl natijalari",
     "error": {
       "title": "Faylni yuklashda xatolik",

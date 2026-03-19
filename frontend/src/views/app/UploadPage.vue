@@ -232,9 +232,9 @@ function statusClass(status) {
 
 <style scoped>
 .upload-page {
-    max-width: 640px;
+    max-width: 900px;
     margin: 0 auto;
-    padding: 32px 24px 64px;
+    padding: 36px 32px 64px;
     display: flex;
     flex-direction: column;
     gap: 24px;

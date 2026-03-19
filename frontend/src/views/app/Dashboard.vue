@@ -109,7 +109,7 @@
         </div>
 
         <!-- Empty state when no files yet -->
-        <div v-else class="empty-state">
+        <div v-else class="empty-state drop-zone">
             <div class="empty-icon">
                 <DocumentPlusIcon class="w-8 h-8" />
             </div>
@@ -586,6 +586,21 @@ function statusClass(status) {
     border: 1px dashed #E5E7EB;
     border-radius: 16px;
     text-align: center;
+}
+
+/* Drop zone */
+.empty-state.drop-zone {
+    border: 2px dashed rgba(149, 0, 255, 0.2);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    text-align: center;
+}
+
+.empty-state.drop-zone:hover,
+.empty-state.drop-zone.dragging {
+    border-color: #7C3AED;
+    background: rgba(124, 58, 237, 0.03);
 }
 
 .empty-icon {

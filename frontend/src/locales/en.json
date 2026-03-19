@@ -1,5 +1,4 @@
 {
-  
   "landing": {
     "hiw": {
       "label": "Process",
@@ -420,6 +419,12 @@
     "backToDashboard": "Back to main page"
   },
   "settings": {
+    "subtitle": "Manage your account preferences",
+    "soon": "Soon",
+    "account": "Account",
+    "accountDesc": "Your Google account details",
+    "plan": "Plan",
+    "planDesc": "Your current subscription",
     "tabs": {
       "personal": "Personal",
       "usage": "Usage & Plan",
@@ -645,6 +650,12 @@
     "supportedFormats": "Supports .xlsx and .xls files up to 50MB"
   },
   "processing": {
+    "subtitle": "Mapping NSBU accounts and generating the structured report…",
+    "doneSubtitle": "Your IFRS report is ready to download.",
+    "failedSubtitle": "Something went wrong while transforming your file.",
+    "rowsTransformed": "Rows transformed",
+    "lineItemsMapped": "Line items mapped",
+    "processingTime": "Processing time",
     "title": "Processing Your File",
     "status": {
       "pending": "Pending",
@@ -679,7 +690,8 @@
       "backToDashboard": "Back to Dashboard",
       "uploadNew": "Upload New File",
       "viewResults": "View Results",
-      "retryUpload": "Upload Again"
+      "retryUpload": "Upload Again",
+      "viewDetails": "View details"
     },
     "duration": "Processing time: {duration}",
     "timeFormat": {
@@ -704,6 +716,18 @@
     "error": "Processing Error"
   },
   "results": {
+    "templateUsed": "Template used",
+    "processed": "Processed",
+    "fileDetails": "File details",
+    "originalFile": "Original file",
+    "template": "Template",
+    "status": "Status",
+    "uploaded": "Uploaded",
+    "completed": "Completed",
+    "fileSize": "File size",
+    "notes": "Notes",
+    "processAnother": "Process another file",
+    "confirmDelete": "Delete this file? This cannot be undone.",
     "title": "File Results",
     "error": {
       "title": "Error Loading File",

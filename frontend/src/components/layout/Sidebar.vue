@@ -751,8 +751,13 @@ onUnmounted(() => window.removeEventListener('resize', onResize))
 }
 
 .lang-flag-lg {
+    color: var(--toggle-icon);
     font-size: 18px;
     line-height: 1;
+}
+
+.lang-icon-btn:hover .lang-flag-lg {
+    color: var(--sb-text-hover);
 }
 
 .lang-menu {
@@ -817,8 +822,11 @@ onUnmounted(() => window.removeEventListener('resize', onResize))
 }
 
 .theme-pill {
-    display: flex;
+    width: 100%;
     align-items: center;
+    grid-template-columns: 50% 50%;
+    display: inline-grid !important;
+    justify-content: space-between;
     background: var(--toggle-bg);
     border-radius: 8px;
     padding: 3px;
@@ -829,7 +837,7 @@ onUnmounted(() => window.removeEventListener('resize', onResize))
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 28px;
+    width: 100%;
     height: 24px;
     border: none;
     border-radius: 6px;
