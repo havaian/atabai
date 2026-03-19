@@ -119,11 +119,11 @@ defineExpose({
     display: block;
     width: 100%;
     padding: 8px 12px;
-    background: #171523;
-    border: 1px solid rgba(149, 0, 255, 0.12);
+    background: var(--ws-surface);
+    border: 1px solid var(--ws-border);
     border-radius: 9px;
     font-size: 13.5px;
-    color: #F0ECF6;
+    color: var(--ws-text);
     outline: none;
     transition: border-color 0.15s, box-shadow 0.15s;
     line-height: 1.5;
@@ -166,11 +166,11 @@ defineExpose({
 .input-el.is-disabled {
     opacity: 0.45;
     cursor: not-allowed;
-    background: #1D1A2A;
+    background: var(--ws-surface-2);
 }
 
 .input-el.is-readonly {
-    background: #1D1A2A;
+    background: var(--ws-surface-2);
     cursor: default;
 }
 

@@ -87,7 +87,7 @@ function openInstagram() { window.open('https://instagram.com/atabai.official', 
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #07060B;
+    background: var(--misc-bg);
     position: relative;
     overflow: hidden;
     padding: 40px 24px;
@@ -97,8 +97,8 @@ function openInstagram() { window.open('https://instagram.com/atabai.official', 
     position: absolute;
     inset: 0;
     background-image:
-        linear-gradient(rgba(149, 0, 255, 0.04) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(149, 0, 255, 0.04) 1px, transparent 1px);
+        linear-gradient(var(--misc-grid) 1px, transparent 1px),
+        linear-gradient(90deg, var(--misc-grid) 1px, transparent 1px);
     background-size: 56px 56px;
     pointer-events: none;
 }
@@ -108,7 +108,7 @@ function openInstagram() { window.open('https://instagram.com/atabai.official', 
     width: 500px;
     height: 500px;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(124, 58, 237, 0.1) 0%, transparent 70%);
+    background: radial-gradient(circle, var(--misc-glow) 0%, transparent 70%);
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
@@ -135,7 +135,7 @@ function openInstagram() { window.open('https://instagram.com/atabai.official', 
 .help-brand-name {
     font-size: 18px;
     font-weight: 800;
-    color: #F0ECF6;
+    color: var(--misc-text);
     letter-spacing: 0.06em;
 }
 
@@ -148,7 +148,7 @@ function openInstagram() { window.open('https://instagram.com/atabai.official', 
 .help-title {
     font-size: clamp(36px, 7vw, 52px);
     font-weight: 800;
-    color: #F0ECF6;
+    color: var(--misc-text);
     letter-spacing: -0.03em;
     line-height: 1.1;
     margin: 0;
@@ -156,7 +156,7 @@ function openInstagram() { window.open('https://instagram.com/atabai.official', 
 
 .help-sub {
     font-size: 15px;
-    color: rgba(240, 236, 246, 0.4);
+    color: var(--misc-text-2);
     line-height: 1.6;
     margin: 0;
 }
@@ -174,8 +174,8 @@ function openInstagram() { window.open('https://instagram.com/atabai.official', 
     align-items: center;
     gap: 16px;
     padding: 16px 20px;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.07);
+    background: var(--misc-card-bg);
+    border: 1px solid var(--misc-card-border);
     border-radius: 14px;
     cursor: pointer;
     text-align: left;
@@ -185,7 +185,7 @@ function openInstagram() { window.open('https://instagram.com/atabai.official', 
 
 .help-card:hover {
     border-color: rgba(149, 0, 255, 0.25);
-    background: rgba(149, 0, 255, 0.06);
+    background: var(--misc-badge-bg);
 }
 
 .help-card-icon {
@@ -208,13 +208,13 @@ function openInstagram() { window.open('https://instagram.com/atabai.official', 
 .help-card-name {
     font-size: 14px;
     font-weight: 600;
-    color: #F0ECF6;
+    color: var(--misc-text);
     margin-bottom: 2px;
 }
 
 .help-card-hint {
     font-size: 12.5px;
-    color: rgba(240, 236, 246, 0.3);
+    color: var(--misc-text-3);
 }
 
 .help-card-arrow {
@@ -235,12 +235,12 @@ function openInstagram() { window.open('https://instagram.com/atabai.official', 
     gap: 7px;
     font-size: 13.5px;
     font-weight: 500;
-    color: rgba(240, 236, 246, 0.3);
+    color: var(--misc-text-3);
     text-decoration: none;
     transition: color 0.15s;
 }
 
 .help-back:hover {
-    color: rgba(240, 236, 246, 0.7);
+    color: var(--misc-text-2);
 }
 </style>

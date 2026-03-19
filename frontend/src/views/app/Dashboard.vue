@@ -109,7 +109,7 @@
         </div>
 
         <!-- Empty state when no files yet -->
-        <div v-else class="empty-state drop-zone">
+        <div v-else class="empty-state">
             <div class="empty-icon">
                 <DocumentPlusIcon class="w-8 h-8" />
             </div>
@@ -200,17 +200,6 @@ function statusClass(status) {
 
 <style scoped>
 .dash {
-    --ws-bg: #0F0D18;
-    --ws-surface: #171523;
-    --ws-surface-2: #1D1A2A;
-    --ws-border: rgba(149, 0, 255, 0.12);
-    --ws-border-2: rgba(149, 0, 255, 0.06);
-    --ws-text: #F0ECF6;
-    --ws-text-2: rgba(240, 236, 246, 0.55);
-    --ws-text-3: rgba(240, 236, 246, 0.3);
-    --ws-purple: #7C3AED;
-    --ws-purple-lt: rgba(124, 58, 237, 0.15);
-
     max-width: 900px;
     margin: 0 auto;
     padding: 36px 32px 64px;
@@ -593,21 +582,10 @@ function statusClass(status) {
     align-items: center;
     gap: 12px;
     padding: 64px 24px;
+    background: var(--ws-bg);
+    border: 1px dashed #E5E7EB;
+    border-radius: 16px;
     text-align: center;
-}
-
-/* Drop zone */
-.empty-state.drop-zone {
-    border: 2px dashed rgba(149, 0, 255, 0.2);
-    border-radius: 12px;
-    cursor: pointer;
-    transition: border-color 0.15s, background 0.15s;
-}
-
-.empty-state.drop-zone:hover,
-.empty-state.drop-zone.dragging {
-    border-color: #7C3AED;
-    background: rgba(124, 58, 237, 0.03);
 }
 
 .empty-icon {

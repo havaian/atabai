@@ -108,7 +108,7 @@ const closeSidebar = () => { isSidebarOpen.value = false }
     align-items: center;
     justify-content: space-between;
     padding: 12px 16px;
-    background: #0F0D18;
+    background: var(--ws-bg);
     border-bottom: 1px solid rgba(149, 0, 255, 0.1);
 }
 

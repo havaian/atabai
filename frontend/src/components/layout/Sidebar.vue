@@ -1,6 +1,6 @@
 <template>
     <!-- Desktop sidebar -->
-    <div v-if="isLargeScreen" class="sidebar-shell" :class="{ collapsed: !isSidebarOpen }">
+    <div v-if="isLargeScreen" class="sidebar-shell" :class="{ collapsed: !isSidebarOpen }" ref="shellRef">
 
         <!-- Brand header -->
         <div class="sidebar-brand" :class="{ 'sidebar-brand-collapsed': !isSidebarOpen }">
@@ -27,7 +27,7 @@
         <nav class="sidebar-nav">
             <button class="nav-item" :class="{ active: $route.path === '/app/dashboard', 'icon-only': !isSidebarOpen }"
                 @click="navigateTo('/app/dashboard')">
-                <SquaresFourIcon class="nav-icon" />
+                <Squares2X2Icon class="nav-icon" />
                 <Transition name="fade-slide">
                     <span v-if="isSidebarOpen" class="nav-label">{{ $t('nav.dashboard') }}</span>
                 </Transition>
@@ -51,12 +51,10 @@
             <div v-if="filesStore.isLoading && recentFiles.length === 0" class="recent-loading">
                 <div class="loading-spinner"></div>
             </div>
-
             <div v-else-if="recentFiles.length === 0" class="recent-empty">
                 <DocumentTextIcon class="w-5 h-5 opacity-30" />
-                <span>{{ $t('dashboard.noFilesYet') }}</span>
+                <span>{{ $t('dashboard.noFilesYetSidebar') }}</span>
             </div>
-
             <button v-else v-for="file in recentFiles.slice(0, 8)" :key="file.id" class="recent-item"
                 @click="openFile(file)">
                 <div class="recent-dot" :class="statusDotClass(file.status)"></div>
@@ -70,24 +68,39 @@
         <!-- Spacer -->
         <div class="flex-1"></div>
 
+        <!-- Theme toggle -->
+        <div class="theme-section" :class="{ 'theme-section-collapsed': !isSidebarOpen }">
+            <div v-if="isSidebarOpen" class="theme-pill">
+                <button class="theme-pill-btn" :class="{ active: currentTheme === 'light' }" @click="setTheme('light')"
+                    :title="$t('settings.personal.themeLight')">
+                    <SunIcon class="w-3.5 h-3.5" />
+                </button>
+                <button class="theme-pill-btn" :class="{ active: currentTheme === 'dark' }" @click="setTheme('dark')"
+                    :title="$t('settings.personal.themeDark')">
+                    <MoonIcon class="w-3.5 h-3.5" />
+                </button>
+            </div>
+            <button v-else class="theme-icon-btn" @click="toggleTheme"
+                :title="currentTheme === 'light' ? $t('settings.personal.themeLight') : $t('settings.personal.themeDark')">
+                <SunIcon v-if="currentTheme === 'light'" class="w-4 h-4" />
+                <MoonIcon v-else class="w-4 h-4" />
+            </button>
+        </div>
+
         <!-- User profile -->
-        <div class="sidebar-profile" :class="{ 'icon-only': !isSidebarOpen }">
+        <div class="sidebar-profile" :class="{ 'icon-only': !isSidebarOpen }" ref="profileRef">
             <div class="profile-avatar" @click="toggleProfileMenu">
                 <img v-if="authStore.user?.picture" :src="authStore.user.picture" alt="avatar" class="avatar-img" />
                 <span v-else class="avatar-initials">{{ initials }}</span>
             </div>
-
             <Transition name="fade-slide">
                 <div v-if="isSidebarOpen" class="profile-info" @click="toggleProfileMenu">
                     <span class="profile-name">{{ authStore.user?.name?.split(' ')[0] }}</span>
                     <span class="profile-plan">{{ authStore.subscriptionType }}</span>
                 </div>
             </Transition>
-
-            <!-- Profile menu -->
             <Transition name="menu-pop">
                 <div v-if="isProfileMenuOpen" class="profile-menu">
-                    <!-- Language -->
                     <div class="menu-section-label">{{ $t('nav.language') }}</div>
                     <button v-for="lang in languages" :key="lang.code" class="menu-item"
                         :class="{ active: selectedLanguage === lang.code }" @click="selectLanguage(lang.code)">
@@ -104,24 +117,23 @@
         </div>
     </div>
 
-    <!-- Mobile drawer (unchanged from previous) -->
+    <!-- Mobile drawer -->
     <Transition name="drawer">
         <div v-if="!isLargeScreen && isMobileMenuOpen" class="mobile-overlay" @click="$emit('close')">
             <div class="mobile-drawer" @click.stop>
                 <div class="mobile-header">
-                    <LogoComponent class="h-7 w-7" />
-
+                    <LogoComponent class="mobile-logo" />
                     <button class="mobile-close" @click="$emit('close')">
                         <XMarkIcon class="w-5 h-5" />
                     </button>
                 </div>
-                <button class="new-file-btn mt-4 mx-4" @click="() => { navigateTo('/app/upload'); $emit('close') }">
+                <button class="new-file-btn mt-4 mx-4" @click="() => { navigateTo('/app/dashboard'); $emit('close') }">
                     <PlusIcon class="w-4 h-4" />
                     <span>{{ $t('dashboard.newProject') }}</span>
                 </button>
                 <nav class="sidebar-nav mt-2">
                     <button class="nav-item" @click="() => { navigateTo('/app/dashboard'); $emit('close') }">
-                        <SquaresFourIcon class="nav-icon" />
+                        <Squares2X2Icon class="nav-icon" />
                         <span class="nav-label">{{ $t('nav.dashboard') }}</span>
                     </button>
                     <button class="nav-item" @click="() => { navigateTo('/app/history'); $emit('close') }">
@@ -140,13 +152,14 @@ import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
 import { useFilesStore } from '@/stores/files'
+import { onClickOutside } from '@vueuse/core'
 import { changeLocale } from '@/utils/i18n'
 import LogoComponent from '@/components/Logo.vue'
 import {
     PlusIcon, ArchiveBoxIcon, DocumentTextIcon,
     ArrowRightOnRectangleIcon, XMarkIcon,
     ChevronLeftIcon, ChevronRightIcon,
-    Squares2X2Icon as SquaresFourIcon
+    Squares2X2Icon, SunIcon, MoonIcon,
 } from '@heroicons/vue/24/outline'
 
 const props = defineProps({
@@ -157,13 +170,32 @@ defineEmits(['toggle', 'close'])
 
 const router = useRouter()
 const route = useRoute()
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const authStore = useAuthStore()
 const filesStore = useFilesStore()
 
-const isLargeScreen = ref(window.innerWidth >= 1024)
 const isProfileMenuOpen = ref(false)
-const selectedLanguage = ref('ru')
+const selectedLanguage = ref(locale.value || 'ru')
+const shellRef = ref(null)
+const profileRef = ref(null)
+const isLargeScreen = ref(window.innerWidth >= 1024)
+
+// ── Theme ──────────────────────────────────────────────────────────────────
+const THEME_KEY = 'atabai-theme'
+const currentTheme = ref(localStorage.getItem(THEME_KEY) || 'light')
+
+function applyTheme(theme) {
+    currentTheme.value = theme
+    localStorage.setItem(THEME_KEY, theme)
+    document.documentElement.setAttribute('data-theme', theme)
+    if (theme === 'dark') document.documentElement.classList.add('dark')
+    else document.documentElement.classList.remove('dark')
+}
+function setTheme(theme) { applyTheme(theme) }
+function toggleTheme() { applyTheme(currentTheme.value === 'light' ? 'dark' : 'light') }
+
+// ── Outside click — profile menu ───────────────────────────────────────────
+onClickOutside(profileRef, () => { isProfileMenuOpen.value = false })
 
 const languages = [
     { code: 'en', name: 'English', flag: '🇬🇧' },
@@ -180,11 +212,8 @@ const initials = computed(() => {
 function navigateTo(path) { router.push(path) }
 
 function openFile(file) {
-    if (file.status === 'completed') {
-        router.push(`/app/files/${file.id}`)
-    } else if (file.jobId) {
-        router.push(`/app/processing/${file.jobId}`)
-    }
+    if (file.status === 'completed') router.push(`/app/files/${file.id}`)
+    else if (file.jobId) router.push(`/app/processing/${file.jobId}`)
 }
 
 function truncate(str, len) {
@@ -196,19 +225,14 @@ function formatDate(d) {
     const date = new Date(d)
     const now = new Date()
     const diffM = Math.floor((now - date) / 60000)
-    if (diffM < 1) return 'just now'
-    if (diffM < 60) return `${diffM}m ago`
-    if (diffM < 1440) return `${Math.floor(diffM / 60)}h ago`
+    if (diffM < 1) return t('history.dateJustNow')
+    if (diffM < 60) return t('history.dateMinutesAgo', { n: diffM })
+    if (diffM < 1440) return t('history.dateHoursAgo', { n: Math.floor(diffM / 60) })
     return date.toLocaleDateString()
 }
 
 function statusDotClass(status) {
-    return {
-        'completed': 'dot-green',
-        'processing': 'dot-blue',
-        'failed': 'dot-red',
-        'pending': 'dot-yellow',
-    }[status] || 'dot-gray'
+    return { completed: 'dot-green', processing: 'dot-blue', failed: 'dot-red', pending: 'dot-yellow' }[status] || 'dot-gray'
 }
 
 function toggleProfileMenu() { isProfileMenuOpen.value = !isProfileMenuOpen.value }
@@ -220,13 +244,11 @@ function selectLanguage(code) {
 }
 
 async function handleSignOut() {
-    try {
-        await authStore.logout()
-        router.push('/')
-    } catch (e) { console.error(e) }
+    try { await authStore.logout(); router.push('/') } catch (e) { console.error(e) }
 }
 
 function onResize() { isLargeScreen.value = window.innerWidth >= 1024 }
+
 onMounted(async () => {
     window.addEventListener('resize', onResize)
     if (filesStore.recentFiles.length === 0) {
@@ -237,16 +259,14 @@ onUnmounted(() => window.removeEventListener('resize', onResize))
 </script>
 
 <style scoped>
-/* ─── Shell ──────────────────────────────────────────────────────────────── */
 .sidebar-shell {
     display: flex;
     flex-direction: column;
     height: 100%;
     width: 232px;
-    background: #0C0A14;
-    border-right: 1px solid rgba(149, 0, 255, 0.1);
-    transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    overflow: hidden;
+    background: var(--sb-bg);
+    border-right: 1px solid var(--sb-border);
+    transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1), background 0.2s, border-color 0.2s;
     position: relative;
 }
 
@@ -254,7 +274,6 @@ onUnmounted(() => window.removeEventListener('resize', onResize))
     width: 60px;
 }
 
-/* ─── Brand ──────────────────────────────────────────────────────────────── */
 .sidebar-brand {
     display: flex;
     align-items: center;
@@ -263,7 +282,6 @@ onUnmounted(() => window.removeEventListener('resize', onResize))
     flex-shrink: 0;
 }
 
-/* Collapsed: center just the arrow button */
 .sidebar-brand-collapsed {
     justify-content: center;
     padding: 20px 0 16px;
@@ -277,7 +295,6 @@ onUnmounted(() => window.removeEventListener('resize', onResize))
     min-width: 0;
 }
 
-/* LogoComponent fills the available space — shows icon + wordmark naturally */
 .brand-logo-full {
     height: 32px;
     width: auto;
@@ -290,7 +307,7 @@ onUnmounted(() => window.removeEventListener('resize', onResize))
     align-items: center;
     justify-content: center;
     border-radius: 6px;
-    color: rgba(240, 236, 246, 0.3);
+    color: var(--sb-icon-muted);
     background: transparent;
     border: none;
     cursor: pointer;
@@ -299,11 +316,10 @@ onUnmounted(() => window.removeEventListener('resize', onResize))
 }
 
 .collapse-btn:hover {
-    color: #F0ECF6;
-    background: rgba(149, 0, 255, 0.12);
+    color: var(--sb-icon-hover);
+    background: var(--sb-item-hover);
 }
 
-/* ─── New file ───────────────────────────────────────────────────────────── */
 .sidebar-new {
     padding: 0 12px 12px;
     flex-shrink: 0;
@@ -315,7 +331,7 @@ onUnmounted(() => window.removeEventListener('resize', onResize))
     gap: 8px;
     width: 100%;
     padding: 9px 14px;
-    background: #7C3AED;
+    background: var(--ws-purple);
     color: #fff;
     border: none;
     border-radius: 10px;
@@ -337,7 +353,6 @@ onUnmounted(() => window.removeEventListener('resize', onResize))
     justify-content: center;
 }
 
-/* ─── Nav ────────────────────────────────────────────────────────────────── */
 .sidebar-nav {
     padding: 0 12px;
     display: flex;
@@ -355,24 +370,24 @@ onUnmounted(() => window.removeEventListener('resize', onResize))
     border: none;
     border-radius: 8px;
     background: transparent;
-    color: rgba(240, 236, 246, 0.45);
+    color: var(--sb-text);
     font-size: 13px;
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.15s;
+    transition: background 0.15s, color 0.15s;
     white-space: nowrap;
     overflow: hidden;
     text-align: left;
 }
 
 .nav-item:hover {
-    background: rgba(149, 0, 255, 0.1);
-    color: rgba(240, 236, 246, 0.85);
+    background: var(--sb-item-hover);
+    color: var(--sb-text-hover);
 }
 
 .nav-item.active {
-    background: rgba(124, 58, 237, 0.18);
-    color: #C084FC;
+    background: var(--sb-item-active-bg);
+    color: var(--sb-text-active);
 }
 
 .nav-item.icon-only {
@@ -390,18 +405,16 @@ onUnmounted(() => window.removeEventListener('resize', onResize))
     white-space: nowrap;
 }
 
-/* ─── Divider ────────────────────────────────────────────────────────────── */
 .sidebar-divider {
     margin: 16px 14px 8px;
     font-size: 10px;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    color: rgba(240, 236, 246, 0.2);
+    color: var(--sb-divider);
     flex-shrink: 0;
 }
 
-/* ─── Recent files ───────────────────────────────────────────────────────── */
 .recent-files {
     padding: 0 12px;
     display: flex;
@@ -421,7 +434,7 @@ onUnmounted(() => window.removeEventListener('resize', onResize))
 }
 
 .recent-files::-webkit-scrollbar-thumb {
-    background: rgba(149, 0, 255, 0.2);
+    background: var(--sb-item-hover);
     border-radius: 2px;
 }
 
@@ -440,7 +453,7 @@ onUnmounted(() => window.removeEventListener('resize', onResize))
 }
 
 .recent-item:hover {
-    background: rgba(149, 0, 255, 0.08);
+    background: var(--sb-item-hover);
 }
 
 .recent-dot {
@@ -467,7 +480,7 @@ onUnmounted(() => window.removeEventListener('resize', onResize))
 }
 
 .dot-gray {
-    background: rgba(240, 236, 246, 0.2);
+    background: var(--sb-divider);
 }
 
 .recent-info {
@@ -481,7 +494,7 @@ onUnmounted(() => window.removeEventListener('resize', onResize))
 .recent-name {
     font-size: 12px;
     font-weight: 500;
-    color: rgba(240, 236, 246, 0.65);
+    color: var(--sb-recent-name);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -489,7 +502,7 @@ onUnmounted(() => window.removeEventListener('resize', onResize))
 
 .recent-meta {
     font-size: 10px;
-    color: rgba(240, 236, 246, 0.25);
+    color: var(--sb-recent-meta);
 }
 
 .recent-loading {
@@ -501,8 +514,8 @@ onUnmounted(() => window.removeEventListener('resize', onResize))
 .loading-spinner {
     width: 20px;
     height: 20px;
-    border: 2px solid rgba(149, 0, 255, 0.2);
-    border-top-color: #7C3AED;
+    border: 2px solid var(--sb-item-hover);
+    border-top-color: var(--ws-purple);
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
 }
@@ -519,9 +532,75 @@ onUnmounted(() => window.removeEventListener('resize', onResize))
     align-items: center;
     gap: 6px;
     padding: 20px 8px;
-    color: rgba(240, 236, 246, 0.25);
+    color: var(--sb-recent-empty);
     font-size: 11px;
     text-align: center;
+}
+
+/* ─── Theme toggle ───────────────────────────────────────────────────────── */
+.theme-section {
+    padding: 8px 12px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.theme-section-collapsed {
+    justify-content: center;
+    padding: 8px 0;
+}
+
+.theme-pill {
+    display: flex;
+    align-items: center;
+    background: var(--toggle-bg);
+    border-radius: 8px;
+    padding: 3px;
+    gap: 2px;
+}
+
+.theme-pill-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 24px;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--toggle-icon);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+
+.theme-pill-btn.active {
+    background: var(--toggle-active-bg);
+    color: var(--toggle-icon-active);
+}
+
+.theme-pill-btn:not(.active):hover {
+    color: var(--sb-text-hover);
+    background: var(--sb-item-hover);
+}
+
+.theme-icon-btn {
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 8px;
+    background: var(--toggle-bg);
+    color: var(--toggle-icon);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+
+.theme-icon-btn:hover {
+    background: var(--sb-item-hover);
+    color: var(--sb-text-hover);
 }
 
 /* ─── Profile ────────────────────────────────────────────────────────────── */
@@ -530,7 +609,7 @@ onUnmounted(() => window.removeEventListener('resize', onResize))
     align-items: center;
     gap: 10px;
     padding: 12px 14px;
-    border-top: 1px solid rgba(149, 0, 255, 0.08);
+    border-top: 1px solid var(--sb-profile-border);
     cursor: pointer;
     flex-shrink: 0;
     position: relative;
@@ -538,7 +617,7 @@ onUnmounted(() => window.removeEventListener('resize', onResize))
 }
 
 .sidebar-profile:hover {
-    background: rgba(149, 0, 255, 0.06);
+    background: var(--sb-item-hover);
 }
 
 .sidebar-profile.icon-only {
@@ -551,7 +630,7 @@ onUnmounted(() => window.removeEventListener('resize', onResize))
     border-radius: 50%;
     overflow: hidden;
     flex-shrink: 0;
-    background: #7C3AED;
+    background: var(--ws-purple);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -582,7 +661,7 @@ onUnmounted(() => window.removeEventListener('resize', onResize))
 .profile-name {
     font-size: 13px;
     font-weight: 600;
-    color: rgba(240, 236, 246, 0.85);
+    color: var(--sb-recent-name);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -592,26 +671,23 @@ onUnmounted(() => window.removeEventListener('resize', onResize))
     font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    color: #A78BFA;
+    color: var(--ws-purple);
     font-weight: 600;
 }
 
-/* ─── Profile menu ───────────────────────────────────────────────────────── */
 .profile-menu {
     position: fixed;
     bottom: 12px;
     left: 72px;
-    /* just outside collapsed sidebar */
     min-width: 200px;
-    background: #1A1528;
-    border: 1px solid rgba(149, 0, 255, 0.15);
+    background: var(--sb-menu-bg);
+    border: 1px solid var(--sb-menu-border);
     border-radius: 12px;
     padding: 8px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
     z-index: 200;
 }
 
-/* When expanded sidebar, anchor to bottom of profile row instead */
 .sidebar-shell:not(.collapsed) .profile-menu {
     position: absolute;
     bottom: calc(100% + 8px);
@@ -624,7 +700,7 @@ onUnmounted(() => window.removeEventListener('resize', onResize))
     font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    color: rgba(240, 236, 246, 0.25);
+    color: var(--sb-divider);
     padding: 4px 8px 6px;
     font-weight: 600;
 }
@@ -638,38 +714,37 @@ onUnmounted(() => window.removeEventListener('resize', onResize))
     border: none;
     border-radius: 7px;
     background: transparent;
-    color: rgba(240, 236, 246, 0.65);
+    color: var(--sb-menu-text);
     font-size: 13px;
     cursor: pointer;
-    transition: all 0.12s;
+    transition: background 0.12s, color 0.12s;
     text-align: left;
 }
 
 .menu-item:hover {
-    background: rgba(149, 0, 255, 0.1);
-    color: #F0ECF6;
+    background: var(--sb-item-hover);
+    color: var(--sb-text-hover);
 }
 
 .menu-item.active {
-    color: #A78BFA;
+    color: var(--ws-purple);
 }
 
 .menu-divider {
     height: 1px;
-    background: rgba(149, 0, 255, 0.1);
+    background: var(--sb-border);
     margin: 6px 0;
 }
 
 .menu-item-danger:hover {
-    background: rgba(239, 68, 68, 0.1);
-    color: #f87171;
+    background: rgba(239, 68, 68, 0.08);
+    color: #ef4444;
 }
 
-/* ─── Mobile ─────────────────────────────────────────────────────────────── */
 .mobile-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.6);
+    background: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(4px);
     z-index: 50;
 }
@@ -680,10 +755,11 @@ onUnmounted(() => window.removeEventListener('resize', onResize))
     top: 0;
     bottom: 0;
     width: 260px;
-    background: #0C0A14;
+    background: var(--sb-bg);
     display: flex;
     flex-direction: column;
     padding-bottom: 24px;
+    border-right: 1px solid var(--sb-border);
 }
 
 .mobile-header {
@@ -691,20 +767,29 @@ onUnmounted(() => window.removeEventListener('resize', onResize))
     align-items: center;
     gap: 10px;
     padding: 20px 16px 16px;
-    border-bottom: 1px solid rgba(149, 0, 255, 0.08);
+    border-bottom: 1px solid var(--sb-border);
+}
+
+.mobile-logo {
+    height: 28px;
+    width: auto;
 }
 
 .mobile-close {
     margin-left: auto;
     background: transparent;
     border: none;
-    color: rgba(240, 236, 246, 0.4);
+    color: var(--sb-icon-muted);
     cursor: pointer;
     padding: 4px;
     border-radius: 6px;
+    transition: color 0.12s;
 }
 
-/* ─── Transitions ────────────────────────────────────────────────────────── */
+.mobile-close:hover {
+    color: var(--sb-text-hover);
+}
+
 .fade-slide-enter-active,
 .fade-slide-leave-active {
     transition: opacity 0.15s, transform 0.15s;

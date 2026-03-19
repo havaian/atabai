@@ -167,17 +167,6 @@ function selectTheme(value) {
 
 <style scoped>
 .settings-page {
-    --ws-bg: #0F0D18;
-    --ws-surface: #171523;
-    --ws-surface-2: #1D1A2A;
-    --ws-border: rgba(149, 0, 255, 0.12);
-    --ws-border-2: rgba(149, 0, 255, 0.06);
-    --ws-text: #F0ECF6;
-    --ws-text-2: rgba(240, 236, 246, 0.55);
-    --ws-text-3: rgba(240, 236, 246, 0.3);
-    --ws-purple: #7C3AED;
-    --ws-purple-lt: rgba(124, 58, 237, 0.15);
-
     max-width: 800px;
     margin: 0 auto;
     padding: 36px 32px 64px;
@@ -453,8 +442,8 @@ function selectTheme(value) {
     width: 52px;
     height: 52px;
     border-radius: 14px;
-    background: var(--ws-surface-2);
-    color: var(--ws-text-3);
+    background: var(--pill-gray-bg);
+    color: var(--pill-gray-text);
     display: flex;
     align-items: center;
     justify-content: center;

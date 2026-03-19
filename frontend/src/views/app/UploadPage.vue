@@ -67,7 +67,7 @@
                 <div class="instructions">
                     <div class="instructions-title">
                         <InformationCircleIcon class="w-4 h-4" />
-                        {{ $t('upload.expectedFormat') }}
+                        Expected format
                     </div>
                     <ul class="instructions-list">
                         <li v-for="(line, i) in uploadInstructions" :key="i">{{ line }}</li>
@@ -78,11 +78,11 @@
                 <button class="upload-btn" :disabled="!selectedFile || isProcessing" @click="uploadFile">
                     <template v-if="isProcessing">
                         <div class="btn-spinner"></div>
-                        
+                        Processing…
                     </template>
                     <template v-else>
                         <BoltIcon class="w-4 h-4" />
-                        {{ $t('upload.transformBtn') }}
+                        Transform to IFRS
                     </template>
                 </button>
 
@@ -232,17 +232,6 @@ function statusClass(status) {
 
 <style scoped>
 .upload-page {
-    --ws-bg: #0F0D18;
-    --ws-surface: #171523;
-    --ws-surface-2: #1D1A2A;
-    --ws-border: rgba(149, 0, 255, 0.12);
-    --ws-border-2: rgba(149, 0, 255, 0.06);
-    --ws-text: #F0ECF6;
-    --ws-text-2: rgba(240, 236, 246, 0.55);
-    --ws-text-3: rgba(240, 236, 246, 0.3);
-    --ws-purple: #7C3AED;
-    --ws-purple-lt: rgba(124, 58, 237, 0.15);
-
     max-width: 640px;
     margin: 0 auto;
     padding: 32px 24px 64px;

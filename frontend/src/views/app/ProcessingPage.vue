@@ -263,17 +263,6 @@ onUnmounted(() => clearStatusPolling())
 <style scoped>
 /* ─── Page ───────────────────────────────────────────────────────────────── */
 .proc-page {
-    --ws-bg: #0F0D18;
-    --ws-surface: #171523;
-    --ws-surface-2: #1D1A2A;
-    --ws-border: rgba(149, 0, 255, 0.12);
-    --ws-border-2: rgba(149, 0, 255, 0.06);
-    --ws-text: #F0ECF6;
-    --ws-text-2: rgba(240, 236, 246, 0.55);
-    --ws-text-3: rgba(240, 236, 246, 0.3);
-    --ws-purple: #7C3AED;
-    --ws-purple-lt: rgba(124, 58, 237, 0.15);
-
     display: flex;
     flex-direction: column;
     align-items: center;

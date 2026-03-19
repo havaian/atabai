@@ -93,7 +93,7 @@ onMounted(async () => {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #F9FAFB;
+    background: var(--auth-bg);
     padding: 24px;
 }
 
@@ -105,8 +105,8 @@ onMounted(async () => {
 .auth-card {
     width: 100%;
     max-width: 380px;
-    background: #fff;
-    border: 1px solid #E5E7EB;
+    background: var(--auth-card-bg);
+    border: 1px solid var(--auth-card-border);
     border-radius: 20px;
     padding: 40px 36px;
     display: flex;
@@ -114,7 +114,7 @@ onMounted(async () => {
     align-items: center;
     gap: 20px;
     text-align: center;
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+    box-shadow: var(--auth-card-shadow);
 }
 
 
@@ -166,13 +166,13 @@ onMounted(async () => {
 .auth-title {
     font-size: 18px;
     font-weight: 700;
-    color: #111827;
+    color: var(--auth-title);
     margin: 0;
 }
 
 .auth-sub {
     font-size: 14px;
-    color: #9CA3AF;
+    color: var(--auth-sub);
     margin: -8px 0 0;
     line-height: 1.5;
 }

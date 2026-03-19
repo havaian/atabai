@@ -78,8 +78,8 @@ onUnmounted(() => document.removeEventListener('keydown', handleKeydown))
     gap: 8px;
     width: 100%;
     padding: 8px 12px;
-    background: #171523;
-    border: 1px solid rgba(149, 0, 255, 0.12);
+    background: var(--ws-surface);
+    border: 1px solid var(--ws-border);
     border-radius: 9px;
     cursor: pointer;
     transition: border-color 0.15s;
@@ -124,11 +124,11 @@ onUnmounted(() => document.removeEventListener('keydown', handleKeydown))
 }
 
 .select-text.selected {
-    color: #F0ECF6;
+    color: var(--ws-text);
 }
 
 .select-text.placeholder {
-    color: rgba(240, 236, 246, 0.25);
+    color: var(--ws-text-3);
 }
 
 .select-chevron {
@@ -152,7 +152,7 @@ onUnmounted(() => document.removeEventListener('keydown', handleKeydown))
     min-width: 100%;
     width: max-content;
     max-width: 320px;
-    background: #1D1A2A;
+    background: var(--ws-surface-2);
     border: 1px solid rgba(149, 0, 255, 0.18);
     border-radius: 10px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
@@ -183,7 +183,7 @@ onUnmounted(() => document.removeEventListener('keydown', handleKeydown))
     background: transparent;
     border: none;
     font-size: 13px;
-    color: rgba(240, 236, 246, 0.65);
+    color: var(--ws-text-2);
     cursor: pointer;
     text-align: left;
     transition: background 0.1s, color 0.1s;
@@ -191,7 +191,7 @@ onUnmounted(() => document.removeEventListener('keydown', handleKeydown))
 
 .select-option:hover {
     background: rgba(124, 58, 237, 0.1);
-    color: #F0ECF6;
+    color: var(--ws-text);
 }
 
 .select-option.active {
@@ -228,7 +228,7 @@ onUnmounted(() => document.removeEventListener('keydown', handleKeydown))
 .select-empty {
     padding: 12px 14px;
     font-size: 13px;
-    color: rgba(240, 236, 246, 0.25);
+    color: var(--ws-text-3);
 }
 
 /* ── Transition ── */
