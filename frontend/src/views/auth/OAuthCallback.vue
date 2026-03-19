@@ -5,12 +5,7 @@
             <!-- Brand -->
             <div class="auth-brand">
                 <div class="auth-logo">
-                    <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-7 h-7">
-                        <rect width="32" height="32" rx="8" fill="#7C3AED" />
-                        <path d="M8 24L16 8L24 24" stroke="white" stroke-width="2.5" stroke-linecap="round"
-                            stroke-linejoin="round" />
-                        <path d="M10.5 19H21.5" stroke="white" stroke-width="2.5" stroke-linecap="round" />
-                    </svg>
+                    <LogoComponent class="w-8 h-8" />
                 </div>
                 <span class="auth-brand-name">ATABAI</span>
             </div>
@@ -54,6 +49,7 @@
 </template>
 
 <script setup>
+import LogoComponent from '@/components/Logo.vue'
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
