@@ -263,6 +263,17 @@ onUnmounted(() => clearStatusPolling())
 <style scoped>
 /* ─── Page ───────────────────────────────────────────────────────────────── */
 .proc-page {
+    --ws-bg: #0F0D18;
+    --ws-surface: #171523;
+    --ws-surface-2: #1D1A2A;
+    --ws-border: rgba(149, 0, 255, 0.12);
+    --ws-border-2: rgba(149, 0, 255, 0.06);
+    --ws-text: #F0ECF6;
+    --ws-text-2: rgba(240, 236, 246, 0.55);
+    --ws-text-3: rgba(240, 236, 246, 0.3);
+    --ws-purple: #7C3AED;
+    --ws-purple-lt: rgba(124, 58, 237, 0.15);
+
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -278,11 +289,11 @@ onUnmounted(() => clearStatusPolling())
     align-items: center;
     gap: 8px;
     padding: 6px 16px;
-    background: #fff;
-    border: 1px solid #E5E7EB;
+    background: var(--ws-surface);
+    border: 1px solid var(--ws-border);
     border-radius: 100px;
     font-size: 13px;
-    color: #374151;
+    color: var(--ws-text-2);
     font-weight: 500;
     max-width: 480px;
     overflow: hidden;
@@ -295,7 +306,7 @@ onUnmounted(() => clearStatusPolling())
 }
 
 .proc-file-sep {
-    color: #D1D5DB;
+    color: rgba(240, 236, 246, 0.15);
 }
 
 .proc-template-tag {
@@ -312,8 +323,8 @@ onUnmounted(() => clearStatusPolling())
 .proc-card {
     width: 100%;
     max-width: 480px;
-    background: #fff;
-    border: 1px solid #E5E7EB;
+    background: var(--ws-surface);
+    border: 1px solid var(--ws-border);
     border-radius: 20px;
     padding: 40px 36px;
     display: flex;
@@ -390,7 +401,7 @@ onUnmounted(() => clearStatusPolling())
     width: 64px;
     height: 64px;
     border-radius: 50%;
-    background: #dcfce7;
+    background: rgba(34, 197, 94, 0.12);
     color: #16a34a;
     display: flex;
     align-items: center;
@@ -401,7 +412,7 @@ onUnmounted(() => clearStatusPolling())
     width: 64px;
     height: 64px;
     border-radius: 50%;
-    background: #fee2e2;
+    background: rgba(248, 113, 113, 0.12);
     color: #dc2626;
     display: flex;
     align-items: center;
@@ -412,22 +423,22 @@ onUnmounted(() => clearStatusPolling())
 .proc-title {
     font-size: 20px;
     font-weight: 700;
-    color: #111827;
+    color: var(--ws-text);
     letter-spacing: -0.02em;
     margin: 0;
 }
 
 .proc-title-done {
-    color: #14532d;
+    color: #4ade80;
 }
 
 .proc-title-fail {
-    color: #7f1d1d;
+    color: #fca5a5;
 }
 
 .proc-sub {
     font-size: 14px;
-    color: #9CA3AF;
+    color: var(--ws-text-3);
     margin: -12px 0 0;
     line-height: 1.5;
 }
@@ -443,7 +454,7 @@ onUnmounted(() => clearStatusPolling())
 .proc-progress-track {
     flex: 1;
     height: 6px;
-    background: #F3F4F6;
+    background: var(--ws-surface-2);
     border-radius: 10px;
     overflow: hidden;
 }
@@ -491,12 +502,12 @@ onUnmounted(() => clearStatusPolling())
 }
 
 .step-done .proc-step-dot {
-    background: #dcfce7;
+    background: rgba(34, 197, 94, 0.12);
     color: #16a34a;
 }
 
 .step-done {
-    color: #374151;
+    color: var(--ws-text-2);
 }
 
 .step-active .proc-step-dot {
@@ -508,11 +519,11 @@ onUnmounted(() => clearStatusPolling())
 }
 
 .step-idle .proc-step-dot {
-    background: #F3F4F6;
+    background: var(--ws-surface-2);
 }
 
 .step-idle {
-    color: #D1D5DB;
+    color: rgba(240, 236, 246, 0.15);
 }
 
 .proc-step-label {}
@@ -544,8 +555,8 @@ onUnmounted(() => clearStatusPolling())
     display: flex;
     align-items: center;
     gap: 0;
-    background: #F9FAFB;
-    border: 1px solid #E5E7EB;
+    background: var(--ws-bg);
+    border: 1px solid var(--ws-border);
     border-radius: 12px;
     overflow: hidden;
     width: 100%;
@@ -560,14 +571,14 @@ onUnmounted(() => clearStatusPolling())
 .proc-result-val {
     font-size: 22px;
     font-weight: 700;
-    color: #111827;
+    color: var(--ws-text);
     letter-spacing: -0.02em;
     margin-bottom: 3px;
 }
 
 .proc-result-label {
     font-size: 11px;
-    color: #9CA3AF;
+    color: var(--ws-text-3);
     font-weight: 500;
 }
 
@@ -584,11 +595,11 @@ onUnmounted(() => clearStatusPolling())
     align-items: center;
     gap: 8px;
     padding: 10px 14px;
-    background: #FEF2F2;
+    background: rgba(248, 113, 113, 0.08);
     border: 1px solid #FCA5A5;
     border-radius: 8px;
     font-size: 13px;
-    color: #B91C1C;
+    color: #fca5a5;
     width: 100%;
     text-align: left;
 }
@@ -633,8 +644,8 @@ onUnmounted(() => clearStatusPolling())
     justify-content: center;
     gap: 7px;
     padding: 11px 16px;
-    background: #F3F4F6;
-    color: #374151;
+    background: var(--ws-surface-2);
+    color: var(--ws-text-2);
     border: none;
     border-radius: 10px;
     font-size: 14px;
@@ -671,7 +682,7 @@ onUnmounted(() => clearStatusPolling())
     gap: 6px;
     font-size: 13px;
     font-weight: 500;
-    color: #9CA3AF;
+    color: var(--ws-text-3);
     background: transparent;
     border: none;
     cursor: pointer;
@@ -680,6 +691,6 @@ onUnmounted(() => clearStatusPolling())
 }
 
 .proc-nav-link:hover {
-    color: #374151;
+    color: var(--ws-text-2);
 }
 </style>

@@ -5,7 +5,7 @@
         <div class="dash-header">
             <div>
                 <h1 class="dash-title">
-                    {{ $t('dashboard.welcome', { name: firstName }) }}
+                    {{ firstName ? $t('dashboard.welcome', { name: firstName }) : $t('dashboard.welcomeBack') }}
                 </h1>
                 <p class="dash-subtitle">{{ $t('dashboard.subtitle') }}</p>
             </div>
@@ -25,7 +25,7 @@
                     <div class="stat-value">{{ authStore.filesProcessedThisMonth }}</div>
                     <div class="stat-label">{{ $t('dashboard.filesThisMonth') }}</div>
                 </div>
-                <div class="stat-limit">/ {{ authStore.monthlyLimit }}</div>
+                <div class="stat-limit">/ {{ monthlyLimitDisplay }}</div>
             </div>
             <div class="stat-card">
                 <div class="stat-icon stat-icon-green">
@@ -50,7 +50,7 @@
         <!-- Templates section -->
         <div class="section">
             <div class="section-header">
-                <h2 class="section-title">{{ $t('dashboard.chooseTemplate') || 'Transform a report' }}</h2>
+                <h2 class="section-title">{{ $t('dashboard.chooseTemplate') }}</h2>
             </div>
 
             <div class="template-grid">
@@ -79,7 +79,7 @@
             <div class="section-header">
                 <h2 class="section-title">{{ $t('dashboard.recentFiles') }}</h2>
                 <button class="section-link" @click="router.push('/app/history')">
-                    {{ $t('dashboard.viewAll') || 'View all' }}
+                    {{ $t('dashboard.viewAll') }}
                     <ArrowRightIcon class="w-3.5 h-3.5" />
                 </button>
             </div>
@@ -113,8 +113,8 @@
             <div class="empty-icon">
                 <DocumentPlusIcon class="w-8 h-8" />
             </div>
-            <h3 class="empty-title">No files processed yet</h3>
-            <p class="empty-desc">Upload your first NSBU report to get started with IFRS transformation.</p>
+            <h3 class="empty-title">{{ $t('dashboard.noFilesYet') }}</h3>
+            <p class="empty-desc">{{ $t('dashboard.emptyDesc') }}</p>
             <button class="dash-new-btn" @click="router.push('/app/upload')">
                 <PlusIcon class="w-4 h-4" />
                 {{ $t('dashboard.newProject') }}
@@ -149,8 +149,12 @@ onMounted(() => {
 
 const templates = computed(() => templatesStore.availableTemplates)
 const recentFiles = computed(() => filesStore.recentFiles || [])
-const firstName = computed(() => authStore.user?.name?.split(' ')[0] || 'there')
+const firstName = computed(() => authStore.user?.name?.split(' ')[0] || '')
 const completedFiles = computed(() => recentFiles.value.filter(f => f.status === 'completed').length)
+const monthlyLimitDisplay = computed(() => {
+    const lim = authStore.monthlyLimit
+    return lim === Infinity || lim > 9999 ? '∞' : lim
+})
 
 function selectTemplate(template) {
     router.push(`/app/upload?template=${template.id}`)
@@ -196,6 +200,17 @@ function statusClass(status) {
 
 <style scoped>
 .dash {
+    --ws-bg: #0F0D18;
+    --ws-surface: #171523;
+    --ws-surface-2: #1D1A2A;
+    --ws-border: rgba(149, 0, 255, 0.12);
+    --ws-border-2: rgba(149, 0, 255, 0.06);
+    --ws-text: #F0ECF6;
+    --ws-text-2: rgba(240, 236, 246, 0.55);
+    --ws-text-3: rgba(240, 236, 246, 0.3);
+    --ws-purple: #7C3AED;
+    --ws-purple-lt: rgba(124, 58, 237, 0.15);
+
     max-width: 900px;
     margin: 0 auto;
     padding: 36px 32px 64px;
@@ -215,7 +230,7 @@ function statusClass(status) {
 .dash-title {
     font-size: 26px;
     font-weight: 700;
-    color: #111827;
+    color: var(--ws-text);
     letter-spacing: -0.02em;
     line-height: 1.2;
     margin: 0 0 6px;
@@ -223,7 +238,7 @@ function statusClass(status) {
 
 .dash-subtitle {
     font-size: 14px;
-    color: #6B7280;
+    color: var(--ws-text-3);
     margin: 0;
 }
 
@@ -261,8 +276,8 @@ function statusClass(status) {
     align-items: center;
     gap: 14px;
     padding: 18px 20px;
-    background: #fff;
-    border: 1px solid #E5E7EB;
+    background: var(--ws-surface);
+    border: 1px solid var(--ws-border);
     border-radius: 14px;
     position: relative;
     overflow: hidden;
@@ -304,7 +319,7 @@ function statusClass(status) {
 .stat-value {
     font-size: 22px;
     font-weight: 700;
-    color: #111827;
+    color: var(--ws-text);
     letter-spacing: -0.02em;
     line-height: 1;
     margin-bottom: 3px;
@@ -319,13 +334,13 @@ function statusClass(status) {
 
 .stat-label {
     font-size: 12px;
-    color: #9CA3AF;
+    color: var(--ws-text-3);
     font-weight: 500;
 }
 
 .stat-limit {
     font-size: 13px;
-    color: #D1D5DB;
+    color: rgba(240, 236, 246, 0.15);
     font-weight: 500;
     margin-left: auto;
 }
@@ -346,7 +361,7 @@ function statusClass(status) {
 .section-title {
     font-size: 16px;
     font-weight: 700;
-    color: #111827;
+    color: var(--ws-text);
     margin: 0;
     letter-spacing: -0.01em;
 }
@@ -381,8 +396,8 @@ function statusClass(status) {
     flex-direction: column;
     gap: 12px;
     padding: 20px;
-    background: #fff;
-    border: 1px solid #E5E7EB;
+    background: var(--ws-surface);
+    border: 1px solid var(--ws-border);
     border-radius: 14px;
     cursor: pointer;
     transition: border-color 0.15s, box-shadow 0.15s;
@@ -427,14 +442,14 @@ function statusClass(status) {
 .template-name {
     font-size: 14px;
     font-weight: 700;
-    color: #111827;
+    color: var(--ws-text);
     margin: 0 0 6px;
     letter-spacing: -0.01em;
 }
 
 .template-desc {
     font-size: 12.5px;
-    color: #9CA3AF;
+    color: var(--ws-text-3);
     line-height: 1.5;
     margin: 0;
     display: -webkit-box;
@@ -451,12 +466,12 @@ function statusClass(status) {
 
 .template-cat {
     font-size: 11px;
-    color: #D1D5DB;
+    color: rgba(240, 236, 246, 0.15);
     font-weight: 500;
 }
 
 .template-arrow {
-    color: #D1D5DB;
+    color: rgba(240, 236, 246, 0.15);
     transition: color 0.15s, transform 0.15s;
 }
 
@@ -467,8 +482,8 @@ function statusClass(status) {
 
 /* ─── Files table ────────────────────────────────────────────────────────── */
 .files-table {
-    background: #fff;
-    border: 1px solid #E5E7EB;
+    background: var(--ws-surface);
+    border: 1px solid var(--ws-border);
     border-radius: 14px;
     overflow: hidden;
 }
@@ -479,7 +494,7 @@ function statusClass(status) {
     align-items: center;
     gap: 12px;
     padding: 12px 20px;
-    border-bottom: 1px solid #F3F4F6;
+    border-bottom: 1px solid var(--ws-border-2);
 }
 
 .files-table-row:last-child {
@@ -487,23 +502,23 @@ function statusClass(status) {
 }
 
 .files-table-head {
-    background: #F9FAFB;
+    background: var(--ws-bg);
     font-size: 11px;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    color: #9CA3AF;
+    color: var(--ws-text-3);
 }
 
 .files-table-data {
     cursor: pointer;
     transition: background 0.12s;
     font-size: 13.5px;
-    color: #374151;
+    color: var(--ws-text-2);
 }
 
 .files-table-data:hover {
-    background: #F9FAFB;
+    background: var(--ws-bg);
 }
 
 .file-name-cell {
@@ -518,11 +533,11 @@ function statusClass(status) {
     overflow: hidden;
     text-overflow: ellipsis;
     font-weight: 500;
-    color: #111827;
+    color: var(--ws-text);
 }
 
 .file-template {
-    color: #6B7280;
+    color: var(--ws-text-3);
     font-size: 12.5px;
     white-space: nowrap;
     overflow: hidden;
@@ -530,7 +545,7 @@ function statusClass(status) {
 }
 
 .file-date {
-    color: #9CA3AF;
+    color: var(--ws-text-3);
     font-size: 12.5px;
     white-space: nowrap;
 }
@@ -547,28 +562,28 @@ function statusClass(status) {
 }
 
 .status-green {
-    background: #dcfce7;
-    color: #15803d;
+    background: rgba(34, 197, 94, 0.12);
+    color: #4ade80;
 }
 
 .status-blue {
-    background: #dbeafe;
-    color: #1d4ed8;
+    background: rgba(96, 165, 250, 0.12);
+    color: #93c5fd;
 }
 
 .status-red {
-    background: #fee2e2;
-    color: #b91c1c;
+    background: rgba(248, 113, 113, 0.12);
+    color: #fca5a5;
 }
 
 .status-yellow {
-    background: #fef9c3;
-    color: #854d0e;
+    background: rgba(251, 191, 36, 0.12);
+    color: #fcd34d;
 }
 
 .status-gray {
-    background: #F3F4F6;
-    color: #6B7280;
+    background: var(--ws-surface-2);
+    color: var(--ws-text-3);
 }
 
 /* ─── Empty ──────────────────────────────────────────────────────────────── */
@@ -578,7 +593,7 @@ function statusClass(status) {
     align-items: center;
     gap: 12px;
     padding: 64px 24px;
-    background: #F9FAFB;
+    background: var(--ws-bg);
     border: 1px dashed #E5E7EB;
     border-radius: 16px;
     text-align: center;
@@ -598,13 +613,13 @@ function statusClass(status) {
 .empty-title {
     font-size: 16px;
     font-weight: 700;
-    color: #111827;
+    color: var(--ws-text);
     margin: 0;
 }
 
 .empty-desc {
     font-size: 13.5px;
-    color: #9CA3AF;
+    color: var(--ws-text-3);
     margin: 0;
     max-width: 360px;
 }

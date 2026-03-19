@@ -6,9 +6,6 @@
         <div class="sidebar-brand">
             <router-link to="/" class="brand-link">
                 <LogoComponent class="brand-logo" />
-                <Transition name="fade-slide">
-                    <span v-if="isSidebarOpen" class="brand-name">ATABAI</span>
-                </Transition>
             </router-link>
             <button class="collapse-btn" @click="$emit('toggle')" :title="isSidebarOpen ? 'Collapse' : 'Expand'">
                 <ChevronLeftIcon v-if="isSidebarOpen" class="w-4 h-4" />
@@ -18,7 +15,7 @@
 
         <!-- New file CTA -->
         <div class="sidebar-new">
-            <button class="new-file-btn" @click="navigateTo('/app/upload')" :class="{ 'icon-only': !isSidebarOpen }">
+            <button class="new-file-btn" @click="navigateTo('/app/dashboard')" :class="{ 'icon-only': !isSidebarOpen }">
                 <PlusIcon class="w-4 h-4 flex-shrink-0" />
                 <Transition name="fade-slide">
                     <span v-if="isSidebarOpen">{{ $t('dashboard.newProject') }}</span>
@@ -278,14 +275,6 @@ onUnmounted(() => window.removeEventListener('resize', onResize))
     width: 28px;
     height: 28px;
     flex-shrink: 0;
-}
-
-.brand-name {
-    font-size: 15px;
-    font-weight: 700;
-    color: #F0ECF6;
-    letter-spacing: 0.04em;
-    white-space: nowrap;
 }
 
 .collapse-btn {

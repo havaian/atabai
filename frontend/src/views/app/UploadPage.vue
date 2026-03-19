@@ -32,21 +32,15 @@
             <div class="upload-area">
 
                 <!-- Drop zone -->
-                <div v-if="!selectedFile"
-                    class="drop-zone"
-                    :class="{ 'dragging': isDragOver }"
-                    @drop="handleDrop"
-                    @dragover.prevent
-                    @dragenter.prevent="isDragOver = true"
-                    @dragleave.prevent="isDragOver = false"
+                <div v-if="!selectedFile" class="drop-zone" :class="{ 'dragging': isDragOver }" @drop="handleDrop"
+                    @dragover.prevent @dragenter.prevent="isDragOver = true" @dragleave.prevent="isDragOver = false"
                     @click="$refs.fileInput.click()">
                     <div class="drop-icon">
                         <CloudArrowUpIcon class="w-8 h-8" />
                     </div>
                     <p class="drop-title">Drop your Excel file here</p>
                     <p class="drop-sub">or click to browse · .xlsx, .xls up to 10 MB</p>
-                    <input ref="fileInput" type="file" class="hidden" accept=".xlsx,.xls"
-                        @change="handleFileSelect" />
+                    <input ref="fileInput" type="file" class="hidden" accept=".xlsx,.xls" @change="handleFileSelect" />
                 </div>
 
                 <!-- File selected state -->
@@ -75,9 +69,7 @@
                 </div>
 
                 <!-- Upload button -->
-                <button class="upload-btn"
-                    :disabled="!selectedFile || isProcessing"
-                    @click="uploadFile">
+                <button class="upload-btn" :disabled="!selectedFile || isProcessing" @click="uploadFile">
                     <template v-if="isProcessing">
                         <div class="btn-spinner"></div>
                         Processing…
@@ -99,8 +91,7 @@
             <div v-if="prevFiles.length > 0" class="prev-section">
                 <div class="prev-header">Previous files</div>
                 <div class="prev-list">
-                    <div v-for="file in prevFiles" :key="file.id"
-                        class="prev-item" @click="openFile(file)">
+                    <div v-for="file in prevFiles" :key="file.id" class="prev-item" @click="openFile(file)">
                         <DocumentIcon class="w-4 h-4 text-gray-400 flex-shrink-0" />
                         <div class="prev-item-info">
                             <span class="prev-item-name">{{ file.originalName }}</span>
@@ -155,7 +146,7 @@ const uploadInstructions = computed(() => {
 onMounted(async () => {
     if (!templateId.value) { router.push('/app/dashboard'); return }
     await templatesStore.fetchTemplates()
-    await filesStore.fetchTemplateFiles(templateId.value, { limit: 5 }).catch(() => {})
+    await filesStore.fetchTemplateFiles(templateId.value, { limit: 5 }).catch(() => { })
 })
 
 function handleDrop(e) {
@@ -235,6 +226,17 @@ function statusClass(status) {
 
 <style scoped>
 .upload-page {
+    --ws-bg: #0F0D18;
+    --ws-surface: #171523;
+    --ws-surface-2: #1D1A2A;
+    --ws-border: rgba(149, 0, 255, 0.12);
+    --ws-border-2: rgba(149, 0, 255, 0.06);
+    --ws-text: #F0ECF6;
+    --ws-text-2: rgba(240, 236, 246, 0.55);
+    --ws-text-3: rgba(240, 236, 246, 0.3);
+    --ws-purple: #7C3AED;
+    --ws-purple-lt: rgba(124, 58, 237, 0.15);
+
     max-width: 640px;
     margin: 0 auto;
     padding: 32px 24px 64px;
@@ -250,7 +252,7 @@ function statusClass(status) {
     gap: 6px;
     font-size: 13.5px;
     font-weight: 500;
-    color: #9CA3AF;
+    color: var(--ws-text-3);
     background: transparent;
     border: none;
     cursor: pointer;
@@ -258,7 +260,10 @@ function statusClass(status) {
     transition: color 0.15s;
     align-self: flex-start;
 }
-.back-btn:hover { color: #374151; }
+
+.back-btn:hover {
+    color: var(--ws-text-2);
+}
 
 /* ─── Template header ────────────────────────────────────────────────────── */
 .template-header {
@@ -266,8 +271,8 @@ function statusClass(status) {
     align-items: center;
     gap: 14px;
     padding: 18px 20px;
-    background: #fff;
-    border: 1px solid #E5E7EB;
+    background: var(--ws-surface);
+    border: 1px solid var(--ws-border);
     border-radius: 14px;
 }
 
@@ -286,7 +291,7 @@ function statusClass(status) {
 .template-header-name {
     font-size: 16px;
     font-weight: 700;
-    color: #111827;
+    color: var(--ws-text);
     letter-spacing: -0.01em;
     margin-bottom: 5px;
 }
@@ -306,13 +311,20 @@ function statusClass(status) {
     border-radius: 6px;
 }
 
-.meta-sep { color: #D1D5DB; font-size: 12px; }
-.meta-cat { font-size: 12px; color: #9CA3AF; }
+.meta-sep {
+    color: rgba(240, 236, 246, 0.15);
+    font-size: 12px;
+}
+
+.meta-cat {
+    font-size: 12px;
+    color: var(--ws-text-3);
+}
 
 /* ─── Upload area ────────────────────────────────────────────────────────── */
 .upload-area {
-    background: #fff;
-    border: 1px solid #E5E7EB;
+    background: var(--ws-surface);
+    border: 1px solid var(--ws-border);
     border-radius: 16px;
     padding: 24px;
     display: flex;
@@ -334,7 +346,8 @@ function statusClass(status) {
     text-align: center;
 }
 
-.drop-zone:hover, .drop-zone.dragging {
+.drop-zone:hover,
+.drop-zone.dragging {
     border-color: #7C3AED;
     background: rgba(124, 58, 237, 0.03);
 }
@@ -354,17 +367,19 @@ function statusClass(status) {
 .drop-title {
     font-size: 15px;
     font-weight: 600;
-    color: #111827;
+    color: var(--ws-text);
     margin: 0;
 }
 
 .drop-sub {
     font-size: 12.5px;
-    color: #9CA3AF;
+    color: var(--ws-text-3);
     margin: 0;
 }
 
-.hidden { display: none; }
+.hidden {
+    display: none;
+}
 
 /* File selected */
 .file-selected {
@@ -397,7 +412,7 @@ function statusClass(status) {
 .file-selected-name {
     font-size: 14px;
     font-weight: 600;
-    color: #111827;
+    color: var(--ws-text);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -405,7 +420,7 @@ function statusClass(status) {
 
 .file-selected-size {
     font-size: 12px;
-    color: #9CA3AF;
+    color: var(--ws-text-3);
     margin-top: 2px;
 }
 
@@ -415,7 +430,7 @@ function statusClass(status) {
     border-radius: 8px;
     border: none;
     background: transparent;
-    color: #9CA3AF;
+    color: var(--ws-text-3);
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -423,12 +438,16 @@ function statusClass(status) {
     flex-shrink: 0;
     transition: background 0.12s, color 0.12s;
 }
-.file-change-btn:hover { background: #FEE2E2; color: #EF4444; }
+
+.file-change-btn:hover {
+    background: rgba(248, 113, 113, 0.12);
+    color: #EF4444;
+}
 
 /* Instructions */
 .instructions {
     padding: 14px 16px;
-    background: #F8FAFC;
+    background: var(--ws-surface-2);
     border-radius: 10px;
 }
 
@@ -438,7 +457,7 @@ function statusClass(status) {
     gap: 7px;
     font-size: 12.5px;
     font-weight: 600;
-    color: #374151;
+    color: var(--ws-text-2);
     margin-bottom: 10px;
 }
 
@@ -452,7 +471,7 @@ function statusClass(status) {
 
 .instructions-list li {
     font-size: 12.5px;
-    color: #6B7280;
+    color: var(--ws-text-3);
     line-height: 1.5;
 }
 
@@ -488,13 +507,17 @@ function statusClass(status) {
 .btn-spinner {
     width: 16px;
     height: 16px;
-    border: 2px solid rgba(255,255,255,0.3);
+    border: 2px solid rgba(255, 255, 255, 0.3);
     border-top-color: #fff;
     border-radius: 50%;
     animation: spin 0.7s linear infinite;
 }
 
-@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
 
 /* Error */
 .upload-error {
@@ -502,17 +525,17 @@ function statusClass(status) {
     align-items: center;
     gap: 8px;
     padding: 10px 14px;
-    background: #FEF2F2;
+    background: rgba(248, 113, 113, 0.08);
     border: 1px solid #FCA5A5;
     border-radius: 8px;
     font-size: 13px;
-    color: #B91C1C;
+    color: #fca5a5;
 }
 
 /* ─── Previous files ─────────────────────────────────────────────────────── */
 .prev-section {
-    background: #fff;
-    border: 1px solid #E5E7EB;
+    background: var(--ws-surface);
+    border: 1px solid var(--ws-border);
     border-radius: 14px;
     overflow: hidden;
 }
@@ -523,9 +546,9 @@ function statusClass(status) {
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    color: #9CA3AF;
-    background: #F9FAFB;
-    border-bottom: 1px solid #F3F4F6;
+    color: var(--ws-text-3);
+    background: var(--ws-bg);
+    border-bottom: 1px solid var(--ws-border-2);
 }
 
 .prev-list {
@@ -538,13 +561,18 @@ function statusClass(status) {
     align-items: center;
     gap: 12px;
     padding: 13px 20px;
-    border-bottom: 1px solid #F3F4F6;
+    border-bottom: 1px solid var(--ws-border-2);
     cursor: pointer;
     transition: background 0.12s;
 }
 
-.prev-item:last-child { border-bottom: none; }
-.prev-item:hover { background: #F9FAFB; }
+.prev-item:last-child {
+    border-bottom: none;
+}
+
+.prev-item:hover {
+    background: var(--ws-bg);
+}
 
 .prev-item-info {
     flex: 1;
@@ -557,7 +585,7 @@ function statusClass(status) {
 .prev-item-name {
     font-size: 13.5px;
     font-weight: 500;
-    color: #111827;
+    color: var(--ws-text);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -565,7 +593,7 @@ function statusClass(status) {
 
 .prev-item-date {
     font-size: 11.5px;
-    color: #9CA3AF;
+    color: var(--ws-text-3);
 }
 
 /* Status pills */
@@ -580,15 +608,34 @@ function statusClass(status) {
     flex-shrink: 0;
 }
 
-.status-green  { background: #dcfce7; color: #15803d; }
-.status-blue   { background: #dbeafe; color: #1d4ed8; }
-.status-red    { background: #fee2e2; color: #b91c1c; }
-.status-yellow { background: #fef9c3; color: #854d0e; }
-.status-gray   { background: #F3F4F6; color: #6B7280; }
+.status-green {
+    background: rgba(34, 197, 94, 0.12);
+    color: #4ade80;
+}
+
+.status-blue {
+    background: rgba(96, 165, 250, 0.12);
+    color: #93c5fd;
+}
+
+.status-red {
+    background: rgba(248, 113, 113, 0.12);
+    color: #fca5a5;
+}
+
+.status-yellow {
+    background: rgba(251, 191, 36, 0.12);
+    color: #fcd34d;
+}
+
+.status-gray {
+    background: var(--ws-surface-2);
+    color: var(--ws-text-3);
+}
 
 .no-template {
     padding: 32px;
     text-align: center;
-    color: #9CA3AF;
+    color: var(--ws-text-3);
 }
 </style>

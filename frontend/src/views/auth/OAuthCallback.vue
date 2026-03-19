@@ -3,48 +3,45 @@
         <div class="auth-card">
 
             <!-- Brand -->
-            <div class="auth-brand">
-                <div class="auth-logo">
-                    <LogoComponent class="w-8 h-8" />
-                </div>
-                <span class="auth-brand-name">ATABAI</span>
-            </div>
+            <LogoComponent class="auth-logo-comp" />
 
-            <!-- Loading state -->
-            <template v-if="isLoading">
-                <div class="auth-spinner-wrap">
-                    <div class="auth-spinner"></div>
-                </div>
-                <h2 class="auth-title">Signing you in…</h2>
-                <p class="auth-sub">{{ $t('auth.pleaseWait') }}</p>
-            </template>
-
-            <!-- Error state -->
-            <template v-else-if="error">
-                <div class="auth-state-icon auth-state-error">
-                    <XCircleIcon class="w-7 h-7" />
-                </div>
-                <h2 class="auth-title">{{ $t('auth.loginFailed') }}</h2>
-                <p class="auth-sub auth-sub-error">{{ error }}</p>
-                <button class="auth-btn" @click="router.push('/')">
-                    <ArrowLeftIcon class="w-4 h-4" />
-                    {{ $t('common.goHome') }}
-                </button>
-            </template>
-
-            <!-- Success state -->
-            <template v-else>
-                <div class="auth-state-icon auth-state-success">
-                    <CheckCircleIcon class="w-7 h-7" />
-                </div>
-                <h2 class="auth-title">{{ $t('auth.loginSuccessful') }}</h2>
-                <p class="auth-sub">{{ $t('auth.redirectingToDashboard') }}</p>
-                <div class="auth-progress">
-                    <div class="auth-progress-fill"></div>
-                </div>
-            </template>
-
+            <span class="auth-brand-name">ATABAI</span>
         </div>
+
+        <!-- Loading state -->
+        <template v-if="isLoading">
+            <div class="auth-spinner-wrap">
+                <div class="auth-spinner"></div>
+            </div>
+            <h2 class="auth-title">Signing you in…</h2>
+            <p class="auth-sub">{{ $t('auth.pleaseWait') }}</p>
+        </template>
+
+        <!-- Error state -->
+        <template v-else-if="error">
+            <div class="auth-state-icon auth-state-error">
+                <XCircleIcon class="w-7 h-7" />
+            </div>
+            <h2 class="auth-title">{{ $t('auth.loginFailed') }}</h2>
+            <p class="auth-sub auth-sub-error">{{ error }}</p>
+            <button class="auth-btn" @click="router.push('/')">
+                <ArrowLeftIcon class="w-4 h-4" />
+                {{ $t('common.goHome') }}
+            </button>
+        </template>
+
+        <!-- Success state -->
+        <template v-else>
+            <div class="auth-state-icon auth-state-success">
+                <CheckCircleIcon class="w-7 h-7" />
+            </div>
+            <h2 class="auth-title">{{ $t('auth.loginSuccessful') }}</h2>
+            <p class="auth-sub">{{ $t('auth.redirectingToDashboard') }}</p>
+            <div class="auth-progress">
+                <div class="auth-progress-fill"></div>
+            </div>
+        </template>
+
     </div>
 </template>
 
@@ -92,6 +89,11 @@ onMounted(async () => {
     padding: 24px;
 }
 
+.auth-logo-comp {
+    width: 140px;
+    height: 40px;
+}
+
 .auth-card {
     width: 100%;
     max-width: 380px;
@@ -107,25 +109,11 @@ onMounted(async () => {
     box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
 }
 
-.auth-brand {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 4px;
-}
 
-.auth-logo {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
 
-.auth-brand-name {
-    font-size: 17px;
-    font-weight: 800;
-    color: #111827;
-    letter-spacing: 0.04em;
-}
+
+
+
 
 .auth-spinner-wrap {
     width: 56px;

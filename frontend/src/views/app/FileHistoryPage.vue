@@ -18,11 +18,7 @@
             <!-- Search -->
             <div class="search-wrap">
                 <MagnifyingGlassIcon class="search-icon w-4 h-4" />
-                <input
-                    v-model="filters.search"
-                    type="text"
-                    class="search-input"
-                    placeholder="Search by file name…"
+                <input v-model="filters.search" type="text" class="search-input" placeholder="Search by file name…"
                     @input="onSearch" />
                 <button v-if="filters.search" class="search-clear" @click="filters.search = ''; applyFilters()">
                     <XMarkIcon class="w-3.5 h-3.5" />
@@ -118,8 +114,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="file in paginatedFiles" :key="file.id"
-                        class="table-row" @click="openFile(file)">
+                    <tr v-for="file in paginatedFiles" :key="file.id" class="table-row" @click="openFile(file)">
 
                         <!-- File name -->
                         <td class="td td-file">
@@ -152,33 +147,29 @@
                         <td class="td td-actions" @click.stop>
                             <div class="actions-cell">
                                 <!-- Download -->
-                                <button v-if="file.status === 'completed'"
-                                    class="action-icon-btn" title="Download IFRS file"
-                                    :disabled="file.downloading"
-                                    @click="downloadFile(file)">
+                                <button v-if="file.status === 'completed'" class="action-icon-btn"
+                                    title="Download IFRS file" :disabled="file.downloading" @click="downloadFile(file)">
                                     <div v-if="file.downloading" class="mini-spin"></div>
                                     <ArrowDownTrayIcon v-else class="w-4 h-4" />
                                 </button>
 
                                 <!-- View / Processing -->
-                                <button class="action-icon-btn" :title="file.status === 'completed' ? 'View details' : 'View processing'"
+                                <button class="action-icon-btn"
+                                    :title="file.status === 'completed' ? 'View details' : 'View processing'"
                                     @click="openFile(file)">
                                     <EyeIcon class="w-4 h-4" />
                                 </button>
 
                                 <!-- Retry -->
-                                <button v-if="file.status === 'failed'"
-                                    class="action-icon-btn" title="Retry"
-                                    :disabled="file.retrying"
-                                    @click="retryFile(file)">
+                                <button v-if="file.status === 'failed'" class="action-icon-btn" title="Retry"
+                                    :disabled="file.retrying" @click="retryFile(file)">
                                     <div v-if="file.retrying" class="mini-spin"></div>
                                     <ArrowPathIcon v-else class="w-4 h-4" />
                                 </button>
 
                                 <!-- Delete -->
                                 <button class="action-icon-btn action-icon-danger" title="Delete"
-                                    :disabled="file.deleting"
-                                    @click="deleteFile(file)">
+                                    :disabled="file.deleting" @click="deleteFile(file)">
                                     <div v-if="file.deleting" class="mini-spin"></div>
                                     <TrashIcon v-else class="w-4 h-4" />
                                 </button>
@@ -193,16 +184,16 @@
                 <button class="page-btn" :disabled="currentPage === 1" @click="currentPage--">
                     <ChevronLeftIcon class="w-4 h-4" />
                 </button>
-                <button v-for="p in visiblePages" :key="p"
-                    class="page-btn page-num" :class="{ 'page-active': p === currentPage }"
-                    @click="currentPage = p">
+                <button v-for="p in visiblePages" :key="p" class="page-btn page-num"
+                    :class="{ 'page-active': p === currentPage }" @click="currentPage = p">
                     {{ p }}
                 </button>
                 <button class="page-btn" :disabled="currentPage === totalPages" @click="currentPage++">
                     <ChevronRightIcon class="w-4 h-4" />
                 </button>
                 <span class="page-info">
-                    {{ (currentPage - 1) * itemsPerPage + 1 }}–{{ Math.min(currentPage * itemsPerPage, filteredFiles.length) }} of {{ filteredFiles.length }}
+                    {{ (currentPage - 1) * itemsPerPage + 1 }}–{{ Math.min(currentPage * itemsPerPage,
+                    filteredFiles.length) }} of {{ filteredFiles.length }}
                 </span>
             </div>
         </div>
@@ -266,9 +257,9 @@ const filteredFiles = computed(() => {
         const now = new Date()
         const start = new Date()
         switch (filters.value.dateRange) {
-            case 'today':   start.setHours(0, 0, 0, 0); break
-            case 'week':    start.setDate(now.getDate() - 7); break
-            case 'month':   start.setMonth(now.getMonth() - 1); break
+            case 'today': start.setHours(0, 0, 0, 0); break
+            case 'week': start.setDate(now.getDate() - 7); break
+            case 'month': start.setMonth(now.getMonth() - 1); break
             case 'quarter': start.setMonth(now.getMonth() - 3); break
         }
         result = result.filter(f => new Date(f.createdAt) >= start)
@@ -391,13 +382,24 @@ watch(() => currentPage.value, () => window.scrollTo({ top: 0, behavior: 'smooth
 
 onMounted(async () => {
     if (filesStore.recentFiles.length === 0) {
-        await filesStore.fetchRecentFiles().catch(() => {})
+        await filesStore.fetchRecentFiles().catch(() => { })
     }
 })
 </script>
 
 <style scoped>
 .history-page {
+    --ws-bg: #0F0D18;
+    --ws-surface: #171523;
+    --ws-surface-2: #1D1A2A;
+    --ws-border: rgba(149, 0, 255, 0.12);
+    --ws-border-2: rgba(149, 0, 255, 0.06);
+    --ws-text: #F0ECF6;
+    --ws-text-2: rgba(240, 236, 246, 0.55);
+    --ws-text-3: rgba(240, 236, 246, 0.3);
+    --ws-purple: #7C3AED;
+    --ws-purple-lt: rgba(124, 58, 237, 0.15);
+
     max-width: 1000px;
     margin: 0 auto;
     padding: 36px 32px 64px;
@@ -417,14 +419,14 @@ onMounted(async () => {
 .history-title {
     font-size: 24px;
     font-weight: 700;
-    color: #111827;
+    color: var(--ws-text);
     letter-spacing: -0.02em;
     margin: 0 0 5px;
 }
 
 .history-sub {
     font-size: 13.5px;
-    color: #9CA3AF;
+    color: var(--ws-text-3);
     margin: 0;
 }
 
@@ -470,31 +472,36 @@ onMounted(async () => {
 .search-icon {
     position: absolute;
     left: 10px;
-    color: #9CA3AF;
+    color: var(--ws-text-3);
     pointer-events: none;
 }
 
 .search-input {
     width: 100%;
     padding: 8px 32px 8px 34px;
-    background: #fff;
-    border: 1px solid #E5E7EB;
+    background: var(--ws-surface);
+    border: 1px solid var(--ws-border);
     border-radius: 9px;
     font-size: 13.5px;
-    color: #111827;
+    color: var(--ws-text);
     outline: none;
     transition: border-color 0.15s;
 }
 
-.search-input:focus { border-color: #7C3AED; }
-.search-input::placeholder { color: #D1D5DB; }
+.search-input:focus {
+    border-color: #7C3AED;
+}
+
+.search-input::placeholder {
+    color: rgba(240, 236, 246, 0.15);
+}
 
 .search-clear {
     position: absolute;
     right: 8px;
     background: transparent;
     border: none;
-    color: #9CA3AF;
+    color: var(--ws-text-3);
     cursor: pointer;
     padding: 2px;
     border-radius: 4px;
@@ -503,15 +510,18 @@ onMounted(async () => {
     justify-content: center;
     transition: color 0.12s;
 }
-.search-clear:hover { color: #374151; }
+
+.search-clear:hover {
+    color: var(--ws-text-2);
+}
 
 .filter-select {
     padding: 8px 12px;
-    background: #fff;
-    border: 1px solid #E5E7EB;
+    background: var(--ws-surface);
+    border: 1px solid var(--ws-border);
     border-radius: 9px;
     font-size: 13px;
-    color: #374151;
+    color: var(--ws-text-2);
     cursor: pointer;
     outline: none;
     transition: border-color 0.15s;
@@ -523,7 +533,9 @@ onMounted(async () => {
     background-size: 16px;
 }
 
-.filter-select:focus { border-color: #7C3AED; }
+.filter-select:focus {
+    border-color: #7C3AED;
+}
 
 .clear-btn {
     display: flex;
@@ -531,35 +543,41 @@ onMounted(async () => {
     gap: 5px;
     padding: 8px 12px;
     background: transparent;
-    border: 1px solid #E5E7EB;
+    border: 1px solid var(--ws-border);
     border-radius: 9px;
     font-size: 13px;
-    color: #6B7280;
+    color: var(--ws-text-3);
     cursor: pointer;
     transition: all 0.12s;
     white-space: nowrap;
 }
-.clear-btn:hover { border-color: #D1D5DB; background: #F9FAFB; }
+
+.clear-btn:hover {
+    border-color: rgba(240, 236, 246, 0.15);
+    background: var(--ws-bg);
+}
 
 .filter-count {
     font-size: 12.5px;
-    color: #9CA3AF;
+    color: var(--ws-text-3);
     margin-left: auto;
     white-space: nowrap;
 }
 
 /* ─── States ─────────────────────────────────────────────────────────────── */
-.state-loading, .state-error {
+.state-loading,
+.state-error {
     display: flex;
     align-items: center;
     gap: 12px;
     padding: 48px;
-    color: #9CA3AF;
+    color: var(--ws-text-3);
     font-size: 14px;
     justify-content: center;
 }
 
-.state-spinner, .mini-spin {
+.state-spinner,
+.mini-spin {
     width: 20px;
     height: 20px;
     border: 2px solid #E5E7EB;
@@ -569,11 +587,21 @@ onMounted(async () => {
     flex-shrink: 0;
 }
 
-.mini-spin { width: 14px; height: 14px; border-width: 1.5px; }
+.mini-spin {
+    width: 14px;
+    height: 14px;
+    border-width: 1.5px;
+}
 
-@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
 
-.state-error { color: #EF4444; }
+.state-error {
+    color: #EF4444;
+}
 
 .error-retry {
     background: transparent;
@@ -591,7 +619,7 @@ onMounted(async () => {
     align-items: center;
     gap: 12px;
     padding: 64px 24px;
-    background: #F9FAFB;
+    background: var(--ws-bg);
     border: 1px dashed #E5E7EB;
     border-radius: 16px;
     text-align: center;
@@ -611,33 +639,36 @@ onMounted(async () => {
 .empty-title {
     font-size: 15px;
     font-weight: 700;
-    color: #111827;
+    color: var(--ws-text);
     margin: 0;
 }
 
 .empty-desc {
     font-size: 13.5px;
-    color: #9CA3AF;
+    color: var(--ws-text-3);
     margin: 0;
 }
 
 .clear-btn-lg {
     padding: 9px 18px;
     background: transparent;
-    border: 1px solid #E5E7EB;
+    border: 1px solid var(--ws-border);
     border-radius: 9px;
     font-size: 13.5px;
     font-weight: 600;
-    color: #374151;
+    color: var(--ws-text-2);
     cursor: pointer;
     transition: all 0.12s;
 }
-.clear-btn-lg:hover { background: #F3F4F6; }
+
+.clear-btn-lg:hover {
+    background: var(--ws-surface-2);
+}
 
 /* ─── Table ──────────────────────────────────────────────────────────────── */
 .files-card {
-    background: #fff;
-    border: 1px solid #E5E7EB;
+    background: var(--ws-surface);
+    border: 1px solid var(--ws-border);
     border-radius: 16px;
     overflow: hidden;
 }
@@ -647,7 +678,9 @@ onMounted(async () => {
     border-collapse: collapse;
 }
 
-.table-head { background: #F9FAFB; }
+.table-head {
+    background: var(--ws-bg);
+}
 
 .th {
     padding: 11px 16px;
@@ -655,9 +688,9 @@ onMounted(async () => {
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    color: #9CA3AF;
+    color: var(--ws-text-3);
     text-align: left;
-    border-bottom: 1px solid #F3F4F6;
+    border-bottom: 1px solid var(--ws-border-2);
 }
 
 .table-row {
@@ -666,22 +699,46 @@ onMounted(async () => {
     border-bottom: 1px solid #F9FAFB;
 }
 
-.table-row:last-child { border-bottom: none; }
-.table-row:hover { background: #F9FAFB; }
+.table-row:last-child {
+    border-bottom: none;
+}
+
+.table-row:hover {
+    background: var(--ws-bg);
+}
 
 .td {
     padding: 13px 16px;
     font-size: 13.5px;
-    color: #374151;
+    color: var(--ws-text-2);
     vertical-align: middle;
 }
 
 /* Column widths */
-.th-file, .td-file { width: auto; }
-.th-template, .td-template { width: 140px; }
-.th-status, .td-status { width: 110px; }
-.th-date, .td-date { width: 100px; }
-.th-actions, .td-actions { width: 120px; }
+.th-file,
+.td-file {
+    width: auto;
+}
+
+.th-template,
+.td-template {
+    width: 140px;
+}
+
+.th-status,
+.td-status {
+    width: 110px;
+}
+
+.th-date,
+.td-date {
+    width: 100px;
+}
+
+.th-actions,
+.td-actions {
+    width: 120px;
+}
 
 .file-cell {
     display: flex;
@@ -689,11 +746,13 @@ onMounted(async () => {
     gap: 9px;
 }
 
-.file-icon { color: #D1D5DB; }
+.file-icon {
+    color: rgba(240, 236, 246, 0.15);
+}
 
 .file-name {
     font-weight: 500;
-    color: #111827;
+    color: var(--ws-text);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -712,7 +771,7 @@ onMounted(async () => {
 
 .date-text {
     font-size: 12.5px;
-    color: #9CA3AF;
+    color: var(--ws-text-3);
     white-space: nowrap;
 }
 
@@ -726,11 +785,31 @@ onMounted(async () => {
     font-weight: 600;
     white-space: nowrap;
 }
-.status-green  { background: #dcfce7; color: #15803d; }
-.status-blue   { background: #dbeafe; color: #1d4ed8; }
-.status-red    { background: #fee2e2; color: #b91c1c; }
-.status-yellow { background: #fef9c3; color: #854d0e; }
-.status-gray   { background: #F3F4F6; color: #6B7280; }
+
+.status-green {
+    background: rgba(34, 197, 94, 0.12);
+    color: #4ade80;
+}
+
+.status-blue {
+    background: rgba(96, 165, 250, 0.12);
+    color: #93c5fd;
+}
+
+.status-red {
+    background: rgba(248, 113, 113, 0.12);
+    color: #fca5a5;
+}
+
+.status-yellow {
+    background: rgba(251, 191, 36, 0.12);
+    color: #fcd34d;
+}
+
+.status-gray {
+    background: var(--ws-surface-2);
+    color: var(--ws-text-3);
+}
 
 /* Actions */
 .actions-cell {
@@ -745,7 +824,7 @@ onMounted(async () => {
     border-radius: 7px;
     border: none;
     background: transparent;
-    color: #9CA3AF;
+    color: var(--ws-text-3);
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -754,14 +833,17 @@ onMounted(async () => {
 }
 
 .action-icon-btn:hover:not(:disabled) {
-    background: #F3F4F6;
-    color: #374151;
+    background: var(--ws-surface-2);
+    color: var(--ws-text-2);
 }
 
-.action-icon-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.action-icon-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
 
 .action-icon-danger:hover:not(:disabled) {
-    background: #FEF2F2;
+    background: rgba(248, 113, 113, 0.08);
     color: #EF4444;
 }
 
@@ -771,16 +853,16 @@ onMounted(async () => {
     align-items: center;
     gap: 4px;
     padding: 14px 16px;
-    border-top: 1px solid #F3F4F6;
+    border-top: 1px solid var(--ws-border-2);
 }
 
 .page-btn {
     width: 32px;
     height: 32px;
     border-radius: 8px;
-    border: 1px solid #E5E7EB;
-    background: #fff;
-    color: #374151;
+    border: 1px solid var(--ws-border);
+    background: var(--ws-surface);
+    color: var(--ws-text-2);
     font-size: 13px;
     font-weight: 500;
     cursor: pointer;
@@ -790,31 +872,58 @@ onMounted(async () => {
     transition: all 0.12s;
 }
 
-.page-btn:hover:not(:disabled) { background: #F3F4F6; }
-.page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.page-btn:hover:not(:disabled) {
+    background: var(--ws-surface-2);
+}
 
-.page-num { min-width: 32px; }
+.page-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.page-num {
+    min-width: 32px;
+}
 
 .page-active {
     background: #7C3AED;
     border-color: #7C3AED;
     color: #fff;
 }
-.page-active:hover { background: #7C3AED; }
+
+.page-active:hover {
+    background: #7C3AED;
+}
 
 .page-info {
     font-size: 12.5px;
-    color: #9CA3AF;
+    color: var(--ws-text-3);
     margin-left: auto;
 }
 
 /* ─── Responsive ─────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
-    .history-page { padding: 24px 16px 48px; }
-    .history-header { flex-direction: column; }
-    .filter-bar { gap: 8px; }
-    .search-wrap { max-width: 100%; }
-    .th-template, .td-template,
-    .th-date, .td-date { display: none; }
+    .history-page {
+        padding: 24px 16px 48px;
+    }
+
+    .history-header {
+        flex-direction: column;
+    }
+
+    .filter-bar {
+        gap: 8px;
+    }
+
+    .search-wrap {
+        max-width: 100%;
+    }
+
+    .th-template,
+    .td-template,
+    .th-date,
+    .td-date {
+        display: none;
+    }
 }
 </style>

@@ -167,6 +167,17 @@ function selectTheme(value) {
 
 <style scoped>
 .settings-page {
+    --ws-bg: #0F0D18;
+    --ws-surface: #171523;
+    --ws-surface-2: #1D1A2A;
+    --ws-border: rgba(149, 0, 255, 0.12);
+    --ws-border-2: rgba(149, 0, 255, 0.06);
+    --ws-text: #F0ECF6;
+    --ws-text-2: rgba(240, 236, 246, 0.55);
+    --ws-text-3: rgba(240, 236, 246, 0.3);
+    --ws-purple: #7C3AED;
+    --ws-purple-lt: rgba(124, 58, 237, 0.15);
+
     max-width: 800px;
     margin: 0 auto;
     padding: 36px 32px 64px;
@@ -179,14 +190,14 @@ function selectTheme(value) {
 .settings-title {
     font-size: 24px;
     font-weight: 700;
-    color: #111827;
+    color: var(--ws-text);
     letter-spacing: -0.02em;
     margin: 0 0 5px;
 }
 
 .settings-sub {
     font-size: 13.5px;
-    color: #9CA3AF;
+    color: var(--ws-text-3);
     margin: 0;
 }
 
@@ -215,7 +226,7 @@ function selectTheme(value) {
     border: none;
     border-radius: 9px;
     background: transparent;
-    color: #6B7280;
+    color: var(--ws-text-3);
     font-size: 13.5px;
     font-weight: 500;
     cursor: pointer;
@@ -225,8 +236,8 @@ function selectTheme(value) {
 }
 
 .settings-tab:hover {
-    background: #F3F4F6;
-    color: #111827;
+    background: var(--ws-surface-2);
+    color: var(--ws-text);
 }
 
 .settings-tab.active {
@@ -238,8 +249,8 @@ function selectTheme(value) {
     margin-left: auto;
     font-size: 10px;
     font-weight: 600;
-    color: #9CA3AF;
-    background: #F3F4F6;
+    color: var(--ws-text-3);
+    background: var(--ws-surface-2);
     padding: 2px 6px;
     border-radius: 4px;
     letter-spacing: 0.04em;
@@ -247,8 +258,8 @@ function selectTheme(value) {
 
 /* ─── Panel ──────────────────────────────────────────────────────────────── */
 .settings-panel {
-    background: #fff;
-    border: 1px solid #E5E7EB;
+    background: var(--ws-surface);
+    border: 1px solid var(--ws-border);
     border-radius: 16px;
     overflow: hidden;
 }
@@ -262,19 +273,19 @@ function selectTheme(value) {
 
 .panel-section-header {
     padding-bottom: 20px;
-    border-bottom: 1px solid #F3F4F6;
+    border-bottom: 1px solid var(--ws-border-2);
 }
 
 .panel-section-title {
     font-size: 16px;
     font-weight: 700;
-    color: #111827;
+    color: var(--ws-text);
     margin: 0 0 5px;
 }
 
 .panel-section-desc {
     font-size: 13px;
-    color: #9CA3AF;
+    color: var(--ws-text-3);
     margin: 0;
 }
 
@@ -293,18 +304,18 @@ function selectTheme(value) {
 .row-label-title {
     font-size: 14px;
     font-weight: 600;
-    color: #111827;
+    color: var(--ws-text);
     margin-bottom: 3px;
 }
 
 .row-label-desc {
     font-size: 12.5px;
-    color: #9CA3AF;
+    color: var(--ws-text-3);
 }
 
 .settings-divider {
     height: 1px;
-    background: #F3F4F6;
+    background: var(--ws-surface-2);
 }
 
 /* ─── Profile ────────────────────────────────────────────────────────────── */
@@ -339,12 +350,12 @@ function selectTheme(value) {
 .profile-name {
     font-size: 14px;
     font-weight: 600;
-    color: #111827;
+    color: var(--ws-text);
 }
 
 .profile-email {
     font-size: 12.5px;
-    color: #9CA3AF;
+    color: var(--ws-text-3);
     margin-top: 2px;
 }
 
@@ -359,10 +370,10 @@ function selectTheme(value) {
     align-items: center;
     gap: 6px;
     padding: 7px 13px;
-    border: 1px solid #E5E7EB;
+    border: 1px solid var(--ws-border);
     border-radius: 9px;
     background: transparent;
-    color: #6B7280;
+    color: var(--ws-text-3);
     font-size: 13px;
     font-weight: 500;
     cursor: pointer;
@@ -371,8 +382,8 @@ function selectTheme(value) {
 }
 
 .theme-opt:hover {
-    border-color: #D1D5DB;
-    color: #374151;
+    border-color: rgba(240, 236, 246, 0.15);
+    color: var(--ws-text-2);
 }
 
 .theme-opt.active {
@@ -400,7 +411,7 @@ function selectTheme(value) {
 
 .plan-usage {
     font-size: 12.5px;
-    color: #9CA3AF;
+    color: var(--ws-text-3);
 }
 
 /* ─── Save notif ─────────────────────────────────────────────────────────── */
@@ -409,12 +420,12 @@ function selectTheme(value) {
     align-items: center;
     gap: 8px;
     padding: 10px 14px;
-    background: #f0fdf4;
+    background: rgba(34, 197, 94, 0.08);
     border: 1px solid #bbf7d0;
     border-radius: 9px;
     font-size: 13.5px;
     font-weight: 500;
-    color: #15803d;
+    color: #4ade80;
 }
 
 .notif-enter-active,
@@ -442,8 +453,8 @@ function selectTheme(value) {
     width: 52px;
     height: 52px;
     border-radius: 14px;
-    background: #F3F4F6;
-    color: #9CA3AF;
+    background: var(--ws-surface-2);
+    color: var(--ws-text-3);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -452,13 +463,13 @@ function selectTheme(value) {
 .coming-soon-title {
     font-size: 15px;
     font-weight: 700;
-    color: #111827;
+    color: var(--ws-text);
     margin: 0;
 }
 
 .coming-soon-desc {
     font-size: 13.5px;
-    color: #9CA3AF;
+    color: var(--ws-text-3);
     margin: 0;
     max-width: 320px;
 }

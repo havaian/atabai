@@ -34,10 +34,10 @@
                 </div>
 
                 <!-- Download CTA -->
-                <button v-if="file.status === 'completed'" class="download-btn" @click="filesStore.downloadFile(file.id)">
+                <a v-if="file.status === 'completed'" :href="downloadUrl" class="download-btn" download>
                     <ArrowDownTrayIcon class="w-4 h-4" />
                     Download IFRS file
-                </button>
+                </a>
             </div>
 
             <!-- Stats row -->
@@ -104,10 +104,11 @@
 
             <!-- Actions row -->
             <div class="actions-row">
-                <button v-if="file.status === 'completed'" class="action-btn action-btn-primary" @click="filesStore.downloadFile(file.id)">
+                <a v-if="file.status === 'completed'" :href="downloadUrl" class="action-btn action-btn-primary"
+                    download>
                     <ArrowDownTrayIcon class="w-4 h-4" />
-                    Download IFRS file
-                </button>
+                    Download IFRS Excel
+                </a>
                 <button class="action-btn action-btn-secondary"
                     @click="router.push(`/app/upload?template=${file.templateType}`)">
                     <PlusIcon class="w-4 h-4" />
@@ -218,7 +219,7 @@ async function deleteFile() {
 onMounted(async () => {
     try {
         const data = await filesStore.getFileDetails(fileId.value)
-        file.value = data.file || data
+        file.value = data
     } catch (e) {
         error.value = 'Could not load file details.'
     } finally {
@@ -229,6 +230,17 @@ onMounted(async () => {
 
 <style scoped>
 .results-page {
+    --ws-bg: #0F0D18;
+    --ws-surface: #171523;
+    --ws-surface-2: #1D1A2A;
+    --ws-border: rgba(149, 0, 255, 0.12);
+    --ws-border-2: rgba(149, 0, 255, 0.06);
+    --ws-text: #F0ECF6;
+    --ws-text-2: rgba(240, 236, 246, 0.55);
+    --ws-text-3: rgba(240, 236, 246, 0.3);
+    --ws-purple: #7C3AED;
+    --ws-purple-lt: rgba(124, 58, 237, 0.15);
+
     max-width: 720px;
     margin: 0 auto;
     padding: 32px 24px 64px;
@@ -244,7 +256,7 @@ onMounted(async () => {
     gap: 6px;
     font-size: 13.5px;
     font-weight: 500;
-    color: #9CA3AF;
+    color: var(--ws-text-3);
     background: transparent;
     border: none;
     cursor: pointer;
@@ -254,7 +266,7 @@ onMounted(async () => {
 }
 
 .back-btn:hover {
-    color: #374151;
+    color: var(--ws-text-2);
 }
 
 /* ─── Loading / Error ────────────────────────────────────────────────────── */
@@ -263,7 +275,7 @@ onMounted(async () => {
     align-items: center;
     gap: 12px;
     padding: 40px;
-    color: #9CA3AF;
+    color: var(--ws-text-3);
     font-size: 14px;
 }
 
@@ -296,10 +308,10 @@ onMounted(async () => {
     align-items: center;
     gap: 10px;
     padding: 16px 20px;
-    background: #FEF2F2;
+    background: rgba(248, 113, 113, 0.08);
     border: 1px solid #FCA5A5;
     border-radius: 12px;
-    color: #B91C1C;
+    color: #fca5a5;
     font-size: 14px;
 }
 
@@ -314,7 +326,7 @@ onMounted(async () => {
 }
 
 .banner-success {
-    background: #f0fdf4;
+    background: rgba(34, 197, 94, 0.08);
     border-color: #bbf7d0;
 }
 
@@ -339,17 +351,17 @@ onMounted(async () => {
 }
 
 .banner-success .banner-icon {
-    background: #dcfce7;
+    background: rgba(34, 197, 94, 0.12);
     color: #16a34a;
 }
 
 .banner-error .banner-icon {
-    background: #fee2e2;
+    background: rgba(248, 113, 113, 0.12);
     color: #dc2626;
 }
 
 .banner-processing .banner-icon {
-    background: #dbeafe;
+    background: rgba(96, 165, 250, 0.12);
     color: #2563eb;
 }
 
@@ -360,13 +372,13 @@ onMounted(async () => {
 .banner-title {
     font-size: 15px;
     font-weight: 700;
-    color: #111827;
+    color: var(--ws-text);
     margin-bottom: 3px;
 }
 
 .banner-sub {
     font-size: 12.5px;
-    color: #6B7280;
+    color: var(--ws-text-3);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -403,29 +415,29 @@ onMounted(async () => {
 
 .result-stat {
     padding: 16px 18px;
-    background: #fff;
-    border: 1px solid #E5E7EB;
+    background: var(--ws-surface);
+    border: 1px solid var(--ws-border);
     border-radius: 12px;
 }
 
 .result-stat-val {
     font-size: 20px;
     font-weight: 700;
-    color: #111827;
+    color: var(--ws-text);
     letter-spacing: -0.02em;
     margin-bottom: 4px;
 }
 
 .result-stat-label {
     font-size: 11.5px;
-    color: #9CA3AF;
+    color: var(--ws-text-3);
     font-weight: 500;
 }
 
 /* ─── Warnings ───────────────────────────────────────────────────────────── */
 .warnings-section {
     padding: 16px 18px;
-    background: #FFFBEB;
+    background: rgba(251, 191, 36, 0.08);
     border: 1px solid #FDE68A;
     border-radius: 12px;
 }
@@ -436,7 +448,7 @@ onMounted(async () => {
     gap: 7px;
     font-size: 13px;
     font-weight: 600;
-    color: #92400E;
+    color: #fcd34d;
     margin-bottom: 10px;
 }
 
@@ -456,8 +468,8 @@ onMounted(async () => {
 
 /* ─── File info ──────────────────────────────────────────────────────────── */
 .file-info-section {
-    background: #fff;
-    border: 1px solid #E5E7EB;
+    background: var(--ws-surface);
+    border: 1px solid var(--ws-border);
     border-radius: 14px;
     overflow: hidden;
 }
@@ -468,9 +480,9 @@ onMounted(async () => {
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    color: #9CA3AF;
-    background: #F9FAFB;
-    border-bottom: 1px solid #F3F4F6;
+    color: var(--ws-text-3);
+    background: var(--ws-bg);
+    border-bottom: 1px solid var(--ws-border-2);
 }
 
 .file-info-grid {
@@ -484,7 +496,7 @@ onMounted(async () => {
     justify-content: space-between;
     gap: 16px;
     padding: 13px 20px;
-    border-bottom: 1px solid #F3F4F6;
+    border-bottom: 1px solid var(--ws-border-2);
     font-size: 13.5px;
 }
 
@@ -493,13 +505,13 @@ onMounted(async () => {
 }
 
 .info-label {
-    color: #9CA3AF;
+    color: var(--ws-text-3);
     font-weight: 500;
     flex-shrink: 0;
 }
 
 .info-value {
-    color: #111827;
+    color: var(--ws-text);
     font-weight: 500;
     text-align: right;
     word-break: break-all;
@@ -516,28 +528,28 @@ onMounted(async () => {
 }
 
 .status-green {
-    background: #dcfce7;
-    color: #15803d;
+    background: rgba(34, 197, 94, 0.12);
+    color: #4ade80;
 }
 
 .status-blue {
-    background: #dbeafe;
-    color: #1d4ed8;
+    background: rgba(96, 165, 250, 0.12);
+    color: #93c5fd;
 }
 
 .status-red {
-    background: #fee2e2;
-    color: #b91c1c;
+    background: rgba(248, 113, 113, 0.12);
+    color: #fca5a5;
 }
 
 .status-yellow {
-    background: #fef9c3;
-    color: #854d0e;
+    background: rgba(251, 191, 36, 0.12);
+    color: #fcd34d;
 }
 
 .status-gray {
-    background: #F3F4F6;
-    color: #6B7280;
+    background: var(--ws-surface-2);
+    color: var(--ws-text-3);
 }
 
 /* ─── Actions ────────────────────────────────────────────────────────────── */
@@ -573,8 +585,8 @@ onMounted(async () => {
 }
 
 .action-btn-secondary {
-    background: #F3F4F6;
-    color: #374151;
+    background: var(--ws-surface-2);
+    color: var(--ws-text-2);
 }
 
 .action-btn-secondary:hover {
@@ -583,13 +595,13 @@ onMounted(async () => {
 
 .action-btn-ghost {
     background: transparent;
-    color: #9CA3AF;
+    color: var(--ws-text-3);
     margin-left: auto;
 }
 
 .action-btn-ghost:hover {
     color: #EF4444;
-    background: #FEF2F2;
+    background: rgba(248, 113, 113, 0.08);
 }
 
 /* ─── Responsive ─────────────────────────────────────────────────────────── */
