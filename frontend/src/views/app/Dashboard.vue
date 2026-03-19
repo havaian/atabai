@@ -9,10 +9,6 @@
                 </h1>
                 <p class="dash-subtitle">{{ $t('dashboard.subtitle') }}</p>
             </div>
-            <button class="dash-new-btn" @click="router.push('/app/upload')">
-                <PlusIcon class="w-4 h-4" />
-                {{ $t('dashboard.newProject') }}
-            </button>
         </div>
 
         <!-- Stats row -->
@@ -107,20 +103,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- Empty state when no files yet -->
-        <div v-else class="empty-state drop-zone">
-            <div class="empty-icon">
-                <DocumentPlusIcon class="w-8 h-8" />
-            </div>
-            <h3 class="empty-title">{{ $t('dashboard.noFilesYet') }}</h3>
-            <p class="empty-desc">{{ $t('dashboard.emptyDesc') }}</p>
-            <button class="dash-new-btn" @click="router.push('/app/upload')">
-                <PlusIcon class="w-4 h-4" />
-                {{ $t('dashboard.newProject') }}
-            </button>
-        </div>
-
     </div>
 </template>
 
@@ -229,28 +211,6 @@ function statusClass(status) {
     font-size: 14px;
     color: var(--ws-text-3);
     margin: 0;
-}
-
-.dash-new-btn {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    padding: 9px 18px;
-    background: #7C3AED;
-    color: #fff;
-    border: none;
-    border-radius: 10px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    white-space: nowrap;
-    flex-shrink: 0;
-    transition: background 0.15s, box-shadow 0.15s;
-}
-
-.dash-new-btn:hover {
-    background: #6D28D9;
-    box-shadow: 0 4px 20px rgba(124, 58, 237, 0.3);
 }
 
 /* ─── Stats ──────────────────────────────────────────────────────────────── */

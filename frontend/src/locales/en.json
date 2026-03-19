@@ -504,6 +504,20 @@
         "2": "Expected sections: ДОХОДЫ (Revenue), РАСХОДЫ/ПРЯМЫЕ РАСХОДЫ (Expenses), project-level line items",
         "3": "Monthly columns (Jan–Dec) are detected automatically — both quarterly and annual layouts supported",
         "4": "Both simple structures (PL_2 style) and nested project hierarchies (PL_1 style) are handled automatically"
+      },
+      "instructions": {
+        "profitLossForm2": [
+          "Standard NSBU Form 2 (ОКУД 0710002) Excel file",
+          "Row codes in column A: 010, 020, 040, 050, 060, 070, 090, 100, 140",
+          "Value columns: current period and prior year comparison",
+          "The system auto-detects code column and period headers"
+        ],
+        "equity": [
+          "Option A — Balance sheet (Form 1): uploads opening/closing equity balances",
+          "Option B — Form 4 (Statement of Changes in Equity): full movement breakdown",
+          "Column headers must include: Уставный капитал, Нераспределённая прибыль, Итого",
+          "The system auto-detects which file type you uploaded"
+        ]
       }
     },
     "dropZone": {
