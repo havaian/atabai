@@ -13,7 +13,7 @@ const BALANCE_SHEET_MAPPING = {
     // ============================================
     // ASSETS - NON-CURRENT
     // ============================================
-    
+
     // PROPERTY, PLANT & EQUIPMENT
     '010': {
         nsbuRowCode: '010',
@@ -49,7 +49,7 @@ const BALANCE_SHEET_MAPPING = {
         isCalculated: true,
         formula: '010 - 011'
     },
-    
+
     // INTANGIBLE ASSETS
     '020': {
         nsbuRowCode: '020',
@@ -84,7 +84,7 @@ const BALANCE_SHEET_MAPPING = {
         isCalculated: true,
         formula: '020 - 021'
     },
-    
+
     // LONG-TERM INVESTMENTS
     '040': {
         nsbuRowCode: '040',
@@ -126,7 +126,7 @@ const BALANCE_SHEET_MAPPING = {
         section: 'ASSETS - NON-CURRENT',
         subsection: 'Long-term Investments'
     },
-    
+
     // CONSTRUCTION IN PROGRESS
     '090': {
         nsbuRowCode: '090',
@@ -157,7 +157,7 @@ const BALANCE_SHEET_MAPPING = {
             '0890': 'Other Capital Expenditures'
         }
     },
-    
+
     // OTHER NON-CURRENT ASSETS
     '110': {
         nsbuRowCode: '110',
@@ -175,27 +175,35 @@ const BALANCE_SHEET_MAPPING = {
     },
     '120': {
         nsbuRowCode: '120',
-        nsbuCodes: ['0950', '0960', '0990'],
+        nsbuCodes: ['0960', '0990'],
         nsbuDescription: 'Long-term Prepaid Expenses / Долгосрочные расходы будущих периодов',
         ifrsClassification: 'Long-term Prepaid Expenses',
         section: 'ASSETS - NON-CURRENT',
         subsection: 'Other Non-current Assets',
         accountDetails: {
-            '0950': 'Deferred Tax Assets',
             '0960': 'Long-term Prepaid Expenses',
             '0990': 'Other Long-term Deferrals'
         }
+    },
+    '120_DTA': {
+        nsbuRowCode: '120_DTA',
+        nsbuCodes: ['0950'],
+        nsbuDescription: 'Отложенные налоговые активы / Deferred Tax Assets',
+        ifrsClassification: 'Deferred Tax Assets',
+        section: 'ASSETS - NON-CURRENT',
+        subsection: 'Other Non-current Assets',
+        accountDetails: { '0950': 'Deferred Tax Assets' }
     },
 
     // ============================================
     // ASSETS - CURRENT
     // ============================================
-    
+
     // INVENTORIES
     '150': {
         nsbuRowCode: '150',
-        nsbuCodes: ['1000', '1010', '1020', '1030', '1040', '1050', '1060', '1070', '1080', '1090', 
-                    '1100', '1110', '1120', '1500', '1510', '1600', '1610'],
+        nsbuCodes: ['1000', '1010', '1020', '1030', '1040', '1050', '1060', '1070', '1080', '1090',
+            '1100', '1110', '1120', '1500', '1510', '1600', '1610'],
         nsbuDescription: 'Production Supplies / Производственные запасы',
         ifrsClassification: 'Raw Materials & Supplies',
         section: 'ASSETS - CURRENT',
@@ -270,7 +278,7 @@ const BALANCE_SHEET_MAPPING = {
             '2990': 'Other Merchandise'
         }
     },
-    
+
     // PREPAYMENTS & DEFERRALS
     '190': {
         nsbuRowCode: '190',
@@ -298,7 +306,7 @@ const BALANCE_SHEET_MAPPING = {
             '3290': 'Other Deferred Expenses'
         }
     },
-    
+
     // RECEIVABLES
     '220': {
         nsbuRowCode: '220',
@@ -421,7 +429,7 @@ const BALANCE_SHEET_MAPPING = {
             '4890': 'Other Receivables'
         }
     },
-    
+
     // CASH & CASH EQUIVALENTS
     '330': {
         nsbuRowCode: '330',
@@ -473,7 +481,7 @@ const BALANCE_SHEET_MAPPING = {
             '5710': 'Cash/Transfers in Transit'
         }
     },
-    
+
     // SHORT-TERM INVESTMENTS & OTHER
     '370': {
         nsbuRowCode: '370',
@@ -571,9 +579,9 @@ const BALANCE_SHEET_MAPPING = {
         nsbuRowCode: '460',
         nsbuCodes: ['8800', '8810', '8820', '8830', '8840', '8890'],
         nsbuDescription: 'Targeted Funds / Целевые поступления',
-        ifrsClassification: 'Grants & Restricted Funds',
-        section: 'EQUITY',
-        subsection: 'Reserves',
+        ifrsClassification: 'Deferred Government Grants & Restricted Income',
+        section: 'LIABILITIES - NON-CURRENT',
+        subsection: 'Deferred Income',
         accountDetails: {
             '8810': 'Grants',
             '8820': 'Government Subsidies',
@@ -586,9 +594,10 @@ const BALANCE_SHEET_MAPPING = {
         nsbuRowCode: '470',
         nsbuCodes: ['8900', '8910'],
         nsbuDescription: 'Provisions / Резервы предстоящих расходов и платежей',
-        ifrsClassification: 'Provisions for Liabilities',
-        section: 'EQUITY',
-        subsection: 'Reserves',
+        // BUG-001 FIX: Provisions are NOT equity. IAS 37.14 requires them in Non-current Liabilities.
+        ifrsClassification: 'Provisions for Liabilities & Charges',
+        section: 'LIABILITIES - NON-CURRENT',
+        subsection: 'Provisions',
         accountDetails: {
             '8910': 'Provisions'
         }
@@ -597,7 +606,7 @@ const BALANCE_SHEET_MAPPING = {
     // ============================================
     // LIABILITIES - NON-CURRENT
     // ============================================
-    
+
     // LONG-TERM PAYABLES
     '500': {
         nsbuRowCode: '500',
@@ -627,7 +636,7 @@ const BALANCE_SHEET_MAPPING = {
         section: 'LIABILITIES - NON-CURRENT',
         subsection: 'Long-term Payables'
     },
-    
+
     // LONG-TERM DEFERRED ITEMS
     '530': {
         nsbuRowCode: '530',
@@ -673,7 +682,7 @@ const BALANCE_SHEET_MAPPING = {
             '7310': 'Customer Prepayments - LT'
         }
     },
-    
+
     // LONG-TERM BORROWINGS
     '570': {
         nsbuRowCode: '570',
@@ -698,21 +707,29 @@ const BALANCE_SHEET_MAPPING = {
     },
     '590': {
         nsbuRowCode: '590',
-        nsbuCodes: ['7900', '7910', '7920'],
+        nsbuCodes: ['7900', '7920'],
         nsbuDescription: 'LT Other Liabilities / Прочие долгосрочные обязательства',
         ifrsClassification: 'Other Non-Current Liabilities',
         section: 'LIABILITIES - NON-CURRENT',
         subsection: 'Other',
         accountDetails: {
-            '7910': 'Finance Lease Liabilities',
             '7920': 'Other LT Payables'
         }
+    },
+    '590_LEASE': {
+        nsbuRowCode: '590_LEASE',
+        nsbuCodes: ['7910'],
+        nsbuDescription: 'Обязательства по финансовой аренде / Finance Lease Liabilities',
+        ifrsClassification: 'Lease Liabilities - Non-current',
+        section: 'LIABILITIES - NON-CURRENT',
+        subsection: 'Lease Liabilities',
+        accountDetails: { '7910': 'Finance Lease Liabilities (IFRS 16)' }
     },
 
     // ============================================
     // LIABILITIES - CURRENT
     // ============================================
-    
+
     // TRADE PAYABLES
     '610': {
         nsbuRowCode: '610',
@@ -742,7 +759,7 @@ const BALANCE_SHEET_MAPPING = {
         section: 'LIABILITIES - CURRENT',
         subsection: 'Trade Payables'
     },
-    
+
     // DEFERRED ITEMS
     '640': {
         nsbuRowCode: '640',
@@ -790,7 +807,7 @@ const BALANCE_SHEET_MAPPING = {
             '6390': 'Other Advances Received'
         }
     },
-    
+
     // OTHER CURRENT PAYABLES
     '680': {
         nsbuRowCode: '680',
@@ -844,7 +861,7 @@ const BALANCE_SHEET_MAPPING = {
             '6720': 'Unclaimed Wages'
         }
     },
-    
+
     // SHORT-TERM BORROWINGS
     '730': {
         nsbuRowCode: '730',
@@ -963,12 +980,12 @@ function getIFRSStructure() {
 function isAccountIncluded(rowCode, accountCode) {
     const mapping = getIFRSMapping(rowCode);
     if (!mapping) return false;
-    
+
     // Check excluded accounts
     if (mapping.excludedAccounts && mapping.excludedAccounts.includes(accountCode)) {
         return false;
     }
-    
+
     // Check if account is in the nsbuCodes array
     return mapping.nsbuCodes.includes(accountCode);
 }

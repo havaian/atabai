@@ -90,6 +90,26 @@ export const useTemplatesStore = defineStore('templates', () => {
                 icon: DocumentTextIcon,
                 description: 'Transform NSBU profit & loss (PnL budget) report to IFRS format',
                 subscriptionRequired: 'basic'
+            },
+            {
+                id: 'profitLossForm2',
+                key: 'profitLossForm2',
+                name: 'P&L Form 2 Transformation',
+                standard: 'IAS 1',
+                category: 'Financial Statements',
+                icon: DocumentTextIcon,
+                description: 'Transform standard NSBU Form 2 (ОКУД 0710002) profit & loss statement to IFRS format',
+                subscriptionRequired: 'basic'
+            },
+            {
+                id: 'equity',
+                key: 'equity',
+                name: 'Statement of Changes in Equity',
+                standard: 'IAS 1',
+                category: 'Financial Statements',
+                icon: ChartBarIcon,
+                description: 'Generate IFRS Statement of Changes in Equity from a balance sheet or dedicated Form 4 file',
+                subscriptionRequired: 'basic'
             }
         ]
 
@@ -412,6 +432,16 @@ export const useTemplatesStore = defineStore('templates', () => {
                 en: 'Upload your NSBU profit & loss (PnL budget) report. The system detects revenue and expense sections automatically and restructures the data into IFRS P&L format.',
                 ru: 'Загрузите отчёт о прибылях и убытках в формате НСБУ (бюджет ПиУ). Система автоматически определит разделы доходов и расходов и преобразует данные в формат МСФО.',
                 uz: 'NSBU formatidagi foyda va zararlar hisobotini (PnL byudjeti) yuklang. Tizim daromad va xarajat bo\'limlarini avtomatik aniqlaydi va ma\'lumotlarni IFRS P&L formatiga o\'zgartiradi.'
+            },
+            'profitLossForm2': {
+                en: 'Upload your standard NSBU Form 2 (ОКУД 0710002) P&L statement. The system detects row codes (010, 020, ...) automatically and maps them to the corresponding IFRS P&L line items.',
+                ru: 'Загрузите стандартный отчёт о прибылях и убытках НСБУ (Форма № 2 — ОКУД 0710002). Система автоматически определяет коды строк (010, 020, ...) и сопоставляет их с соответствующими статьями МСФО.',
+                uz: 'Standart NSBU 2-shakl (ОКУД 0710002) foyda va zararlar hisobotini yuklang. Tizim qator kodlarini (010, 020, ...) avtomatik aniqlaydi va ularni IFRS bo\'yicha tegishli moddalarga moslashtiradi.'
+            },
+            'equity': {
+                en: 'Upload either your NSBU balance sheet (Form 1) for a simplified equity statement, or a dedicated Form 4 (Statement of Changes in Equity) for a full movement breakdown. The system detects the file type automatically.',
+                ru: 'Загрузите баланс НСБУ (Форма № 1) для упрощённого отчёта об изменениях в капитале, либо отдельный отчёт об изменениях в капитале (Форма № 4) для полной разбивки движений. Система определяет тип файла автоматически.',
+                uz: 'Kapital o\'zgarishlari to\'g\'risidagi soddalashtirilgan hisobot uchun NSBU balansi (1-shakl) yoki to\'liq harakat tafsilotlari uchun alohida kapital o\'zgarishlari to\'g\'risidagi hisobot (4-shakl) yuklang. Tizim fayl turini avtomatik aniqlaydi.'
             }
         }
 
@@ -478,6 +508,26 @@ export const useTemplatesStore = defineStore('templates', () => {
                 {
                     name: 'Multi-project P&L',
                     description: 'Monthly P&L with multiple construction projects mapped to IFRS sections'
+                }
+            ],
+            'profitLossForm2': [
+                {
+                    name: 'Standard Form 2 Mapping',
+                    description: 'Complete NSBU Form 2 (row codes 010–150) to IFRS P&L transformation'
+                },
+                {
+                    name: 'Comparative P&L',
+                    description: 'Two-period comparison (current year vs prior year) in IFRS format'
+                }
+            ],
+            'equity': [
+                {
+                    name: 'From Balance Sheet',
+                    description: 'Equity statement showing opening/closing balances derived from Form 1'
+                },
+                {
+                    name: 'From Form 4',
+                    description: 'Full statement of changes in equity with all movement categories'
                 }
             ]
         }

@@ -8,6 +8,8 @@ const ProcessingJob = require('../jobs/model');
 const { processBalanceSheetTemplate } = require('../processors/balanceSheet');
 const { processCashFlowTemplate } = require('../processors/cashFlow');
 const { processProfitLossTemplate } = require('../processors/profitLoss');
+const { processProfitLossForm2Template } = require('../processors/profitLossForm2');
+const { processEquityTemplate } = require('../processors/equity');
 const templateTypes = require('../utils/templateTypes')
 
 /**
@@ -574,15 +576,23 @@ async function processFileAsync(fileRecord, processingJob) {
             case 'balanceSheet':
                 result = await processBalanceSheetTemplate(filePath);
                 break;
-            
+
             case 'cashFlow':
                 result = await processCashFlowTemplate(filePath);
                 break;
-                
+
             case 'profitLoss':
                 result = await processProfitLossTemplate(filePath);
                 break;
-            
+
+            case 'profitLossForm2':
+                result = await processProfitLossForm2Template(filePath);
+                break;
+
+            case 'equity':
+                result = await processEquityTemplate(filePath);
+                break;
+
             default:
                 throw new Error(`Unknown template type: ${processingJob.templateType}`);
         }

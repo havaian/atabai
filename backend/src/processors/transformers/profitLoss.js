@@ -29,6 +29,9 @@ function transformToIFRSProfitLoss(extracted) {
         periods,
         revenueItems,
         cogsItems,
+        // BUG-010 FIX: genServices was extracted but never destructured here,
+        // causing it to be silently dropped from the IFRS output.
+        genServices,
         overheadFOT,
         overheadESP,
         overheadOther,
@@ -69,6 +72,18 @@ function transformToIFRSProfitLoss(extracted) {
             rows.push({ type: 'item', label: `  ${item.name}`, values: norm(item.values) });
         }
     }
+
+    // BUG-010 FIX: include genServices in revenue section if present.
+    // These are general services revenue items that were previously extracted
+    // but silently dropped because the transformer never referenced them.
+    if (genServices && genServices.length > 0) {
+        global.logger.logInfo(`[PL TRANSFORMER] Adding ${genServices.length} genServices item(s) to revenue`);
+        rows.push({ type: 'subheader', label: 'General services revenue' });
+        for (const item of genServices) {
+            rows.push({ type: 'item', label: `  ${item.name}`, values: norm(item.values) });
+        }
+    }
+
     const revenueEnd = rows.length; // exclusive end
 
     rows.push({
@@ -182,19 +197,37 @@ function transformToIFRSProfitLoss(extracted) {
     // ─── VIII. FINANCE INCOME / (COSTS) ──────────────────────────────────────
     rows.push({ type: 'title', label: 'VIII. FINANCE INCOME / (COSTS)' });
 
+    // BUG-011 FIX: split financeIncomeItems into income (positive) and costs (negative)
+    // by examining the sum of each item's values. Items that are net-negative are costs.
+    // This avoids changing the extractor while still populating the finance costs row.
+    const allFinanceItems = financeIncomeItems || [];
+    const financeIncomeOnly = allFinanceItems.filter(item => {
+        const total = (item.values || []).reduce((s, v) => s + (v || 0), 0);
+        return total >= 0;
+    });
+    const financeCostItems = allFinanceItems.filter(item => {
+        const total = (item.values || []).reduce((s, v) => s + (v || 0), 0);
+        return total < 0;
+    });
+
     // Track range start for the Net finance total formula
     const financeItemsStart = rows.length;
 
-    if (financeIncomeItems && financeIncomeItems.length > 0) {
-        for (const item of financeIncomeItems) {
+    if (financeIncomeOnly.length > 0) {
+        for (const item of financeIncomeOnly) {
             rows.push({ type: 'item', label: `  ${item.name}`, values: norm(item.values) });
         }
     } else {
         rows.push({ type: 'item', label: '  Finance income', values: nullArr() });
     }
 
-    // Finance costs placeholder (zero until source data provides it)
-    rows.push({ type: 'item', label: '  Finance costs', values: nullArr() });
+    if (financeCostItems.length > 0) {
+        for (const item of financeCostItems) {
+            rows.push({ type: 'item', label: `  ${item.name}`, values: norm(item.values) });
+        }
+    } else {
+        rows.push({ type: 'item', label: '  Finance costs', values: nullArr() });
+    }
 
     const financeItemsEnd = rows.length; // exclusive
 

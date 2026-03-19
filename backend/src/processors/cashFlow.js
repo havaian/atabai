@@ -27,13 +27,16 @@ async function processCashFlowTemplate(input) {
 
         const sheet = normalizedWorkbook.sheets[0];
 
-        // Extract (returns dataMap and periods only)
+        // Extract (returns dataMap, periods, reconciliationItems, additionalSourcesItems)
         const extracted = extractCashFlowData(sheet);
 
-        // Transform (no longer needs reconciliation or additional sources)
+        // BUG-006 FIX: pass reconciliationItems and additionalSourcesItems to transformer.
+        // Previously called with only 2 args, leaving reconciliation always undefined.
         const ifrsStructure = transformToIFRSCashFlow(
             extracted.dataMap,
-            extracted.periods
+            extracted.periods,
+            extracted.reconciliationItems,
+            extracted.additionalSourcesItems
         );
 
         // Style

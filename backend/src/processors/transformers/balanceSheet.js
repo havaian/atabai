@@ -35,10 +35,18 @@ function transformToIFRSStructure(dataMap) {
             const nsbuData = dataMap.get(code);
             const mapping = BALANCE_SHEET_MAPPING[code];
 
+            // BUG-003 FIX: respect isNegative flag (accumulated depreciation, treasury stock, etc.)
+            // These are contra-accounts in NSBU — their NSBU values are stored as positives
+            // but must be presented as negatives in IFRS to correctly reduce the section total.
+            const isNeg = mapping.isNegative === true;
+            const startVal = isNeg ? -(nsbuData.start || 0) : (nsbuData.start || 0);
+            const endVal = isNeg ? -(nsbuData.end || 0) : (nsbuData.end || 0);
+
             const item = {
                 label: mapping.ifrsClassification,
-                start: nsbuData.start || 0,
-                end: nsbuData.end || 0
+                start: startVal,
+                end: endVal,
+                isNegative: isNeg
             };
 
             const sectionKey = mapping.section;
@@ -48,6 +56,52 @@ function transformToIFRSStructure(dataMap) {
                 sections[sectionKey].totalStart += item.start;
                 sections[sectionKey].totalEnd += item.end;
             }
+        }
+    });
+
+    // BUG-004 FIX: resolve isCalculated rows (012 Net PP&E, 022 Net Intangibles).
+    // These rows never appear in dataMap (the extractor reads raw NSBU rows only),
+    // so they were silently dropped. We compute them here from their formula references.
+    Object.keys(BALANCE_SHEET_MAPPING).forEach(code => {
+        const mapping = BALANCE_SHEET_MAPPING[code];
+        if (!mapping.isCalculated) return;
+        if (dataMap.has(code)) return; // already processed above (shouldn't happen, but guard)
+
+        // Parse simple binary formula: '010 - 011' or '020 - 021'
+        const formulaMatch = mapping.formula && mapping.formula.match(/^(\w+)\s*([-+])\s*(\w+)$/);
+        if (!formulaMatch) return;
+
+        const [, refA, op, refB] = formulaMatch;
+
+        // Retrieve values already placed in the sections (post-sign-correction)
+        const findItemValue = (refCode, key) => {
+            const refMapping = BALANCE_SHEET_MAPPING[refCode];
+            if (!refMapping) return 0;
+            const sectionItems = sections[refMapping.section]?.items || [];
+            const found = sectionItems.find(i => i.label === refMapping.ifrsClassification);
+            return found ? found[key] : 0;
+        };
+
+        const aStart = findItemValue(refA, 'start');
+        const aEnd = findItemValue(refA, 'end');
+        const bStart = findItemValue(refB, 'start');
+        const bEnd = findItemValue(refB, 'end');
+
+        const calcStart = op === '-' ? aStart - bStart : aStart + bStart;
+        const calcEnd = op === '-' ? aEnd - bEnd : aEnd + bEnd;
+
+        const item = {
+            label: mapping.ifrsClassification,
+            start: calcStart,
+            end: calcEnd,
+            isCalculated: true
+        };
+
+        const sectionKey = mapping.section;
+        if (sections[sectionKey]) {
+            sections[sectionKey].items.push(item);
+            // NOTE: do NOT add to section totals — the gross and contra rows that
+            // form this net value are already reflected in the running total.
         }
     });
 

@@ -5,21 +5,27 @@ import i18n from '@/utils/i18n'
 // Import layouts
 import UserLayout from '@/layouts/UserLayout.vue'
 
-// Import views
-import LandingPage from '@/views/LandingPage.vue'
-import ComingSoon from '@/views/ComingSoon.vue'
-import OAuthCallback from '@/views/OAuthCallback.vue'
-import AuthSuccess from '@/views/AuthSuccess.vue'
-import Dashboard from '@/views/Dashboard.vue'
-import Settings from '@/views/Settings.vue'
-import Help from '@/views/Help.vue'
-import UploadPage from '@/views/UploadPage.vue'
-import ProcessingPage from '@/views/ProcessingPage.vue'
-import FileDetailsPage from  '@/views/FileDetailsPage.vue'
-import FileHistoryPage from '@/views/FileHistoryPage.vue'
+// ─── Public / landing ─────────────────────────────────────────────────────────
+import LandingPage from '@/views/landing/LandingPage.vue'
+
+// ─── Auth ─────────────────────────────────────────────────────────────────────
+import OAuthCallback from '@/views/auth/OAuthCallback.vue'
+import AuthSuccess from '@/views/auth/AuthSuccess.vue'
+
+// ─── Misc ─────────────────────────────────────────────────────────────────────
+import ComingSoon from '@/views/misc/ComingSoon.vue'
+import Help from '@/views/misc/Help.vue'
+
+// ─── App (authenticated workspace) ───────────────────────────────────────────
+import Dashboard from '@/views/app/Dashboard.vue'
+import Settings from '@/views/app/Settings.vue'
+import UploadPage from '@/views/app/UploadPage.vue'
+import ProcessingPage from '@/views/app/ProcessingPage.vue'
+import FileDetailsPage from '@/views/app/FileDetailsPage.vue'
+import FileHistoryPage from '@/views/app/FileHistoryPage.vue'
 
 const routes = [
-    // Public routes (no layout)
+    // ── Landing ──────────────────────────────────────────────────────────────
     {
         path: '/',
         name: 'Landing',
@@ -29,6 +35,8 @@ const routes = [
             descriptionKey: 'pageDescriptions./'
         }
     },
+
+    // ── Misc public ───────────────────────────────────────────────────────────
     {
         path: '/coming-soon',
         name: 'ComingSoon',
@@ -40,6 +48,19 @@ const routes = [
             descriptionKey: 'pageDescriptions./coming-soon'
         }
     },
+    {
+        path: '/help',
+        name: 'Help',
+        component: Help,
+        meta: {
+            showNavbar: false,
+            showFooter: false,
+            titleKey: 'pageTitles./help',
+            descriptionKey: 'pageDescriptions./help'
+        }
+    },
+
+    // ── Auth ──────────────────────────────────────────────────────────────────
     {
         path: '/auth/callback',
         name: 'OAuthCallback',
@@ -63,19 +84,8 @@ const routes = [
             descriptionKey: 'pageDescriptions./auth/success'
         }
     },
-    {
-        path: '/help',
-        name: 'Help',
-        component: Help,
-        meta: {
-            showNavbar: false,
-            showFooter: false,
-            titleKey: 'pageTitles./help',
-            descriptionKey: 'pageDescriptions./help'
-        }
-    },
 
-    // User routes (with UserLayout)
+    // ── App (authenticated, uses UserLayout) ──────────────────────────────────
     {
         path: '/app',
         component: UserLayout,
@@ -126,6 +136,15 @@ const routes = [
                 }
             },
             {
+                path: 'history',
+                name: 'FileHistory',
+                component: FileHistoryPage,
+                meta: {
+                    titleKey: 'pageTitles./history',
+                    descriptionKey: 'pageDescriptions./history'
+                }
+            },
+            {
                 path: 'settings',
                 name: 'Settings',
                 component: Settings,
@@ -133,20 +152,11 @@ const routes = [
                     titleKey: 'pageTitles./settings',
                     descriptionKey: 'pageDescriptions./settings'
                 }
-            },
-            {
-                path: 'history',
-                name: 'FileHistory', 
-                component: FileHistoryPage,
-                meta: {
-                    titleKey: 'pageTitles./history',
-                    descriptionKey: 'pageDescriptions./history'
-                }
             }
         ]
     },
 
-    // Legacy redirects
+    // ── Legacy redirects ──────────────────────────────────────────────────────
     {
         path: '/dashboard',
         redirect: '/app/dashboard'
@@ -156,7 +166,7 @@ const routes = [
         redirect: '/app/upload'
     },
 
-    // 404 redirect
+    // ── 404 ───────────────────────────────────────────────────────────────────
     {
         path: '/:pathMatch(.*)*',
         redirect: '/',
@@ -181,10 +191,8 @@ const router = createRouter({
     }
 })
 
-// Helper function to update meta description
 function updateMetaDescription(description) {
     if (!description) return
-
     let metaDescription = document.querySelector('meta[name="description"]')
     if (metaDescription) {
         metaDescription.content = description
@@ -196,41 +204,32 @@ function updateMetaDescription(description) {
     }
 }
 
-// Navigation guards
 router.beforeEach(async (to, from, next) => {
-    // Wait for i18n to be ready
     try {
         await i18n.global.$waitForI18n?.()
     } catch (error) {
         console.warn('i18n not ready, continuing anyway:', error)
     }
 
-    // Initialize auth store if not already done
     const authStore = useAuthStore()
 
-    // Redirect authenticated users from landing page to dashboard
     if (to.path === '/' && authStore.isAuthenticated) {
         return next('/app/dashboard')
     }
 
-    // Check authentication for protected routes
     if (to.meta?.requiresAuth && !authStore.isAuthenticated) {
-        // Save the intended destination
         sessionStorage.setItem('redirectAfterLogin', to.fullPath)
         return next('/')
     }
 
-    // Prevent authenticated users from accessing guest-only routes
     if (to.meta?.requiresGuest && authStore.isAuthenticated) {
         return next('/app/dashboard')
     }
 
-    // Continue to the route
     next()
 })
 
 router.afterEach((to) => {
-    // Update page title and meta description after navigation
     const titleKey = to.meta?.titleKey
     const descriptionKey = to.meta?.descriptionKey
 
@@ -245,10 +244,9 @@ router.afterEach((to) => {
 
     if (descriptionKey) {
         try {
-            const description = i18n.global.t(descriptionKey)
-            updateMetaDescription(description)
+            updateMetaDescription(i18n.global.t(descriptionKey))
         } catch (error) {
-            // Ignore translation errors for meta description
+            // ignore
         }
     }
 })

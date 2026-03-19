@@ -26,27 +26,11 @@ function transformToIFRSCashFlow(dataMap, periods, reconciliationItems, addition
 
     // Process main cash flow items
     for (const [key, data] of dataMap.entries()) {
-        let label = data.lineItem;
-
-        // Replace subsection headers with generic labels
-        const lowerLabel = label.toLowerCase();
-        if (lowerLabel.includes('приток') || lowerLabel.includes('притоки')) {
-            if (data.section === 'OPERATING') {
-                label = 'Operating cash inflows';
-            } else if (data.section === 'INVESTING') {
-                label = 'Investment proceeds';
-            } else if (data.section === 'FINANCING') {
-                label = 'Financing cash inflows';
-            }
-        } else if (lowerLabel.includes('отток') || lowerLabel.includes('оттоки')) {
-            if (data.section === 'OPERATING') {
-                label = 'Operating cash outflows';
-            } else if (data.section === 'INVESTING') {
-                label = 'Investment payments';
-            } else if (data.section === 'FINANCING') {
-                label = 'Financing cash outflows';
-            }
-        }
+        // BUG-007 FIX: preserve original line-item labels from the source document.
+        // Previously, all Приток/Отток subsection labels were replaced with generic English strings
+        // ("Operating cash inflows", "Investment payments", etc.), destroying all line-item granularity.
+        // The original NSBU labels are meaningful and must be kept as-is in the IFRS output.
+        const label = data.lineItem;
 
         const item = {
             label: label,
