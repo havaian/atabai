@@ -4,8 +4,8 @@
         <!-- Header -->
         <div class="history-header">
             <div>
-                <h1 class="history-title">File History</h1>
-                <p class="history-sub">All your processed NSBU → IFRS transformations</p>
+                <h1 class="history-title">{{ $t('history.title') }}</h1>
+                <p class="history-sub">{{ $t('history.subtitle') }}</p>
             </div>
             <button class="new-btn" @click="router.push('/app/upload')">
                 <PlusIcon class="w-4 h-4" />
@@ -17,7 +17,7 @@
         <div class="filter-bar">
             <!-- Search -->
             <div class="search-wrap">
-                <AppInput v-model="filters.search" type="search" placeholder="Search by file name…"
+                <AppInput v-model="filters.search" type="search" :placeholder="$t('history.filters.searchPlaceholder')"
                     :leading-icon="MagnifyingGlassIcon" :clearable="true" @input="onSearch" @clear="applyFilters" />
             </div>
 
@@ -41,21 +41,21 @@
 
             <!-- Count -->
             <span class="filter-count">
-                {{ filteredFiles.length }} {{ filteredFiles.length === 1 ? 'file' : 'files' }}
+                {{ filteredFiles.length }} {{ filteredFiles.length === 1 ? $t('history.file') : $t('history.files') }}
             </span>
         </div>
 
         <!-- Loading -->
         <div v-if="filesStore.isLoading && allFiles.length === 0" class="state-loading">
             <div class="state-spinner"></div>
-            <span>Loading files…</span>
+            <span>{{ $t('common.loading') }}</span>
         </div>
 
         <!-- Error -->
         <div v-else-if="filesStore.error" class="state-error">
             <ExclamationTriangleIcon class="w-5 h-5" />
             Failed to load files.
-            <button class="error-retry" @click="refreshFiles">Try again</button>
+            <button class="error-retry" @click="refreshFiles">{{ $t('common.retry') }}</button>
         </div>
 
         <!-- Empty — no files at all -->
@@ -63,8 +63,8 @@
             <div class="empty-icon">
                 <DocumentPlusIcon class="w-7 h-7" />
             </div>
-            <h3 class="empty-title">No files yet</h3>
-            <p class="empty-desc">Upload your first NSBU report to get started.</p>
+            <h3 class="empty-title">{{ $t('history.empty.title') }}</h3>
+            <p class="empty-desc">{{ $t('history.empty.description') }}</p>
             <button class="new-btn" @click="router.push('/app/upload')">
                 <PlusIcon class="w-4 h-4" />
                 Upload first file
@@ -76,9 +76,9 @@
             <div class="empty-icon">
                 <FunnelIcon class="w-7 h-7" />
             </div>
-            <h3 class="empty-title">No matches</h3>
-            <p class="empty-desc">Try adjusting your filters or search term.</p>
-            <button class="clear-btn-lg" @click="clearFilters">Clear all filters</button>
+            <h3 class="empty-title">{{ $t('history.noResults.title') }}</h3>
+            <p class="empty-desc">{{ $t('history.noResults.description') }}</p>
+            <button class="clear-btn-lg" @click="clearFilters">{{ $t('history.filters.clearAll') }}</button>
         </div>
 
         <!-- Files table -->
@@ -86,11 +86,11 @@
             <table class="files-table">
                 <thead>
                     <tr class="table-head">
-                        <th class="th th-file">File</th>
-                        <th class="th th-template">Template</th>
-                        <th class="th th-status">Status</th>
-                        <th class="th th-date">Date</th>
-                        <th class="th th-actions">Actions</th>
+                        <th class="th th-file">{{ $t('history.table.fileName') }}</th>
+                        <th class="th th-template">{{ $t('history.table.template') }}</th>
+                        <th class="th th-status">{{ $t('history.table.status') }}</th>
+                        <th class="th th-date">{{ $t('history.table.processed') }}</th>
+                        <th class="th th-actions">{{ $t('history.table.actions') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -128,27 +128,29 @@
                             <div class="actions-cell">
                                 <!-- Download -->
                                 <button v-if="file.status === 'completed'" class="action-icon-btn"
-                                    title="Download IFRS file" :disabled="file.downloading" @click="downloadFile(file)">
+                                    :title="$t('history.actions.download')" :disabled="file.downloading"
+                                    @click="downloadFile(file)">
                                     <div v-if="file.downloading" class="mini-spin"></div>
                                     <ArrowDownTrayIcon v-else class="w-4 h-4" />
                                 </button>
 
                                 <!-- View / Processing -->
                                 <button class="action-icon-btn"
-                                    :title="file.status === 'completed' ? 'View details' : 'View processing'"
+                                    :title="file.status === 'completed' ? $t('history.actions.view') : $t('history.actions.viewProcessing')"
                                     @click="openFile(file)">
                                     <EyeIcon class="w-4 h-4" />
                                 </button>
 
                                 <!-- Retry -->
-                                <button v-if="file.status === 'failed'" class="action-icon-btn" title="Retry"
-                                    :disabled="file.retrying" @click="retryFile(file)">
+                                <button v-if="file.status === 'failed'" class="action-icon-btn"
+                                    :title="$t('history.actions.retry')" :disabled="file.retrying"
+                                    @click="retryFile(file)">
                                     <div v-if="file.retrying" class="mini-spin"></div>
                                     <ArrowPathIcon v-else class="w-4 h-4" />
                                 </button>
 
                                 <!-- Delete -->
-                                <button class="action-icon-btn action-icon-danger" title="Delete"
+                                <button class="action-icon-btn action-icon-danger" :title="$t('history.actions.delete')"
                                     :disabled="file.deleting" @click="deleteFile(file)">
                                     <div v-if="file.deleting" class="mini-spin"></div>
                                     <TrashIcon v-else class="w-4 h-4" />
@@ -173,7 +175,7 @@
                 </button>
                 <span class="page-info">
                     {{ (currentPage - 1) * itemsPerPage + 1 }}–{{ Math.min(currentPage * itemsPerPage,
-                    filteredFiles.length) }} of {{ filteredFiles.length }}
+                    filteredFiles.length) }} {{ $t('history.pagination.of') }} {{ filteredFiles.length }}
                 </span>
             </div>
         </div>
@@ -184,6 +186,7 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useFilesStore } from '@/stores/files'
 import AppSelect from '@/components/ui/Select.vue'
 import AppInput from '@/components/ui/Input.vue'
@@ -196,6 +199,7 @@ import {
 
 const router = useRouter()
 const route = useRoute()
+const { t } = useI18n()
 const filesStore = useFilesStore()
 
 const currentPage = ref(1)
@@ -340,7 +344,7 @@ async function retryFile(file) {
 }
 
 async function deleteFile(file) {
-    if (!confirm(`Delete "${file.originalName}"? This cannot be undone.`)) return
+    if (!confirm(t('history.actions.confirmDelete', { name: file.originalName }))) return
     if (!fileStates.value[file.id]) fileStates.value[file.id] = {}
     fileStates.value[file.id].deleting = true
     try {
@@ -350,14 +354,14 @@ async function deleteFile(file) {
 }
 
 function formatTemplate(type) {
-    const m = {
-        balanceSheet: 'Balance Sheet',
-        cashFlow: 'Cash Flow',
-        profitLoss: 'P&L (Budget)',
-        profitLossForm2: 'P&L (Form 2)',
-        equity: 'Equity',
+    const keys = {
+        balanceSheet: 'templates.balanceSheet',
+        cashFlow: 'templates.cashFlow',
+        profitLoss: 'templates.profitLoss',
+        profitLossForm2: 'templates.profitLossForm2',
+        equity: 'templates.equity',
     }
-    return m[type] || type
+    return keys[type] ? t(keys[type]) : type
 }
 
 function formatDate(d) {
@@ -365,9 +369,10 @@ function formatDate(d) {
     const date = new Date(d)
     const now = new Date()
     const diffM = Math.floor((now - date) / 60000)
-    if (diffM < 60) return `${diffM}m ago`
-    if (diffM < 1440) return `${Math.floor(diffM / 60)}h ago`
-    if (diffM < 2880) return 'Yesterday'
+    if (diffM < 1) return t('history.dateJustNow')
+    if (diffM < 60) return t('history.dateMinutesAgo', { n: diffM })
+    if (diffM < 1440) return t('history.dateHoursAgo', { n: Math.floor(diffM / 60) })
+    if (diffM < 2880) return t('history.dateYesterday')
     return date.toLocaleDateString()
 }
 
@@ -472,7 +477,7 @@ onMounted(async () => {
     width: 160px;
 }
 
-.search-wrap-REMOVED {
+.search-wrap {
     position: relative;
     display: flex;
     align-items: center;
@@ -538,7 +543,7 @@ onMounted(async () => {
 .mini-spin {
     width: 20px;
     height: 20px;
-    border: 2px solid #E5E7EB;
+    border: 2px solid rgba(240, 236, 246, 0.1);
     border-top-color: #7C3AED;
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
@@ -578,7 +583,7 @@ onMounted(async () => {
     gap: 12px;
     padding: 64px 24px;
     background: var(--ws-bg);
-    border: 1px dashed #E5E7EB;
+    border: 1px dashed rgba(149, 0, 255, 0.15);
     border-radius: 16px;
     text-align: center;
 }
@@ -654,7 +659,7 @@ onMounted(async () => {
 .table-row {
     cursor: pointer;
     transition: background 0.1s;
-    border-bottom: 1px solid #F9FAFB;
+    border-bottom: 1px solid var(--ws-border-2);
 }
 
 .table-row:last-child {
@@ -877,7 +882,7 @@ onMounted(async () => {
         width: 160px;
     }
 
-    .search-wrap-REMOVED {
+    .search-wrap {
         max-width: 100%;
     }
 

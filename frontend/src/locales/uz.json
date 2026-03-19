@@ -835,6 +835,13 @@
     }
   },
   "history": {
+    "newFile": "Yangi fayl",
+    "file": "fayl",
+    "files": "fayl",
+    "dateJustNow": "hozirgina",
+    "dateMinutesAgo": "{n} daq. oldin",
+    "dateHoursAgo": "{n} soat oldin",
+    "dateYesterday": "Kecha",
     "title": "Fayllar tarixi",
     "subtitle": "Barcha qayta ishlangan fayllarni ko'ring va boshqaring",
     "filters": {
@@ -885,7 +892,8 @@
     "pagination": {
       "showing": "{total}dan {start} dan {end} gacha natija ko'rsatilmoqda",
       "previous": "Oldingi",
-      "next": "Keyingi"
+      "next": "Keyingi",
+      "of": "dan"
     }
   },
   "common": {

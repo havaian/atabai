@@ -830,6 +830,13 @@
     }
   },
   "history": {
+    "newFile": "Новый файл",
+    "file": "файл",
+    "files": "файлов",
+    "dateJustNow": "только что",
+    "dateMinutesAgo": "{n} мин. назад",
+    "dateHoursAgo": "{n} ч. назад",
+    "dateYesterday": "Вчера",
     "title": "История файлов",
     "subtitle": "Просматривайте и управляйте всеми обработанными файлами",
     "filters": {
@@ -880,7 +887,8 @@
     "pagination": {
       "showing": "Показано с {start} по {end} из {total} результатов",
       "previous": "Предыдущая",
-      "next": "Следующая"
+      "next": "Следующая",
+      "of": "из"
     }
   },
   "common": {

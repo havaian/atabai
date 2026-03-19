@@ -825,6 +825,13 @@
     }
   },
   "history": {
+    "newFile": "New file",
+    "file": "file",
+    "files": "files",
+    "dateJustNow": "just now",
+    "dateMinutesAgo": "{n}m ago",
+    "dateHoursAgo": "{n}h ago",
+    "dateYesterday": "Yesterday",
     "title": "File History",
     "subtitle": "View and manage all your processed files",
     "filters": {
@@ -875,7 +882,8 @@
     "pagination": {
       "showing": "Showing {start} to {end} of {total} results",
       "previous": "Previous",
-      "next": "Next"
+      "next": "Next",
+      "of": "of"
     }
   },
   "common": {
