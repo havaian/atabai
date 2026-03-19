@@ -57,12 +57,14 @@
             </div>
             <button v-else v-for="file in recentFiles.slice(0, 8)" :key="file.id" class="recent-item"
                 @click="openFile(file)">
-                <img v-if="file.status === 'completed'" src="/images/icons/excel.svg"
-                    class="recent-excel-icon flex-shrink-0" />
-                <div v-else class="recent-dot" :class="statusDotClass(file.status)"></div>
-                <div class="recent-info">
-                    <span class="recent-name">{{ truncate(file.originalName, 22) }}</span>
-                    <span class="recent-meta">{{ formatDate(file.createdAt) }}</span>
+                <div class="recent-file">
+                    <img v-if="file.status === 'completed'" src="/images/icons/excel.svg"
+                        class="recent-excel-icon flex-shrink-0" />
+                    <div v-else class="recent-dot" :class="statusDotClass(file.status)"></div>
+                    <div class="recent-info">
+                        <span class="recent-name">{{ truncate(file.originalName, 22) }}</span>
+                        <span class="recent-meta">{{ formatDate(file.createdAt) }}</span>
+                    </div>
                 </div>
             </button>
         </div>
@@ -598,6 +600,15 @@ onUnmounted(() => window.removeEventListener('resize', onResize))
 
 .recent-item:hover {
     background: var(--sb-item-hover);
+}
+
+.recent-file {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
 }
 
 .recent-dot {
