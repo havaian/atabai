@@ -958,6 +958,7 @@
     "downloading": "Yuklab olinmoqda...",
     "retry": "Qayta urinish",
     "back": "Orqaga",
-    "goBack": "Orqaga"
+    "goBack": "Orqaga",
+    "backToDashboard": "Boshqaruv paneliga qaytish"
   }
 }

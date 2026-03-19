@@ -947,6 +947,7 @@
     "downloading": "Downloading...",
     "retry": "Retry",
     "back": "Back",
-    "goBack": "Go back"
+    "goBack": "Go back",
+    "backToDashboard": "Back to Dashboard"
   }
 }
