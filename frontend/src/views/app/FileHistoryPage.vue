@@ -100,7 +100,7 @@
                         <!-- File name -->
                         <td class="td td-file">
                             <div class="file-cell">
-                                <DocumentIcon class="w-4 h-4 file-icon flex-shrink-0" />
+                                <img src="/images/icons/excel.svg" class="w-4 h-4 file-icon flex-shrink-0" />
                                 <span class="file-name">{{ file.originalName }}</span>
                             </div>
                         </td>
