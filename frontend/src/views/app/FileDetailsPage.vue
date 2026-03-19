@@ -508,7 +508,7 @@ onMounted(async () => {
 
 /* ─── Status pills ───────────────────────────────────────────────────────── */
 .status-pill {
-    display: inline-flex;
+    text-align: center;
     align-items: center;
     padding: 3px 9px;
     border-radius: 20px;
