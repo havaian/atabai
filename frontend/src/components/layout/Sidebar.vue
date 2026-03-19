@@ -338,9 +338,9 @@ onClickOutside(profileRef, () => { isProfileMenuOpen.value = false })
 onClickOutside(langRef, () => { isLangMenuOpen.value = false })
 
 const languages = [
-    { code: 'en', name: 'English', flag: '🇬🇧' },
-    { code: 'ru', name: 'Русский', flag: '🇷🇺' },
-    { code: 'uz', name: "O'zbek", flag: '🇺🇿' },
+    { code: 'en', name: 'English', flag: 'gb' },
+    { code: 'ru', name: 'Русский', flag: 'ru' },
+    { code: 'uz', name: "O'zbek", flag: 'uz' },
 ]
 
 const currentLang = computed(() => languages.find(l => l.code === selectedLanguage.value) || languages[1])
