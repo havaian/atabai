@@ -87,6 +87,30 @@
             </button>
         </div>
 
+        <!-- Language picker -->
+        <div class="lang-section" :class="{ 'lang-section-collapsed': !isSidebarOpen }" ref="langRef">
+            <!-- Expanded: full-width dropdown trigger -->
+            <button v-if="isSidebarOpen" class="lang-trigger" @click="toggleLangMenu">
+                <span class="lang-flag">{{ currentLang.flag }}</span>
+                <span class="lang-name">{{ currentLang.name }}</span>
+                <ChevronDownIcon class="lang-chevron w-3.5 h-3.5" :class="{ 'rotated': isLangMenuOpen }" />
+            </button>
+            <!-- Collapsed: just the flag -->
+            <button v-else class="lang-icon-btn" @click="toggleLangMenu" :title="currentLang.name">
+                <span class="lang-flag-lg">{{ currentLang.flag }}</span>
+            </button>
+            <!-- Dropdown -->
+            <Transition name="menu-pop">
+                <div v-if="isLangMenuOpen" class="lang-menu">
+                    <button v-for="lang in languages" :key="lang.code" class="lang-option"
+                        :class="{ active: selectedLanguage === lang.code }" @click="selectLanguage(lang.code)">
+                        <span>{{ lang.flag }}</span>
+                        <span>{{ lang.name }}</span>
+                    </button>
+                </div>
+            </Transition>
+        </div>
+
         <!-- User profile -->
         <div class="sidebar-profile" :class="{ 'icon-only': !isSidebarOpen }" ref="profileRef">
             <div class="profile-avatar" @click="toggleProfileMenu">
@@ -101,11 +125,9 @@
             </Transition>
             <Transition name="menu-pop">
                 <div v-if="isProfileMenuOpen" class="profile-menu">
-                    <div class="menu-section-label">{{ $t('nav.language') }}</div>
-                    <button v-for="lang in languages" :key="lang.code" class="menu-item"
-                        :class="{ active: selectedLanguage === lang.code }" @click="selectLanguage(lang.code)">
-                        <span>{{ lang.flag }}</span>
-                        <span>{{ lang.name }}</span>
+                    <button class="menu-item" @click="navigateTo('/app/settings')">
+                        <Cog6ToothIcon class="w-4 h-4" />
+                        {{ $t('dashboard.settings') }}
                     </button>
                     <div class="menu-divider"></div>
                     <button class="menu-item menu-item-danger" @click="handleSignOut">
@@ -158,8 +180,8 @@ import LogoComponent from '@/components/Logo.vue'
 import {
     PlusIcon, ArchiveBoxIcon, DocumentTextIcon,
     ArrowRightOnRectangleIcon, XMarkIcon,
-    ChevronLeftIcon, ChevronRightIcon,
-    Squares2X2Icon, SunIcon, MoonIcon,
+    ChevronLeftIcon, ChevronRightIcon, ChevronDownIcon,
+    Squares2X2Icon, SunIcon, MoonIcon, Cog6ToothIcon,
 } from '@heroicons/vue/24/outline'
 
 const props = defineProps({
@@ -175,9 +197,11 @@ const authStore = useAuthStore()
 const filesStore = useFilesStore()
 
 const isProfileMenuOpen = ref(false)
+const isLangMenuOpen = ref(false)
 const selectedLanguage = ref(locale.value || 'ru')
 const shellRef = ref(null)
 const profileRef = ref(null)
+const langRef = ref(null)
 const isLargeScreen = ref(window.innerWidth >= 1024)
 
 // ── Theme ──────────────────────────────────────────────────────────────────
@@ -310,6 +334,7 @@ function toggleTheme() { applyTheme(currentTheme.value === 'light' ? 'dark' : 'l
 
 // ── Outside click — profile menu ───────────────────────────────────────────
 onClickOutside(profileRef, () => { isProfileMenuOpen.value = false })
+onClickOutside(langRef, () => { isLangMenuOpen.value = false })
 
 const languages = [
     { code: 'en', name: 'English', flag: '🇬🇧' },
@@ -317,6 +342,7 @@ const languages = [
     { code: 'uz', name: "O'zbek", flag: '🇺🇿' },
 ]
 
+const currentLang = computed(() => languages.find(l => l.code === selectedLanguage.value) || languages[1])
 const recentFiles = computed(() => filesStore.recentFiles || [])
 const initials = computed(() => {
     const name = authStore.user?.name || ''
@@ -350,10 +376,12 @@ function statusDotClass(status) {
 }
 
 function toggleProfileMenu() { isProfileMenuOpen.value = !isProfileMenuOpen.value }
+function toggleLangMenu() { isLangMenuOpen.value = !isLangMenuOpen.value }
 
 function selectLanguage(code) {
     changeLocale(code)
     selectedLanguage.value = code
+    isLangMenuOpen.value = false
     isProfileMenuOpen.value = false
 }
 
@@ -649,6 +677,129 @@ onUnmounted(() => window.removeEventListener('resize', onResize))
     color: var(--sb-recent-empty);
     font-size: 11px;
     text-align: center;
+}
+
+/* ─── Language picker ───────────────────────────────────────────────────────── */
+.lang-section {
+    padding: 4px 12px;
+    flex-shrink: 0;
+    position: relative;
+}
+
+.lang-section-collapsed {
+    padding: 4px 0;
+    display: flex;
+    justify-content: center;
+}
+
+.lang-trigger {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 8px 10px;
+    background: var(--toggle-bg);
+    border: none;
+    border-radius: 9px;
+    color: var(--sb-text-hover);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.lang-trigger:hover {
+    background: var(--sb-item-hover);
+}
+
+.lang-flag {
+    font-size: 16px;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.lang-name {
+    flex: 1;
+    text-align: left;
+}
+
+.lang-chevron {
+    color: var(--sb-icon-muted);
+    transition: transform 0.2s;
+    flex-shrink: 0;
+}
+
+.lang-chevron.rotated {
+    transform: rotate(180deg);
+}
+
+.lang-icon-btn {
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 8px;
+    background: var(--toggle-bg);
+    cursor: pointer;
+    transition: background 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.lang-icon-btn:hover {
+    background: var(--sb-item-hover);
+}
+
+.lang-flag-lg {
+    font-size: 18px;
+    line-height: 1;
+}
+
+.lang-menu {
+    position: absolute;
+    bottom: calc(100% + 4px);
+    left: 12px;
+    right: 12px;
+    background: var(--sb-menu-bg);
+    border: 1px solid var(--sb-menu-border);
+    border-radius: 10px;
+    padding: 6px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    z-index: 200;
+}
+
+.sidebar-shell.collapsed .lang-menu {
+    position: fixed;
+    bottom: 80px;
+    left: 72px;
+    min-width: 160px;
+    right: unset;
+}
+
+.lang-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 8px 10px;
+    border: none;
+    border-radius: 7px;
+    background: transparent;
+    color: var(--sb-menu-text);
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.12s, color 0.12s;
+    text-align: left;
+}
+
+.lang-option:hover {
+    background: var(--sb-item-hover);
+    color: var(--sb-text-hover);
+}
+
+.lang-option.active {
+    color: var(--ws-purple);
+    font-weight: 600;
 }
 
 /* ─── Theme toggle ───────────────────────────────────────────────────────── */
