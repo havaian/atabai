@@ -95,21 +95,21 @@
         <div class="lang-section" :class="{ 'lang-section-collapsed': !isSidebarOpen }" ref="langRef">
             <!-- Expanded: full-width dropdown trigger -->
             <button v-if="isSidebarOpen" class="lang-trigger" @click="toggleLangMenu">
-                <img class="lang-flag" src="/images/country-flags/{{ lang.flag }}.svg" alt="{{ lang.flag }}">
+                <img class="lang-flag" :src="'/images/country-flags/' + lang.flag + '.svg'" alt="{{ lang.flag }}">
                 <span class="lang-name">{{ currentLang.name }}</span>
                 <ChevronDownIcon class="lang-chevron w-3.5 h-3.5" :class="{ 'rotated': isLangMenuOpen }" />
             </button>
             <!-- Collapsed: just the flag -->
             <button v-else class="lang-icon-btn" @click="toggleLangMenu" :title="currentLang.name">
                 <span>{{ currentLang.flag }}</span>
-                <img class="lang-flag-lg" src="/images/country-flags/{{ lang.flag }}.svg" alt="{{ lang.flag }}">
+                <img class="lang-flag-lg" :src="'/images/country-flags/' + lang.flag + '.svg'" alt="{{ lang.flag }}">
             </button>
             <!-- Dropdown -->
             <Transition name="menu-pop">
                 <div v-if="isLangMenuOpen" class="lang-menu">
                     <button v-for="lang in languages" :key="lang.code" class="lang-option"
                         :class="{ active: selectedLanguage === lang.code }" @click="selectLanguage(lang.code)">
-                        <img class="lang-flag" src="/images/country-flags/{{ lang.flag }}.svg" alt="{{ lang.flag }}">
+                        <img class="lang-flag" :src="'/images/country-flags/' + lang.flag + '.svg'" alt="{{ lang.flag }}">
                         <span>{{ lang.name }}</span>
                     </button>
                 </div>
