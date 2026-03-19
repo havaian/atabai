@@ -772,6 +772,7 @@ onUnmounted(() => window.removeEventListener('resize', onResize))
 .lang-flag-lg {
     font-size: 18px;
     line-height: 1;
+    color: var(--sb-text-hover);
 }
 
 .lang-menu {
