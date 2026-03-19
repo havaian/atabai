@@ -17,41 +17,21 @@
         <div class="filter-bar">
             <!-- Search -->
             <div class="search-wrap">
-                <MagnifyingGlassIcon class="search-icon w-4 h-4" />
-                <input v-model="filters.search" type="text" class="search-input" placeholder="Search by file name…"
-                    @input="onSearch" />
-                <button v-if="filters.search" class="search-clear" @click="filters.search = ''; applyFilters()">
-                    <XMarkIcon class="w-3.5 h-3.5" />
-                </button>
+                <AppInput v-model="filters.search" type="search" placeholder="Search by file name…"
+                    :leading-icon="MagnifyingGlassIcon" :clearable="true" @input="onSearch" @clear="applyFilters" />
             </div>
 
             <!-- Status -->
-            <select v-model="filters.status" class="filter-select" @change="applyFilters">
-                <option value="">All statuses</option>
-                <option value="completed">Completed</option>
-                <option value="processing">Processing</option>
-                <option value="failed">Failed</option>
-                <option value="pending">Pending</option>
-            </select>
+            <AppSelect v-model="filters.status" :options="statusOptions" placeholder="All statuses"
+                class="filter-select-comp" @change="applyFilters" />
 
             <!-- Template -->
-            <select v-model="filters.templateType" class="filter-select" @change="applyFilters">
-                <option value="">All templates</option>
-                <option value="balanceSheet">Balance Sheet</option>
-                <option value="cashFlow">Cash Flow</option>
-                <option value="profitLoss">P&L (Budget)</option>
-                <option value="profitLossForm2">P&L (Form 2)</option>
-                <option value="equity">Changes in Equity</option>
-            </select>
+            <AppSelect v-model="filters.templateType" :options="templateOptions" placeholder="All templates"
+                class="filter-select-comp" @change="applyFilters" />
 
             <!-- Date range -->
-            <select v-model="filters.dateRange" class="filter-select" @change="applyFilters">
-                <option value="">All dates</option>
-                <option value="today">Today</option>
-                <option value="week">This week</option>
-                <option value="month">This month</option>
-                <option value="quarter">Last 3 months</option>
-            </select>
+            <AppSelect v-model="filters.dateRange" :options="dateOptions" placeholder="All dates"
+                class="filter-select-comp" @change="applyFilters" />
 
             <!-- Clear filters -->
             <button v-if="hasActiveFilters" class="clear-btn" @click="clearFilters">
@@ -205,6 +185,8 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useFilesStore } from '@/stores/files'
+import AppSelect from '@/components/ui/Select.vue'
+import AppInput from '@/components/ui/Input.vue'
 import { debounce } from 'lodash-es'
 import {
     PlusIcon, MagnifyingGlassIcon, XMarkIcon, DocumentIcon, DocumentPlusIcon,
@@ -285,6 +267,32 @@ const visiblePages = computed(() => {
     for (let i = start; i <= end; i++) pages.push(i)
     return pages
 })
+
+
+const statusOptions = [
+    { value: '', label: 'All statuses' },
+    { value: 'completed', label: 'Completed' },
+    { value: 'processing', label: 'Processing' },
+    { value: 'failed', label: 'Failed' },
+    { value: 'pending', label: 'Pending' },
+]
+
+const templateOptions = [
+    { value: '', label: 'All templates' },
+    { value: 'balanceSheet', label: 'Balance Sheet' },
+    { value: 'cashFlow', label: 'Cash Flow' },
+    { value: 'profitLoss', label: 'P&L (Budget)' },
+    { value: 'profitLossForm2', label: 'P&L (Form 2)' },
+    { value: 'equity', label: 'Changes in Equity' },
+]
+
+const dateOptions = [
+    { value: '', label: 'All dates' },
+    { value: 'today', label: 'Today' },
+    { value: 'week', label: 'This week' },
+    { value: 'month', label: 'This month' },
+    { value: 'quarter', label: 'Last 3 months' },
+]
 
 const onSearch = debounce(() => applyFilters(), 250)
 
@@ -460,7 +468,11 @@ onMounted(async () => {
     flex-wrap: wrap;
 }
 
-.search-wrap {
+.filter-select-comp {
+    width: 160px;
+}
+
+.search-wrap-REMOVED {
     position: relative;
     display: flex;
     align-items: center;
@@ -469,73 +481,19 @@ onMounted(async () => {
     max-width: 280px;
 }
 
-.search-icon {
-    position: absolute;
-    left: 10px;
-    color: var(--ws-text-3);
-    pointer-events: none;
-}
 
-.search-input {
-    width: 100%;
-    padding: 8px 32px 8px 34px;
-    background: var(--ws-surface);
-    border: 1px solid var(--ws-border);
-    border-radius: 9px;
-    font-size: 13.5px;
-    color: var(--ws-text);
-    outline: none;
-    transition: border-color 0.15s;
-}
 
-.search-input:focus {
-    border-color: #7C3AED;
-}
 
-.search-input::placeholder {
-    color: rgba(240, 236, 246, 0.15);
-}
 
-.search-clear {
-    position: absolute;
-    right: 8px;
-    background: transparent;
-    border: none;
-    color: var(--ws-text-3);
-    cursor: pointer;
-    padding: 2px;
-    border-radius: 4px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: color 0.12s;
-}
 
-.search-clear:hover {
-    color: var(--ws-text-2);
-}
 
-.filter-select {
-    padding: 8px 12px;
-    background: var(--ws-surface);
-    border: 1px solid var(--ws-border);
-    border-radius: 9px;
-    font-size: 13px;
-    color: var(--ws-text-2);
-    cursor: pointer;
-    outline: none;
-    transition: border-color 0.15s;
-    appearance: none;
-    padding-right: 28px;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%239CA3AF'%3E%3Cpath fill-rule='evenodd' d='M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z' clip-rule='evenodd'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 8px center;
-    background-size: 16px;
-}
 
-.filter-select:focus {
-    border-color: #7C3AED;
-}
+
+
+
+
+
+
 
 .clear-btn {
     display: flex;
@@ -915,7 +873,11 @@ onMounted(async () => {
         gap: 8px;
     }
 
-    .search-wrap {
+    .filter-select-comp {
+        width: 160px;
+    }
+
+    .search-wrap-REMOVED {
         max-width: 100%;
     }
 

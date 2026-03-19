@@ -445,6 +445,15 @@
     "backToDashboard": "Вернуться на главную"
   },
   "upload": {
+    "noTemplate": "Шаблон не выбран.",
+    "dropTitle": "Перетащите файл Excel сюда",
+    "dropSub": "или нажмите для выбора · .xlsx, .xls до 10 МБ",
+    "processing": "Обработка…",
+    "transformBtn": "Трансформировать в МСФО",
+    "errorFileType": "Поддерживаются только файлы .xlsx и .xls.",
+    "errorFileSize": "Файл должен быть менее 10 МБ.",
+    "errorUploadFailed": "Ошибка загрузки. Попробуйте ещё раз.",
+    "previousFiles": "Предыдущие файлы",
     "title": "Загрузка файла для обработки",
     "backToDashboard": "Назад к панели управления",
     "uploadSection": "Загрузите ваш файл",
@@ -888,6 +897,8 @@
     "download": "Скачать",
     "process": "Обработать",
     "downloading": "Скачивание...",
-    "retry": "Повторить"
+    "retry": "Повторить",
+    "back": "Назад",
+    "goBack": "Назад"
   }
 }

@@ -9,7 +9,8 @@
 
         <!-- No template selected guard -->
         <div v-if="!templateId" class="no-template">
-            <p>No template selected. <router-link to="/app/dashboard">Go back</router-link></p>
+            <p>{{ $t('upload.noTemplate') }} <router-link to="/app/dashboard">{{ $t('common.goBack') }}</router-link>
+            </p>
         </div>
 
         <template v-else>
@@ -38,8 +39,8 @@
                     <div class="drop-icon">
                         <CloudArrowUpIcon class="w-8 h-8" />
                     </div>
-                    <p class="drop-title">Drop your Excel file here</p>
-                    <p class="drop-sub">or click to browse · .xlsx, .xls up to 10 MB</p>
+                    <p class="drop-title">{{ $t('upload.dropTitle') }}</p>
+                    <p class="drop-sub">{{ $t('upload.dropSub') }}</p>
                     <input ref="fileInput" type="file" class="hidden" accept=".xlsx,.xls" @change="handleFileSelect" />
                 </div>
 
@@ -89,16 +90,16 @@
 
             <!-- Previous files for this template -->
             <div v-if="prevFiles.length > 0" class="prev-section">
-                <div class="prev-header">Previous files</div>
+                <div class="prev-header">{{ $t('upload.previousFiles') }}</div>
                 <div class="prev-list">
                     <div v-for="file in prevFiles" :key="file.id" class="prev-item" @click="openFile(file)">
-                        <DocumentIcon class="w-4 h-4 text-gray-400 flex-shrink-0" />
+                        <DocumentIcon class="w-4 h-4 flex-shrink-0" style="color: var(--ws-text-3)" />
                         <div class="prev-item-info">
                             <span class="prev-item-name">{{ file.originalName }}</span>
                             <span class="prev-item-date">{{ formatDate(file.createdAt) }}</span>
                         </div>
                         <span class="status-pill" :class="statusClass(file.status)">{{ file.status }}</span>
-                        <ArrowRightIcon class="w-4 h-4 text-gray-300" />
+                        <ArrowRightIcon class="w-4 h-4" style="color: var(--ws-text-3)" />
                     </div>
                 </div>
             </div>
@@ -163,11 +164,11 @@ function handleFileSelect(e) {
 
 function setFile(file) {
     if (!file.name.match(/\.(xlsx|xls)$/i)) {
-        errorMessage.value = 'Only .xlsx and .xls files are supported.'
+        errorMessage.value = t('upload.errorFileType')
         return
     }
     if (file.size > 10 * 1024 * 1024) {
-        errorMessage.value = 'File must be under 10 MB.'
+        errorMessage.value = t('upload.errorFileSize')
         return
     }
     errorMessage.value = ''
@@ -187,7 +188,7 @@ async function uploadFile() {
         const result = await filesStore.uploadFile(selectedFile.value, templateId.value)
         router.push(`/app/processing/${result.jobId}`)
     } catch (err) {
-        errorMessage.value = err.message || 'Upload failed. Please try again.'
+        errorMessage.value = err.message || t('upload.errorUploadFailed')
         isProcessing.value = false
     }
 }
@@ -339,7 +340,7 @@ function statusClass(status) {
     align-items: center;
     gap: 10px;
     padding: 48px 24px;
-    border: 2px dashed #E5E7EB;
+    border: 2px dashed rgba(149, 0, 255, 0.2);
     border-radius: 12px;
     cursor: pointer;
     transition: border-color 0.15s, background 0.15s;

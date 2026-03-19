@@ -1,67 +1,25 @@
 <template>
-    <div class="relative" ref="selectRef">
-        <!-- Select Trigger -->
-        <button @click="toggleDropdown" :class="[
-            'relative w-full px-4 py-3 text-left bg-white border border-gray-300 rounded-lg shadow-sm cursor-pointer',
-            'hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent',
-            'transition-all duration-200',
-            isOpen ? 'border-accent ring-2 ring-accent' : '',
-            disabled ? 'bg-gray-50 cursor-not-allowed opacity-75' : ''
-        ]" :disabled="disabled">
-            <div class="flex items-center justify-between">
-                <!-- Selected Value Display -->
-                <div class="flex items-center space-x-2">
-                    <!-- Icon if provided -->
-                    <component v-if="selectedOption?.icon" :is="selectedOption.icon" class="h-4 w-4 text-gray-500" />
-                    <!-- Selected Text -->
-                    <span :class="[
-                        'block truncate text-sm',
-                        selectedOption ? 'text-gray-900' : 'text-gray-500'
-                    ]">
-                        {{ selectedOption ? selectedOption.label : placeholder }}
-                    </span>
-                </div>
-
-                <!-- Dropdown Arrow -->
-                <ChevronDownIcon :class="[
-                    'h-4 w-4 text-gray-400 transition-transform duration-200',
-                    isOpen ? 'rotate-180' : ''
-                ]" />
+    <div class="select-wrap" ref="selectRef">
+        <button class="select-trigger" :class="{ open: isOpen, disabled: disabled }" :disabled="disabled" type="button"
+            @click="toggleDropdown">
+            <div class="select-value">
+                <component v-if="selectedOption?.icon" :is="selectedOption.icon" class="select-icon" />
+                <span :class="['select-text', selectedOption ? 'selected' : 'placeholder']">
+                    {{ selectedOption ? selectedOption.label : placeholder }}
+                </span>
             </div>
+            <ChevronDownIcon class="select-chevron" :class="{ rotated: isOpen }" />
         </button>
 
-        <!-- Dropdown Options -->
-        <Transition enter-active-class="transition ease-out duration-200"
-            enter-from-class="opacity-0 scale-95 -translate-y-2" enter-to-class="opacity-100 scale-100 translate-y-0"
-            leave-active-class="transition ease-in duration-150" leave-from-class="opacity-100 scale-100 translate-y-0"
-            leave-to-class="opacity-0 scale-95 -translate-y-2">
-            <div v-show="isOpen && !disabled" :class="[
-                'absolute z-50 w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg',
-                'max-h-60 overflow-auto'
-            ]">
-                <button v-for="option in options" :key="option.value" @click="selectOption(option)" :class="[
-                    'w-full px-4 py-2.5 text-left text-sm flex items-center space-x-2',
-                    'hover:bg-violet-200 hover:text-gray-900 transition-colors duration-150',
-                    option.value === modelValue ? 'bg-accent/10 text-accent' : 'text-gray-700',
-                    'focus:outline-none focus:bg-gray-50'
-                ]">
-                    <!-- Option Icon -->
-                    <component v-if="option.icon" :is="option.icon" :class="[
-                        'h-4 w-4 flex-shrink-0',
-                        option.value === modelValue ? 'text-accent' : 'text-gray-400'
-                    ]" />
-
-                    <!-- Option Label -->
-                    <span class="truncate">{{ option.label }}</span>
-
-                    <!-- Selected Check -->
-                    <CheckIcon v-if="option.value === modelValue" class="h-4 w-4 ml-auto text-accent flex-shrink-0" />
+        <Transition name="dropdown">
+            <div v-if="isOpen && !disabled" class="select-dropdown">
+                <button v-for="option in options" :key="option.value" class="select-option"
+                    :class="{ active: option.value === modelValue }" type="button" @click="selectOption(option)">
+                    <component v-if="option.icon" :is="option.icon" class="option-icon" />
+                    <span class="option-label">{{ option.label }}</span>
+                    <CheckIcon v-if="option.value === modelValue" class="option-check" />
                 </button>
-
-                <!-- No options state -->
-                <div v-if="options.length === 0" class="px-4 py-2.5 text-sm text-gray-500">
-                    No options available
-                </div>
+                <div v-if="options.length === 0" class="select-empty">No options available</div>
             </div>
         </Transition>
     </div>
@@ -72,91 +30,214 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { onClickOutside } from '@vueuse/core'
 import { ChevronDownIcon, CheckIcon } from '@heroicons/vue/24/outline'
 
-// Props
 const props = defineProps({
-    modelValue: {
-        type: [String, Number, Object],
-        default: null
-    },
-    options: {
-        type: Array,
-        required: true,
-        default: () => []
-    },
-    placeholder: {
-        type: String,
-        default: 'Select an option...'
-    },
-    disabled: {
-        type: Boolean,
-        default: false
-    }
+    modelValue: { type: [String, Number, Object], default: null },
+    options: { type: Array, required: true, default: () => [] },
+    placeholder: { type: String, default: 'Select...' },
+    disabled: { type: Boolean, default: false },
 })
 
-// Emits
 const emit = defineEmits(['update:modelValue', 'change'])
 
-// State
 const isOpen = ref(false)
 const selectRef = ref(null)
 
-// Computed
-const selectedOption = computed(() => {
-    return props.options.find(option => option.value === props.modelValue)
-})
+const selectedOption = computed(() => props.options.find(o => o.value === props.modelValue))
 
-// Methods
-const toggleDropdown = () => {
-    if (!props.disabled) {
-        isOpen.value = !isOpen.value
-    }
+function toggleDropdown() {
+    if (!props.disabled) isOpen.value = !isOpen.value
 }
 
-const selectOption = (option) => {
+function selectOption(option) {
     emit('update:modelValue', option.value)
     emit('change', option.value, option)
     isOpen.value = false
 }
 
-const closeDropdown = () => {
-    isOpen.value = false
+onClickOutside(selectRef, () => { isOpen.value = false })
+
+function handleKeydown(e) {
+    if (e.key === 'Escape') isOpen.value = false
 }
 
-// Close dropdown when clicking outside
-onClickOutside(selectRef, closeDropdown)
-
-// Close dropdown on escape key
-const handleKeydown = (event) => {
-    if (event.key === 'Escape' && isOpen.value) {
-        closeDropdown()
-    }
-}
-
-onMounted(() => {
-    document.addEventListener('keydown', handleKeydown)
-})
-
-onUnmounted(() => {
-    document.removeEventListener('keydown', handleKeydown)
-})
+onMounted(() => document.addEventListener('keydown', handleKeydown))
+onUnmounted(() => document.removeEventListener('keydown', handleKeydown))
 </script>
 
 <style scoped>
-/* Custom scrollbar for dropdown */
-.overflow-auto::-webkit-scrollbar {
+.select-wrap {
+    position: relative;
+    width: 100%;
+}
+
+/* ── Trigger ── */
+.select-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    width: 100%;
+    padding: 8px 12px;
+    background: #171523;
+    border: 1px solid rgba(149, 0, 255, 0.12);
+    border-radius: 9px;
+    cursor: pointer;
+    transition: border-color 0.15s;
+    text-align: left;
+    font-size: 13px;
+}
+
+.select-trigger:hover:not(.disabled) {
+    border-color: rgba(149, 0, 255, 0.25);
+}
+
+.select-trigger.open {
+    border-color: #7C3AED;
+    box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.15);
+}
+
+.select-trigger.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.select-value {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.select-icon {
+    width: 15px;
+    height: 15px;
+    color: rgba(240, 236, 246, 0.4);
+    flex-shrink: 0;
+}
+
+.select-text {
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 13px;
+}
+
+.select-text.selected {
+    color: #F0ECF6;
+}
+
+.select-text.placeholder {
+    color: rgba(240, 236, 246, 0.25);
+}
+
+.select-chevron {
+    width: 15px;
+    height: 15px;
+    color: rgba(240, 236, 246, 0.3);
+    flex-shrink: 0;
+    transition: transform 0.18s;
+}
+
+.select-chevron.rotated {
+    transform: rotate(180deg);
+}
+
+/* ── Dropdown ── */
+.select-dropdown {
+    position: absolute;
+    z-index: 100;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    background: #1D1A2A;
+    border: 1px solid rgba(149, 0, 255, 0.18);
+    border-radius: 10px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+    max-height: 240px;
+    overflow-y: auto;
+}
+
+.select-dropdown::-webkit-scrollbar {
     width: 4px;
 }
 
-.overflow-auto::-webkit-scrollbar-track {
+.select-dropdown::-webkit-scrollbar-track {
     background: transparent;
 }
 
-.overflow-auto::-webkit-scrollbar-thumb {
-    background: #d1d5db;
+.select-dropdown::-webkit-scrollbar-thumb {
+    background: rgba(149, 0, 255, 0.2);
     border-radius: 2px;
 }
 
-.overflow-auto::-webkit-scrollbar-thumb:hover {
-    background: #9ca3af;
+.select-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 9px 14px;
+    background: transparent;
+    border: none;
+    font-size: 13px;
+    color: rgba(240, 236, 246, 0.65);
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.1s, color 0.1s;
+}
+
+.select-option:hover {
+    background: rgba(124, 58, 237, 0.1);
+    color: #F0ECF6;
+}
+
+.select-option.active {
+    background: rgba(124, 58, 237, 0.12);
+    color: #C084FC;
+}
+
+.option-icon {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+    color: rgba(240, 236, 246, 0.35);
+}
+
+.select-option.active .option-icon {
+    color: #A78BFA;
+}
+
+.option-label {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.option-check {
+    width: 14px;
+    height: 14px;
+    color: #A78BFA;
+    flex-shrink: 0;
+    margin-left: auto;
+}
+
+.select-empty {
+    padding: 12px 14px;
+    font-size: 13px;
+    color: rgba(240, 236, 246, 0.25);
+}
+
+/* ── Transition ── */
+.dropdown-enter-active,
+.dropdown-leave-active {
+    transition: opacity 0.15s, transform 0.15s;
+}
+
+.dropdown-enter-from,
+.dropdown-leave-to {
+    opacity: 0;
+    transform: translateY(-6px);
 }
 </style>

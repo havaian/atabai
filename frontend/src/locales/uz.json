@@ -444,6 +444,15 @@
     "backToDashboard": "Bosh sahifaga qaytish"
   },
   "upload": {
+    "noTemplate": "Shablon tanlanmagan.",
+    "dropTitle": "Excel faylini shu yerga tashlang",
+    "dropSub": "yoki ko'rish uchun bosing · .xlsx, .xls 10 MB gacha",
+    "processing": "Qayta ishlanmoqda…",
+    "transformBtn": "IFRS ga aylantirish",
+    "errorFileType": "Faqat .xlsx va .xls fayllar qo'llab-quvvatlanadi.",
+    "errorFileSize": "Fayl 10 MB dan kichik bo'lishi kerak.",
+    "errorUploadFailed": "Yuklash muvaffaqiyatsiz. Qayta urinib ko'ring.",
+    "previousFiles": "Oldingi fayllar",
     "title": "Qayta ishlash uchun fayl yuklash",
     "backToDashboard": "Boshqaruv paneliga qaytish",
     "uploadSection": "Faylingizni yuklang",
@@ -893,6 +902,8 @@
     "download": "Yuklab olish",
     "process": "Qayta ishlash",
     "downloading": "Yuklab olinmoqda...",
-    "retry": "Qayta urinish"
+    "retry": "Qayta urinish",
+    "back": "Orqaga",
+    "goBack": "Orqaga"
   }
 }

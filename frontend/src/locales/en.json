@@ -445,6 +445,15 @@
     "backToDashboard": "Back to Dashboard"
   },
   "upload": {
+    "noTemplate": "No template selected.",
+    "dropTitle": "Drop your Excel file here",
+    "dropSub": "or click to browse · .xlsx, .xls up to 10 MB",
+    "processing": "Processing…",
+    "transformBtn": "Transform to IFRS",
+    "errorFileType": "Only .xlsx and .xls files are supported.",
+    "errorFileSize": "File must be under 10 MB.",
+    "errorUploadFailed": "Upload failed. Please try again.",
+    "previousFiles": "Previous files",
     "title": "Upload File for Processing",
     "backToDashboard": "Back to Dashboard",
     "uploadSection": "Upload Your File",
@@ -883,6 +892,8 @@
     "download": "Download",
     "process": "Process",
     "downloading": "Downloading...",
-    "retry": "Retry"
+    "retry": "Retry",
+    "back": "Back",
+    "goBack": "Go back"
   }
 }
