@@ -3,9 +3,9 @@
     <div v-if="isLargeScreen" class="sidebar-shell" :class="{ collapsed: !isSidebarOpen }">
 
         <!-- Brand header -->
-        <div class="sidebar-brand">
-            <router-link to="/" class="brand-link" :class="{ 'brand-link-collapsed': !isSidebarOpen }">
-                <LogoComponent class="brand-logo" />
+        <div class="sidebar-brand" :class="{ 'sidebar-brand-collapsed': !isSidebarOpen }">
+            <router-link v-if="isSidebarOpen" to="/" class="brand-link">
+                <LogoComponent class="brand-logo-full" />
             </router-link>
             <button class="collapse-btn" @click="$emit('toggle')" :title="isSidebarOpen ? 'Collapse' : 'Expand'">
                 <ChevronLeftIcon v-if="isSidebarOpen" class="w-4 h-4" />
@@ -263,24 +263,24 @@ onUnmounted(() => window.removeEventListener('resize', onResize))
     flex-shrink: 0;
 }
 
+/* Collapsed: center just the arrow button */
+.sidebar-brand-collapsed {
+    justify-content: center;
+    padding: 20px 0 16px;
+}
+
 .brand-link {
     display: flex;
     align-items: center;
-    gap: 10px;
     text-decoration: none;
-    overflow: hidden;
+    flex: 1;
+    min-width: 0;
 }
 
-.brand-logo {
-    width: 28px;
-    height: 28px;
-    flex-shrink: 0;
-}
-
-/* When collapsed: clip logo to icon-only width so wordmark doesn't overflow */
-.brand-link-collapsed {
-    width: 28px;
-    overflow: hidden;
+/* LogoComponent fills the available space — shows icon + wordmark naturally */
+.brand-logo-full {
+    height: 32px;
+    width: auto;
 }
 
 .collapse-btn {
