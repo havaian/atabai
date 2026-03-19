@@ -775,6 +775,10 @@ onUnmounted(() => window.removeEventListener('resize', onResize))
     color: var(--toggle-icon);
 }
 
+.lang-icon-btn:hover .lang-flag-lg {
+    color: var(--sb-text-hover);
+}
+
 .lang-menu {
     position: absolute;
     bottom: calc(100% + 4px);
