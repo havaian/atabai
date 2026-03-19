@@ -57,7 +57,9 @@
             </div>
             <button v-else v-for="file in recentFiles.slice(0, 8)" :key="file.id" class="recent-item"
                 @click="openFile(file)">
-                <div class="recent-dot" :class="statusDotClass(file.status)"></div>
+                <img v-if="file.status === 'completed'" src="/images/icons/excel.svg"
+                    class="recent-excel-icon flex-shrink-0" />
+                <div v-else class="recent-dot" :class="statusDotClass(file.status)"></div>
                 <div class="recent-info">
                     <span class="recent-name">{{ truncate(file.originalName, 22) }}</span>
                     <span class="recent-meta">{{ formatDate(file.createdAt) }}</span>
@@ -605,6 +607,12 @@ onUnmounted(() => window.removeEventListener('resize', onResize))
     flex-shrink: 0;
 }
 
+.recent-excel-icon {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+}
+
 .dot-green {
     background: #22c55e;
 }
@@ -751,13 +759,8 @@ onUnmounted(() => window.removeEventListener('resize', onResize))
 }
 
 .lang-flag-lg {
-    color: var(--toggle-icon);
     font-size: 18px;
     line-height: 1;
-}
-
-.lang-icon-btn:hover .lang-flag-lg {
-    color: var(--sb-text-hover);
 }
 
 .lang-menu {
@@ -822,11 +825,8 @@ onUnmounted(() => window.removeEventListener('resize', onResize))
 }
 
 .theme-pill {
-    width: 100%;
+    display: flex;
     align-items: center;
-    grid-template-columns: 50% 50%;
-    display: inline-grid !important;
-    justify-content: space-between;
     background: var(--toggle-bg);
     border-radius: 8px;
     padding: 3px;
@@ -837,7 +837,7 @@ onUnmounted(() => window.removeEventListener('resize', onResize))
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 100%;
+    width: 28px;
     height: 24px;
     border: none;
     border-radius: 6px;

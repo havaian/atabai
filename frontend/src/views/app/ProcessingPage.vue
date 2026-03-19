@@ -301,8 +301,8 @@ onUnmounted(() => clearStatusPolling())
 .proc-template-tag {
     font-size: 11.5px;
     font-weight: 600;
-    color: #7C3AED;
-    background: rgba(124, 58, 237, 0.08);
+    color: var(--ws-purple);
+    background: var(--ws-purple-lt);
     padding: 2px 8px;
     border-radius: 6px;
     flex-shrink: 0;
@@ -324,13 +324,13 @@ onUnmounted(() => clearStatusPolling())
 }
 
 .proc-card.card-done {
-    border-color: #bbf7d0;
-    background: linear-gradient(180deg, #f0fdf4 0%, #fff 40%);
+    border-color: var(--pill-green-bg);
+    background: var(--ws-surface);
 }
 
 .proc-card.card-fail {
-    border-color: #fca5a5;
-    background: linear-gradient(180deg, #fef2f2 0%, #fff 40%);
+    border-color: var(--pill-red-bg);
+    background: var(--ws-surface);
 }
 
 /* ─── Processing animation ───────────────────────────────────────────────── */
@@ -390,8 +390,8 @@ onUnmounted(() => clearStatusPolling())
     width: 64px;
     height: 64px;
     border-radius: 50%;
-    background: rgba(34, 197, 94, 0.12);
-    color: #16a34a;
+    background: var(--pill-green-bg);
+    color: var(--pill-green-text);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -401,8 +401,8 @@ onUnmounted(() => clearStatusPolling())
     width: 64px;
     height: 64px;
     border-radius: 50%;
-    background: rgba(248, 113, 113, 0.12);
-    color: #dc2626;
+    background: var(--pill-red-bg);
+    color: var(--pill-red-text);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -418,11 +418,11 @@ onUnmounted(() => clearStatusPolling())
 }
 
 .proc-title-done {
-    color: #4ade80;
+    color: var(--pill-green-text);
 }
 
 .proc-title-fail {
-    color: #fca5a5;
+    color: var(--pill-red-text);
 }
 
 .proc-sub {
@@ -491,8 +491,8 @@ onUnmounted(() => clearStatusPolling())
 }
 
 .step-done .proc-step-dot {
-    background: rgba(34, 197, 94, 0.12);
-    color: #16a34a;
+    background: var(--pill-green-bg);
+    color: var(--pill-green-text);
 }
 
 .step-done {
@@ -574,7 +574,7 @@ onUnmounted(() => clearStatusPolling())
 .proc-result-divider {
     width: 1px;
     height: 40px;
-    background: #E5E7EB;
+    background: var(--ws-border);
     flex-shrink: 0;
 }
 
@@ -588,7 +588,7 @@ onUnmounted(() => clearStatusPolling())
     border: 1px solid #FCA5A5;
     border-radius: 8px;
     font-size: 13px;
-    color: #fca5a5;
+    color: var(--pill-red-text);
     width: 100%;
     text-align: left;
 }
@@ -645,7 +645,7 @@ onUnmounted(() => clearStatusPolling())
 }
 
 .proc-btn-secondary:hover {
-    background: #E5E7EB;
+    background: var(--ws-surface-2);
 }
 
 .btn-spinner {
