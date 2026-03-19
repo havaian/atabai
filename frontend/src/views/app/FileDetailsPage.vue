@@ -4,7 +4,7 @@
         <!-- Back -->
         <button class="back-btn" @click="router.push('/app/dashboard')">
             <ArrowLeftIcon class="w-4 h-4" />
-            Back to dashboard
+            {{ $t('common.backToDashboard') }}
         </button>
 
         <!-- Loading -->
@@ -34,10 +34,11 @@
                 </div>
 
                 <!-- Download CTA -->
-                <a v-if="file.status === 'completed'" :href="downloadUrl" class="download-btn" download>
+                <button v-if="file.status === 'completed'" class="download-btn"
+                    @click="filesStore.downloadFile(file.id)">
                     <ArrowDownTrayIcon class="w-4 h-4" />
-                    Download IFRS file
-                </a>
+                    {{ $t('processing.actions.download') }}
+                </button>
             </div>
 
             <!-- Stats row -->
@@ -64,7 +65,7 @@
             <div v-if="file.warnings?.length" class="warnings-section">
                 <div class="warnings-header">
                     <ExclamationTriangleIcon class="w-4 h-4" />
-                    Notes
+                    {{ $t('results.notes') }}
                 </div>
                 <ul class="warnings-list">
                     <li v-for="(w, i) in file.warnings" :key="i">{{ w }}</li>
@@ -85,7 +86,9 @@
                     </div>
                     <div class="file-info-row">
                         <span class="info-label">{{ $t('results.status') }}</span>
-                        <span class="status-pill" :class="statusClass(file.status)">{{ $t(`processing.status.${(file.status).toString()}`) }}</span>
+                        <span class="status-pill" :class="statusClass(file.status)">
+                            {{ $t(`processing.status.${file.status}`, file.status) }}
+                        </span>
                     </div>
                     <div class="file-info-row">
                         <span class="info-label">{{ $t('results.uploaded') }}</span>
@@ -104,19 +107,19 @@
 
             <!-- Actions row -->
             <div class="actions-row">
-                <a v-if="file.status === 'completed'" :href="downloadUrl" class="action-btn action-btn-primary"
-                    download>
+                <button v-if="file.status === 'completed'" class="action-btn action-btn-primary"
+                    @click="filesStore.downloadFile(file.id)">
                     <ArrowDownTrayIcon class="w-4 h-4" />
-                    Download IFRS Excel
-                </a>
+                    {{ $t('processing.actions.download') }}
+                </button>
                 <button class="action-btn action-btn-secondary"
                     @click="router.push(`/app/upload?template=${file.templateType}`)">
                     <PlusIcon class="w-4 h-4" />
-                    Process another file
+                    {{ $t('results.processAnother') }}
                 </button>
                 <button class="action-btn action-btn-ghost" @click="deleteFile">
                     <TrashIcon class="w-4 h-4" />
-                    Delete
+                    {{ $t('common.delete') }}
                 </button>
             </div>
 
@@ -127,6 +130,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useFilesStore } from '@/stores/files'
 import {
     ArrowLeftIcon, ArrowDownTrayIcon, PlusIcon, TrashIcon,
@@ -135,6 +139,7 @@ import {
 
 const router = useRouter()
 const route = useRoute()
+const { t } = useI18n()
 const filesStore = useFilesStore()
 
 const file = ref(null)
@@ -143,19 +148,16 @@ const error = ref('')
 
 const fileId = computed(() => route.params.fileId)
 
-const templateLabels = {
-    balanceSheet: 'Balance Sheet (IAS 1)',
-    cashFlow: 'Cash Flow (IAS 7)',
-    profitLoss: 'P&L — Budget Format',
-    profitLossForm2: 'P&L — Form 2',
-    equity: 'Changes in Equity (IAS 1)',
-}
-
-const templateLabel = computed(() => templateLabels[file.value?.templateType] || file.value?.templateType || '—')
-
-const downloadUrl = computed(() => {
-    if (!file.value?.id) return '#'
-    return `/api/files/${file.value.id}/download`
+const templateLabel = computed(() => {
+    const keys = {
+        balanceSheet: 'templates.balanceSheet',
+        cashFlow: 'templates.cashFlow',
+        profitLoss: 'templates.profitLoss',
+        profitLossForm2: 'templates.profitLossForm2',
+        equity: 'templates.equity',
+    }
+    const k = file.value?.templateType
+    return k && keys[k] ? t(keys[k]) : (k || '—')
 })
 
 const bannerClass = computed(() => ({
@@ -166,13 +168,13 @@ const bannerClass = computed(() => ({
 
 const bannerTitle = computed(() => {
     const map = {
-        completed: $t('processing.status.completed'),
-        failed: $t('processing.status.failed'),
+        completed: t('processing.status.completed'),
+        failed: t('processing.status.failed'),
         processing: t('processing.status.processing'),
         pending: t('processing.status.pending'),
         uploaded: t('processing.status.uploaded'),
     }
-    return map[file.value?.status] || 'Unknown status'
+    return map[file.value?.status] || ''
 })
 
 function statusClass(status) {
@@ -190,8 +192,9 @@ function formatDate(d) {
     const date = new Date(d)
     const now = new Date()
     const diffM = Math.floor((now - date) / 60000)
-    if (diffM < 60) return `${diffM}m ago`
-    if (diffM < 1440) return `${Math.floor(diffM / 60)}h ago`
+    if (diffM < 1) return t('history.dateJustNow')
+    if (diffM < 60) return t('history.dateMinutesAgo', { n: diffM })
+    if (diffM < 1440) return t('history.dateHoursAgo', { n: Math.floor(diffM / 60) })
     return date.toLocaleDateString()
 }
 
@@ -212,16 +215,17 @@ async function deleteFile() {
         await filesStore.deleteFile(fileId.value)
         router.push('/app/dashboard')
     } catch (e) {
-        error.value = 'Failed to delete file.'
+        error.value = t('results.deleteFailed')
     }
 }
 
 onMounted(async () => {
     try {
         const data = await filesStore.getFileDetails(fileId.value)
-        file.value = data
+        // API returns { success: true, file: {...} }
+        file.value = data?.file || data
     } catch (e) {
-        error.value = 'Could not load file details.'
+        error.value = t('results.loadFailed')
     } finally {
         isLoading.value = false
     }
@@ -238,7 +242,6 @@ onMounted(async () => {
     gap: 20px;
 }
 
-/* ─── Back ───────────────────────────────────────────────────────────────── */
 .back-btn {
     display: inline-flex;
     align-items: center;
@@ -258,7 +261,6 @@ onMounted(async () => {
     color: var(--ws-text-2);
 }
 
-/* ─── Loading / Error ────────────────────────────────────────────────────── */
 .results-loading {
     display: flex;
     align-items: center;
@@ -272,8 +274,8 @@ onMounted(async () => {
 .mini-spinner {
     width: 20px;
     height: 20px;
-    border: 2px solid #E5E7EB;
-    border-top-color: #7C3AED;
+    border: 2px solid var(--ws-border);
+    border-top-color: var(--ws-purple);
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
     flex-shrink: 0;
@@ -282,7 +284,7 @@ onMounted(async () => {
 .mini-spinner {
     width: 18px;
     height: 18px;
-    border-color: rgba(255, 255, 255, 0.4);
+    border-color: rgba(255, 255, 255, 0.3);
     border-top-color: #fff;
 }
 
@@ -297,10 +299,10 @@ onMounted(async () => {
     align-items: center;
     gap: 10px;
     padding: 16px 20px;
-    background: rgba(248, 113, 113, 0.08);
-    border: 1px solid #FCA5A5;
+    background: var(--pill-red-bg);
+    border: 1px solid var(--pill-red-bg);
     border-radius: 12px;
-    color: #fca5a5;
+    color: var(--pill-red-text);
     font-size: 14px;
 }
 
@@ -315,18 +317,18 @@ onMounted(async () => {
 }
 
 .banner-success {
-    background: rgba(34, 197, 94, 0.08);
-    border-color: #bbf7d0;
+    background: var(--pill-green-bg);
+    border-color: var(--pill-green-bg);
 }
 
 .banner-error {
-    background: #fef2f2;
-    border-color: #fca5a5;
+    background: var(--pill-red-bg);
+    border-color: var(--pill-red-bg);
 }
 
 .banner-processing {
-    background: #eff6ff;
-    border-color: #bfdbfe;
+    background: var(--pill-blue-bg);
+    border-color: var(--pill-blue-bg);
 }
 
 .banner-icon {
@@ -340,18 +342,18 @@ onMounted(async () => {
 }
 
 .banner-success .banner-icon {
-    background: rgba(34, 197, 94, 0.12);
-    color: #16a34a;
+    background: var(--pill-green-bg);
+    color: var(--pill-green-text);
 }
 
 .banner-error .banner-icon {
-    background: rgba(248, 113, 113, 0.12);
-    color: #dc2626;
+    background: var(--pill-red-bg);
+    color: var(--pill-red-text);
 }
 
 .banner-processing .banner-icon {
-    background: rgba(96, 165, 250, 0.12);
-    color: #2563eb;
+    background: var(--pill-blue-bg);
+    color: var(--pill-blue-text);
 }
 
 .banner-text {
@@ -379,12 +381,13 @@ onMounted(async () => {
     align-items: center;
     gap: 7px;
     padding: 9px 18px;
-    background: #7C3AED;
+    background: var(--ws-purple);
     color: #fff;
+    border: none;
     border-radius: 10px;
     font-size: 13.5px;
     font-weight: 600;
-    text-decoration: none;
+    cursor: pointer;
     white-space: nowrap;
     flex-shrink: 0;
     transition: background 0.15s, box-shadow 0.15s;
@@ -426,8 +429,8 @@ onMounted(async () => {
 /* ─── Warnings ───────────────────────────────────────────────────────────── */
 .warnings-section {
     padding: 16px 18px;
-    background: rgba(251, 191, 36, 0.08);
-    border: 1px solid #FDE68A;
+    background: var(--pill-yellow-bg);
+    border: 1px solid var(--pill-yellow-bg);
     border-radius: 12px;
 }
 
@@ -437,7 +440,7 @@ onMounted(async () => {
     gap: 7px;
     font-size: 13px;
     font-weight: 600;
-    color: #fcd34d;
+    color: var(--pill-yellow-text);
     margin-bottom: 10px;
 }
 
@@ -451,7 +454,7 @@ onMounted(async () => {
 
 .warnings-list li {
     font-size: 13px;
-    color: #78350F;
+    color: var(--ws-text-2);
     line-height: 1.5;
 }
 
@@ -508,7 +511,7 @@ onMounted(async () => {
 
 /* ─── Status pills ───────────────────────────────────────────────────────── */
 .status-pill {
-    text-align: center;
+    display: inline-flex;
     align-items: center;
     padding: 3px 9px;
     border-radius: 20px;
@@ -517,28 +520,28 @@ onMounted(async () => {
 }
 
 .status-green {
-    background: rgba(34, 197, 94, 0.12);
-    color: #4ade80;
+    background: var(--pill-green-bg);
+    color: var(--pill-green-text);
 }
 
 .status-blue {
-    background: rgba(96, 165, 250, 0.12);
-    color: #93c5fd;
+    background: var(--pill-blue-bg);
+    color: var(--pill-blue-text);
 }
 
 .status-red {
-    background: rgba(248, 113, 113, 0.12);
-    color: #fca5a5;
+    background: var(--pill-red-bg);
+    color: var(--pill-red-text);
 }
 
 .status-yellow {
-    background: rgba(251, 191, 36, 0.12);
-    color: #fcd34d;
+    background: var(--pill-yellow-bg);
+    color: var(--pill-yellow-text);
 }
 
 .status-gray {
-    background: var(--ws-surface-2);
-    color: var(--ws-text-3);
+    background: var(--pill-gray-bg);
+    color: var(--pill-gray-text);
 }
 
 /* ─── Actions ────────────────────────────────────────────────────────────── */
@@ -564,7 +567,7 @@ onMounted(async () => {
 }
 
 .action-btn-primary {
-    background: #7C3AED;
+    background: var(--ws-purple);
     color: #fff;
 }
 
@@ -579,7 +582,7 @@ onMounted(async () => {
 }
 
 .action-btn-secondary:hover {
-    background: #E5E7EB;
+    background: var(--ws-border);
 }
 
 .action-btn-ghost {
@@ -593,7 +596,6 @@ onMounted(async () => {
     background: rgba(248, 113, 113, 0.08);
 }
 
-/* ─── Responsive ─────────────────────────────────────────────────────────── */
 @media (max-width: 640px) {
     .result-stats {
         grid-template-columns: repeat(2, 1fr);
