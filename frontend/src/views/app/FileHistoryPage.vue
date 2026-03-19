@@ -113,7 +113,7 @@
                         <!-- Status -->
                         <td class="td td-status">
                             <span class="status-pill" :class="statusClass(file.status)">
-                                {{ $t('processing.status.' + file.status, file.status) }}
+                                {{ $t(`processing.status.${(file.status).toString()}`) }}
                             </span>
                         </td>
 

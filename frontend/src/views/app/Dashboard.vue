@@ -96,7 +96,7 @@
                     </div>
                     <span class="file-template">{{ formatTemplate(file.templateType) }}</span>
                     <span class="status-pill" :class="statusClass(file.status)">
-                        {{ file.status }}
+                        {{ $t(`processing.status.${(file.status).toString()}`) }}
                     </span>
                     <span class="file-date">{{ formatDate(file.createdAt) }}</span>
                     <ArrowRightIcon class="w-4 h-4 text-gray-300 hover:text-violet-500 transition-colors" />

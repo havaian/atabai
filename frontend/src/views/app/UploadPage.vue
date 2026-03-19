@@ -103,7 +103,7 @@
                             <span class="prev-item-name">{{ file.originalName }}</span>
                             <span class="prev-item-date">{{ formatDate(file.createdAt) }}</span>
                         </div>
-                        <span class="status-pill" :class="statusClass(file.status)">{{ file.status }}</span>
+                        <span class="status-pill" :class="statusClass(file.status)">{{ $t(`processing.status.${(file.status).toString()}`) }}</span>
                         <ArrowRightIcon class="w-4 h-4" style="color: var(--ws-text-3)" />
                     </div>
                 </div>

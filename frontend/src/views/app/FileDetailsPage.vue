@@ -85,7 +85,7 @@
                     </div>
                     <div class="file-info-row">
                         <span class="info-label">{{ $t('results.status') }}</span>
-                        <span class="status-pill" :class="statusClass(file.status)">{{ file.status }}</span>
+                        <span class="status-pill" :class="statusClass(file.status)">{{ $t(`processing.status.${(file.status).toString()}`) }}</span>
                     </div>
                     <div class="file-info-row">
                         <span class="info-label">{{ $t('results.uploaded') }}</span>
