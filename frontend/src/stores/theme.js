@@ -4,12 +4,9 @@ import { ref, computed } from 'vue'
 const STORAGE_KEY = 'atabai-theme'
 
 export const useThemeStore = defineStore('theme', () => {
-    const preference = ref('system')
+    const preference = ref('dark')
 
     const resolvedTheme = computed(() => {
-        if (preference.value === 'system') {
-            return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
-        }
         return preference.value
     })
 
@@ -151,35 +148,20 @@ export const useThemeStore = defineStore('theme', () => {
         Object.entries(vars).forEach(([k, v]) => root.style.setProperty(k, v))
     }
 
-    let _mediaQuery = null
-    let _systemHandler = null
-
-    function _watchSystem() {
-        if (_mediaQuery && _systemHandler) {
-            _mediaQuery.removeEventListener('change', _systemHandler)
-        }
-        _mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
-        _systemHandler = () => {
-            if (preference.value === 'system') _apply(resolvedTheme.value)
-        }
-        _mediaQuery.addEventListener('change', _systemHandler)
-    }
-
     function init() {
         try {
             const saved = localStorage.getItem(STORAGE_KEY)
-            if (saved && ['light', 'dark', 'system'].includes(saved)) {
+            if (saved && ['light', 'dark'].includes(saved)) {
                 preference.value = saved
             }
         } catch (e) {
             console.warn('Could not read theme from localStorage:', e)
         }
         _apply(resolvedTheme.value)
-        _watchSystem()
     }
 
     function setTheme(theme) {
-        if (!['light', 'dark', 'system'].includes(theme)) return
+        if (!['light', 'dark'].includes(theme)) return
         preference.value = theme
         try { localStorage.setItem(STORAGE_KEY, theme) } catch (e) { }
         _apply(resolvedTheme.value)

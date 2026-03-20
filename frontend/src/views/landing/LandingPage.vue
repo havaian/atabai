@@ -65,29 +65,15 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* ===================================================================
-   LANDING PAGE THEME VARIABLES
-   All landing section components reference these via var(--landing-*)
-   =================================================================== */
 .landing-page {
-  /* Light theme (default) */
-  --landing-bg: #FAFAFA;
-  --landing-surface: #FFFFFF;
-  --landing-surface-2: #F5F3F7;
-  --landing-text: #111018;
-  --landing-text-secondary: #5C5670;
-  --landing-text-muted: #9890A8;
-  --landing-border: rgba(0, 0, 0, 0.06);
-  --landing-border-accent: rgba(149, 0, 255, 0.12);
-
-  background: var(--landing-bg);
+    background: var(--landing-bg);
+    transition: background 0.2s;
 }
 
-/* Hero area wrapper */
 .landing-hero-area {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding-bottom: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-bottom: 2rem;
 }
 </style>
