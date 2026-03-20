@@ -46,7 +46,7 @@ const themeStore = useThemeStore()
 }
 
 .cta-card-dark {
-    background: linear-gradient(135deg, #1E0040 0%, #1A0F3D 40%, #120A2E 100%);
+    background: linear-gradient(135deg, #4A007A 0%, #3B1A7A 40%, #2D1560 100%);
 }
 
 .cta-glow {
