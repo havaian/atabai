@@ -14,6 +14,11 @@
         @apply transition-all duration-300 ease-out;
     }
 
+    /* Override Tailwind preflight border-color with theme-aware var */
+    *, ::before, ::after {
+        border-color: var(--ws-border, rgba(229, 231, 235, 1));
+    }
+
     /* Override for elements that shouldn't have transitions */
     img,
     svg,
