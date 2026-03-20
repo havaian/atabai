@@ -204,7 +204,6 @@ const isLargeScreen = ref(window.innerWidth >= 1024)
 
 // ── Theme ──────────────────────────────────────────────────────────────────
 const THEME_KEY = 'atabai-theme'
-const currentTheme = ref(localStorage.getItem(THEME_KEY) || 'light')
 
 import { useThemeStore } from '@/stores/theme'
 const themeStore = useThemeStore()
