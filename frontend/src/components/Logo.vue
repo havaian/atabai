@@ -143,6 +143,11 @@ function handleClick() {
     -webkit-text-fill-color: transparent;
     color: transparent;
     mix-blend-mode: difference;
+    font-weight: 900;
+    letter-spacing: .03em;
+    display: flex;
+    align-items: center;
+    font-size: 1rem;
 }
 
 .text-primary {
