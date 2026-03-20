@@ -76,6 +76,14 @@ export const useThemeStore = defineStore('theme', () => {
             '--toggle-active-bg': '#7C3AED',
             '--toggle-icon': 'rgba(240, 236, 246, 0.35)',
             '--toggle-icon-active': '#ffffff',
+            '--landing-bg': '#07060B',
+            '--landing-surface': '#0F0D15',
+            '--landing-surface-2': '#16131F',
+            '--landing-text': '#F0ECF6',
+            '--landing-text-secondary': 'rgba(240, 236, 246, 0.55)',
+            '--landing-text-muted': 'rgba(240, 236, 246, 0.3)',
+            '--landing-border': 'rgba(149, 0, 255, 0.08)',
+            '--landing-border-accent': 'rgba(149, 0, 255, 0.12)',
         } : {
             '--ws-bg': '#F4F2F9',
             '--ws-surface': '#FFFFFF',
@@ -131,6 +139,14 @@ export const useThemeStore = defineStore('theme', () => {
             '--toggle-active-bg': '#7C3AED',
             '--toggle-icon': 'rgba(17, 16, 24, 0.45)',
             '--toggle-icon-active': '#ffffff',
+            '--landing-bg': '#FAFAFA',
+            '--landing-surface': '#FFFFFF',
+            '--landing-surface-2': '#F5F3F7',
+            '--landing-text': '#111018',
+            '--landing-text-secondary': '#5C5670',
+            '--landing-text-muted': '#9890A8',
+            '--landing-border': 'rgba(0, 0, 0, 0.06)',
+            '--landing-border-accent': 'rgba(149, 0, 255, 0.12)',
         }
         Object.entries(vars).forEach(([k, v]) => root.style.setProperty(k, v))
     }

@@ -45,13 +45,14 @@
 
                     <!-- Auth -->
                     <div v-if="!authStore.isAuthenticated">
-                        <button @click="authStore.login" class="navbar-auth-btn">
+                        <button @click="authStore.login" class="btn-auth hover-glow inline-flex items-center">
                             <GoogleIcon size="16" className="mr-2" />
                             {{ $t('auth.signInWithGoogle') }}
                         </button>
                     </div>
                     <div v-else>
-                        <button @click="router.push('/app/dashboard')" class="navbar-auth-btn">
+                        <button @click="router.push('/app/dashboard')"
+                            class="btn-auth hover-glow inline-flex items-center">
                             {{ $t('nav.dashboard') }}
                         </button>
                     </div>
@@ -109,12 +110,12 @@
                 <!-- Auth -->
                 <div class="px-4 pb-4">
                     <button v-if="!authStore.isAuthenticated" @click="authStore.login; mobileOpen = false"
-                        class="navbar-auth-btn w-full justify-center">
+                        class="btn-auth hover-glow inline-flex items-center justify-center w-full">
                         <GoogleIcon size="16" className="mr-2" />
                         {{ $t('auth.signInWithGoogle') }}
                     </button>
                     <button v-else @click="router.push('/app/dashboard'); mobileOpen = false"
-                        class="navbar-auth-btn w-full justify-center">
+                        class="btn-auth hover-glow inline-flex items-center justify-center w-full">
                         {{ $t('nav.dashboard') }}
                     </button>
                 </div>
@@ -332,28 +333,6 @@ async function changeLanguage(code) {
 .lang-option.active {
     color: var(--ws-purple);
     font-weight: 600;
-}
-
-/* ── Auth button ──────────────────────────────────────────────── */
-.navbar-auth-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 16px;
-    background: var(--ws-purple);
-    color: #fff;
-    border: none;
-    border-radius: 9px;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.15s, box-shadow 0.15s;
-    white-space: nowrap;
-}
-
-.navbar-auth-btn:hover {
-    background: #6D28D9;
-    box-shadow: 0 4px 16px rgba(124, 58, 237, 0.3);
 }
 
 /* ── Mobile burger ────────────────────────────────────────────── */
