@@ -145,6 +145,14 @@ function handleClick() {
     mix-blend-mode: difference;
 }
 
+.text-primary {
+    font-weight: 900;
+    letter-spacing: .03em;
+    display: flex;
+    align-items: center;
+    font-size: 1rem;
+}
+
 /* SVG-specific styling */
 .logo-fancy.logo-svg {
     -webkit-mask: url('/images/icons/logo.svg') no-repeat center;

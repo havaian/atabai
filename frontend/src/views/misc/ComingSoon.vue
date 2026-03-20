@@ -10,7 +10,6 @@
                 <div class="cs-logo">
                     <LogoComponent class="w-8 h-8" />
                 </div>
-                <span class="cs-brand-name">ATABAI</span>
             </div>
 
             <!-- Headline -->
@@ -112,13 +111,6 @@ function openInstagram() { window.open('https://instagram.com/atabai.official', 
     display: flex;
     align-items: center;
     gap: 10px;
-}
-
-.cs-brand-name {
-    font-size: 18px;
-    font-weight: 800;
-    color: var(--misc-text);
-    letter-spacing: 0.06em;
 }
 
 /* Headline */
