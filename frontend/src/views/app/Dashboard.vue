@@ -394,6 +394,9 @@ function statusClass(status) {
     color: var(--ws-text);
     margin: 0 0 6px;
     letter-spacing: -0.01em;
+    min-height: 2.8em;
+    display: flex;
+    align-items: flex-start;
 }
 
 .template-desc {

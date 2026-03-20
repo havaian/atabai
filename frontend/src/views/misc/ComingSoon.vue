@@ -17,25 +17,25 @@
             <div class="cs-headline">
                 <div class="cs-badge">
                     <span class="cs-badge-dot"></span>
-                    In development
+                    {{ $t('comingSoon.title') }}
                 </div>
-                <h1 class="cs-title">Coming soon</h1>
-                <p class="cs-sub">This feature is being built. Stay tuned for updates.</p>
+                <h1 class="cs-title">{{ $t('comingSoon.pageTitle') }}</h1>
+                <p class="cs-sub">{{ $t('comingSoon.description') }}</p>
             </div>
 
             <!-- Contact channels -->
             <div class="cs-channels">
                 <button class="cs-channel" @click="openTelegram">
                     <TelegramIcon class="w-5 h-5" />
-                    <span>Telegram</span>
+                    <span>{{ $t('description.telegram') }}</span>
                 </button>
                 <button class="cs-channel" @click="openMail">
                     <EnvelopeIcon class="w-5 h-5" />
-                    <span>Email</span>
+                    <span>{{ $t('description.email') }}</span>
                 </button>
                 <button class="cs-channel" @click="openInstagram">
                     <InstagramIcon class="w-5 h-5" />
-                    <span>Instagram</span>
+                    <span>{{ $t('description.instagram') }}</span>
                 </button>
             </div>
 
@@ -138,7 +138,7 @@ function openInstagram() { window.open('https://instagram.com/atabai.official', 
     border-radius: 100px;
     font-size: 12px;
     font-weight: 500;
-    color: rgba(240, 236, 246, 0.5);
+    color: var(--ws-text-3);
     background: var(--misc-badge-bg);
 }
 
@@ -195,7 +195,7 @@ function openInstagram() { window.open('https://instagram.com/atabai.official', 
     border: 1px solid var(--misc-card-border);
     border-radius: 10px;
     background: var(--misc-card-bg);
-    color: rgba(240, 236, 246, 0.65);
+    color: var(--ws-text-3);
     font-size: 13.5px;
     font-weight: 500;
     cursor: pointer;
@@ -205,7 +205,7 @@ function openInstagram() { window.open('https://instagram.com/atabai.official', 
 .cs-channel:hover {
     border-color: rgba(149, 0, 255, 0.3);
     background: rgba(149, 0, 255, 0.08);
-    color: #F0ECF6;
+    color: var(--ws-text);
 }
 
 /* Back */

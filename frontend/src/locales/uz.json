@@ -1,5 +1,17 @@
 {
   "landing": {
+    "hero": {
+      "badge": "NSBU → IFRS Automation Platform",
+      "titlePre": "Avtomatlashtirish",
+      "titleHighlight": "XMHS.",
+      "titlePost": "AI asosida.",
+      "subtitle": "Moliyaviy ma'lumotlarni aniq, audit uchun tayyor XMHS hisobotlariga aylantiring — tezroq, arzonroq va to'liq shaffoflik bilan.",
+      "bookDemo": "Demo buyurtma qilish",
+      "howItWorks": "Bu qanday ishlaydi"
+    },
+    "trust": {
+      "builtFor": "O'zbekiston uchun yaratilgan"
+    },
     "hiw": {
       "label": "Jarayon",
       "subtitle": "Faylni yuklashdan tayyor XMHS hisobotiga qadar to'rtta oddiy qadam",

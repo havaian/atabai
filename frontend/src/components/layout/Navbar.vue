@@ -28,9 +28,9 @@
                     <!-- Language Selector -->
                     <div class="relative group">
                         <div
-                            class="flex items-center gap-1 bg-gray-100 px-3 py-2 rounded-md hover:bg-gray-200 cursor-pointer transition-colors duration-200">
-                            <GlobeAltIcon class="w-4 h-4" />
-                            <span class="text-sm font-medium">{{ currentLocale.code.toUpperCase() }}</span>
+                            class="flex items-center gap-1.5 bg-gray-100 px-3 py-2 rounded-md hover:bg-gray-200 cursor-pointer transition-colors duration-200">
+                            <img :src="'/images/country-flags/' + currentLocale.flag + '.svg'" class="w-4 h-4"
+                                :alt="currentLocale.name" />
                             <ChevronDownIcon class="w-4 h-4 transition-transform duration-200 group-hover:rotate-180" />
                         </div>
                         <!-- Dropdown Menu -->
@@ -38,9 +38,10 @@
                             class="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 ease-out transform translate-y-1 group-hover:translate-y-0">
                             <button v-for="locale in availableLocales" :key="locale.code"
                                 @click="changeLanguage(locale.code)"
-                                class="flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150">
-                                <span class="mr-2">{{ locale.flag }}</span>
-                                {{ locale.name }}
+                                :class="[locale.code === currentLocale.code ? 'bg-gray-100' : '', 'flex items-center gap-2 px-4 py-2 text-sm text-gray-700 w-full text-left hover:bg-gray-50']">
+                                <img :src="'/images/country-flags/' + locale.flag + '.svg'" class="w-4 h-4"
+                                    :alt="locale.name" />
+                                <span>{{ locale.name }}</span>
                             </button>
                         </div>
                     </div>
@@ -122,12 +123,14 @@
                     <div class="grid grid-cols-2 gap-2">
                         <button v-for="locale in availableLocales" :key="locale.code"
                             @click="changeLanguage(locale.code)" :class="[
-                                'flex items-center px-3 py-2 text-sm rounded-md transition-colors duration-150',
+                                'flex items-center gap-2 px-3 py-2 text-sm rounded-md transition-colors duration-150',
                                 locale.code === currentLocale.code
-                                    ? 'bg-primary text-white'
-                                    : 'text-gray-700 hover:bg-gray-100'
+                                    ? 'bg-violet-50 text-violet-700 font-medium'
+                                    : 'text-gray-700 hover:bg-gray-50'
                             ]">
-                            {{ locale.name }}
+                            <img :src="'/images/country-flags/' + locale.flag + '.svg'" class="w-4 h-4"
+                                :alt="locale.name" />
+                            <span>{{ locale.name }}</span>
                         </button>
                     </div>
                 </div>
@@ -183,7 +186,6 @@ import {
     ChevronDownIcon,
     Bars3Icon,
     XMarkIcon,
-    GlobeAltIcon,
     SunIcon,
     MoonIcon
 } from '@heroicons/vue/24/outline'

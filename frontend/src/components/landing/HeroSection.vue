@@ -7,37 +7,37 @@
             <span v-for="n in 7" :key="n" class="hero-particle"></span>
         </div>
 
-        <div class="hero-content">
-            <div class="hero-badge">
-                <span class="hero-badge-dot"></span>
-                NSBU → IFRS Automation Platform
-            </div>
+        <div class="hero-badge">
+            <span class="hero-badge-dot"></span>
+            {{ $t('landing.hero.badge') }}
+        </div>
 
-            <h1 class="hero-title">
-                Автоматизация <span class="hero-title-highlight">МСФО.</span><br>
-                На основе ИИ.
-            </h1>
+        <h1 class="hero-title">
+            {{ $t('landing.hero.titlePre') }} <span class="hero-title-highlight">{{ $t('landing.hero.titleHighlight')
+                }}</span><br>
+            {{ $t('landing.hero.titlePost') }}
+        </h1>
 
-            <p class="hero-subtitle">
-                Превращайте финансовые данные в точные, готовые к аудиту отчеты МСФО — быстрее, дешевле и с полной
-                прозрачностью.
-            </p>
+        <p class="hero-subtitle">{{ $t('landing.hero.subtitle') }}</p>
 
-            <div class="hero-actions">
-                <button class="hero-btn hero-btn-primary" @click="$emit('bookDemo')">
-                    Забронировать демо
-                    <ArrowRightIcon class="w-4 h-4" />
-                </button>
-                <button class="hero-btn hero-btn-secondary" @click="scrollToHowItWorks">
-                    Как это работает
-                </button>
-            </div>
+        <div class="hero-actions">
+            <button class="hero-btn hero-btn-primary" @click="$emit('bookDemo')">
+                {{ $t('landing.hero.bookDemo') }}
+                <ArrowRightIcon class="w-4 h-4" />
+            </button>
+            <button class="hero-btn hero-btn-secondary" @click="scrollToHowItWorks">
+                {{ $t('landing.hero.howItWorks') }}
+            </button>
         </div>
     </section>
 </template>
 
 <script setup>
+import { useI18n } from 'vue-i18n'
 import { ArrowRightIcon } from '@heroicons/vue/24/outline'
+
+const { t } = useI18n()
+defineEmits(['bookDemo'])
 
 defineEmits(['bookDemo'])
 
@@ -71,6 +71,7 @@ function scrollToHowItWorks() {
     mask-image: radial-gradient(ellipse 60% 50% at 50% 40%, black 10%, transparent 60%);
     -webkit-mask-image: radial-gradient(ellipse 60% 50% at 50% 40%, black 10%, transparent 60%);
 }
+
 /* Glow orb — hidden in light, visible in dark */
 .hero-glow-orb {
     position: absolute;
@@ -227,6 +228,7 @@ function scrollToHowItWorks() {
         opacity: 0.5;
     }
 }
+
 /* Title */
 .hero-title {
     font-size: clamp(2.5rem, 6vw, 4.5rem);

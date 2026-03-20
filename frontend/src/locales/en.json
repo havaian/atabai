@@ -1,5 +1,17 @@
 {
   "landing": {
+    "hero": {
+        "badge": "NSBU → IFRS Automation Platform",
+        "titlePre": "Automate",
+        "titleHighlight": "IFRS.",
+        "titlePost": "Powered by AI.",
+        "subtitle": "Turn complex financial data into accurate, audit-ready IFRS reports — faster, cheaper, and with full transparency.",
+        "bookDemo": "Book a demo",
+        "howItWorks": "How it works"
+    },
+    "trust": {
+        "builtFor": "Built for Uzbekistan"
+    },
     "hiw": {
       "label": "Process",
       "subtitle": "Four simple steps from file upload to a ready IFRS report",

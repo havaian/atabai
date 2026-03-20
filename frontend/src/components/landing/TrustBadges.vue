@@ -8,11 +8,13 @@
 </template>
 
 <script setup>
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
 const badges = [
     { icon: '📋', label: 'IAS 16' },
     { icon: '📊', label: 'IFRS 15' },
     { icon: '🔍', label: 'IAS 36' },
-    { icon: '🇺🇿', label: 'Built for Uzbekistan' }
+    { icon: '🇺🇿', label: t('landing.trust.builtFor') }
 ]
 </script>
 
