@@ -5,7 +5,6 @@
             <!-- Brand -->
             <div class="auth-brand">
                 <LogoComponent class="auth-logo-comp" />
-                <span class="auth-brand-name">ATABAI</span>
             </div>
 
             <div class="auth-divider"></div>
@@ -118,14 +117,6 @@ onMounted(async () => {
 .auth-logo-comp {
     width: 140px;
     height: 40px;
-}
-
-.auth-brand-name {
-    font-size: 13px;
-    font-weight: 600;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--auth-sub);
 }
 
 .auth-divider {
