@@ -64,21 +64,21 @@ const isLoading = ref(true)
 const error = ref(null)
 
 onMounted(async () => {
-    try {
-        const code = route.query.code
-        const errorParam = route.query.error
+    // try {
+    //     const code = route.query.code
+    //     const errorParam = route.query.error
 
-        if (errorParam) throw new Error(t('auth.oauthCancelled'))
-        if (!code) throw new Error(t('auth.invalidOauthResponse'))
+    //     if (errorParam) throw new Error(t('auth.oauthCancelled'))
+    //     if (!code) throw new Error(t('auth.invalidOauthResponse'))
 
-        await authStore.handleOAuthCallback(code)
+    //     await authStore.handleOAuthCallback(code)
 
-        isLoading.value = false
-        setTimeout(() => router.push('/app/dashboard'), 2000)
-    } catch (err) {
-        error.value = err.message || t('auth.unexpectedError')
-        isLoading.value = false
-    }
+    //     isLoading.value = false
+    //     setTimeout(() => router.push('/app/dashboard'), 2000)
+    // } catch (err) {
+    //     error.value = err.message || t('auth.unexpectedError')
+    //     isLoading.value = false
+    // }
 })
 </script>
 
