@@ -43,6 +43,10 @@ defineEmits(['bookDemo'])
     background: linear-gradient(135deg, #9500FF 0%, #7C3AED 40%, #5B21B6 100%);
 }
 
+:global(.dark) .cta-card {
+    background: linear-gradient(135deg, #4A007A 0%, #3B1A7A 40%, #2D1560 100%);
+}
+
 .cta-glow {
     position: absolute;
     width: 400px;
