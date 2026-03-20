@@ -3,45 +3,48 @@
         <div class="auth-card">
 
             <!-- Brand -->
-            <LogoComponent class="auth-logo-comp" />
+            <div class="auth-brand">
+                <LogoComponent class="auth-logo-comp" />
+                <span class="auth-brand-name">ATABAI</span>
+            </div>
 
-            <span class="auth-brand-name">ATABAI</span>
+            <div class="auth-divider"></div>
+
+            <!-- Loading state -->
+            <template v-if="isLoading">
+                <div class="auth-spinner-wrap">
+                    <div class="auth-spinner"></div>
+                </div>
+                <h2 class="auth-title">{{ $t('auth.processingLogin') }}</h2>
+                <p class="auth-sub">{{ $t('auth.pleaseWait') }}</p>
+            </template>
+
+            <!-- Error state -->
+            <template v-else-if="error">
+                <div class="auth-state-icon auth-state-error">
+                    <XCircleIcon class="w-7 h-7" />
+                </div>
+                <h2 class="auth-title">{{ $t('auth.loginFailed') }}</h2>
+                <p class="auth-sub auth-sub-error">{{ error }}</p>
+                <button class="auth-btn" @click="router.push('/')">
+                    <ArrowLeftIcon class="w-4 h-4" />
+                    {{ $t('common.goHome') }}
+                </button>
+            </template>
+
+            <!-- Success state -->
+            <template v-else>
+                <div class="auth-state-icon auth-state-success">
+                    <CheckCircleIcon class="w-7 h-7" />
+                </div>
+                <h2 class="auth-title">{{ $t('auth.loginSuccessful') }}</h2>
+                <p class="auth-sub">{{ $t('auth.redirectingToDashboard') }}</p>
+                <div class="auth-progress">
+                    <div class="auth-progress-fill"></div>
+                </div>
+            </template>
+
         </div>
-
-        <!-- Loading state -->
-        <template v-if="isLoading">
-            <div class="auth-spinner-wrap">
-                <div class="auth-spinner"></div>
-            </div>
-            <h2 class="auth-title">Signing you in…</h2>
-            <p class="auth-sub">{{ $t('auth.pleaseWait') }}</p>
-        </template>
-
-        <!-- Error state -->
-        <template v-else-if="error">
-            <div class="auth-state-icon auth-state-error">
-                <XCircleIcon class="w-7 h-7" />
-            </div>
-            <h2 class="auth-title">{{ $t('auth.loginFailed') }}</h2>
-            <p class="auth-sub auth-sub-error">{{ error }}</p>
-            <button class="auth-btn" @click="router.push('/')">
-                <ArrowLeftIcon class="w-4 h-4" />
-                {{ $t('common.goHome') }}
-            </button>
-        </template>
-
-        <!-- Success state -->
-        <template v-else>
-            <div class="auth-state-icon auth-state-success">
-                <CheckCircleIcon class="w-7 h-7" />
-            </div>
-            <h2 class="auth-title">{{ $t('auth.loginSuccessful') }}</h2>
-            <p class="auth-sub">{{ $t('auth.redirectingToDashboard') }}</p>
-            <div class="auth-progress">
-                <div class="auth-progress-fill"></div>
-            </div>
-        </template>
-
     </div>
 </template>
 
@@ -62,20 +65,21 @@ const isLoading = ref(true)
 const error = ref(null)
 
 onMounted(async () => {
-    // try {
-    //     const code = route.query.code
-    //     const errorParam = route.query.error
+    try {
+        const code = route.query.code
+        const errorParam = route.query.error
 
-    //     if (errorParam) throw new Error(t('auth.oauthCancelled'))
-    //     if (!code) throw new Error(t('auth.invalidOauthResponse'))
+        if (errorParam) throw new Error(t('auth.oauthCancelled'))
+        if (!code) throw new Error(t('auth.invalidOauthResponse'))
 
-    //     await authStore.handleOAuthCallback(code)
+        await authStore.handleOAuthCallback(code)
 
-    //     setTimeout(() => router.push('/app/dashboard'), 2000)
-    // } catch (err) {
-    //     error.value = err.message || t('auth.unexpectedError')
-    //     isLoading.value = false
-    // }
+        isLoading.value = false
+        setTimeout(() => router.push('/app/dashboard'), 2000)
+    } catch (err) {
+        error.value = err.message || t('auth.unexpectedError')
+        isLoading.value = false
+    }
 })
 </script>
 
@@ -89,11 +93,6 @@ onMounted(async () => {
     padding: 24px;
 }
 
-.auth-logo-comp {
-    width: 140px;
-    height: 40px;
-}
-
 .auth-card {
     width: 100%;
     max-width: 380px;
@@ -104,16 +103,37 @@ onMounted(async () => {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 20px;
+    gap: 16px;
     text-align: center;
     box-shadow: var(--auth-card-shadow);
 }
 
+.auth-brand {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
 
+.auth-logo-comp {
+    width: 140px;
+    height: 40px;
+}
 
+.auth-brand-name {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--auth-sub);
+}
 
-
-
+.auth-divider {
+    width: 100%;
+    height: 1px;
+    background: var(--auth-card-border);
+    margin: 4px 0;
+}
 
 .auth-spinner-wrap {
     width: 56px;
@@ -121,6 +141,7 @@ onMounted(async () => {
     display: flex;
     align-items: center;
     justify-content: center;
+    margin-top: 8px;
 }
 
 .auth-spinner {
@@ -145,15 +166,16 @@ onMounted(async () => {
     display: flex;
     align-items: center;
     justify-content: center;
+    margin-top: 8px;
 }
 
 .auth-state-success {
-    background: #dcfce7;
+    background: rgba(34, 197, 94, 0.12);
     color: #16a34a;
 }
 
 .auth-state-error {
-    background: #fee2e2;
+    background: rgba(239, 68, 68, 0.12);
     color: #dc2626;
 }
 
@@ -168,7 +190,7 @@ onMounted(async () => {
 .auth-sub {
     font-size: 14px;
     color: var(--auth-sub);
-    margin: -8px 0 0;
+    margin: -4px 0 0;
     line-height: 1.5;
 }
 
@@ -178,10 +200,11 @@ onMounted(async () => {
 
 .auth-progress {
     width: 100%;
-    height: 4px;
-    background: #F3F4F6;
+    height: 3px;
+    background: var(--auth-card-border);
     border-radius: 10px;
     overflow: hidden;
+    margin-top: 4px;
 }
 
 .auth-progress-fill {
@@ -214,6 +237,7 @@ onMounted(async () => {
     font-weight: 600;
     cursor: pointer;
     transition: background 0.15s;
+    margin-top: 4px;
 }
 
 .auth-btn:hover {
