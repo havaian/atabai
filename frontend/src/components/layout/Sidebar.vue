@@ -203,8 +203,6 @@ const langRef = ref(null)
 const isLargeScreen = ref(window.innerWidth >= 1024)
 
 // ── Theme ──────────────────────────────────────────────────────────────────
-const THEME_KEY = 'atabai-theme'
-
 import { useThemeStore } from '@/stores/theme'
 const themeStore = useThemeStore()
 const currentTheme = computed(() => themeStore.resolvedTheme)
