@@ -172,4 +172,12 @@ export const useThemeStore = defineStore('theme', () => {
     }
 
     return { preference, resolvedTheme, isDark, init, setTheme, toggle }
-})
+});(() => {
+    try {
+        const saved = localStorage.getItem(STORAGE_KEY)
+        if (saved && ['light', 'dark'].includes(saved)) {
+            preference.value = saved
+        }
+    } catch (e) {}
+    _apply(resolvedTheme.value)
+})()
