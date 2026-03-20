@@ -69,9 +69,6 @@
             </button>
         </div>
 
-        <!-- Spacer -->
-        <div class="flex-1"></div>
-
         <!-- Theme toggle -->
         <div class="theme-section" :class="{ 'theme-section-collapsed': !isSidebarOpen }">
             <div v-if="isSidebarOpen" class="theme-pill">
