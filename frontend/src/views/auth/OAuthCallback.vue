@@ -7,8 +7,6 @@
                 <LogoComponent class="auth-logo-comp" />
             </div>
 
-            <div class="auth-divider"></div>
-
             <!-- Loading state -->
             <template v-if="isLoading">
                 <div class="auth-spinner-wrap">
@@ -64,21 +62,21 @@ const isLoading = ref(true)
 const error = ref(null)
 
 onMounted(async () => {
-    // try {
-    //     const code = route.query.code
-    //     const errorParam = route.query.error
+    try {
+        const code = route.query.code
+        const errorParam = route.query.error
 
-    //     if (errorParam) throw new Error(t('auth.oauthCancelled'))
-    //     if (!code) throw new Error(t('auth.invalidOauthResponse'))
+        if (errorParam) throw new Error(t('auth.oauthCancelled'))
+        if (!code) throw new Error(t('auth.invalidOauthResponse'))
 
-    //     await authStore.handleOAuthCallback(code)
+        await authStore.handleOAuthCallback(code)
 
-    //     isLoading.value = false
-    //     setTimeout(() => router.push('/app/dashboard'), 2000)
-    // } catch (err) {
-    //     error.value = err.message || t('auth.unexpectedError')
-    //     isLoading.value = false
-    // }
+        isLoading.value = false
+        setTimeout(() => router.push('/app/dashboard'), 2000)
+    } catch (err) {
+        error.value = err.message || t('auth.unexpectedError')
+        isLoading.value = false
+    }
 })
 </script>
 
@@ -112,18 +110,6 @@ onMounted(async () => {
     flex-direction: column;
     align-items: center;
     gap: 10px;
-}
-
-.auth-logo-comp {
-    width: 140px;
-    height: 40px;
-}
-
-.auth-divider {
-    width: 100%;
-    height: 1px;
-    background: var(--auth-card-border);
-    margin: 4px 0;
 }
 
 .auth-spinner-wrap {
