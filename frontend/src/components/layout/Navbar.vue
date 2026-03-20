@@ -87,6 +87,14 @@
                     </div>
                 </div>
 
+                <!-- Theme Toggle -->
+                <button @click="themeStore.toggle()"
+                    class="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
+                    :title="themeStore.isDark ? $t('settings.personal.themeLight') : $t('settings.personal.themeDark')">
+                    <SunIcon v-if="themeStore.isDark" class="w-5 h-5 text-yellow-500" />
+                    <MoonIcon v-else class="w-5 h-5 text-gray-600" />
+                </button>
+
                 <!-- Mobile menu button -->
                 <div class="flex md:hidden">
                     <button @click="mobileMenuOpen = !mobileMenuOpen"
@@ -128,6 +136,33 @@
                             ]">
                             <img :src="'/images/country-flags/' + locale.flag + '.svg'" class="w-4 h-4 lang-flag" :alt="locale.name" />
                             <span>{{ locale.name }}</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Theme Toggle (Mobile) -->
+                <div class="px-3 py-2">
+                    <div class="text-sm font-medium text-gray-500 mb-2">{{ $t('settings.personal.theme') }}</div>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button @click="themeStore.setTheme('light')" :class="[
+                            'flex items-center justify-center px-3 py-2 text-sm rounded-md transition-colors duration-150',
+                            themeStore.preference === 'light' ? 'bg-primary/10 text-primary border border-primary' : 'bg-gray-100 text-gray-700'
+                        ]">
+                            <SunIcon class="w-4 h-4 mr-1" />
+                            {{ $t('settings.personal.themeLight') }}
+                        </button>
+                        <button @click="themeStore.setTheme('dark')" :class="[
+                            'flex items-center justify-center px-3 py-2 text-sm rounded-md transition-colors duration-150',
+                            themeStore.preference === 'dark' ? 'bg-primary/10 text-primary border border-primary' : 'bg-gray-100 text-gray-700'
+                        ]">
+                            <MoonIcon class="w-4 h-4 mr-1" />
+                            {{ $t('settings.personal.themeDark') }}
+                        </button>
+                        <button @click="themeStore.setTheme('system')" :class="[
+                            'flex items-center justify-center px-3 py-2 text-sm rounded-md transition-colors duration-150',
+                            themeStore.preference === 'system' ? 'bg-primary/10 text-primary border border-primary' : 'bg-gray-100 text-gray-700'
+                        ]">
+                            {{ $t('settings.personal.themeSystem') }}
                         </button>
                     </div>
                 </div>
@@ -189,11 +224,13 @@ import {
 
 // Composables
 import { useAuthStore } from '@/stores/auth'
+import { useThemeStore } from '@/stores/theme'
 import { availableLocales, changeLocale } from '@/utils/i18n'
 
 const router = useRouter()
 const { locale } = useI18n()
 const authStore = useAuthStore()
+const themeStore = useThemeStore()
 
 // State
 const mobileMenuOpen = ref(false)
