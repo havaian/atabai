@@ -39,8 +39,7 @@
                             <button v-for="locale in availableLocales" :key="locale.code"
                                 @click="changeLanguage(locale.code)"
                                 :class="[locale.code === currentLocale.code ? 'bg-gray-100' : '', 'flex items-center gap-2 px-4 py-2 text-sm text-gray-700 w-full text-left hover:bg-gray-50']">
-                                <img :src="'/images/country-flags/' + locale.flag + '.svg'" class="w-4 h-4"
-                                    :alt="locale.name" />
+                                <img :src="'/images/country-flags/' + locale.flag + '.svg'" class="w-4 h-4" :alt="locale.name" style="object-fit: cover;" />
                                 <span>{{ locale.name }}</span>
                             </button>
                         </div>
@@ -128,8 +127,7 @@
                                     ? 'bg-violet-50 text-violet-700 font-medium'
                                     : 'text-gray-700 hover:bg-gray-50'
                             ]">
-                            <img :src="'/images/country-flags/' + locale.flag + '.svg'" class="w-4 h-4"
-                                :alt="locale.name" />
+                            <img :src="'/images/country-flags/' + locale.flag + '.svg'" class="w-4 h-4" :alt="locale.name" style="object-fit: cover;" />
                             <span>{{ locale.name }}</span>
                         </button>
                     </div>
