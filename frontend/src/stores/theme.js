@@ -3,13 +3,27 @@ import { ref, computed } from 'vue'
 
 const STORAGE_KEY = 'atabai-theme'
 
+    // Apply theme immediately before Vue even mounts — eliminates flash
+    ; (() => {
+        try {
+            const saved = localStorage.getItem(STORAGE_KEY)
+            const theme = (saved === 'light' || saved === 'dark') ? saved : 'dark'
+            const root = document.documentElement
+            root.setAttribute('data-theme', theme)
+            if (theme === 'dark') root.classList.add('dark')
+            else root.classList.remove('dark')
+        } catch (e) { }
+    })()
+
 export const useThemeStore = defineStore('theme', () => {
-    const preference = ref('dark')
+    const preference = ref((() => {
+        try {
+            const saved = localStorage.getItem(STORAGE_KEY)
+            return (saved === 'light' || saved === 'dark') ? saved : 'dark'
+        } catch (e) { return 'dark' }
+    })())
 
-    const resolvedTheme = computed(() => {
-        return preference.value
-    })
-
+    const resolvedTheme = computed(() => preference.value)
     const isDark = computed(() => resolvedTheme.value === 'dark')
 
     function _apply(theme) {
@@ -149,14 +163,6 @@ export const useThemeStore = defineStore('theme', () => {
     }
 
     function init() {
-        try {
-            const saved = localStorage.getItem(STORAGE_KEY)
-            if (saved && ['light', 'dark'].includes(saved)) {
-                preference.value = saved
-            }
-        } catch (e) {
-            console.warn('Could not read theme from localStorage:', e)
-        }
         _apply(resolvedTheme.value)
     }
 
@@ -171,13 +177,8 @@ export const useThemeStore = defineStore('theme', () => {
         setTheme(isDark.value ? 'light' : 'dark')
     }
 
-    return { preference, resolvedTheme, isDark, init, setTheme, toggle }
-});(() => {
-    try {
-        const saved = localStorage.getItem(STORAGE_KEY)
-        if (saved && ['light', 'dark'].includes(saved)) {
-            preference.value = saved
-        }
-    } catch (e) {}
+    // Apply CSS vars now that store is initialized
     _apply(resolvedTheme.value)
-})()
+
+    return { preference, resolvedTheme, isDark, init, setTheme, toggle }
+})
