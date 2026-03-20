@@ -29,7 +29,7 @@
                     <div class="relative group">
                         <div
                             class="flex items-center gap-1.5 bg-gray-100 px-3 py-2 rounded-md hover:bg-gray-200 cursor-pointer transition-colors duration-200">
-                            <img :src="'/images/country-flags/' + currentLocale.flag + '.svg'" class="w-4 h-4" :alt="currentLocale.name" style="object-fit: cover;" />
+                            <img :src="'/images/country-flags/' + currentLocale.flag + '.svg'" class="w-4 h-4 lang-flag" :alt="currentLocale.name" />
                             <ChevronDownIcon class="w-4 h-4 transition-transform duration-200 group-hover:rotate-180" />
                         </div>
                         <!-- Dropdown Menu -->
@@ -38,7 +38,7 @@
                             <button v-for="locale in availableLocales" :key="locale.code"
                                 @click="changeLanguage(locale.code)"
                                 :class="[locale.code === currentLocale.code ? 'bg-gray-100' : '', 'flex items-center gap-2 px-4 py-2 text-sm text-gray-700 w-full text-left hover:bg-gray-50']">
-                                <img :src="'/images/country-flags/' + locale.flag + '.svg'" class="w-4 h-4" :alt="locale.name" style="object-fit: cover;" />
+                                <img :src="'/images/country-flags/' + locale.flag + '.svg'" class="w-4 h-4 lang-flag" :alt="locale.name" />
                                 <span>{{ locale.name }}</span>
                             </button>
                         </div>
@@ -126,7 +126,7 @@
                                     ? 'bg-violet-50 text-violet-700 font-medium'
                                     : 'text-gray-700 hover:bg-gray-50'
                             ]">
-                            <img :src="'/images/country-flags/' + locale.flag + '.svg'" class="w-4 h-4" :alt="locale.name" style="object-fit: cover;" />
+                            <img :src="'/images/country-flags/' + locale.flag + '.svg'" class="w-4 h-4 lang-flag" :alt="locale.name" />
                             <span>{{ locale.name }}</span>
                         </button>
                     </div>
@@ -212,3 +212,9 @@ function goToComingSoon() {
     router.push('/coming-soon')
 }
 </script>
+
+<style>
+.lang-flag {
+    object-fit: cover;
+}
+</style>

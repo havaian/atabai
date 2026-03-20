@@ -738,6 +738,7 @@ onUnmounted(() => window.removeEventListener('resize', onResize))
     width: 20px;
     line-height: 1;
     flex-shrink: 0;
+    object-fit: cover;
 }
 
 .lang-name {
