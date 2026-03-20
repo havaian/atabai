@@ -1,175 +1,125 @@
 <template>
-    <!-- Navigation -->
-    <nav class="bg-white shadow-sm border-b fixed top-0 left-0 right-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                <div class="flex items-center">
-                    <!-- Logo -->
-                    <router-link to="/" class="flex-shrink-0 flex items-center justify-center h-full">
-                        <LogoComponent size="large" :clickable="true" @click="$router.push('/')" />
+    <nav class="navbar">
+        <div class="navbar-inner">
+            <div class="navbar-row">
+                <!-- Left: Logo + links -->
+                <div class="navbar-left">
+                    <router-link to="/" class="navbar-logo-link">
+                        <LogoComponent size="large" :clickable="true" />
                     </router-link>
-
-                    <!-- Navigation Links -->
-                    <div class="hidden md:ml-12 md:flex md:space-x-8">
-                        <a href="#how-it-works" class="text-gray-900 hover:text-primary px-3 py-2 text-sm font-medium">
-                            {{ $t('nav.howItWorks') }}
-                        </a>
-                        <a href="#features" class="text-gray-900 hover:text-primary px-3 py-2 text-sm font-medium">
-                            {{ $t('nav.features') }}
-                        </a>
-                        <!-- <a href="#pricing" class="text-gray-900 hover:text-primary px-3 py-2 text-sm font-medium">
-                            {{ $t('nav.pricing') }}
-                        </a> -->
+                    <div class="navbar-links">
+                        <a href="#how-it-works" class="navbar-link">{{ $t('nav.howItWorks') }}</a>
+                        <a href="#features" class="navbar-link">{{ $t('nav.features') }}</a>
                     </div>
                 </div>
 
-                <!-- Desktop User Menu -->
-                <div class="hidden md:flex items-center space-x-4">
-                    <!-- Theme Toggle -->
-                    <button @click="themeStore.toggle()"
-                        class="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
+                <!-- Right: theme + lang + auth -->
+                <div class="navbar-right">
+
+                    <!-- Theme toggle -->
+                    <button class="navbar-icon-btn" @click="themeStore.toggle()"
                         :title="themeStore.isDark ? $t('settings.personal.themeLight') : $t('settings.personal.themeDark')">
-                        <SunIcon v-if="themeStore.isDark" class="w-5 h-5 text-yellow-500" />
-                        <MoonIcon v-else class="w-5 h-5 text-gray-600" />
+                        <SunIcon v-if="themeStore.isDark" class="w-5 h-5" />
+                        <MoonIcon v-else class="w-5 h-5" />
                     </button>
 
-                    <!-- Language Selector -->
-                    <div class="relative group">
-                        <div
-                            class="flex items-center gap-1.5 bg-gray-100 px-3 py-2 rounded-md hover:bg-gray-200 cursor-pointer transition-colors duration-200">
-                            <img :src="'/images/country-flags/' + currentLocale.flag + '.svg'" class="w-4 h-4 lang-flag" :alt="currentLocale.name" />
-                            <ChevronDownIcon class="w-4 h-4 transition-transform duration-200 group-hover:rotate-180" />
-                        </div>
-                        <!-- Dropdown Menu -->
-                        <div
-                            class="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 ease-out transform translate-y-1 group-hover:translate-y-0">
-                            <button v-for="locale in availableLocales" :key="locale.code"
-                                @click="changeLanguage(locale.code)"
-                                :class="[locale.code === currentLocale.code ? 'bg-gray-100' : '', 'flex items-center gap-2 px-4 py-2 text-sm text-gray-700 w-full text-left hover:bg-gray-50']">
-                                <img :src="'/images/country-flags/' + locale.flag + '.svg'" class="w-4 h-4 lang-flag" :alt="locale.name" />
-                                <span>{{ locale.name }}</span>
-                            </button>
-                        </div>
+                    <!-- Language selector -->
+                    <div class="lang-wrap" ref="langRef">
+                        <button class="lang-trigger" @click="langOpen = !langOpen">
+                            <img :src="'/images/country-flags/' + currentLocale.flag + '.svg'" class="flag-img"
+                                :alt="currentLocale.name" />
+                            <ChevronDownIcon class="w-3.5 h-3.5 lang-chevron" :class="{ rotated: langOpen }" />
+                        </button>
+                        <Transition name="menu-pop">
+                            <div v-if="langOpen" class="lang-dropdown">
+                                <button v-for="loc in availableLocales" :key="loc.code" class="lang-option"
+                                    :class="{ active: loc.code === currentLocale.code }"
+                                    @click="changeLanguage(loc.code)">
+                                    <img :src="'/images/country-flags/' + loc.flag + '.svg'" class="flag-img"
+                                        :alt="loc.name" />
+                                    <span>{{ loc.name }}</span>
+                                </button>
+                            </div>
+                        </Transition>
                     </div>
 
-                    <!-- Auth Buttons -->
-                    <div v-if="!authStore.isAuthenticated" class="flex items-center space-x-4">
-                        <button @click="authStore.login" class="btn-auth hover-glow inline-flex items-center">
+                    <!-- Auth -->
+                    <div v-if="!authStore.isAuthenticated">
+                        <button @click="authStore.login" class="navbar-auth-btn">
                             <GoogleIcon size="16" className="mr-2" />
                             {{ $t('auth.signInWithGoogle') }}
                         </button>
                     </div>
+                    <div v-else>
+                        <button @click="router.push('/app/dashboard')" class="navbar-auth-btn">
+                            {{ $t('nav.dashboard') }}
+                        </button>
+                    </div>
                 </div>
 
-                <!-- Mobile menu button -->
-                <div class="flex md:hidden">
-                    <button @click="mobileMenuOpen = !mobileMenuOpen"
-                        class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary">
-                        <Bars3Icon v-if="!mobileMenuOpen" class="block h-6 w-6" />
-                        <XMarkIcon v-else class="block h-6 w-6" />
-                    </button>
-                </div>
+                <!-- Mobile burger -->
+                <button class="mobile-burger" @click="mobileOpen = !mobileOpen">
+                    <Bars3Icon v-if="!mobileOpen" class="w-6 h-6" />
+                    <XMarkIcon v-else class="w-6 h-6" />
+                </button>
             </div>
         </div>
 
         <!-- Mobile menu -->
-        <div v-show="mobileMenuOpen" class="md:hidden border-t border-gray-200">
-            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white">
-                <!-- Navigation Links -->
-                <a href="#features" @click="mobileMenuOpen = false"
-                    class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">
-                    {{ $t('nav.features') }}
-                </a>
-                <a href="#how-it-works" @click="mobileMenuOpen = false"
-                    class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">
-                    {{ $t('nav.howItWorks') }}
-                </a>
-                <!-- <a href="#pricing" @click="mobileMenuOpen = false"
-                    class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">
-                    {{ $t('nav.pricing') }}
-                </a> -->
+        <Transition name="mobile-drop">
+            <div v-if="mobileOpen" class="mobile-menu">
+                <a href="#features" @click="mobileOpen = false" class="mobile-link">{{ $t('nav.features') }}</a>
+                <a href="#how-it-works" @click="mobileOpen = false" class="mobile-link">{{ $t('nav.howItWorks') }}</a>
 
-                <!-- Language Selector for Mobile -->
-                <div class="px-3 py-2">
-                    <div class="text-sm font-medium text-gray-500 mb-2">{{ $t('nav.language') }}</div>
-                    <div class="grid grid-cols-2 gap-2">
-                        <button v-for="locale in availableLocales" :key="locale.code"
-                            @click="changeLanguage(locale.code)" :class="[
-                                'flex items-center gap-2 px-3 py-2 text-sm rounded-md transition-colors duration-150',
-                                locale.code === currentLocale.code
-                                    ? 'bg-violet-50 text-violet-700 font-medium'
-                                    : 'text-gray-700 hover:bg-gray-50'
-                            ]">
-                            <img :src="'/images/country-flags/' + locale.flag + '.svg'" class="w-4 h-4 lang-flag" :alt="locale.name" />
-                            <span>{{ locale.name }}</span>
-                        </button>
-                    </div>
+                <div class="mobile-divider"></div>
+
+                <!-- Language -->
+                <div class="mobile-section-label">{{ $t('nav.language') }}</div>
+                <div class="mobile-lang-grid">
+                    <button v-for="loc in availableLocales" :key="loc.code" class="mobile-lang-btn"
+                        :class="{ active: loc.code === currentLocale.code }" @click="changeLanguage(loc.code)">
+                        <img :src="'/images/country-flags/' + loc.flag + '.svg'" class="flag-img" :alt="loc.name" />
+                        <span>{{ loc.name }}</span>
+                    </button>
                 </div>
 
-                <!-- Theme Toggle (Mobile) -->
-                <div class="px-3 py-2">
-                    <div class="text-sm font-medium text-gray-500 mb-2">{{ $t('settings.personal.theme') }}</div>
-                    <div class="grid grid-cols-3 gap-2">
-                        <button @click="themeStore.setTheme('light')" :class="[
-                            'flex items-center justify-center px-3 py-2 text-sm rounded-md transition-colors duration-150',
-                            themeStore.preference === 'light' ? 'bg-primary/10 text-primary border border-primary' : 'bg-gray-100 text-gray-700'
-                        ]">
-                            <SunIcon class="w-4 h-4 mr-1" />
-                            {{ $t('settings.personal.themeLight') }}
-                        </button>
-                        <button @click="themeStore.setTheme('dark')" :class="[
-                            'flex items-center justify-center px-3 py-2 text-sm rounded-md transition-colors duration-150',
-                            themeStore.preference === 'dark' ? 'bg-primary/10 text-primary border border-primary' : 'bg-gray-100 text-gray-700'
-                        ]">
-                            <MoonIcon class="w-4 h-4 mr-1" />
-                            {{ $t('settings.personal.themeDark') }}
-                        </button>
-                        <button @click="themeStore.setTheme('system')" :class="[
-                            'flex items-center justify-center px-3 py-2 text-sm rounded-md transition-colors duration-150',
-                            themeStore.preference === 'system' ? 'bg-primary/10 text-primary border border-primary' : 'bg-gray-100 text-gray-700'
-                        ]">
-                            {{ $t('settings.personal.themeSystem') }}
-                        </button>
-                    </div>
+                <div class="mobile-divider"></div>
+
+                <!-- Theme -->
+                <div class="mobile-section-label">{{ $t('settings.personal.theme') }}</div>
+                <div class="mobile-theme-grid">
+                    <button class="mobile-theme-btn" :class="{ active: themeStore.preference === 'light' }"
+                        @click="themeStore.setTheme('light')">
+                        <SunIcon class="w-4 h-4" />
+                        {{ $t('settings.personal.themeLight') }}
+                    </button>
+                    <button class="mobile-theme-btn" :class="{ active: themeStore.preference === 'dark' }"
+                        @click="themeStore.setTheme('dark')">
+                        <MoonIcon class="w-4 h-4" />
+                        {{ $t('settings.personal.themeDark') }}
+                    </button>
+                    <button class="mobile-theme-btn" :class="{ active: themeStore.preference === 'system' }"
+                        @click="themeStore.setTheme('system')">
+                        {{ $t('settings.personal.themeSystem') }}
+                    </button>
                 </div>
 
-                <!-- Mobile Auth Section -->
-                <div class="border-t border-gray-200 pt-3">
-                    <!-- Not Authenticated -->
-                    <div v-if="!authStore.isAuthenticated" class="px-3 py-2">
-                        <button @click="goToComingSoon() || authStore.login; mobileMenuOpen = false"
-                            class="w-full btn-auth hover-glow inline-flex items-center justify-center">
-                            <GoogleIcon size="16" className="mr-2" />
-                            {{ $t('auth.signInWithGoogle') }}
-                        </button>
-                    </div>
+                <div class="mobile-divider"></div>
 
-                    <!-- Authenticated User Menu -->
-                    <div v-if="authStore.isAuthenticated" class="px-3 py-2">
-                        <!-- User Info -->
-                        <div class="flex items-center space-x-3 px-3 py-2 mb-2">
-                            <img class="h-8 w-8" :src="authStore.user?.picture || '/images/default-avatar.png'"
-                                :alt="authStore.user?.name || 'User'" />
-                            <span class="text-gray-700 font-medium">{{ authStore.user?.name }}</span>
-                        </div>
-
-                        <!-- User Menu Items -->
-                        <router-link to="/dashboard" @click="mobileMenuOpen = false"
-                            class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md">
-                            {{ $t('nav.dashboard') }}
-                        </router-link>
-                        <!-- <router-link to="/profile" @click="mobileMenuOpen = false"
-                            class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md">
-                            {{ $t('nav.profile') }}
-                        </router-link> -->
-                        <button @click="authStore.logout; mobileMenuOpen = false"
-                            class="block w-full text-left px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md">
-                            {{ $t('nav.logout') }}
-                        </button>
-                    </div>
+                <!-- Auth -->
+                <div class="px-4 pb-4">
+                    <button v-if="!authStore.isAuthenticated" @click="authStore.login; mobileOpen = false"
+                        class="navbar-auth-btn w-full justify-center">
+                        <GoogleIcon size="16" className="mr-2" />
+                        {{ $t('auth.signInWithGoogle') }}
+                    </button>
+                    <button v-else @click="router.push('/app/dashboard'); mobileOpen = false"
+                        class="navbar-auth-btn w-full justify-center">
+                        {{ $t('nav.dashboard') }}
+                    </button>
                 </div>
             </div>
-        </div>
+        </Transition>
     </nav>
 </template>
 
@@ -177,18 +127,12 @@
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
+import { onClickOutside } from '@vueuse/core'
 import LogoComponent from '@/components/Logo.vue'
 import GoogleIcon from '@/components/icons/GoogleIcon.vue'
 import {
-    ChevronDownIcon,
-    Bars3Icon,
-    XMarkIcon,
-    SunIcon,
-    MoonIcon
+    ChevronDownIcon, Bars3Icon, XMarkIcon, SunIcon, MoonIcon
 } from '@heroicons/vue/24/outline'
-
-// Composables
 import { useAuthStore } from '@/stores/auth'
 import { useThemeStore } from '@/stores/theme'
 import { availableLocales, changeLocale } from '@/utils/i18n'
@@ -198,26 +142,365 @@ const { locale } = useI18n()
 const authStore = useAuthStore()
 const themeStore = useThemeStore()
 
-// State
-const mobileMenuOpen = ref(false)
+const mobileOpen = ref(false)
+const langOpen = ref(false)
+const langRef = ref(null)
 
-// Computed
-const currentLocale = computed(() => {
-    return availableLocales.find(l => l.code === locale.value) || availableLocales[0]
-})
+onClickOutside(langRef, () => { langOpen.value = false })
 
-// Methods
-async function changeLanguage(newLocale) {
-    await changeLocale(newLocale)
-}
+const currentLocale = computed(() =>
+    availableLocales.find(l => l.code === locale.value) || availableLocales[0]
+)
 
-function goToComingSoon() {
-    router.push('/coming-soon')
+async function changeLanguage(code) {
+    await changeLocale(code)
+    langOpen.value = false
+    mobileOpen.value = false
 }
 </script>
 
-<style>
-.lang-flag {
+<style scoped>
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    background: var(--sb-bg);
+    border-bottom: 1px solid var(--sb-border);
+    transition: background 0.2s, border-color 0.2s;
+}
+
+.navbar-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+}
+
+.navbar-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 60px;
+}
+
+/* ── Left ─────────────────────────────────────────────────────── */
+.navbar-left {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+}
+
+.navbar-logo-link {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    flex-shrink: 0;
+}
+
+.navbar-links {
+    display: none;
+    gap: 4px;
+}
+
+@media (min-width: 768px) {
+    .navbar-links {
+        display: flex;
+    }
+}
+
+.navbar-link {
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--sb-text);
+    text-decoration: none;
+    transition: background 0.15s, color 0.15s;
+}
+
+.navbar-link:hover {
+    background: var(--sb-item-hover);
+    color: var(--sb-text-hover);
+}
+
+/* ── Right ────────────────────────────────────────────────────── */
+.navbar-right {
+    display: none;
+    align-items: center;
+    gap: 8px;
+}
+
+@media (min-width: 768px) {
+    .navbar-right {
+        display: flex;
+    }
+}
+
+.navbar-icon-btn {
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--sb-icon-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+
+.navbar-icon-btn:hover {
+    background: var(--sb-item-hover);
+    color: var(--sb-icon-hover);
+}
+
+/* ── Language ─────────────────────────────────────────────────── */
+.lang-wrap {
+    position: relative;
+}
+
+.lang-trigger {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 10px;
+    border: none;
+    border-radius: 8px;
+    background: var(--toggle-bg);
+    color: var(--sb-text-hover);
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.lang-trigger:hover {
+    background: var(--sb-item-hover);
+}
+
+.flag-img {
+    width: 20px;
+    height: 14px;
     object-fit: cover;
+    border-radius: 2px;
+    flex-shrink: 0;
+}
+
+.lang-chevron {
+    color: var(--sb-icon-muted);
+    transition: transform 0.2s;
+}
+
+.lang-chevron.rotated {
+    transform: rotate(180deg);
+}
+
+.lang-dropdown {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    min-width: 160px;
+    background: var(--sb-menu-bg);
+    border: 1px solid var(--sb-menu-border);
+    border-radius: 10px;
+    padding: 6px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    z-index: 100;
+}
+
+.lang-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 8px 10px;
+    border: none;
+    border-radius: 7px;
+    background: transparent;
+    color: var(--sb-menu-text);
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.12s, color 0.12s;
+    text-align: left;
+}
+
+.lang-option:hover {
+    background: var(--sb-item-hover);
+    color: var(--sb-text-hover);
+}
+
+.lang-option.active {
+    color: var(--ws-purple);
+    font-weight: 600;
+}
+
+/* ── Auth button ──────────────────────────────────────────────── */
+.navbar-auth-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: var(--ws-purple);
+    color: #fff;
+    border: none;
+    border-radius: 9px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, box-shadow 0.15s;
+    white-space: nowrap;
+}
+
+.navbar-auth-btn:hover {
+    background: #6D28D9;
+    box-shadow: 0 4px 16px rgba(124, 58, 237, 0.3);
+}
+
+/* ── Mobile burger ────────────────────────────────────────────── */
+.mobile-burger {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--sb-icon-muted);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+
+.mobile-burger:hover {
+    background: var(--sb-item-hover);
+    color: var(--sb-icon-hover);
+}
+
+@media (min-width: 768px) {
+    .mobile-burger {
+        display: none;
+    }
+}
+
+/* ── Mobile menu ──────────────────────────────────────────────── */
+.mobile-menu {
+    background: var(--sb-bg);
+    border-top: 1px solid var(--sb-border);
+    padding: 8px 0 0;
+}
+
+.mobile-link {
+    display: block;
+    padding: 10px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--sb-text-hover);
+    text-decoration: none;
+    transition: background 0.12s;
+}
+
+.mobile-link:hover {
+    background: var(--sb-item-hover);
+}
+
+.mobile-divider {
+    height: 1px;
+    background: var(--sb-border);
+    margin: 8px 0;
+}
+
+.mobile-section-label {
+    padding: 4px 16px 8px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--sb-text);
+}
+
+.mobile-lang-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    padding: 0 16px;
+}
+
+.mobile-lang-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 10px;
+    border: none;
+    border-radius: 8px;
+    background: var(--toggle-bg);
+    color: var(--sb-text-hover);
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.12s;
+}
+
+.mobile-lang-btn:hover {
+    background: var(--sb-item-hover);
+}
+
+.mobile-lang-btn.active {
+    background: var(--sb-item-active-bg);
+    color: var(--sb-text-active);
+    font-weight: 600;
+}
+
+.mobile-theme-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    padding: 0 16px;
+    margin-bottom: 8px;
+}
+
+.mobile-theme-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 8px 6px;
+    border: none;
+    border-radius: 8px;
+    background: var(--toggle-bg);
+    color: var(--sb-text-hover);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.12s;
+}
+
+.mobile-theme-btn:hover {
+    background: var(--sb-item-hover);
+}
+
+.mobile-theme-btn.active {
+    background: var(--toggle-active-bg);
+    color: var(--toggle-icon-active);
+}
+
+/* ── Transitions ──────────────────────────────────────────────── */
+.menu-pop-enter-active,
+.menu-pop-leave-active {
+    transition: opacity 0.15s, transform 0.15s;
+}
+
+.menu-pop-enter-from,
+.menu-pop-leave-to {
+    opacity: 0;
+    transform: translateY(6px);
+}
+
+.mobile-drop-enter-active,
+.mobile-drop-leave-active {
+    transition: opacity 0.15s;
+}
+
+.mobile-drop-enter-from,
+.mobile-drop-leave-to {
+    opacity: 0;
 }
 </style>
