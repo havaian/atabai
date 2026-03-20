@@ -6,7 +6,7 @@
         <div class="cs-inner">
 
             <!-- Brand -->
-            <div class="cs-brand">
+            <div class="`cs-brand`">
                 <div class="cs-logo">
                     <LogoComponent class="w-8 h-8" />
                 </div>
@@ -26,15 +26,15 @@
             <div class="cs-channels">
                 <button class="cs-channel" @click="openTelegram">
                     <TelegramIcon class="w-5 h-5" />
-                    <span>{{ $t('description.telegram') }}</span>
+                    <span>{{ $t('comingSoon.telegram') }}</span>
                 </button>
                 <button class="cs-channel" @click="openMail">
                     <EnvelopeIcon class="w-5 h-5" />
-                    <span>{{ $t('description.email') }}</span>
+                    <span>{{ $t('comingSoon.email') }}</span>
                 </button>
                 <button class="cs-channel" @click="openInstagram">
                     <InstagramIcon class="w-5 h-5" />
-                    <span>{{ $t('description.instagram') }}</span>
+                    <span>{{ $t('comingSoon.instagram') }}</span>
                 </button>
             </div>
 
