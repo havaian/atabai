@@ -25,6 +25,14 @@
 
                 <!-- Desktop User Menu -->
                 <div class="hidden md:flex items-center space-x-4">
+                    <!-- Theme Toggle -->
+                    <button @click="themeStore.toggle()"
+                        class="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
+                        :title="themeStore.isDark ? $t('settings.personal.themeLight') : $t('settings.personal.themeDark')">
+                        <SunIcon v-if="themeStore.isDark" class="w-5 h-5 text-yellow-500" />
+                        <MoonIcon v-else class="w-5 h-5 text-gray-600" />
+                    </button>
+
                     <!-- Language Selector -->
                     <div class="relative group">
                         <div
@@ -51,49 +59,7 @@
                             {{ $t('auth.signInWithGoogle') }}
                         </button>
                     </div>
-
-                    <!-- User Dropdown -->
-                    <div v-if="authStore.isAuthenticated" class="relative group">
-                        <Menu as="div" class="relative inline-block text-left">
-                            <MenuButton
-                                class="flex items-center space-x-3 text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary btn-auth hover-glow">
-                                <img class="h-8 w-8 rounded-full"
-                                    :src="authStore.user?.picture || '/images/default-avatar.png'"
-                                    :alt="authStore.user?.name || 'User'" />
-                                <span class="hidden lg:block text-gray-700">{{ authStore.user?.name }}</span>
-                            </MenuButton>
-                            <MenuItems
-                                class="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                                <MenuItem v-slot="{ active }">
-                                <router-link to="/dashboard"
-                                    :class="[active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700']">
-                                    {{ $t('nav.dashboard') }}
-                                </router-link>
-                                </MenuItem>
-                                <MenuItem v-slot="{ active }">
-                                <!-- <router-link to="/profile"
-                                    :class="[active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700']">
-                                    {{ $t('nav.profile') }}
-                                </router-link> -->
-                                </MenuItem>
-                                <MenuItem v-slot="{ active }">
-                                <button @click="authStore.logout"
-                                    :class="[active ? 'bg-gray-100' : '', 'block w-full text-left px-4 py-2 text-sm text-gray-700']">
-                                    {{ $t('nav.logout') }}
-                                </button>
-                                </MenuItem>
-                            </MenuItems>
-                        </Menu>
-                    </div>
                 </div>
-
-                <!-- Theme Toggle -->
-                <button @click="themeStore.toggle()"
-                    class="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
-                    :title="themeStore.isDark ? $t('settings.personal.themeLight') : $t('settings.personal.themeDark')">
-                    <SunIcon v-if="themeStore.isDark" class="w-5 h-5 text-yellow-500" />
-                    <MoonIcon v-else class="w-5 h-5 text-gray-600" />
-                </button>
 
                 <!-- Mobile menu button -->
                 <div class="flex md:hidden">
