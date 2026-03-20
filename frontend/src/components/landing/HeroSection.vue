@@ -39,8 +39,6 @@ import { ArrowRightIcon } from '@heroicons/vue/24/outline'
 const { t } = useI18n()
 defineEmits(['bookDemo'])
 
-defineEmits(['bookDemo'])
-
 function scrollToHowItWorks() {
     const el = document.getElementById('how-it-works')
     if (el) el.scrollIntoView({ behavior: 'smooth' })
