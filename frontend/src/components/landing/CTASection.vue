@@ -1,7 +1,7 @@
 <template>
     <section class="cta-section">
         <div class="cta-inner">
-            <div class="cta-card">
+            <div class="cta-card" :class="{ 'cta-card-dark': themeStore.isDark }">
                 <div class="cta-glow" aria-hidden="true"></div>
                 <div class="cta-content">
                     <h2 class="cta-title">{{ $t('finalCta.title') }}</h2>
@@ -21,7 +21,9 @@
 
 <script setup>
 import { ArrowRightIcon } from '@heroicons/vue/24/outline'
+import { useThemeStore } from '@/stores/theme'
 defineEmits(['bookDemo'])
+const themeStore = useThemeStore()
 </script>
 
 <style scoped>
@@ -43,8 +45,8 @@ defineEmits(['bookDemo'])
     background: linear-gradient(135deg, #9500FF 0%, #7C3AED 40%, #5B21B6 100%);
 }
 
-:global(.dark) .cta-card {
-    background: linear-gradient(135deg, #4A007A 0%, #3B1A7A 40%, #2D1560 100%);
+.cta-card-dark {
+    background: linear-gradient(135deg, #1E0040 0%, #1A0F3D 40%, #120A2E 100%);
 }
 
 .cta-glow {
