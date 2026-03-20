@@ -40,6 +40,7 @@ function openLink(url) {
     margin: 0 auto;
     padding: 32px 24px 48px;
     border-top: 1px solid var(--landing-border);
+    background: var(--landing-bg);
 }
 
 @media (min-width: 768px) {

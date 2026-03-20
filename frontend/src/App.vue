@@ -1,5 +1,5 @@
 <template>
-    <div id="app" class="min-h-screen bg-gray-50">
+    <div id="app" class="min-h-screen" style="background: var(--landing-bg)">
         <!-- Navigation -->
         <Navbar v-if="showNavbar" />
 
@@ -9,7 +9,9 @@
         </div>
 
         <!-- Footer -->
-        <Footer v-if="showFooter" />
+        <div v-if="showFooter" style="background: var(--landing-bg)">
+            <Footer />
+        </div>
 
         <!-- Loading Overlay -->
         <div v-if="authStore.isLoading"
