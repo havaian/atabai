@@ -50,6 +50,7 @@ function scrollToHowItWorks() {
 .hero-section {
     position: relative;
     display: flex;
+    text-align: center;
     flex-direction: column;
     align-items: center;
     justify-content: center;
