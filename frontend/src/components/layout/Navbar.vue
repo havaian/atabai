@@ -29,8 +29,7 @@
                     <div class="relative group">
                         <div
                             class="flex items-center gap-1.5 bg-gray-100 px-3 py-2 rounded-md hover:bg-gray-200 cursor-pointer transition-colors duration-200">
-                            <img :src="'/images/country-flags/' + currentLocale.flag + '.svg'" class="w-4 h-4"
-                                :alt="currentLocale.name" />
+                            <img :src="'/images/country-flags/' + currentLocale.flag + '.svg'" class="w-4 h-4" :alt="currentLocale.name" style="object-fit: cover;" />
                             <ChevronDownIcon class="w-4 h-4 transition-transform duration-200 group-hover:rotate-180" />
                         </div>
                         <!-- Dropdown Menu -->
