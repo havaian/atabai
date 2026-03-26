@@ -144,26 +144,95 @@
     <Transition name="drawer">
         <div v-if="!isLargeScreen && isMobileMenuOpen" class="mobile-overlay" @click="$emit('close')">
             <div class="mobile-drawer" @click.stop>
+
+                <!-- Header -->
                 <div class="mobile-header">
                     <LogoComponent class="mobile-logo" />
                     <button class="mobile-close" @click="$emit('close')">
                         <XMarkIcon class="w-5 h-5" />
                     </button>
                 </div>
-                <button class="new-file-btn mt-4 mx-4" @click="() => { navigateTo('/app/dashboard'); $emit('close') }">
-                    <PlusIcon class="w-4 h-4" />
-                    <span>{{ $t('dashboard.newProject') }}</span>
-                </button>
-                <nav class="sidebar-nav mt-2">
-                    <button class="nav-item" @click="() => { navigateTo('/app/dashboard'); $emit('close') }">
+
+                <!-- New Project -->
+                <div class="mobile-section-pad">
+                    <button class="new-file-btn" @click="() => { navigateTo('/app/dashboard'); $emit('close') }">
+                        <PlusIcon class="w-4 h-4 flex-shrink-0" />
+                        <span>{{ $t('dashboard.newProject') }}</span>
+                    </button>
+                </div>
+
+                <!-- Navigation -->
+                <nav class="sidebar-nav">
+                    <button class="nav-item" :class="{ active: $route.path === '/app/dashboard' }"
+                        @click="() => { navigateTo('/app/dashboard'); $emit('close') }">
                         <Squares2X2Icon class="nav-icon" />
                         <span class="nav-label">{{ $t('nav.dashboard') }}</span>
                     </button>
-                    <button class="nav-item" @click="() => { navigateTo('/app/history'); $emit('close') }">
+                    <button class="nav-item" :class="{ active: $route.path === '/app/history' }"
+                        @click="() => { navigateTo('/app/history'); $emit('close') }">
                         <ArchiveBoxIcon class="nav-icon" />
                         <span class="nav-label">{{ $t('nav.history') }}</span>
                     </button>
+                    <button class="nav-item" @click="() => { navigateTo('/app/settings'); $emit('close') }">
+                        <Cog6ToothIcon class="nav-icon" />
+                        <span class="nav-label">{{ $t('dashboard.settings') }}</span>
+                    </button>
                 </nav>
+
+                <div class="mobile-divider-line"></div>
+
+                <!-- Theme -->
+                <div class="mobile-section-pad">
+                    <div class="mobile-label">{{ $t('settings.personal.theme') }}</div>
+                    <div class="theme-pill" style="max-width: 180px;">
+                        <button class="theme-pill-btn" :class="{ active: currentTheme === 'light' }"
+                            @click="setTheme('light')">
+                            <SunIcon class="w-4 h-4" />
+                            <span style="font-size: 12px; margin-left: 4px;">{{ $t('settings.personal.themeLight')
+                                }}</span>
+                        </button>
+                        <button class="theme-pill-btn" :class="{ active: currentTheme === 'dark' }"
+                            @click="setTheme('dark')">
+                            <MoonIcon class="w-4 h-4" />
+                            <span style="font-size: 12px; margin-left: 4px;">{{ $t('settings.personal.themeDark')
+                                }}</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Language -->
+                <div class="mobile-section-pad">
+                    <div class="mobile-label">{{ $t('nav.language') }}</div>
+                    <div class="mobile-lang-grid">
+                        <button v-for="lang in languages" :key="lang.code" class="mobile-lang-btn"
+                            :class="{ active: selectedLanguage === lang.code }" @click="selectLanguage(lang.code)">
+                            <img :src="langFlagSrc(lang.flag)" :alt="lang.name" class="mobile-lang-flag" />
+                            <span>{{ lang.name }}</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Spacer -->
+                <div style="flex: 1; min-height: 0;"></div>
+
+                <!-- Profile + Sign out -->
+                <div class="mobile-profile">
+                    <div class="mobile-profile-info">
+                        <div class="profile-avatar">
+                            <img v-if="authStore.user?.picture" :src="authStore.user.picture" alt="avatar"
+                                class="avatar-img" />
+                            <span v-else class="avatar-initials">{{ initials }}</span>
+                        </div>
+                        <div class="mobile-profile-text">
+                            <span class="profile-name">{{ authStore.user?.name }}</span>
+                            <span class="profile-plan">{{ authStore.subscriptionType }}</span>
+                        </div>
+                    </div>
+                    <button class="mobile-signout-btn" @click="handleSignOut">
+                        <ArrowRightOnRectangleIcon class="w-4 h-4" />
+                    </button>
+                </div>
+
             </div>
         </div>
     </Transition>
@@ -985,5 +1054,108 @@ onUnmounted(() => window.removeEventListener('resize', onResize))
 .drawer-enter-from,
 .drawer-leave-to {
     opacity: 0;
+}
+
+.mobile-section-pad {
+    padding: 8px 14px;
+    flex-shrink: 0;
+}
+ 
+.mobile-divider-line {
+    height: 1px;
+    background: var(--sb-border);
+    margin: 6px 14px;
+    flex-shrink: 0;
+}
+ 
+.mobile-label {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--sb-text);
+    margin-bottom: 8px;
+}
+ 
+.mobile-lang-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+}
+ 
+.mobile-lang-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 10px;
+    border: none;
+    border-radius: 8px;
+    background: var(--toggle-bg);
+    color: var(--sb-text-hover);
+    font-size: 12px;
+    cursor: pointer;
+    transition: background 0.12s;
+}
+ 
+.mobile-lang-btn:hover {
+    background: var(--sb-item-hover);
+}
+ 
+.mobile-lang-btn.active {
+    background: var(--sb-item-active-bg);
+    color: var(--sb-text-active);
+    font-weight: 600;
+}
+ 
+.mobile-lang-flag {
+    width: 18px;
+    height: 13px;
+    object-fit: cover;
+    border-radius: 2px;
+    flex-shrink: 0;
+}
+ 
+/* Profile strip at bottom */
+.mobile-profile {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 14px 28px;
+    border-top: 1px solid var(--sb-profile-border);
+    flex-shrink: 0;
+}
+ 
+.mobile-profile-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+ 
+.mobile-profile-text {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
+}
+ 
+.mobile-signout-btn {
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--sb-icon-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.12s, color 0.12s;
+}
+ 
+.mobile-signout-btn:hover {
+    background: rgba(239, 68, 68, 0.08);
+    color: #ef4444;
 }
 </style>
