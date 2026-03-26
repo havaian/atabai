@@ -30,21 +30,42 @@ import { Bars3Icon } from '@heroicons/vue/24/outline'
 import LogoComponent from '@/components/Logo.vue'
 import LandingMenuSidebar from '@/components/landing/LandingMenuSidebar.vue'
 import { useLandingMenu } from '@/composables/useLandingMenu'
+import { useThemeStore } from '@/stores/theme'
 
 const { menuOpen } = useLandingMenu()
 const route = useRoute()
+const themeStore = useThemeStore()
 
-// Toggle #app class + body scroll lock when menu opens/closes
+// Body background colors for the void behind the receded #app
+const BODY_BG_DARK = '#08060f'   // deep purple-black
+const BODY_BG_LIGHT = '#ddd5ef'   // muted lavender
+
+function applyBodyBg() {
+    document.body.style.background = themeStore.isDark ? BODY_BG_DARK : BODY_BG_LIGHT
+}
+
+function resetBodyBg() {
+    document.body.style.background = ''
+}
+
+// Toggle #app class + body scroll lock + themed body bg when menu opens/closes
 watch(menuOpen, (v) => {
     const app = document.getElementById('app')
     if (!app) return
     if (v) {
+        applyBodyBg()
         app.classList.add('landing-menu-open')
         document.body.style.overflow = 'hidden'
     } else {
         app.classList.remove('landing-menu-open')
         document.body.style.overflow = ''
+        resetBodyBg()
     }
+})
+
+// If theme changes while menu is open, update body bg in real time
+watch(() => themeStore.isDark, () => {
+    if (menuOpen.value) applyBodyBg()
 })
 
 // Close on route navigation
@@ -66,6 +87,7 @@ onUnmounted(() => {
     const app = document.getElementById('app')
     if (app) app.classList.remove('landing-menu-open')
     document.body.style.overflow = ''
+    resetBodyBg()
 })
 </script>
 
@@ -126,11 +148,6 @@ onUnmounted(() => {
      #app is the pusher. LandingMenuSidebar teleports outside it.
      ───────────────────────────────────────────────────────────── -->
 <style>
-/* Dark purple-grey backdrop shown behind the receded #app */
-body {
-    background: #0e0a1a;
-}
-
 /* Smooth transition always present so reverse animation works */
 #app {
     transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1),

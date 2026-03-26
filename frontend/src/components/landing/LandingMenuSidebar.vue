@@ -65,10 +65,6 @@
                             <MoonIcon class="w-4 h-4" />
                             {{ $t('settings.personal.themeDark') }}
                         </button>
-                        <!-- <button class="lsb-theme-btn" :class="{ active: themeStore.preference === 'system' }"
-                            @click="themeStore.setTheme('system')">
-                            {{ $t('settings.personal.themeSystem') }}
-                        </button> -->
                     </div>
                 </div>
 
@@ -302,7 +298,7 @@ function handleNavClick() {
 /* Theme grid */
 .lsb-theme-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 6px;
 }
 

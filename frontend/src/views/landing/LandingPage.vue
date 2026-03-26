@@ -79,7 +79,7 @@ onMounted(() => {
 
 @media (max-width: 768px) {
     .landing-hero-area {
-        padding: 0 4rem 2rem 4rem;
+        padding: 2rem 4rem;
     }
 }
 </style>
