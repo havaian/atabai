@@ -30,42 +30,21 @@ import { Bars3Icon } from '@heroicons/vue/24/outline'
 import LogoComponent from '@/components/Logo.vue'
 import LandingMenuSidebar from '@/components/landing/LandingMenuSidebar.vue'
 import { useLandingMenu } from '@/composables/useLandingMenu'
-import { useThemeStore } from '@/stores/theme'
 
 const { menuOpen } = useLandingMenu()
 const route = useRoute()
-const themeStore = useThemeStore()
 
-// Body background colors for the void behind the receded #app
-const BODY_BG_DARK = '#08060f'   // deep purple-black
-const BODY_BG_LIGHT = '#ddd5ef'   // muted lavender
-
-function applyBodyBg() {
-    document.body.style.background = themeStore.isDark ? BODY_BG_DARK : BODY_BG_LIGHT
-}
-
-function resetBodyBg() {
-    document.body.style.background = ''
-}
-
-// Toggle #app class + body scroll lock + themed body bg when menu opens/closes
+// Toggle #app class + body scroll lock when menu opens/closes
 watch(menuOpen, (v) => {
     const app = document.getElementById('app')
     if (!app) return
     if (v) {
-        applyBodyBg()
         app.classList.add('landing-menu-open')
         document.body.style.overflow = 'hidden'
     } else {
         app.classList.remove('landing-menu-open')
         document.body.style.overflow = ''
-        resetBodyBg()
     }
-})
-
-// If theme changes while menu is open, update body bg in real time
-watch(() => themeStore.isDark, () => {
-    if (menuOpen.value) applyBodyBg()
 })
 
 // Close on route navigation
@@ -83,11 +62,9 @@ function onKeyDown(e) {
 onMounted(() => document.addEventListener('keydown', onKeyDown))
 onUnmounted(() => {
     document.removeEventListener('keydown', onKeyDown)
-    // Cleanup in case component unmounts while menu is open
     const app = document.getElementById('app')
     if (app) app.classList.remove('landing-menu-open')
     document.body.style.overflow = ''
-    resetBodyBg()
 })
 </script>
 
@@ -148,6 +125,17 @@ onUnmounted(() => {
      #app is the pusher. LandingMenuSidebar teleports outside it.
      ───────────────────────────────────────────────────────────── -->
 <style>
+/* Body background behind the receded #app — pure CSS, reacts to theme instantly,
+   no JS timing flash. data-theme is set on <html> before Vue even mounts. */
+[data-theme="dark"] body,
+html.dark body {
+    background: #08060f;
+}
+
+[data-theme="light"] body {
+    background: #ddd5ef;
+}
+
 /* Smooth transition always present so reverse animation works */
 #app {
     transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1),
