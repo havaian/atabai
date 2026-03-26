@@ -184,7 +184,7 @@
                 <!-- Theme -->
                 <div class="mobile-section-pad">
                     <div class="mobile-label">{{ $t('settings.personal.theme') }}</div>
-                    <div class="theme-pill" style="max-width: 180px;">
+                    <div class="theme-pill">
                         <button class="theme-pill-btn" :class="{ active: currentTheme === 'light' }"
                             @click="setTheme('light')">
                             <SunIcon class="w-4 h-4" />
