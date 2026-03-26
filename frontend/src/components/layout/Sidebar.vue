@@ -207,7 +207,6 @@
                         <button v-for="lang in languages" :key="lang.code" class="mobile-lang-btn"
                             :class="{ active: selectedLanguage === lang.code }" @click="selectLanguage(lang.code)">
                             <img :src="langFlagSrc(lang.flag)" :alt="lang.name" class="mobile-lang-flag" />
-                            <span>{{ lang.name }}</span>
                         </button>
                     </div>
                 </div>
@@ -1078,7 +1077,8 @@ onUnmounted(() => window.removeEventListener('resize', onResize))
 }
 
 .mobile-lang-grid {
-    display: flex;
+    display: inline-grid;
+    grid-template-columns: repeat(3, 1fr);
     gap: 6px;
 }
 
@@ -1086,7 +1086,7 @@ onUnmounted(() => window.removeEventListener('resize', onResize))
     display: flex;
     align-items: center;
     gap: 6px;
-    padding: 8px 10px;
+    padding: 0.5rem 0.5rem;
     border: none;
     border-radius: 8px;
     background: var(--toggle-bg);
