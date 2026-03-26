@@ -194,7 +194,7 @@ const tabs = [
 const themeOptions = [
     { value: 'light', label: t('settings.personal.themeLight'), icon: SunIcon },
     { value: 'dark', label: t('settings.personal.themeDark'), icon: MoonIcon },
-    { value: 'system', label: t('settings.personal.themeSystem'), icon: ComputerDesktopIcon },
+    // { value: 'system', label: t('settings.personal.themeSystem'), icon: ComputerDesktopIcon },
 ]
 
 const currentTab = computed(() => tabs.find(t => t.key === activeTab.value))

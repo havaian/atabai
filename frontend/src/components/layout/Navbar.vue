@@ -99,10 +99,10 @@
                         <MoonIcon class="w-4 h-4" />
                         {{ $t('settings.personal.themeDark') }}
                     </button>
-                    <button class="mobile-theme-btn" :class="{ active: themeStore.preference === 'system' }"
+                    <!-- <button class="mobile-theme-btn" :class="{ active: themeStore.preference === 'system' }"
                         @click="themeStore.setTheme('system')">
                         {{ $t('settings.personal.themeSystem') }}
-                    </button>
+                    </button> -->
                 </div>
 
                 <div class="mobile-divider"></div>
