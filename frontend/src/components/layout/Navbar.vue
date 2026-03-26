@@ -109,7 +109,7 @@
 
                 <!-- Auth -->
                 <div class="px-4 pb-4">
-                    <button v-if="!authStore.isAuthenticated" @click="authStore.login; mobileOpen = false"
+                    <button v-if="!authStore.isAuthenticated" @click="authStore.login(); mobileOpen = false"
                         class="btn-auth hover-glow inline-flex items-center justify-center w-full">
                         <GoogleIcon size="16" className="mr-2" />
                         {{ $t('auth.signInWithGoogle') }}

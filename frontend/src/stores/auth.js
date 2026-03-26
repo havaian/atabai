@@ -27,7 +27,7 @@ export const useAuthStore = defineStore('auth', () => {
             // Redirect directly to Google OAuth (ORIGINAL WORKING VERSION)
             const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
                 `client_id=${import.meta.env.VITE_GOOGLE_CLIENT_ID}&` +
-                `redirect_uri=${encodeURIComponent(window.location.origin)}/auth/callback&` +
+                `redirect_uri=${encodeURIComponent(import.meta.env.VITE_API_BASE_URL)}/auth/callback&` +
                 `response_type=code&` +
                 `scope=profile email&` +
                 `access_type=offline&` +
