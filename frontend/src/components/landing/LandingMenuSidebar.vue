@@ -65,10 +65,10 @@
                             <MoonIcon class="w-4 h-4" />
                             {{ $t('settings.personal.themeDark') }}
                         </button>
-                        <button class="lsb-theme-btn" :class="{ active: themeStore.preference === 'system' }"
+                        <!-- <button class="lsb-theme-btn" :class="{ active: themeStore.preference === 'system' }"
                             @click="themeStore.setTheme('system')">
                             {{ $t('settings.personal.themeSystem') }}
-                        </button>
+                        </button> -->
                     </div>
                 </div>
 
@@ -135,8 +135,17 @@ function handleNavClick() {
     position: fixed;
     inset: 0;
     z-index: 998;
-    /* No fill — the receded #app visually signals the open state */
+    /* Transparent on desktop — the receded #app signals open state */
+    background: transparent;
     cursor: pointer;
+}
+
+/* On mobile where #app doesn't move — show a dim overlay */
+@media (max-width: 768px) {
+    .lsb-backdrop {
+        background: rgba(0, 0, 0, 0.45);
+        backdrop-filter: blur(2px);
+    }
 }
 
 /* ── Panel ───────────────────────────────────────────────── */

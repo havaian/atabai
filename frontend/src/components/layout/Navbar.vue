@@ -126,30 +126,37 @@ onUnmounted(() => {
      #app is the pusher. LandingMenuSidebar teleports outside it.
      ───────────────────────────────────────────────────────────── -->
 <style>
-/* Body background must match app bg so the gap behind #app is invisible */
+/* Dark purple-grey backdrop shown behind the receded #app */
 body {
-    background: var(--landing-bg);
+    background: #0e0a1a;
 }
 
 /* Smooth transition always present so reverse animation works */
 #app {
-    transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1), border-radius 0.45s;
-    /* transform-origin left so the scale anchors from left side */
+    transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1),
+        border-radius 0.45s,
+        box-shadow 0.45s;
     transform-origin: left center;
 }
 
-/* Pusher state — desktop */
-#app.landing-menu-open {
-    transform: translateX(-220px) scale(0.88) rotate(-1.5deg);
-    border-radius: 16px;
-    overflow: hidden;
+/* Pusher state — desktop only */
+@media (min-width: 769px) {
+    #app.landing-menu-open {
+        transform: translateX(-220px) scale(0.88) rotate(-1.5deg);
+        border-radius: 16px;
+        overflow: hidden;
+        /* Visible left edge so the separation is clear */
+        box-shadow: -1px 0 0 0 rgba(149, 0, 255, 0.35),
+            0 0 60px rgba(0, 0, 0, 0.6);
+    }
 }
 
-/* Pusher state — mobile */
+/* Mobile — no push effect, sidebar just overlays */
 @media (max-width: 768px) {
     #app.landing-menu-open {
-        transform: translateX(-250px) scale(0.85);
-        border-radius: 12px;
+        transform: none;
+        border-radius: 0;
+        overflow: visible;
     }
 }
 </style>
