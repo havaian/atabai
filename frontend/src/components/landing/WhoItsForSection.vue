@@ -176,7 +176,7 @@ const audiences = [
 
 @media (max-width: 768px) {
     .wif-section {
-        padding: 4rem 1rem;
+        padding: 4rem 1.25rem;
     }
 
     .wif-grid {

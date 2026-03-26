@@ -718,7 +718,7 @@ const templates = [
 
 @media (max-width: 768px) {
     .hiw-section {
-        padding: 4rem 1rem;
+        padding: 4rem 1.25rem;
     }
 
     .hiw-layout {

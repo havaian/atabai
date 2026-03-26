@@ -289,7 +289,7 @@ import {
 
 @media (max-width: 768px) {
     .feat-section {
-        padding: 4rem 1rem;
+        padding: 4rem 1.25rem;
     }
 
     .feat-bento {

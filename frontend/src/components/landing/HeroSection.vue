@@ -331,7 +331,7 @@ function scrollToHowItWorks() {
 /* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
     .hero-section {
-        padding: 4rem 1rem 1.5rem;
+        padding: 4rem 1.25rem 1.5rem;
     }
 
     .hero-actions {
