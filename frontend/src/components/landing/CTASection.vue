@@ -130,7 +130,7 @@ const themeStore = useThemeStore()
 
 @media (max-width: 768px) {
     .cta-section {
-        padding: 1.5rem 1.25rem 4rem;
+        padding: 0 4rem 2rem 4rem;
     }
 
     .cta-card {
