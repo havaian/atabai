@@ -25,8 +25,54 @@ const isTouch = ref(false)
 const isHover = ref(false)
 const isClicking = ref(false)
 
-// ─── Accent color ─────────────────────────────────────────────────────────────
-const ACCENT = { r: 149, g: 0, b: 255 }
+// ─── Accent colors ────────────────────────────────────────────────────────────
+const PURPLE = { r: 149, g: 0, b: 255 }
+const WHITE = { r: 255, g: 255, b: 255 }
+
+// Current ripple color — switches when cursor is over purple bg
+let rippleColor = PURPLE
+
+// Walk up the DOM to find first element with a non-transparent background.
+// If it's purple-ish (matches #9500FF region), return WHITE so cursor is visible.
+function resolveAccentForEl(el) {
+    let node = el
+    while (node && node !== document.body) {
+        const bg = window.getComputedStyle(node).backgroundColor
+        const m = bg.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?/)
+        if (m) {
+            const r = +m[1], g = +m[2], b = +m[3]
+            const a = m[4] !== undefined ? +m[4] : 1
+            // Skip transparent
+            if (a === 0) { node = node.parentElement; continue }
+            // "Purple-ish": R > 80, G < 80, B > 120
+            if (r > 80 && g < 80 && b > 120) return WHITE
+            // Found a non-transparent non-purple bg — stop walking
+            break
+        }
+        node = node.parentElement
+    }
+    return PURPLE
+}
+
+function applyCursorColor(color) {
+    if (!dotEl.value || !ringEl.value) return
+    const isWhite = color === WHITE
+
+    dotEl.value.style.background = isWhite
+        ? 'rgba(255,255,255,0.95)'
+        : '#9500FF'
+
+    ringEl.value.style.borderColor = isWhite
+        ? 'rgba(255,255,255,0.7)'
+        : 'rgba(149,0,255,0.55)'
+
+    // Clear inline bg when switching back to purple (CSS handles hover/click states)
+    ringEl.value.style.background = isWhite
+        ? 'rgba(255,255,255,0.08)'
+        : ''
+
+    rippleColor = color
+}
 
 // ─── Canvas ripple state ───────────────────────────────────────────────────────
 let ctx = null
@@ -34,16 +80,15 @@ let ripples = []
 let rafId = null
 let lastRipple = 0
 
-// Throttle: one ripple per N ms while moving
 const RIPPLE_THROTTLE = 40
 
-function spawnRipple(x, y) {
+function spawnRipple(x, y, color = rippleColor) {
     ripples.push({
         x, y,
         r: 0,
-        maxR: 55 + Math.random() * 25,   // 55–80px
         alpha: 0.22,
-        speed: 1.4 + Math.random() * 0.8  // px per frame
+        speed: 1.4 + Math.random() * 0.8,
+        color
     })
 }
 
@@ -56,11 +101,11 @@ function drawRipples() {
 
     for (const rp of ripples) {
         rp.r += rp.speed
-        rp.alpha *= 0.93   // fade multiplier per frame
+        rp.alpha *= 0.93
 
         ctx.beginPath()
         ctx.arc(rp.x, rp.y, rp.r, 0, Math.PI * 2)
-        ctx.strokeStyle = `rgba(${ACCENT.r}, ${ACCENT.g}, ${ACCENT.b}, ${rp.alpha})`
+        ctx.strokeStyle = `rgba(${rp.color.r},${rp.color.g},${rp.color.b},${rp.alpha})`
         ctx.lineWidth = 1.5
         ctx.stroke()
     }
@@ -76,10 +121,8 @@ let cursorRaf = null
 function lerpCursor() {
     if (!dotEl.value || !ringEl.value) return
 
-    // Dot: exact
     dotEl.value.style.transform = `translate(${mouse.x - 4}px, ${mouse.y - 4}px)`
 
-    // Ring: lerp toward mouse
     ring.x += (mouse.x - ring.x) * 0.13
     ring.y += (mouse.y - ring.y) * 0.13
     ringEl.value.style.transform = `translate(${ring.x - 18}px, ${ring.y - 18}px)`
@@ -101,9 +144,13 @@ function onMouseMove(e) {
 
     isHover.value = isInteractive(e.target)
 
+    // Detect bg color and switch cursor + ripple color accordingly
+    const accent = resolveAccentForEl(e.target)
+    applyCursorColor(accent)
+
     const now = performance.now()
     if (now - lastRipple > RIPPLE_THROTTLE) {
-        spawnRipple(e.clientX, e.clientY)
+        spawnRipple(e.clientX, e.clientY, accent)
         lastRipple = now
     }
 }
@@ -113,16 +160,15 @@ function onMouseUp() { isClicking.value = false }
 
 function onTouchStart(e) {
     for (const t of e.touches) {
-        spawnRipple(t.clientX, t.clientY)
-        // Extra burst on tap start
-        spawnRipple(t.clientX, t.clientY)
+        spawnRipple(t.clientX, t.clientY, PURPLE)
+        spawnRipple(t.clientX, t.clientY, PURPLE)
     }
 }
 
 function onTouchMove(e) {
     const now = performance.now()
     if (now - lastRipple > RIPPLE_THROTTLE) {
-        for (const t of e.touches) spawnRipple(t.clientX, t.clientY)
+        for (const t of e.touches) spawnRipple(t.clientX, t.clientY, PURPLE)
         lastRipple = now
     }
 }
@@ -136,18 +182,14 @@ function resizeCanvas() {
 
 // ─── Lifecycle ────────────────────────────────────────────────────────────────
 onMounted(() => {
-    // Detect touch-only device
     isTouch.value = window.matchMedia('(hover: none) and (pointer: coarse)').matches
 
-    // Canvas setup
     ctx = canvasEl.value.getContext('2d')
     resizeCanvas()
     window.addEventListener('resize', resizeCanvas)
 
-    // Start ripple loop
     rafId = requestAnimationFrame(drawRipples)
 
-    // Start cursor lerp loop (desktop only)
     if (!isTouch.value) {
         cursorRaf = requestAnimationFrame(lerpCursor)
         document.addEventListener('mousemove', onMouseMove)
@@ -155,7 +197,6 @@ onMounted(() => {
         document.addEventListener('mouseup', onMouseUp)
     }
 
-    // Touch ripples (mobile)
     document.addEventListener('touchstart', onTouchStart, { passive: true })
     document.addEventListener('touchmove', onTouchMove, { passive: true })
 })
@@ -173,7 +214,6 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-/* Canvas — full viewport overlay, above everything, no pointer interception */
 .cursor-canvas {
     position: fixed;
     inset: 0;
@@ -183,7 +223,6 @@ onUnmounted(() => {
     height: 100vh;
 }
 
-/* Cursor dot — 8px solid */
 .cursor-dot {
     position: fixed;
     top: 0;
@@ -195,10 +234,9 @@ onUnmounted(() => {
     pointer-events: none;
     z-index: 9999;
     will-change: transform;
-    transition: width 0.2s, height 0.2s, background 0.2s;
+    transition: background 0.18s;
 }
 
-/* Cursor ring — 36px outline */
 .cursor-ring {
     position: fixed;
     top: 0;
@@ -210,28 +248,21 @@ onUnmounted(() => {
     pointer-events: none;
     z-index: 9998;
     will-change: transform;
-    /* ring morphs via width/height, not scale */
     transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1),
         height 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-        background 0.25s,
-        border-color 0.25s,
+        background 0.18s,
+        border-color 0.18s,
         border-radius 0.25s;
 }
 
-/* Hover state: ring expands, fills slightly */
 .cursor-ring--hover {
     width: 52px;
     height: 52px;
-    border-color: rgba(149, 0, 255, 0.8);
-    background: rgba(149, 0, 255, 0.08);
 }
 
-/* Click state: ring contracts + brightens */
 .cursor-ring--clicking {
     width: 28px;
     height: 28px;
-    border-color: #9500FF;
-    background: rgba(149, 0, 255, 0.15);
 }
 </style>
 
