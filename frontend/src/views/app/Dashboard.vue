@@ -594,7 +594,7 @@ function statusClass(status) {
 /* ─── Responsive ─────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
     .dash {
-        padding: 24px 16px 48px;
+        padding: 24px 4rem 48px;
         gap: 28px;
     }
 

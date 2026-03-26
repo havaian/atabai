@@ -1,8 +1,9 @@
+<!-- frontend/src/layouts/UserLayout.vue -->
 <template>
     <div class="ws-layout">
         <!-- Sidebar -->
-        <Sidebar :is-sidebar-open="isSidebarOpen" :is-large-screen="isLargeScreen" @toggle="toggleSidebar"
-            @close="closeSidebar" />
+        <Sidebar :is-sidebar-open="isSidebarOpen" :is-mobile-menu-open="isSidebarOpen" :is-large-screen="isLargeScreen"
+            @toggle="toggleSidebar" @close="closeSidebar" />
 
         <!-- Main content -->
         <div class="ws-main">
@@ -56,7 +57,6 @@ const closeSidebar = () => { isSidebarOpen.value = false }
     height: 100vh;
     background: var(--ws-bg);
     overflow: hidden;
-    /* prevent page-level scroll */
 }
 
 .ws-main {

@@ -69,6 +69,9 @@
             </button>
         </div>
 
+        <!-- Spacer: pushes theme/lang/profile to bottom when sidebar is collapsed -->
+        <div v-if="!isSidebarOpen" style="flex: 1; min-height: 0;"></div>
+
         <!-- Theme toggle -->
         <div class="theme-section" :class="{ 'theme-section-collapsed': !isSidebarOpen }">
             <div v-if="isSidebarOpen" class="theme-pill">

@@ -103,7 +103,7 @@
                     <button class="proc-btn-primary" @click="retryProcessing" :disabled="isRetrying">
                         <div v-if="isRetrying" class="btn-spinner"></div>
                         <ArrowPathIcon v-else class="w-4 h-4" />
-                        {{ isRetrying ? $t('processing.actions.retry') : 'processing.actions.retry' }}
+                        {{ isRetrying ? $t('processing.actions.retrying') : $t('processing.actions.retry') }}
                     </button>
                     <button class="proc-btn-secondary" @click="router.push('/app/upload')">
                         {{ $t('upload.selectedFile.chooseDifferent') }}
@@ -116,7 +116,7 @@
         <div class="proc-bottom-nav">
             <button class="proc-nav-link" @click="router.push('/app/dashboard')">
                 <Squares2X2Icon class="w-4 h-4" />
-                {{ $t('processing.common.backToDashboard') }}
+                {{ $t('common.backToDashboard') }}
             </button>
             <button class="proc-nav-link" @click="router.push('/app/history')">
                 <ArchiveBoxIcon class="w-4 h-4" />
