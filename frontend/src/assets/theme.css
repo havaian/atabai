@@ -151,3 +151,32 @@ html.dark {
     --toggle-icon: rgba(240, 236, 246, 0.35);
     --toggle-icon-active: #ffffff;
 }
+
+/* ── Global scrollbar ─────────────────────────────────────────── */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(149, 0, 255, 0.35);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(149, 0, 255, 0.6);
+}
+
+::-webkit-scrollbar-corner {
+    background: transparent;
+}
+
+/* Firefox */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(149, 0, 255, 0.35) transparent;
+}
