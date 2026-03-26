@@ -126,14 +126,21 @@ onUnmounted(() => {
      #app is the pusher. LandingMenuSidebar teleports outside it.
      ───────────────────────────────────────────────────────────── -->
 <style>
+/* Body background must match app bg so the gap behind #app is invisible */
+body {
+    background: var(--landing-bg);
+}
+
 /* Smooth transition always present so reverse animation works */
 #app {
     transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1), border-radius 0.45s;
+    /* transform-origin left so the scale anchors from left side */
+    transform-origin: left center;
 }
 
 /* Pusher state — desktop */
 #app.landing-menu-open {
-    transform: perspective(1400px) translateX(-200px) scale(0.88) rotateY(-4deg);
+    transform: translateX(-220px) scale(0.88) rotate(-1.5deg);
     border-radius: 16px;
     overflow: hidden;
 }
@@ -141,7 +148,7 @@ onUnmounted(() => {
 /* Pusher state — mobile */
 @media (max-width: 768px) {
     #app.landing-menu-open {
-        transform: perspective(800px) translateX(-240px) scale(0.86);
+        transform: translateX(-250px) scale(0.85);
         border-radius: 12px;
     }
 }
