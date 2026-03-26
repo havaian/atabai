@@ -1060,14 +1060,14 @@ onUnmounted(() => window.removeEventListener('resize', onResize))
     padding: 8px 14px;
     flex-shrink: 0;
 }
- 
+
 .mobile-divider-line {
     height: 1px;
     background: var(--sb-border);
     margin: 6px 14px;
     flex-shrink: 0;
 }
- 
+
 .mobile-label {
     font-size: 10px;
     font-weight: 600;
@@ -1076,13 +1076,12 @@ onUnmounted(() => window.removeEventListener('resize', onResize))
     color: var(--sb-text);
     margin-bottom: 8px;
 }
- 
+
 .mobile-lang-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    display: flex;
     gap: 6px;
 }
- 
+
 .mobile-lang-btn {
     display: flex;
     align-items: center;
@@ -1096,17 +1095,17 @@ onUnmounted(() => window.removeEventListener('resize', onResize))
     cursor: pointer;
     transition: background 0.12s;
 }
- 
+
 .mobile-lang-btn:hover {
     background: var(--sb-item-hover);
 }
- 
+
 .mobile-lang-btn.active {
     background: var(--sb-item-active-bg);
     color: var(--sb-text-active);
     font-weight: 600;
 }
- 
+
 .mobile-lang-flag {
     width: 18px;
     height: 13px;
@@ -1114,7 +1113,7 @@ onUnmounted(() => window.removeEventListener('resize', onResize))
     border-radius: 2px;
     flex-shrink: 0;
 }
- 
+
 /* Profile strip at bottom */
 .mobile-profile {
     display: flex;
@@ -1124,21 +1123,21 @@ onUnmounted(() => window.removeEventListener('resize', onResize))
     border-top: 1px solid var(--sb-profile-border);
     flex-shrink: 0;
 }
- 
+
 .mobile-profile-info {
     display: flex;
     align-items: center;
     gap: 10px;
     min-width: 0;
 }
- 
+
 .mobile-profile-text {
     display: flex;
     flex-direction: column;
     gap: 1px;
     min-width: 0;
 }
- 
+
 .mobile-signout-btn {
     width: 32px;
     height: 32px;
@@ -1153,7 +1152,7 @@ onUnmounted(() => window.removeEventListener('resize', onResize))
     flex-shrink: 0;
     transition: background 0.12s, color 0.12s;
 }
- 
+
 .mobile-signout-btn:hover {
     background: rgba(239, 68, 68, 0.08);
     color: #ef4444;
