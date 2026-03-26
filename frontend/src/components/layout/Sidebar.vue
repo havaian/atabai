@@ -1077,6 +1077,7 @@ onUnmounted(() => window.removeEventListener('resize', onResize))
 }
 
 .mobile-lang-grid {
+    width: 100%;
     display: inline-grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 6px;
@@ -1085,6 +1086,7 @@ onUnmounted(() => window.removeEventListener('resize', onResize))
 .mobile-lang-btn {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 6px;
     padding: 0.5rem 0.5rem;
     border: none;
