@@ -7,9 +7,11 @@
         <canvas ref="canvasEl" class="cursor-canvas" aria-hidden="true" />
 
         <!-- Custom cursor — desktop only, hidden on touch devices -->
-        <div v-if="!isTouch" class="cursor-dot" ref="dotEl" aria-hidden="true" />
-        <div v-if="!isTouch" class="cursor-ring" ref="ringEl" aria-hidden="true"
-            :class="{ 'cursor-ring--hover': isHover, 'cursor-ring--clicking': isClicking }" />
+        <template v-if="!isTouch">
+            <div class="cursor-dot" ref="dotEl" aria-hidden="true" />
+            <div class="cursor-ring" ref="ringEl" aria-hidden="true"
+                :class="{ 'cursor-ring--hover': isHover, 'cursor-ring--clicking': isClicking }" />
+        </template>
     </Teleport>
 </template>
 
@@ -25,55 +27,6 @@ const isTouch = ref(false)
 const isHover = ref(false)
 const isClicking = ref(false)
 
-// ─── Accent colors ────────────────────────────────────────────────────────────
-const PURPLE = { r: 149, g: 0, b: 255 }
-const WHITE = { r: 255, g: 255, b: 255 }
-
-// Current ripple color — switches when cursor is over purple bg
-let rippleColor = PURPLE
-
-// Walk up the DOM to find first element with a non-transparent background.
-// If it's purple-ish (matches #9500FF region), return WHITE so cursor is visible.
-function resolveAccentForEl(el) {
-    let node = el
-    while (node && node !== document.body) {
-        const bg = window.getComputedStyle(node).backgroundColor
-        const m = bg.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?/)
-        if (m) {
-            const r = +m[1], g = +m[2], b = +m[3]
-            const a = m[4] !== undefined ? +m[4] : 1
-            // Skip transparent
-            if (a === 0) { node = node.parentElement; continue }
-            // "Purple-ish": R > 80, G < 80, B > 120
-            if (r > 80 && g < 80 && b > 120) return WHITE
-            // Found a non-transparent non-purple bg — stop walking
-            break
-        }
-        node = node.parentElement
-    }
-    return PURPLE
-}
-
-function applyCursorColor(color) {
-    if (!dotEl.value || !ringEl.value) return
-    const isWhite = color === WHITE
-
-    dotEl.value.style.background = isWhite
-        ? 'rgba(255,255,255,0.95)'
-        : '#9500FF'
-
-    ringEl.value.style.borderColor = isWhite
-        ? 'rgba(255,255,255,0.7)'
-        : 'rgba(149,0,255,0.55)'
-
-    // Clear inline bg when switching back to purple (CSS handles hover/click states)
-    ringEl.value.style.background = isWhite
-        ? 'rgba(255,255,255,0.08)'
-        : ''
-
-    rippleColor = color
-}
-
 // ─── Canvas ripple state ───────────────────────────────────────────────────────
 let ctx = null
 let ripples = []
@@ -82,13 +35,12 @@ let lastRipple = 0
 
 const RIPPLE_THROTTLE = 40
 
-function spawnRipple(x, y, color = rippleColor) {
+function spawnRipple(x, y) {
     ripples.push({
         x, y,
         r: 0,
-        alpha: 0.22,
-        speed: 1.4 + Math.random() * 0.8,
-        color
+        alpha: 0.5,
+        speed: 1.4 + Math.random() * 0.8
     })
 }
 
@@ -101,11 +53,12 @@ function drawRipples() {
 
     for (const rp of ripples) {
         rp.r += rp.speed
-        rp.alpha *= 0.93
+        rp.alpha *= 0.92
 
+        // White ripples — mix-blend-mode: difference on canvas inverts bg
         ctx.beginPath()
         ctx.arc(rp.x, rp.y, rp.r, 0, Math.PI * 2)
-        ctx.strokeStyle = `rgba(${rp.color.r},${rp.color.g},${rp.color.b},${rp.alpha})`
+        ctx.strokeStyle = `rgba(255, 255, 255, ${rp.alpha})`
         ctx.lineWidth = 1.5
         ctx.stroke()
     }
@@ -113,9 +66,9 @@ function drawRipples() {
     rafId = requestAnimationFrame(drawRipples)
 }
 
-// ─── Custom cursor lerp state ──────────────────────────────────────────────────
+// ─── Custom cursor lerp ────────────────────────────────────────────────────────
 let mouse = { x: -200, y: -200 }
-let ring = { x: -200, y: -200 }
+let ringPos = { x: -200, y: -200 }
 let cursorRaf = null
 
 function lerpCursor() {
@@ -123,9 +76,9 @@ function lerpCursor() {
 
     dotEl.value.style.transform = `translate(${mouse.x - 4}px, ${mouse.y - 4}px)`
 
-    ring.x += (mouse.x - ring.x) * 0.13
-    ring.y += (mouse.y - ring.y) * 0.13
-    ringEl.value.style.transform = `translate(${ring.x - 18}px, ${ring.y - 18}px)`
+    ringPos.x += (mouse.x - ringPos.x) * 0.13
+    ringPos.y += (mouse.y - ringPos.y) * 0.13
+    ringEl.value.style.transform = `translate(${ringPos.x - 18}px, ${ringPos.y - 18}px)`
 
     cursorRaf = requestAnimationFrame(lerpCursor)
 }
@@ -133,24 +86,16 @@ function lerpCursor() {
 // ─── Interactive element detection ────────────────────────────────────────────
 const HOVER_SELECTORS = 'a, button, [role="button"], input, textarea, select, label, [tabindex]'
 
-function isInteractive(el) {
-    return !!el?.closest(HOVER_SELECTORS)
-}
-
 // ─── Event handlers ───────────────────────────────────────────────────────────
 function onMouseMove(e) {
     mouse.x = e.clientX
     mouse.y = e.clientY
 
-    isHover.value = isInteractive(e.target)
-
-    // Detect bg color and switch cursor + ripple color accordingly
-    const accent = resolveAccentForEl(e.target)
-    applyCursorColor(accent)
+    isHover.value = !!e.target?.closest(HOVER_SELECTORS)
 
     const now = performance.now()
     if (now - lastRipple > RIPPLE_THROTTLE) {
-        spawnRipple(e.clientX, e.clientY, accent)
+        spawnRipple(e.clientX, e.clientY)
         lastRipple = now
     }
 }
@@ -160,15 +105,15 @@ function onMouseUp() { isClicking.value = false }
 
 function onTouchStart(e) {
     for (const t of e.touches) {
-        spawnRipple(t.clientX, t.clientY, PURPLE)
-        spawnRipple(t.clientX, t.clientY, PURPLE)
+        spawnRipple(t.clientX, t.clientY)
+        spawnRipple(t.clientX, t.clientY)
     }
 }
 
 function onTouchMove(e) {
     const now = performance.now()
     if (now - lastRipple > RIPPLE_THROTTLE) {
-        for (const t of e.touches) spawnRipple(t.clientX, t.clientY, PURPLE)
+        for (const t of e.touches) spawnRipple(t.clientX, t.clientY)
         lastRipple = now
     }
 }
@@ -214,6 +159,7 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+/* Canvas — white ripples with difference blend = always inverts bg */
 .cursor-canvas {
     position: fixed;
     inset: 0;
@@ -221,8 +167,10 @@ onUnmounted(() => {
     pointer-events: none;
     width: 100vw;
     height: 100vh;
+    mix-blend-mode: difference;
 }
 
+/* Dot — solid white, difference blends against whatever is below */
 .cursor-dot {
     position: fixed;
     top: 0;
@@ -230,13 +178,14 @@ onUnmounted(() => {
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: #9500FF;
+    background: #fff;
     pointer-events: none;
     z-index: 9999;
     will-change: transform;
-    transition: background 0.18s;
+    mix-blend-mode: difference;
 }
 
+/* Ring — white outline, difference blend */
 .cursor-ring {
     position: fixed;
     top: 0;
@@ -244,29 +193,33 @@ onUnmounted(() => {
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    border: 1.5px solid rgba(149, 0, 255, 0.55);
+    border: 1.5px solid rgba(255, 255, 255, 0.85);
     pointer-events: none;
     z-index: 9998;
     will-change: transform;
+    mix-blend-mode: difference;
     transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1),
         height 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-        background 0.18s,
-        border-color 0.18s,
-        border-radius 0.25s;
+        border-radius 0.25s,
+        background 0.2s;
 }
 
+/* Hover: expand + slight fill */
 .cursor-ring--hover {
     width: 52px;
     height: 52px;
+    background: rgba(255, 255, 255, 0.06);
 }
 
+/* Click: contract */
 .cursor-ring--clicking {
     width: 28px;
     height: 28px;
+    background: rgba(255, 255, 255, 0.12);
 }
 </style>
 
-<!-- Hide native cursor globally on non-touch devices -->
+<!-- Hide native cursor on pointer devices -->
 <style>
 @media (hover: hover) and (pointer: fine) {
 
