@@ -4,7 +4,7 @@
 <template>
     <Teleport to="body">
         <!-- Canvas for wave ripples (desktop mousemove + mobile touch) -->
-        <!-- <canvas ref="canvasEl" class="cursor-canvas" aria-hidden="true" /> -->
+        <canvas ref="canvasEl" class="cursor-canvas" aria-hidden="true" />
 
         <!-- Custom cursor — desktop only, hidden on touch devices -->
         <template v-if="!isTouch">
@@ -36,12 +36,12 @@ let lastRipple = 0
 const RIPPLE_THROTTLE = 40
 
 function spawnRipple(x, y) {
-    ripples.push({
-        x, y,
-        r: 0,
-        alpha: 0.5,
-        speed: 1.4 + Math.random() * 0.8
-    })
+    // ripples.push({
+    //     x, y,
+    //     r: 0,
+    //     alpha: 0.5,
+    //     speed: 1.4 + Math.random() * 0.8
+    // })
 }
 
 function drawRipples() {
@@ -94,10 +94,10 @@ function onMouseMove(e) {
     isHover.value = !!e.target?.closest(HOVER_SELECTORS)
 
     const now = performance.now()
-    if (now - lastRipple > RIPPLE_THROTTLE) {
-        spawnRipple(e.clientX, e.clientY)
-        lastRipple = now
-    }
+    // if (now - lastRipple > RIPPLE_THROTTLE) {
+    //     spawnRipple(e.clientX, e.clientY)
+    //     lastRipple = now
+    // }
 }
 
 function onMouseDown() { isClicking.value = true }
