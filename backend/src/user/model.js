@@ -40,6 +40,10 @@ const userSchema = new mongoose.Schema({
         default: 0,
         min: 0
     },
+    filesCompletedThisMonth: {
+        type: Number,
+        default: 0
+    },
     monthlyResetDate: {
         type: Date,
         default: () => new Date()
@@ -132,6 +136,7 @@ userSchema.methods.resetMonthlyCounterIfNeeded = function () {
     // If more than a month has passed, reset counter
     if (now.getTime() - resetDate.getTime() > 30 * 24 * 60 * 60 * 1000) {
         this.filesProcessedThisMonth = 0;
+        this.filesCompletedThisMonth = 0,
         this.monthlyResetDate = now;
         return this.save();
     }

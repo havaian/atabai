@@ -81,6 +81,7 @@ async function uploadAndProcess(req, res) {
 
         // Update user's monthly file count
         req.user.filesProcessedThisMonth += 1;
+
         await req.user.save();
 
         global.logger.logInfo(`File uploaded successfully: ${req.file.originalname} by ${req.user.email}`);
@@ -621,6 +622,14 @@ async function processFileAsync(fileRecord, processingJob) {
         processingJob.result = result.summary;
         processingJob.completedAt = new Date();
         await processingJob.save();
+
+        // Increment completed counter on user
+        const User = require('../user/model');
+        const user = await User.findById(fileRecord.userId);
+        if (user) {
+            user.filesCompletedThisMonth = (user.filesCompletedThisMonth || 0) + 1;
+            await user.save();
+        }
 
         global.logger.logInfo(`File processing completed: ${fileRecord.originalName}`);
 

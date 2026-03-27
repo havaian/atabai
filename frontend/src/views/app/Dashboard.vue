@@ -107,8 +107,8 @@
 </template>
 
 <script setup>
-import { computed, onMounted, onActivated } from 'vue'
-import { useRouter } from 'vue-router'
+import { computed, onMounted, watch } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
 import { useFilesStore } from '@/stores/files'
@@ -119,23 +119,31 @@ import {
 } from '@heroicons/vue/24/outline'
 
 const router = useRouter()
+const route = useRoute()
 const { t } = useI18n()
 const authStore = useAuthStore()
 const filesStore = useFilesStore()
 const templatesStore = useTemplatesStore()
 
 function refreshData() {
+    authStore.checkAuth()
     filesStore.fetchRecentFiles(true)
     templatesStore.fetchTemplates()
 }
 
 onMounted(refreshData)
-onActivated(refreshData)
+
+watch(() => route.path, (newPath) => {
+    if (newPath === '/app/dashboard') {
+        filesStore.invalidateCache()
+        refreshData()
+    }
+})
 
 const templates = computed(() => templatesStore.availableTemplates)
 const recentFiles = computed(() => filesStore.recentFiles || [])
 const firstName = computed(() => authStore.user?.name?.split(' ')[0] || '')
-const completedFiles = computed(() => recentFiles.value.filter(f => f.status === 'completed').length)
+const completedFiles = computed(() => authStore.filesCompletedThisMonth)
 const monthlyLimitDisplay = computed(() => {
     const lim = authStore.monthlyLimit
     return lim === Infinity || lim > 9999 ? '∞' : lim

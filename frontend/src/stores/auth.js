@@ -17,6 +17,7 @@ export const useAuthStore = defineStore('auth', () => {
     const filesProcessedThisMonth = computed(() => user.value?.filesProcessedThisMonth || 0)
     const monthlyLimit = computed(() => subscriptionType.value === 'basic' ? 5 : Infinity)
     const canProcessFiles = computed(() => filesProcessedThisMonth.value < monthlyLimit.value)
+    const filesCompletedThisMonth = computed(() => user.value?.filesCompletedThisMonth || 0)
 
     // Actions
     async function login() {
@@ -201,6 +202,7 @@ export const useAuthStore = defineStore('auth', () => {
         subscriptionType,
         isPremium,
         filesProcessedThisMonth,
+        filesCompletedThisMonth,
         monthlyLimit,
         canProcessFiles,
         // Actions
