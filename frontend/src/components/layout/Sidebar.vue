@@ -991,7 +991,6 @@ onUnmounted(() => window.removeEventListener('resize', onResize))
     background: var(--sb-bg);
     display: flex;
     flex-direction: column;
-    padding-bottom: 24px;
     border-right: 1px solid var(--sb-border);
 }
 
@@ -1121,7 +1120,7 @@ onUnmounted(() => window.removeEventListener('resize', onResize))
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 14px 14px 28px;
+    padding: 14px;
     border-top: 1px solid var(--sb-profile-border);
     flex-shrink: 0;
 }

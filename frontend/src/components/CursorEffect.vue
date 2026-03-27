@@ -4,7 +4,7 @@
 <template>
     <Teleport to="body">
         <!-- Canvas for wave ripples (desktop mousemove + mobile touch) -->
-        <canvas ref="canvasEl" class="cursor-canvas" aria-hidden="true" />
+        <!-- <canvas ref="canvasEl" class="cursor-canvas" aria-hidden="true" /> -->
 
         <!-- Custom cursor — desktop only, hidden on touch devices -->
         <template v-if="!isTouch">
