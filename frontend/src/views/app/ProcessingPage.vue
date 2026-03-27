@@ -199,6 +199,7 @@ async function loadJobStatus() {
             jobData.value = data
             if (['completed', 'failed'].includes(data.status) && data.fileId) {
                 filesStore.updateFileStatus(data.fileId, data.status, { result: data.result })
+                filesStore.fetchRecentFiles()
                 clearStatusPolling()
             }
         }

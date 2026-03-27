@@ -107,7 +107,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, onActivated } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
@@ -124,10 +124,13 @@ const authStore = useAuthStore()
 const filesStore = useFilesStore()
 const templatesStore = useTemplatesStore()
 
-onMounted(() => {
+function refreshData() {
     filesStore.fetchRecentFiles()
     templatesStore.fetchTemplates()
-})
+}
+
+onMounted(refreshData)
+onActivated(refreshData)
 
 const templates = computed(() => templatesStore.availableTemplates)
 const recentFiles = computed(() => filesStore.recentFiles || [])
@@ -289,7 +292,7 @@ function statusClass(status) {
 
 .stat-limit {
     font-size: 13px;
-    color: rgba(240, 236, 246, 0.15);
+    color: var(--ws-text-3);
     font-weight: 500;
     margin-left: auto;
 }
@@ -418,12 +421,12 @@ function statusClass(status) {
 
 .template-cat {
     font-size: 11px;
-    color: rgba(240, 236, 246, 0.15);
+    color: var(--ws-text-3);
     font-weight: 500;
 }
 
 .template-arrow {
-    color: rgba(240, 236, 246, 0.15);
+    color: var(--ws-text-3);
     transition: color 0.15s, transform 0.15s;
 }
 

@@ -517,20 +517,18 @@
         "3": "Oylik ustunlar (yan–dek) avtomatik aniqlanadi — choraklik va yillik formatlar qo'llab-quvvatlanadi",
         "4": "Sodda tuzilmalar ham, murakkab loyiha ierarxiyalari ham avtomatik ishlaydi"
       },
-      "instructions": {
-        "profitLossForm2": [
-          "Standart NSBU 2-shakl (ОКУД 0710002) Excel fayli",
-          "A ustunida qator kodlari: 010, 020, 040, 050, 060, 070, 090, 100, 140",
-          "Qiymat ustunlari: joriy davr va o'tgan yil taqqoslash",
-          "Tizim kod ustuni va davr sarlavhalarini avtomatik aniqlaydi"
-        ],
-        "equity": [
-          "A varianti — Balans (1-shakl): kapitalning ochilish va yopilish qoldig'i",
-          "B varianti — 4-shakl: kapital harakatlarining to'liq tafsiloti",
-          "Ustun sarlavhalari: Ustav kapitali, Taqsimlanmagan foyda, Jami",
-          "Tizim yuklangan fayl turini avtomatik aniqlaydi"
-        ]
-      }
+      "profitLossForm2": [
+        "Standart NSBU 2-shakl (ОКУД 0710002) Excel fayli",
+        "A ustunida qator kodlari: 010, 020, 040, 050, 060, 070, 090, 100, 140",
+        "Qiymat ustunlari: joriy davr va o'tgan yil taqqoslash",
+        "Tizim kod ustuni va davr sarlavhalarini avtomatik aniqlaydi"
+      ],
+      "equity": [
+        "A varianti — Balans (1-shakl): kapitalning ochilish va yopilish qoldig'i",
+        "B varianti — 4-shakl: kapital harakatlarining to'liq tafsiloti",
+        "Ustun sarlavhalari: Ustav kapitali, Taqsimlanmagan foyda, Jami",
+        "Tizim yuklangan fayl turini avtomatik aniqlaydi"
+      ]
     },
     "dropZone": {
       "title": "Excel faylingizni bu yerga tashlang",
