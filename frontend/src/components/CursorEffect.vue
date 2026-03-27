@@ -58,7 +58,7 @@ function drawRipples() {
         // White ripples — mix-blend-mode: difference on canvas inverts bg
         ctx.beginPath()
         ctx.arc(rp.x, rp.y, rp.r, 0, Math.PI * 2)
-        ctx.strokeStyle = `rgba(255, 255, 255, ${rp.alpha})`
+        ctx.strokeStyle = `rgba(149, 0, 255, ${rp.alpha})`
         ctx.lineWidth = 1.5
         ctx.stroke()
     }
@@ -178,7 +178,7 @@ onUnmounted(() => {
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: #fff;
+    background: #9500FF;
     pointer-events: none;
     z-index: 9999;
     will-change: transform;
@@ -193,7 +193,7 @@ onUnmounted(() => {
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    border: 1.5px solid rgba(255, 255, 255, 0.85);
+    border: 1.5px solid rgba(149, 0, 255, 0.85);
     pointer-events: none;
     z-index: 9998;
     will-change: transform;
@@ -208,14 +208,14 @@ onUnmounted(() => {
 .cursor-ring--hover {
     width: 52px;
     height: 52px;
-    background: rgba(255, 255, 255, 0.06);
+    background: rgba(149, 0, 255, 0.06);
 }
 
 /* Click: contract */
 .cursor-ring--clicking {
     width: 28px;
     height: 28px;
-    background: rgba(255, 255, 255, 0.12);
+    background: rgba(149, 0, 255, 0.12);
 }
 </style>
 
