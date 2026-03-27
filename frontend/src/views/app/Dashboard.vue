@@ -184,7 +184,7 @@ function statusClass(status) {
 .dash {
     max-width: 900px;
     margin: 0 auto;
-    padding: 36px 32px 64px;
+    padding: 36px 4rem 64px;
     display: flex;
     flex-direction: column;
     gap: 40px;

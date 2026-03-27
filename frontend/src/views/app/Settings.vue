@@ -216,7 +216,7 @@ function selectTheme(value) {
 .settings-page {
     max-width: 800px;
     margin: 0 auto;
-    padding: 36px 32px 64px;
+    padding: 36px 4rem 64px;
     display: flex;
     flex-direction: column;
     gap: 28px;
