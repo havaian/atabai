@@ -136,7 +136,7 @@
     "limit": "{current} из {total}",
     "subscription": "Текущий план",
     "upgrade": "Обновить план",
-    "totalProcessed": "Всего обработано",
+    "totalCompleted": "Завершено",
     "accuracy": "Точность",
     "avgTime": "Среднее время",
     "usage": "Использование",

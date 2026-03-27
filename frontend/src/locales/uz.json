@@ -136,7 +136,7 @@
     "limit": "{current} dan {total}",
     "subscription": "Joriy reja",
     "upgrade": "Rejani yangilash",
-    "totalProcessed": "Jami qayta ishlangan",
+    "totalCompleted": "Tugatilgan",
     "accuracy": "Aniqlik",
     "avgTime": "O'rtacha vaqt",
     "usage": "Foydalanish",

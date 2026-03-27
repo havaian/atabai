@@ -29,7 +29,7 @@
                 </div>
                 <div>
                     <div class="stat-value">{{ completedFiles }}</div>
-                    <div class="stat-label">{{ $t('dashboard.totalProcessed') }}</div>
+                    <div class="stat-label">{{ $t('dashboard.totalCompleted') }}</div>
                 </div>
             </div>
             <div class="stat-card">
@@ -125,7 +125,7 @@ const filesStore = useFilesStore()
 const templatesStore = useTemplatesStore()
 
 function refreshData() {
-    filesStore.fetchRecentFiles()
+    filesStore.fetchRecentFiles(true)
     templatesStore.fetchTemplates()
 }
 

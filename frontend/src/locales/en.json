@@ -136,7 +136,7 @@
     "limit": "{current} of {total}",
     "subscription": "Current Plan",
     "upgrade": "Upgrade Plan",
-    "totalProcessed": "Total Processed",
+    "totalCompleted": "Completed",
     "accuracy": "Accuracy",
     "avgTime": "Avg Time",
     "usage": "Usage",
