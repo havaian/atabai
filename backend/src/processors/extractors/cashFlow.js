@@ -119,6 +119,29 @@ function extractCashFlowData(sheet) {
         }
 
         global.logger.logInfo(`[CF EXTRACTOR] Extracted ${result.periods.length} periods from row ${periodHeaderRow}`);
+
+        // If period labels are month-only (no year), check the row above for a year value.
+        // CF_2 style: row N-1 = "2025 2025 2025...", row N = "янв фев мар..."
+        const hasYearInLabels = result.periods.some(p => /\b20\d{2}\b/.test(p.label));
+        if (!hasYearInLabels && periodHeaderRow > 0) {
+            let yearValue = null;
+            for (let col = 1; col < 20; col++) {
+                const v = getCellValue(periodHeaderRow - 1, col);
+                if (v && /^20\d{2}$/.test(String(v).trim())) {
+                    yearValue = String(v).trim();
+                    break;
+                }
+            }
+            if (yearValue) {
+                result.periods.forEach(p => {
+                    const MONTH_ORDER = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+                    if (MONTH_ORDER.includes(p.label)) {
+                        p.label = `${p.label} ${yearValue}`;
+                    }
+                });
+                global.logger.logInfo(`[CF EXTRACTOR] Appended year ${yearValue} to month-only period labels`);
+            }
+        }
         
         // ─── Derive period end date from the last actual month period ─────────────────
         // Periods are labelled "Jan 2025", "Feb 2025", etc. by formatPeriodLabel().

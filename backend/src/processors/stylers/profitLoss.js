@@ -195,7 +195,7 @@ async function styleProfitLossReport(data) {
 
         if (resolved.length === 0) return 0;
         const c = colLetter(col);
-        return { formula: resolved.map((r) => `${c}${r}`).join('+') };;
+        return { formula: resolved.map((r) => `${c}${r}`).join('+') };
     }
 
     for (let li = 0; li < layoutRows.length; li++) {
