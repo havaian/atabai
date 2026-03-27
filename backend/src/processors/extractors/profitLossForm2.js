@@ -102,26 +102,63 @@ function extractProfitLossForm2Data(sheet) {
         }
     }
 
-    // Find value columns by scanning header rows for period labels
-    // Form 2 typically has 1-2 value columns: current year + prior year
+    // Find value columns by scanning header rows for period labels.
+    // Form 2 (ОКУД 0710002): 2 columns — "Текущий период" / "Предыдущий год".
+    // Construction budget P&L: 12 monthly columns ("янв", "фев", …).
+    // Priority: month row first, then year/keyword row as fallback.
     let periods = [];
     let headerRowIdx = -1;
 
+    const MONTH_NAMES_LC = [
+        'янв', 'фев', 'мар', 'апр', 'май', 'июн',
+        'июл', 'авг', 'сен', 'окт', 'ноя', 'дек',
+        'january', 'february', 'march', 'april', 'may', 'june',
+        'july', 'august', 'september', 'october', 'november', 'december',
+        'jan', 'feb', 'mar', 'apr', 'may', 'jun',
+        'jul', 'aug', 'sep', 'oct', 'nov', 'dec',
+    ];
+
+    const MONTH_TRANSLATIONS_F2 = {
+        'янв': 'Jan', 'фев': 'Feb', 'мар': 'Mar', 'апр': 'Apr',
+        'май': 'May', 'июн': 'Jun', 'июл': 'Jul', 'авг': 'Aug',
+        'сен': 'Sep', 'окт': 'Oct', 'ноя': 'Nov', 'дек': 'Dec',
+    };
+
+    // Pass 1: look for a row containing ≥3 month names (highest confidence)
     for (let ri = 0; ri < Math.min(rowCount, 20); ri++) {
         const row = getRow(sheet, ri);
-        const rowText = row.map(c => getCellText(c)).join(' ').toLowerCase();
-        // Look for year indicators or column headers
-        if (/текущ|отчет|current|prior|предыдущ|\b20[1-9]\d\b/.test(rowText)) {
-            // Try to identify which columns have values
-            for (let ci = codeColIdx + 1; ci < Math.min(row.length, 8); ci++) {
-                const text = getCellText(row[ci]).trim();
-                if (text) {
-                    periods.push({ label: text, colIndex: ci });
-                }
+        const monthHits = [];
+        for (let ci = 1; ci < Math.min(row.length, 20); ci++) {
+            const text = getCellText(row[ci]).trim().toLowerCase();
+            if (MONTH_NAMES_LC.includes(text)) {
+                const rawLabel = getCellText(row[ci]).trim();
+                const translated = MONTH_TRANSLATIONS_F2[rawLabel.toLowerCase()] || rawLabel;
+                monthHits.push({ label: translated, colIndex: ci });
             }
-            if (periods.length > 0) {
-                headerRowIdx = ri;
-                break;
+        }
+        if (monthHits.length >= 3) {
+            periods = monthHits;
+            headerRowIdx = ri;
+            break;
+        }
+    }
+
+    // Pass 2: fall back to year/keyword row (standard ОКУД 0710002 behaviour)
+    if (periods.length === 0) {
+        for (let ri = 0; ri < Math.min(rowCount, 20); ri++) {
+            const row = getRow(sheet, ri);
+            const rowText = row.map(c => getCellText(c)).join(' ').toLowerCase();
+            if (/текущ|отчет|current|prior|предыдущ|\b20[1-9]\d\b/.test(rowText)) {
+                for (let ci = codeColIdx + 1; ci < Math.min(row.length, 20); ci++) {
+                    const text = getCellText(row[ci]).trim();
+                    if (text) {
+                        periods.push({ label: text, colIndex: ci });
+                    }
+                }
+                if (periods.length > 0) {
+                    headerRowIdx = ri;
+                    break;
+                }
             }
         }
     }

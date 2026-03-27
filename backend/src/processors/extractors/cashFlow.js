@@ -119,6 +119,32 @@ function extractCashFlowData(sheet) {
         }
 
         global.logger.logInfo(`[CF EXTRACTOR] Extracted ${result.periods.length} periods from row ${periodHeaderRow}`);
+        
+        // ─── Derive period end date from the last actual month period ─────────────────
+        // Periods are labelled "Jan 2025", "Feb 2025", etc. by formatPeriodLabel().
+        // The last column may be a budget/annual total ("Бюджет на 2025 г.") which is
+        // not a real month — skip it and find the last proper month period.
+        const MONTH_ORDER = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        const DAYS_IN_MONTH = (month, year) => new Date(year, month + 1, 0).getDate();
+        
+        const monthPeriods = result.periods.filter(p => {
+            const parts = p.label.split(' ');
+            return parts.length === 2 && MONTH_ORDER.includes(parts[0]) && /^\d{4}$/.test(parts[1]);
+        });
+        
+        if (monthPeriods.length > 0) {
+            const last  = monthPeriods[monthPeriods.length - 1];
+            const [mon, yr] = last.label.split(' ');
+            const monthIdx  = MONTH_ORDER.indexOf(mon);       // 0-based
+            const year      = parseInt(yr, 10);
+            const lastDay   = DAYS_IN_MONTH(monthIdx, year);
+            const dd        = String(lastDay).padStart(2, '0');
+            const mm        = String(monthIdx + 1).padStart(2, '0');
+            result.metadata.period = `For the period ended ${dd}.${mm}.${yr}`;
+            global.logger.logInfo(`[CF EXTRACTOR] Derived period end date: ${result.metadata.period}`);
+        }
+        // ─────────────────────────────────────────────────────────────────────────────
+        
     }
 
     // Find where data starts

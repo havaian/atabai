@@ -3,7 +3,7 @@
 // into a styled ExcelJS workbook. Follows the same alternating-row
 // colour pattern used by other stylers.
 
-const ExcelJS        = require('exceljs');
+const ExcelJS = require('exceljs');
 const { addLogoRow } = require('./logoHelper');
 const {
     FONT_PRESETS,
@@ -73,75 +73,21 @@ const STYLE_PRESETS = {
         },
         totalRow: {
             font: FONT_PRESETS.boldData,
-            alignment: ALIGNMENT_PRESETS.right,
+            alignment: ALIGNMENT_PRESETS.left,
             fill: {
                 type: 'pattern',
                 pattern: 'solid',
-                fgColor: { argb: BRAND_COLORS.lightBlue }
+                fgColor: { argb: BRAND_COLORS.totalBlue }
             },
-            border: BORDER_PRESETS.thin,
-            numFmt: '#,##0.00;(#,##0.00)'
-        },
-        grandTotal: {
-            font: FONT_PRESETS.grandTotal,
-            alignment: ALIGNMENT_PRESETS.right,
-            fill: {
-                type: 'pattern',
-                pattern: 'solid',
-                fgColor: { argb: BRAND_COLORS.lightBlue }
-            },
-            border: {
-                top: { style: 'medium' },
-                left: { style: 'thin' },
-                bottom: { style: 'medium' },
-                right: { style: 'thin' }
-            },
-            numFmt: '#,##0.00;(#,##0.00)'
-        },
-        watermark: {
-            font: FONT_PRESETS.watermark,
-            alignment: ALIGNMENT_PRESETS.right,
-            fill: null
-        }
-    },
-
-    // Simple flat report style (for depreciation, discounts, etc.)
-    flatReport: {
-        title: {
-            font: { name: 'Calibri', size: 11, bold: false },
-            alignment: ALIGNMENT_PRESETS.left,
-            fill: null
-        },
-        columnHeader: {
-            font: { name: 'Calibri', size: 11, bold: false },
-            alignment: ALIGNMENT_PRESETS.left,
-            fill: null,
-            border: null
-        },
-        dataCell: {
-            font: { name: 'Calibri', size: 11, bold: false },
-            alignment: ALIGNMENT_PRESETS.left,
-            fill: null,
-            border: null
-        },
-        numberCell: {
-            font: { name: 'Calibri', size: 11, bold: false },
-            alignment: ALIGNMENT_PRESETS.right,
-            fill: null,
-            border: null,
-            numFmt: '#,##0.00'
+            border: BORDER_PRESETS.thin
         }
     }
 };
 
 /**
- * Format date to dd.mm.yyyy
- * @param {string|Date} dateInput - Date string or Date object
- * @returns {string} Formatted date string
+ * Format date to DD.MM.YYYY
  */
 function formatDateToDDMMYYYY(dateInput) {
-    if (!dateInput) return new Date().toLocaleDateString('en-GB').replace(/\//g, '.');
-
     let date;
 
     // Handle different input types
@@ -218,6 +164,32 @@ function applyStyleToRange(worksheet, startRow, startCol, endRow, endCol, styleC
             applyStyle(cell, styleConfig);
         }
     }
+}
+
+/**
+ * Build a selective SUM formula referencing only non-isCalculated item rows.
+ * isCalculated rows (PP&E Net, Intangibles Net) are display-only sub-totals —
+ * their constituent gross and contra rows are already in the sum, so including
+ * the net row again would double-count.
+ *
+ * @param {string} col   - Column letter, e.g. 'B' or 'C'
+ * @param {number[]} rows - Excel row numbers for items to include
+ * @returns {number|Object} - 0 if no rows, or { formula: '...' }
+ */
+function buildSelectiveSumFormula(col, rows) {
+    if (rows.length === 0) return 0;
+    if (rows.length === 1) return { formula: `${col}${rows[0]}` };
+
+    // Check contiguity
+    let contiguous = true;
+    for (let i = 1; i < rows.length; i++) {
+        if (rows[i] !== rows[i - 1] + 1) { contiguous = false; break; }
+    }
+
+    if (contiguous) {
+        return { formula: `SUM(${col}${rows[0]}:${col}${rows[rows.length - 1]})` };
+    }
+    return { formula: `SUM(${rows.map(r => `${col}${r}`).join(',')})` };
 }
 
 /**
@@ -312,8 +284,12 @@ async function createStyledBalanceSheet(data) {
         currentRow++;
         dataRowCounter++;
 
-        // Track first and last data row for this section
-        const sectionStartRow = currentRow;
+        // Track Excel row numbers for items that contribute to the section total.
+        // isCalculated items (PP&E Net, Intangibles Net) are excluded — their gross
+        // and contra rows are already summed, so including the net row again would
+        // double-count the section total.
+        const sumRowsB = [];
+        const sumRowsC = [];
 
         // Section items
         section.items.forEach(item => {
@@ -352,13 +328,17 @@ async function createStyledBalanceSheet(data) {
             endCell.numFmt = '#,##0.00;(#,##0.00)';
             endCell.fill = rowFill;
 
+            // Only include non-calculated rows in the section total SUM.
+            if (!item.isCalculated) {
+                sumRowsB.push(currentRow);
+                sumRowsC.push(currentRow);
+            }
+
             currentRow++;
             dataRowCounter++;
         });
 
-        const sectionEndRow = currentRow - 1;
-
-        // Section total with FORMULAS
+        // Section total with selective SUM formulas
         if (section.items.length > 0) {
             const totalRow = worksheet.getRow(currentRow);
 
@@ -375,16 +355,15 @@ async function createStyledBalanceSheet(data) {
             totalRow.getCell(1).border = BORDER_PRESETS.thin;
             totalRow.getCell(1).fill = totalFill;
 
-            // Use SUM formula for beginning balance
-            totalRow.getCell(2).value = { formula: `SUM(B${sectionStartRow}:B${sectionEndRow})` };
+            // Selective SUM — excludes isCalculated (net) rows to avoid double-counting
+            totalRow.getCell(2).value = buildSelectiveSumFormula('B', sumRowsB);
             totalRow.getCell(2).font = FONT_PRESETS.boldData;
             totalRow.getCell(2).alignment = ALIGNMENT_PRESETS.right;
             totalRow.getCell(2).border = BORDER_PRESETS.thin;
             totalRow.getCell(2).numFmt = '#,##0.00;(#,##0.00)';
             totalRow.getCell(2).fill = totalFill;
 
-            // Use SUM formula for ending balance
-            totalRow.getCell(3).value = { formula: `SUM(C${sectionStartRow}:C${sectionEndRow})` };
+            totalRow.getCell(3).value = buildSelectiveSumFormula('C', sumRowsC);
             totalRow.getCell(3).font = FONT_PRESETS.boldData;
             totalRow.getCell(3).alignment = ALIGNMENT_PRESETS.right;
             totalRow.getCell(3).border = BORDER_PRESETS.thin;
@@ -509,61 +488,39 @@ async function createStyledBalanceSheet(data) {
         totalEquityRow.getCell(3).fill = equityFill;
 
         currentRow++;
+        dataRowCounter++;
     }
 
-    // === ATABAI WATERMARK ===
-    currentRow += 2;
-    const watermarkRow = worksheet.getRow(currentRow);
-    watermarkRow.getCell(1).value = 'Processed by ATABAI';
-    applyStyle(watermarkRow.getCell(1), styles.watermark);
-    worksheet.mergeCells(currentRow, 1, currentRow, 3);
+    // === FOOTER ===
+    currentRow++;
+    worksheet.mergeCells(`A${currentRow}:C${currentRow}`);
+    const footerCell = worksheet.getCell(`A${currentRow}`);
+    footerCell.value = 'Processed by ATABAI';
+    footerCell.font = { ...FONT_PRESETS.metadata, italic: true };
+    footerCell.alignment = ALIGNMENT_PRESETS.center;
 
     // === COLUMN WIDTHS ===
-    worksheet.getColumn(1).width = 50;  // Line Item
-    worksheet.getColumn(2).width = 20;  // Beginning Balance
-    worksheet.getColumn(3).width = 20;  // Ending Balance
+    worksheet.getColumn(1).width = 45;
+    worksheet.getColumn(2).width = 22;
+    worksheet.getColumn(3).width = 22;
 
     return workbook;
 }
 
 /**
- * Create flat styled report (simple 3-column format)
- * @param {Object} data - Report data structure
- * @param {string} data.title - Report title
- * @param {string} data.subtitle - Report subtitle
- * @param {Array} data.headers - Column headers
- * @param {Array} data.rows - Data rows
- * @returns {ExcelJS.Workbook}
+ * Create flat report (depreciation, discounts, impairment, etc.)
  */
 function createFlatReport(data) {
     const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet(data.sheetName || 'Report');
+    const worksheet = workbook.addWorksheet('Report');
 
-    const styles = STYLE_PRESETS.flatReport;
+    const styles = STYLE_PRESETS.balanceSheet;
     let currentRow = 1;
-
-    // Title
-    if (data.title) {
-        const titleRow = worksheet.getRow(currentRow);
-        titleRow.getCell(1).value = data.title;
-        applyStyle(titleRow.getCell(1), styles.title);
-        currentRow++;
-    }
-
-    // Subtitle
-    if (data.subtitle) {
-        const subtitleRow = worksheet.getRow(currentRow);
-        subtitleRow.getCell(1).value = data.subtitle;
-        applyStyle(subtitleRow.getCell(1), styles.title);
-        currentRow++;
-    }
-
-    // Empty row
-    currentRow++;
 
     // Headers
     if (data.headers && data.headers.length > 0) {
         const headerRow = worksheet.getRow(currentRow);
+
         data.headers.forEach((header, index) => {
             const cell = headerRow.getCell(index + 1);
             cell.value = header;

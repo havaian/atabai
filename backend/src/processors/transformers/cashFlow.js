@@ -1,5 +1,69 @@
 // transformers/cashFlow.js
 
+// ─── NSBU → IFRS label translation map ───────────────────────────────────────
+// Covers all line-item labels observed in NSBU cash flow budget files.
+// Keys are trimmed Russian source labels (case-sensitive match attempted first,
+// then lowercased fallback). Unmatched labels are passed through unchanged so
+// that future NSBU variants don't silently break.
+const LABEL_MAP = {
+    // Operating — inflows
+    'Реализация продукции и товаров': 'Product & goods sales receipts',
+    'Реализация услуг': 'Service revenue receipts',
+    'Прочая выручка': 'Other revenue receipts',
+    'Авансы полученные': 'Customer advances received',
+    'Прочие поступления': 'Other operating receipts',
+
+    // Operating — outflows
+    'Платежи поставщикам за товары и услуги': 'Payments to suppliers',
+    'Авансы выданные': 'Advances paid to suppliers',
+    'Выплаты по заработной плате': 'Payroll payments',
+    'Налог на прибыль': 'Income tax paid',
+    'Другие платежи в бюджет': 'Other budget payments',
+    'Выплаты по краткосрочной аренде': 'Short-term lease payments',
+    'Прочие выплаты': 'Other operating payments',
+
+    // Investing
+    'Притоки': 'Investing inflows',
+    'Оттоки': 'Investing outflows',
+    'Притоки (ФД)': 'Financing inflows',
+    'Оттоки (ФД)': 'Financing outflows',
+
+    // Financing
+    'Поступления от займов': 'Proceeds from borrowings',
+    'Погашение займов': 'Repayment of borrowings',
+    'Выплата дивидендов': 'Dividends paid',
+};
+
+/**
+ * Translate a single label. Returns the English equivalent if found,
+ * otherwise returns the original string.
+ */
+function translateLabel(raw) {
+    if (!raw) return raw;
+    const trimmed = raw.trim();
+    return LABEL_MAP[trimmed] || trimmed;
+}
+
+/**
+ * Deduplicate labels within a single section's item list.
+ * When the same translated label appears more than once, each subsequent
+ * occurrence gets an ordinal suffix: "(2)", "(3)", etc.
+ *
+ * @param {Object[]} items - mutable array of { label, ... }
+ */
+function deduplicateLabels(items) {
+    const seen = {};
+    for (const item of items) {
+        const base = item.label;
+        if (seen[base] === undefined) {
+            seen[base] = 1;
+        } else {
+            seen[base]++;
+            item.label = `${base} (${seen[base]})`;
+        }
+    }
+}
+
 function transformToIFRSCashFlow(dataMap, periods, reconciliationItems, additionalSourcesItems) {
     global.logger.logInfo('[CF TRANSFORMER] Starting transformation...');
     global.logger.logInfo(`[CF TRANSFORMER] Input items: ${dataMap.size}`);
@@ -12,9 +76,9 @@ function transformToIFRSCashFlow(dataMap, periods, reconciliationItems, addition
         operatingTotal: new Array(periods?.length || 1).fill(0),
         investingTotal: new Array(periods?.length || 1).fill(0),
         financingTotal: new Array(periods?.length || 1).fill(0),
-        cfTotal: new Array(periods?.length || 1).fill(0),  // CF = Op + Inv + Fin
-        fcfTotal: new Array(periods?.length || 1).fill(0), // FCF = Op + Inv
-        additionalSourcesTotal: new Array(periods?.length || 1).fill(0)
+        cfTotal: new Array(periods?.length || 1).fill(0),
+        fcfTotal: new Array(periods?.length || 1).fill(0),
+        additionalSourcesTotal: new Array(periods?.length || 1).fill(0),
     };
 
     const operatingItems = [];
@@ -25,26 +89,16 @@ function transformToIFRSCashFlow(dataMap, periods, reconciliationItems, addition
     let sectionCounts = { OPERATING: 0, INVESTING: 0, FINANCING: 0, ADDITIONAL_SOURCES: 0 };
 
     // Process main cash flow items
-    for (const [key, data] of dataMap.entries()) {
-        // BUG-007 FIX: preserve original line-item labels from the source document.
-        // Previously, all Приток/Отток subsection labels were replaced with generic English strings
-        // ("Operating cash inflows", "Investment payments", etc.), destroying all line-item granularity.
-        // The original NSBU labels are meaningful and must be kept as-is in the IFRS output.
-        const label = data.lineItem;
-
+    for (const [, data] of dataMap.entries()) {
         const item = {
-            label: label,
+            label: translateLabel(data.lineItem),
             periodValues: data.periodValues,
             total: data.total,
             flowType: data.total < 0 ? 'outflow' : 'inflow',
-            indent: 1,
-            subSection: data.subSection
+            indent: data.subSection ? 2 : 1,
+            isSubItem: !!data.subSection,
+            subSection: data.subSection,
         };
-
-        if (data.subSection) {
-            item.indent = 2;
-            item.isSubItem = true;
-        }
 
         if (data.section === 'OPERATING') {
             operatingItems.push(item);
@@ -69,19 +123,18 @@ function transformToIFRSCashFlow(dataMap, periods, reconciliationItems, addition
 
     // Process additional sources items
     if (additionalSourcesItems && additionalSourcesItems.size > 0) {
-        for (const [key, data] of additionalSourcesItems.entries()) {
+        for (const [, data] of additionalSourcesItems.entries()) {
             const item = {
-                label: data.lineItem,
+                label: translateLabel(data.lineItem),
                 periodValues: data.periodValues,
                 total: data.total,
                 flowType: data.total < 0 ? 'outflow' : 'inflow',
                 indent: data.indent || 1,
-                isCategory: data.isCategory || false
+                isCategory: data.isCategory || false,
             };
 
             additionalSourcesItemsList.push(item);
 
-            // Only add to totals if it's not a category header
             if (!data.isCategory) {
                 for (let i = 0; i < data.periodValues.length; i++) {
                     result.additionalSourcesTotal[i] += data.periodValues[i];
@@ -89,58 +142,25 @@ function transformToIFRSCashFlow(dataMap, periods, reconciliationItems, addition
             }
 
             sectionCounts.ADDITIONAL_SOURCES++;
-            global.logger.logInfo(`[CF TRANSFORMER] Additional source: "${data.lineItem}"`);
         }
     }
 
     global.logger.logInfo(`[CF TRANSFORMER] Section distribution: Operating=${sectionCounts.OPERATING}, Investing=${sectionCounts.INVESTING}, Financing=${sectionCounts.FINANCING}, Additional Sources=${sectionCounts.ADDITIONAL_SOURCES}`);
 
-    // Add defaults if empty
-    if (operatingItems.length === 0) {
-        operatingItems.push({
-            label: 'No operating activities found',
-            periodValues: new Array(result.periods.length).fill(0),
-            total: 0,
-            flowType: 'inflow',
-            indent: 1
-        });
-    }
+    // Disambiguate duplicate labels within each section
+    deduplicateLabels(operatingItems);
+    deduplicateLabels(investingItems);
+    deduplicateLabels(financingItems);
 
-    if (investingItems.length === 0) {
-        investingItems.push({
-            label: 'No investing activities found',
-            periodValues: new Array(result.periods.length).fill(0),
-            total: 0,
-            flowType: 'inflow',
-            indent: 1
-        });
-    }
-
-    if (financingItems.length === 0) {
-        financingItems.push({
-            label: 'No financing activities found',
-            periodValues: new Array(result.periods.length).fill(0),
-            total: 0,
-            flowType: 'inflow',
-            indent: 1
-        });
-    }
+    // NOTE: Empty sections are left as empty arrays.
+    // The styler renders a section total of 0 with no detail rows, which is the
+    // correct IFRS presentation when a section has no activity. Placeholder
+    // strings ("No financing activities found") must NOT appear in the output.
 
     // Build sections array
-    result.sections.push({
-        name: 'OPERATING ACTIVITIES',
-        items: operatingItems
-    });
-
-    result.sections.push({
-        name: 'INVESTING ACTIVITIES',
-        items: investingItems
-    });
-
-    result.sections.push({
-        name: 'FINANCING ACTIVITIES',
-        items: financingItems
-    });
+    result.sections.push({ name: 'OPERATING ACTIVITIES', items: operatingItems });
+    result.sections.push({ name: 'INVESTING ACTIVITIES', items: investingItems });
+    result.sections.push({ name: 'FINANCING ACTIVITIES', items: financingItems });
 
     // Calculate CF and FCF totals
     for (let i = 0; i < result.periods.length; i++) {
@@ -148,56 +168,41 @@ function transformToIFRSCashFlow(dataMap, periods, reconciliationItems, addition
         result.fcfTotal[i] = result.operatingTotal[i] + result.investingTotal[i];
     }
 
-    // Add CF section (will use formulas in styler)
+    // CF summary section (styler writes formula referencing section total rows)
     result.sections.push({
         name: 'CF',
         items: [{
             label: 'Cash Flow (Operating + Investing + Financing)',
             periodValues: result.cfTotal,
-            total: result.cfTotal.reduce((sum, val) => sum + val, 0),
+            total: result.cfTotal.reduce((s, v) => s + v, 0),
             flowType: 'summary',
-            indent: 1
+            indent: 1,
         }],
-        isSummary: true
+        isSummary: true,
     });
 
-    // Add FCF section (will use formulas in styler)
+    // FCF summary section
     result.sections.push({
         name: 'FCF',
         items: [{
             label: 'Free Cash Flow (Operating + Investing)',
             periodValues: result.fcfTotal,
-            total: result.fcfTotal.reduce((sum, val) => sum + val, 0),
+            total: result.fcfTotal.reduce((s, v) => s + v, 0),
             flowType: 'summary',
-            indent: 1
+            indent: 1,
         }],
-        isSummary: true
+        isSummary: true,
     });
 
-    // Add additional sources section if items exist
+    // Additional sources section
     if (additionalSourcesItemsList.length > 0) {
-        result.sections.push({
-            name: 'ADDITIONAL SOURCES',
-            items: additionalSourcesItemsList
-        });
-    } else {
-        result.sections.push({
-            name: 'ADDITIONAL SOURCES',
-            items: [{
-                label: 'No other additional source of cash flow',
-                periodValues: new Array(result.periods.length).fill(0),
-                total: 0,
-                flowType: 'inflow',
-                indent: 1
-            }]
-        });
+        result.sections.push({ name: 'ADDITIONAL SOURCES', items: additionalSourcesItemsList });
     }
+    // If no additional sources, the section is omitted entirely — no placeholder row.
 
     global.logger.logInfo('[CF TRANSFORMER] Transformation complete');
 
     return result;
 }
 
-module.exports = {
-    transformToIFRSCashFlow
-};
+module.exports = { transformToIFRSCashFlow };

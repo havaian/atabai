@@ -14,6 +14,33 @@ const MONTH_LABELS = [
     'jul', 'aug', 'sep', 'oct', 'nov', 'dec'
 ];
 
+// ADD after MONTH_LABELS constant:
+
+const MONTH_TRANSLATIONS = {
+    // Russian abbreviations
+    'янв': 'Jan', 'фев': 'Feb', 'мар': 'Mar', 'апр': 'Apr',
+    'май': 'May', 'июн': 'Jun', 'июл': 'Jul', 'авг': 'Aug',
+    'сен': 'Sep', 'окт': 'Oct', 'ноя': 'Nov', 'дек': 'Dec',
+    // Russian full names
+    'январь':   'Jan', 'февраль':  'Feb', 'март':     'Mar',
+    'апрель':   'Apr', 'июнь':     'Jun', 'июль':     'Jul',
+    'август':   'Aug', 'сентябрь': 'Sep', 'октябрь':  'Oct',
+    'ноябрь':   'Nov', 'декабрь':  'Dec',
+    // Uzbek
+    'yan': 'Jan', 'fev': 'Feb', 'mar': 'Mar', 'apr': 'Apr',
+    'may': 'May', 'iyun': 'Jun', 'iyul': 'Jul', 'avg': 'Aug',
+    'sen': 'Sep', 'okt': 'Oct', 'noy': 'Nov', 'dek': 'Dec',
+};
+
+/**
+ * Translate a raw period cell value to an English label.
+ * Passes through anything not in the map unchanged (years, quarter labels, budget columns).
+ */
+function translatePeriodLabel(raw) {
+    if (!raw) return raw;
+    return MONTH_TRANSLATIONS[raw.toLowerCase().trim()] || raw;
+}
+
 // ─── Aggregate/total row labels to skip in revenue section ───────────────────
 // These are subtotal/grouping labels, not individual project items
 const REVENUE_SKIP_PATTERNS = [
@@ -203,7 +230,7 @@ function detectPeriods(rowCount, getCellValue) {
             if (val === null || val === undefined) continue;
             const str = String(val).trim().toLowerCase();
             if (MONTH_LABELS.includes(str)) {
-                periods.push({ label: String(val).trim(), colIndex: ci });
+                periods.push({ label: translatePeriodLabel(String(val).trim()), colIndex: ci });
             }
         }
         if (periods.length >= 3) {

@@ -29,9 +29,14 @@ function transformToIFRSProfitLoss(extracted) {
         periods,
         revenueItems,
         cogsItems,
-        // BUG-010 FIX: genServices was extracted but never destructured here,
-        // causing it to be silently dropped from the IFRS output.
-        genServices,
+        // NOTE: genServices (extractor row "Доходы от генуслуг" / "Ген услуги") is intentionally
+        // NOT used here. Its leaf sub-items (Генуслуги 3%, Генуслуги 5%) are already captured
+        // inside revenueItems via collectProjectItems. The group total row is a subtotal header
+        // excluded by REVENUE_SKIP_PATTERNS — adding it again would double-count.
+        // The previous BUG-010 "fix" iterated genServices as if it were an array of item objects,
+        // but the extractor returns it as a flat values array [n1, null, n2, ...]. Iterating that
+        // and calling item.name caused "Cannot read properties of null (reading 'name')" whenever
+        // a null value was encountered (missing-period cells). Fixed by simply not using genServices.
         overheadFOT,
         overheadESP,
         overheadOther,
@@ -73,23 +78,12 @@ function transformToIFRSProfitLoss(extracted) {
         }
     }
 
-    // BUG-010 FIX: include genServices in revenue section if present.
-    // These are general services revenue items that were previously extracted
-    // but silently dropped because the transformer never referenced them.
-    if (genServices && genServices.length > 0) {
-        global.logger.logInfo(`[PL TRANSFORMER] Adding ${genServices.length} genServices item(s) to revenue`);
-        rows.push({ type: 'subheader', label: 'General services revenue' });
-        for (const item of genServices) {
-            rows.push({ type: 'item', label: `  ${item.name}`, values: norm(item.values) });
-        }
-    }
-
     const revenueEnd = rows.length; // exclusive end
 
     rows.push({
         type: 'total',
         label: 'Total Revenue',
-        sumRange: { from: revenueStart, to: revenueEnd }, // row indices into rows[]
+        sumRange: { from: revenueStart, to: revenueEnd },
     });
     rows.push({ type: 'blank' });
 
@@ -119,7 +113,6 @@ function transformToIFRSProfitLoss(extracted) {
     rows.push({
         type: 'calculated',
         label: 'III. GROSS PROFIT',
-        // = Total Revenue + Total Cost of Sales
         addRefs: ['totalRevenue', 'totalCOGS'],
     });
     rows.push({ type: 'blank' });
@@ -194,49 +187,48 @@ function transformToIFRSProfitLoss(extracted) {
     });
     rows.push({ type: 'blank' });
 
-    // ─── VIII. FINANCE INCOME / (COSTS) ──────────────────────────────────────
-    rows.push({ type: 'title', label: 'VIII. FINANCE INCOME / (COSTS)' });
+    // ─── VIII. OTHER INCOME ───────────────────────────────────────────────────
+    // Source section: "Прочие доходы" (Other Income) in NSBU.
+    // Contains asset disposal proceeds (Реализация техники) and inventory sales
+    // (Реализация ТМЦ). These are NOT finance income per IAS 1 — they are
+    // other operating/non-operating income from asset/inventory disposal.
+    // Renamed from "FINANCE INCOME / (COSTS)" to "OTHER INCOME" to reflect this.
+    rows.push({ type: 'title', label: 'VIII. OTHER INCOME' });
 
-    // BUG-011 FIX: split financeIncomeItems into income (positive) and costs (negative)
-    // by examining the sum of each item's values. Items that are net-negative are costs.
-    // This avoids changing the extractor while still populating the finance costs row.
     const allFinanceItems = financeIncomeItems || [];
-    const financeIncomeOnly = allFinanceItems.filter(item => {
+    const incomeItems = allFinanceItems.filter(item => {
         const total = (item.values || []).reduce((s, v) => s + (v || 0), 0);
         return total >= 0;
     });
-    const financeCostItems = allFinanceItems.filter(item => {
+    const costItems = allFinanceItems.filter(item => {
         const total = (item.values || []).reduce((s, v) => s + (v || 0), 0);
         return total < 0;
     });
 
-    // Track range start for the Net finance total formula
     const financeItemsStart = rows.length;
 
-    if (financeIncomeOnly.length > 0) {
-        for (const item of financeIncomeOnly) {
+    if (incomeItems.length > 0) {
+        for (const item of incomeItems) {
             rows.push({ type: 'item', label: `  ${item.name}`, values: norm(item.values) });
         }
     } else {
-        rows.push({ type: 'item', label: '  Finance income', values: nullArr() });
+        rows.push({ type: 'item', label: '  Other income', values: nullArr() });
     }
 
-    if (financeCostItems.length > 0) {
-        for (const item of financeCostItems) {
+    if (costItems.length > 0) {
+        for (const item of costItems) {
             rows.push({ type: 'item', label: `  ${item.name}`, values: norm(item.values) });
         }
     } else {
-        rows.push({ type: 'item', label: '  Finance costs', values: nullArr() });
+        rows.push({ type: 'item', label: '  Other expenses', values: nullArr() });
     }
 
-    const financeItemsEnd = rows.length; // exclusive
+    const financeItemsEnd = rows.length;
 
-    // Net finance result = SUM of all items above (income + costs)
-    // This is what feeds into PBT, so it must not be a static null row
     const netFinanceIndex = rows.length;
     rows.push({
         type: 'total',
-        label: 'Net finance income / (costs)',
+        label: 'Net other income / (expenses)',
         sumRange: { from: financeItemsStart, to: financeItemsEnd },
     });
 
@@ -270,7 +262,6 @@ function transformToIFRSProfitLoss(extracted) {
     });
 
     // ── Named index map for formula resolution ────────────────────────────────
-    // Find actual row indices for named references used in addRefs
     const totalRevenueRowIdx = rows.findIndex(
         (r) => r.type === 'total' && r.label === 'Total Revenue'
     );

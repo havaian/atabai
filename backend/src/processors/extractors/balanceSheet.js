@@ -116,66 +116,71 @@ function detectBalanceSheetStructure(sheet) {
 /**
  * Extract metadata (company name, INN, report date)
  */
+// The standard NSBU form (ОКУД 0710001) labels the date row as:
+//   "Сана (йил, ой, кун) / Дата (год, месяц, число)"
+// and stores year, month, day as three *separate numeric cells* in that row —
+// never as a formatted date string like "30.06.2025".
+//
+// The old code only triggered on 'ҳисобот санаси' / 'отчет' (which didn't match
+// this label) and then looked for a dd.mm.yyyy pattern in adjacent cells (which
+// never found anything because the values are bare numbers). Result: always fell
+// back to new Date() — today's processing date.
+//
+// Fix:
+//   1. Expanded trigger: also match 'сана', 'год, месяц', 'йил, ой'
+//   2. Adjacent-cell scan now collects bare numeric values, identifies
+//      year (2000–2099) / month (1–12) / day (1–31) and assembles the date.
+
+/**
+ * Extract metadata (company name, INN, report date)
+ */
 function extractMetadata(sheet, structure) {
     let companyName = null;
     let inn = null;
     let reportDate = null;
 
-    // Search in header section - EXTENDED RANGE to row 40
-    const searchEndRow = Math.min(40, structure.headerRow || 50);
+    // Scan the pre-header rows (rows before the data table starts)
+    const scanLimit = Math.min(structure.headerRow + 5, structure.lastMeaningfulRow);
 
-    for (let rowNum = 1; rowNum <= searchEndRow; rowNum++) {
-        const rowData = getRow(sheet, rowNum);
+    for (let rowNum = 1; rowNum <= scanLimit; rowNum++) {
+        // Collect all cell values in this row for adjacent-cell lookups
+        const rowData = [];
+        eachCellInRow(sheet, rowNum, (cell) => {
+            rowData.push(cell);
+        });
 
-        rowData.forEach((cell) => {
-            if (!cell || !cell.value) return;
-
+        eachCellInRow(sheet, rowNum, (cell) => {
             const cellText = getCellText(cell);
+            if (!cellText) return;
             const normalized = normalizeText(cellText);
 
             // Company name detection
-            if (!companyName) {
-                // Check for company label
-                if (normalized.includes('корхона') || normalized.includes('предприятие') ||
-                    normalized.includes('ташкилот') || normalized.includes('организация')) {
-                    // Look for company name in the same row
-                    rowData.forEach((valueCell) => {
-                        if (!valueCell || !valueCell.value) return;
-                        const valueText = getCellText(valueCell);
-                        const valueNormalized = normalizeText(valueText);
-
-                        if (valueNormalized.includes('жамият') || valueNormalized.includes('jamiyat') ||
-                            valueNormalized.includes('мчж') || valueNormalized.includes('mchj') ||
-                            valueNormalized.includes('общество') || valueNormalized.includes('ооо') ||
-                            valueNormalized.includes('mas\'uliyati cheklangan') ||
-                            valueNormalized.includes('масъулияти чекланган')) {
-                            companyName = valueText.trim();
-                        }
-                    });
-                }
-
-                // Direct detection
-                if (!companyName && (
-                    normalized.includes('жамият') || normalized.includes('jamiyat') ||
-                    normalized.includes('мчж') || normalized.includes('mchj') ||
-                    normalized.includes('общество') || normalized.includes('ооо') ||
-                    normalized.includes('mas\'uliyati cheklangan') ||
-                    normalized.includes('масъулияти чекланган')
-                )) {
-                    companyName = cellText.trim();
-                }
+            if (!companyName && (
+                normalized.includes('jamiyat') ||
+                normalized.includes('mchj') ||
+                normalized.includes('общество') ||
+                normalized.includes('ооо') ||
+                normalized.includes('mas\'uliyati cheklangan') ||
+                normalized.includes('масъулияти чекланган')
+            )) {
+                companyName = cellText.trim();
             }
 
-            // INN detection - Enhanced with Uzbek tax ID label
-            if (!inn && (normalized.includes('инн') || normalized.includes('стир') || normalized.includes('inn') ||
-                normalized.includes('идентификацион') || normalized.includes('идентификационный') ||
-                normalized.includes('налогоплательщика') || normalized.includes('солиқ тўловчи'))) {
-
+            // INN detection
+            if (!inn && (
+                normalized.includes('инн') ||
+                normalized.includes('стир') ||
+                normalized.includes('inn') ||
+                normalized.includes('идентификацион') ||
+                normalized.includes('идентификационный') ||
+                normalized.includes('налогоплательщика') ||
+                normalized.includes('солиқ тўловчи')
+            )) {
                 const innMatch = cellText.match(/(\d{9,})/);
                 if (innMatch) {
                     inn = innMatch[1];
                 } else {
-                    // Check adjacent cells in the same row for the INN number
+                    // Check adjacent cells in the same row
                     rowData.forEach((valueCell) => {
                         if (!valueCell || !valueCell.value || inn) return;
                         const valueText = getCellText(valueCell);
@@ -187,21 +192,46 @@ function extractMetadata(sheet, structure) {
                 }
             }
 
-            // Report date detection
-            if (!reportDate && (normalized.includes('отчетная дата') || normalized.includes('ҳисобот санаси') ||
-                normalized.includes('hisobot sanasi') || normalized.includes('ҳисобот') || normalized.includes('отчет'))) {
+            // Report date detection.
+            // The standard NSBU form (ОКУД 0710001) labels the date row as
+            // "Сана (йил, ой, кун) / Дата (год, месяц, число)" and stores
+            // year, month, day as three separate numeric cells — never a
+            // formatted date string. Both the label trigger and the
+            // adjacent-cell scan must account for this.
+            if (!reportDate && (
+                normalized.includes('отчетная дата') ||
+                normalized.includes('ҳисобот санаси') ||
+                normalized.includes('hisobot sanasi') ||
+                normalized.includes('сана') ||        // Uzbek: "date"
+                normalized.includes('год, месяц') ||  // Russian date label
+                normalized.includes('йил, ой')        // Uzbek date label
+            )) {
+                // First try: formatted date string in the label cell itself
                 const dateMatch = cellText.match(/(\d{2}[-./]\d{2}[-./]\d{4})/);
                 if (dateMatch) {
                     reportDate = dateMatch[1];
                 } else {
+                    // Standard NSBU form stores year / month / day as three
+                    // separate numeric cells in the same row. Collect them all,
+                    // identify each component by its plausible range, assemble.
+                    const nums = [];
                     rowData.forEach((valueCell) => {
-                        if (!valueCell || !valueCell.value || reportDate) return;
-                        const valueText = getCellText(valueCell);
-                        const match = valueText.match(/(\d{2}[-./]\d{2}[-./]\d{4})/);
-                        if (match) {
-                            reportDate = match[1];
-                        }
+                        if (!valueCell || !valueCell.value) return;
+                        const n = parseFloat(String(valueCell.value).trim());
+                        if (!isNaN(n) && n > 0) nums.push(Math.round(n));
                     });
+
+                    const year = nums.find(n => n >= 2000 && n <= 2099);
+                    const remaining = nums.filter(n => n !== year);
+                    const month = remaining.find(n => n >= 1 && n <= 12);
+                    const afterMonth = remaining.filter(n => n !== month);
+                    const day = afterMonth.find(n => n >= 1 && n <= 31);
+
+                    if (year && month) {
+                        const d = String(day || 1).padStart(2, '0');
+                        const m = String(month).padStart(2, '0');
+                        reportDate = `${d}.${m}.${year}`;
+                    }
                 }
             }
         });
