@@ -163,8 +163,8 @@ async function styleProfitLossReport(data) {
             }
         }
 
-        if (itemExcelRows.length === 0) return `=0`;
-        if (itemExcelRows.length === 1) return `=${c}${itemExcelRows[0]}`;
+        if (itemExcelRows.length === 0) return 0;
+        if (itemExcelRows.length === 1) return { formula: `${c}${itemExcelRows[0]}` };
 
         // Check contiguity in Excel row numbers
         let contiguous = true;
@@ -173,10 +173,10 @@ async function styleProfitLossReport(data) {
         }
 
         if (contiguous) {
-            return { formula:`=SUM(${c}${itemExcelRows[0]}:${c}${itemExcelRows[itemExcelRows.length - 1]})` };
+            return { formula: `SUM(${c}${itemExcelRows[0]}:${c}${itemExcelRows[itemExcelRows.length - 1]})` };
         }
         // Non-contiguous: enumerate refs inside SUM
-        return { formula: `=SUM(${itemExcelRows.map(r => `${c}${r}`).join(',')})` };
+        return { formula: `SUM(${itemExcelRows.map(r => `${c}${r}`).join(',')})` };
     }
 
     /**
@@ -193,9 +193,9 @@ async function styleProfitLossReport(data) {
             return layoutToExcel[ref];
         }).filter(Boolean);
 
-        if (resolved.length === 0) return '=0';
+        if (resolved.length === 0) return 0;
         const c = colLetter(col);
-        return { formula: '=' + resolved.map((r) => `${c}${r}`).join('+') };
+        return { formula: resolved.map((r) => `${c}${r}`).join('+') };;
     }
 
     for (let li = 0; li < layoutRows.length; li++) {

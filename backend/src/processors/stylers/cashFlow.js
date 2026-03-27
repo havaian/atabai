@@ -3,7 +3,7 @@
 // into a styled ExcelJS workbook. Follows the same alternating-row
 // colour pattern used by other stylers.
 
-const ExcelJS        = require('exceljs');
+const ExcelJS = require('exceljs');
 const { addLogoRow } = require('./logoHelper');
 const {
     BRAND_COLORS,
@@ -26,7 +26,7 @@ async function styleCashFlowReport(data) {
         worksheet.getColumn(i + 2).width = 18;
     }
 
-    let currentRow     = 1;
+    let currentRow = 1;
     let dataRowCounter = 0;
 
     // === LOGO ===
@@ -134,7 +134,7 @@ async function styleCashFlowReport(data) {
         if (section.isSummary) {
             const isCF = section.name === 'CF';
             const isFCF = section.name === 'FCF';
-            
+
             if (isCF) {
                 currentRow = addCalculatedSection(
                     worksheet,
@@ -167,7 +167,7 @@ async function styleCashFlowReport(data) {
         sectionHeaderRow.getCell(1).value = `CASH FLOWS FROM ${section.name}:`;
         sectionHeaderRow.getCell(1).font = { name: PRIMARY_FONT, size: 11, bold: true };
         sectionHeaderRow.getCell(1).alignment = { horizontal: 'left', vertical: 'center', indent: 1 };
-        
+
         // Alternating color for section header
         const sectionFill = (dataRowCounter % 2 === 0) ? null : {
             type: 'pattern',
@@ -280,18 +280,18 @@ async function styleCashFlowReport(data) {
 
 function groupPeriodsByYear(periods) {
     const groups = [];
-    
+
     const periodYears = [];
     let currentYear = null;
 
     for (let i = periods.length - 1; i >= 0; i--) {
         const period = periods[i];
         const yearMatch = period.label.match(/\b(20\d{2})\b/);
-        
+
         if (yearMatch) {
             currentYear = yearMatch[1];
         }
-        
+
         periodYears[i] = currentYear;
     }
 
@@ -299,11 +299,11 @@ function groupPeriodsByYear(periods) {
     while (i < periods.length) {
         const year = periodYears[i];
         const startCol = i;
-        
+
         while (i < periods.length && periodYears[i] === year) {
             i++;
         }
-        
+
         groups.push({
             year: year || 'Unknown',
             startCol: startCol,
@@ -330,38 +330,27 @@ function addSectionTotalWithFormulas(worksheet, row, label, periods, range, data
     totalRow.getCell(1).value = label;
     totalRow.getCell(1).font = { name: PRIMARY_FONT, size: 11, bold: true };
     totalRow.getCell(1).alignment = { horizontal: 'left', vertical: 'center', indent: 1 };
-    
-    const totalFill = (dataRowCounter % 2 === 0) ? null : {
-        type: 'pattern',
-        pattern: 'solid',
-        fgColor: { argb: BRAND_COLORS.lightBlue }
-    };
 
+    const totalFill = (dataRowCounter % 2 === 0) ? null : {
+        type: 'pattern', pattern: 'solid', fgColor: { argb: BRAND_COLORS.lightBlue }
+    };
     totalRow.getCell(1).fill = totalFill;
 
     for (let i = 0; i < periods.length; i++) {
         const cell = totalRow.getCell(i + 2);
         const colLetter = getColumnLetter(i + 2);
 
-        // Guard against circular ref: if no item rows exist (start > end),
-        // Excel normalises a reversed range to include the formula cell itself.
         if (range.start > range.end) {
             cell.value = 0;
         } else {
-            const formula = `=SUM(${colLetter}${range.start}:${colLetter}${range.end})`;
-            cell.value = { formula: formula };
+            cell.value = { formula: `SUM(${colLetter}${range.start}:${colLetter}${range.end})` };
         }
 
-        const formula = `=SUM(${colLetter}${range.start}:${colLetter}${range.end})`;
-        cell.value = { formula: formula };
         cell.numFmt = NUM_FMT_WITH_BRACKETS;
         cell.font = { name: PRIMARY_FONT, size: 11, bold: true };
         cell.alignment = { horizontal: 'right', vertical: 'center' };
         cell.fill = totalFill;
-        cell.border = {
-            top: { style: 'thin' },
-            bottom: { style: 'medium' }
-        };
+        cell.border = { top: { style: 'thin' }, bottom: { style: 'medium' } };
     }
 
     totalRow.height = 22;
@@ -376,7 +365,7 @@ function addCalculatedSection(worksheet, startRow, sectionName, label, periods, 
     headerRow.getCell(1).value = sectionName;
     headerRow.getCell(1).font = { name: PRIMARY_FONT, size: 12, bold: true };
     headerRow.getCell(1).alignment = { horizontal: 'left', vertical: 'center', indent: 1 };
-    
+
     const headerFill = (dataRowCounter % 2 === 0) ? null : {
         type: 'pattern',
         pattern: 'solid',
@@ -396,7 +385,7 @@ function addCalculatedSection(worksheet, startRow, sectionName, label, periods, 
     valueRow.getCell(1).value = label;
     valueRow.getCell(1).font = { name: PRIMARY_FONT, size: 11, bold: true };
     valueRow.getCell(1).alignment = { horizontal: 'left', vertical: 'center', indent: 1 };
-    
+
     const valueFill = ((dataRowCounter + 1) % 2 === 0) ? null : {
         type: 'pattern',
         pattern: 'solid',
@@ -408,9 +397,9 @@ function addCalculatedSection(worksheet, startRow, sectionName, label, periods, 
     for (let i = 0; i < periods.length; i++) {
         const cell = valueRow.getCell(i + 2);
         const colLetter = getColumnLetter(i + 2);
-        
+
         const rowRefs = sourceRows.map(r => `${colLetter}${r}`).join('+');
-        const formula = `=${rowRefs}`;
+        const formula = rowRefs;
 
         cell.value = { formula: formula };
         cell.numFmt = NUM_FMT_WITH_BRACKETS;

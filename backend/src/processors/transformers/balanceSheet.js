@@ -46,7 +46,8 @@ function transformToIFRSStructure(dataMap) {
                 label: mapping.ifrsClassification,
                 start: startVal,
                 end: endVal,
-                isNegative: isNeg
+                isNegative: isNeg,
+                isCalculated: mapping.isCalculated === true
             };
 
             const sectionKey = mapping.section;
