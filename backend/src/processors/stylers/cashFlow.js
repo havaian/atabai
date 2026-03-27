@@ -343,6 +343,15 @@ function addSectionTotalWithFormulas(worksheet, row, label, periods, range, data
         const cell = totalRow.getCell(i + 2);
         const colLetter = getColumnLetter(i + 2);
 
+        // Guard against circular ref: if no item rows exist (start > end),
+        // Excel normalises a reversed range to include the formula cell itself.
+        if (range.start > range.end) {
+            cell.value = 0;
+        } else {
+            const formula = `=SUM(${colLetter}${range.start}:${colLetter}${range.end})`;
+            cell.value = { formula: formula };
+        }
+
         const formula = `=SUM(${colLetter}${range.start}:${colLetter}${range.end})`;
         cell.value = { formula: formula };
         cell.numFmt = NUM_FMT_WITH_BRACKETS;

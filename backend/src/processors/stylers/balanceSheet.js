@@ -265,6 +265,7 @@ async function createStyledBalanceSheet(data) {
     let dataRowCounter = 0;
 
     // === DATA SECTIONS ===
+
     data.sections.forEach(section => {
         // Section header
         worksheet.mergeCells(`A${currentRow}:C${currentRow}`);
@@ -274,35 +275,26 @@ async function createStyledBalanceSheet(data) {
         sectionCell.alignment = ALIGNMENT_PRESETS.left;
         sectionCell.border = BORDER_PRESETS.thin;
 
-        // Alternating fill for section header
         const sectionFill = (dataRowCounter % 2 === 0) ? null : {
-            type: 'pattern',
-            pattern: 'solid',
-            fgColor: { argb: BRAND_COLORS.lightBlue }
+            type: 'pattern', pattern: 'solid', fgColor: { argb: BRAND_COLORS.lightBlue }
         };
         sectionCell.fill = sectionFill;
         currentRow++;
         dataRowCounter++;
 
-        // Track Excel row numbers for items that contribute to the section total.
-        // isCalculated items (PP&E Net, Intangibles Net) are excluded — their gross
-        // and contra rows are already summed, so including the net row again would
-        // double-count the section total.
+        // Track rows that contribute to the section total.
+        // isCalculated rows (PP&E Net, Intangibles Net) are excluded — their
+        // gross and contra rows are already in the sum.
         const sumRowsB = [];
         const sumRowsC = [];
 
         // Section items
         section.items.forEach(item => {
             const row = worksheet.getRow(currentRow);
-
-            // Alternating fill for data rows
             const rowFill = (dataRowCounter % 2 === 0) ? null : {
-                type: 'pattern',
-                pattern: 'solid',
-                fgColor: { argb: BRAND_COLORS.lightBlue }
+                type: 'pattern', pattern: 'solid', fgColor: { argb: BRAND_COLORS.lightBlue }
             };
 
-            // Line Item
             const labelCell = row.getCell(1);
             labelCell.value = item.label;
             labelCell.font = FONT_PRESETS.normalData;
@@ -310,7 +302,6 @@ async function createStyledBalanceSheet(data) {
             labelCell.border = BORDER_PRESETS.thin;
             labelCell.fill = rowFill;
 
-            // Beginning Balance
             const startCell = row.getCell(2);
             startCell.value = item.start;
             startCell.font = FONT_PRESETS.normalData;
@@ -319,7 +310,6 @@ async function createStyledBalanceSheet(data) {
             startCell.numFmt = '#,##0.00;(#,##0.00)';
             startCell.fill = rowFill;
 
-            // Ending Balance
             const endCell = row.getCell(3);
             endCell.value = item.end;
             endCell.font = FONT_PRESETS.normalData;
@@ -328,7 +318,6 @@ async function createStyledBalanceSheet(data) {
             endCell.numFmt = '#,##0.00;(#,##0.00)';
             endCell.fill = rowFill;
 
-            // Only include non-calculated rows in the section total SUM.
             if (!item.isCalculated) {
                 sumRowsB.push(currentRow);
                 sumRowsC.push(currentRow);
@@ -338,15 +327,11 @@ async function createStyledBalanceSheet(data) {
             dataRowCounter++;
         });
 
-        // Section total with selective SUM formulas
+        // Section total — selective SUM excludes isCalculated rows
         if (section.items.length > 0) {
             const totalRow = worksheet.getRow(currentRow);
-
-            // Alternating fill for total row
             const totalFill = (dataRowCounter % 2 === 0) ? null : {
-                type: 'pattern',
-                pattern: 'solid',
-                fgColor: { argb: BRAND_COLORS.lightBlue }
+                type: 'pattern', pattern: 'solid', fgColor: { argb: BRAND_COLORS.lightBlue }
             };
 
             totalRow.getCell(1).value = `Total ${section.name}`;
@@ -355,7 +340,6 @@ async function createStyledBalanceSheet(data) {
             totalRow.getCell(1).border = BORDER_PRESETS.thin;
             totalRow.getCell(1).fill = totalFill;
 
-            // Selective SUM — excludes isCalculated (net) rows to avoid double-counting
             totalRow.getCell(2).value = buildSelectiveSumFormula('B', sumRowsB);
             totalRow.getCell(2).font = FONT_PRESETS.boldData;
             totalRow.getCell(2).alignment = ALIGNMENT_PRESETS.right;
@@ -370,7 +354,6 @@ async function createStyledBalanceSheet(data) {
             totalRow.getCell(3).numFmt = '#,##0.00;(#,##0.00)';
             totalRow.getCell(3).fill = totalFill;
 
-            // Track this total row for grand totals
             if (section.name.includes('ASSETS')) {
                 assetSectionTotalRows.push(currentRow);
             } else {

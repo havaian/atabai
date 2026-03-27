@@ -32,6 +32,7 @@ const LABEL_MAP = {
     'Поступления от займов': 'Proceeds from borrowings',
     'Погашение займов': 'Repayment of borrowings',
     'Выплата дивидендов': 'Dividends paid',
+    'ВГО': 'Intercompany eliminations',
 };
 
 /**

@@ -73,6 +73,7 @@ const COGS_SKIP_PATTERNS = [
     /^Валовая прибыль/i,
     /^ВАЛОВАЯ ПРИБЫЛЬ/i,
     /\(ВГО\)/i,               // Intercompany eliminations (e.g. "Кранчи (ВГО)", "БТБС (ВГО)") - excluded from totals in source
+    /^Ген услуги/i,       // Gen-services group header — sub-items (gen fee %) collected individually
 ];
 
 // ─── Globally skip regardless of section ─────────────────────────────────────

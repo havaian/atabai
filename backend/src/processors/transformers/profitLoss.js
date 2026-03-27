@@ -4,6 +4,18 @@
 
 'use strict';
 
+const OTHER_INCOME_LABEL_MAP = {
+    'Реализация техники':                             'Proceeds from equipment disposal',
+    'Реализация ТМЦ (контейнеры и неликвиды)':        'Proceeds from inventory sales',
+    'Реализация ТМЦ':                                 'Proceeds from inventory sales',
+    'Прочие доходы':                                  'Other income',
+};
+ 
+function translateOtherIncomeLabel(raw) {
+    if (!raw) return raw;
+    return OTHER_INCOME_LABEL_MAP[raw.trim()] || raw.trim();
+}
+
 /**
  * Transform extracted P&L data into IFRS-structured layout.
  *
@@ -209,7 +221,7 @@ function transformToIFRSProfitLoss(extracted) {
 
     if (incomeItems.length > 0) {
         for (const item of incomeItems) {
-            rows.push({ type: 'item', label: `  ${item.name}`, values: norm(item.values) });
+            rows.push({ type: 'item', label: `  ${translateOtherIncomeLabel(item.name)}`, values: norm(item.values) });
         }
     } else {
         rows.push({ type: 'item', label: '  Other income', values: nullArr() });
@@ -217,7 +229,7 @@ function transformToIFRSProfitLoss(extracted) {
 
     if (costItems.length > 0) {
         for (const item of costItems) {
-            rows.push({ type: 'item', label: `  ${item.name}`, values: norm(item.values) });
+            rows.push({ type: 'item', label: `  ${translateOtherIncomeLabel(item.name)}`, values: norm(item.values) });
         }
     } else {
         rows.push({ type: 'item', label: '  Other expenses', values: nullArr() });

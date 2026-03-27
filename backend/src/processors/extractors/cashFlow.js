@@ -427,8 +427,19 @@ function hasYearsOrQuarters(cellB, cellC) {
 
 function formatPeriodLabel(value) {
     if (!value) return 'Total';
-
     const str = String(value).trim();
+
+    // Translate Russian/Uzbek month abbreviations to English
+    const MONTH_MAP = {
+        'янв': 'Jan', 'фев': 'Feb', 'мар': 'Mar', 'апр': 'Apr',
+        'май': 'May', 'июн': 'Jun', 'июл': 'Jul', 'авг': 'Aug',
+        'сен': 'Sep', 'окт': 'Oct', 'ноя': 'Nov', 'дек': 'Dec',
+        'yan': 'Jan', 'fev': 'Feb', 'mar': 'Mar', 'apr': 'Apr',
+        'may': 'May', 'iyun': 'Jun', 'iyul': 'Jul', 'avg': 'Aug',
+        'sen': 'Sep', 'okt': 'Oct', 'noy': 'Nov', 'dek': 'Dec',
+    };
+    const translated = MONTH_MAP[str.toLowerCase()];
+    if (translated) return translated;
 
     if (str.length < 15) return str;
 
