@@ -16,7 +16,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { useThemeStore } from '@/stores/theme'
 
 // ─── Refs ─────────────────────────────────────────────────────────────────────
 const canvasEl = ref(null)
@@ -26,6 +27,35 @@ const ringEl = ref(null)
 const isTouch = ref(false)
 const isHover = ref(false)
 const isClicking = ref(false)
+
+// ─── Theme-aware cursor color ──────────────────────────────────────────────
+const themeStore = useThemeStore()
+
+const CURSOR_COLORS = {
+    dark:  '#ffffff',
+    light: '#6AFF00',
+}
+
+function applyCursorColor(theme) {
+    const color = CURSOR_COLORS[theme] ?? CURSOR_COLORS.dark
+    if (dotEl.value)  dotEl.value.style.background = color
+    if (ringEl.value) {
+        ringEl.value.style.borderColor = color.replace('#', 'rgba(').length > 0
+            ? hexToRgba(color, 0.85)
+            : color
+    }
+}
+
+function hexToRgba(hex, alpha) {
+    const r = parseInt(hex.slice(1, 3), 16)
+    const g = parseInt(hex.slice(3, 5), 16)
+    const b = parseInt(hex.slice(5, 7), 16)
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`
+}
+
+watch(() => themeStore.resolvedTheme, (theme) => {
+    applyCursorColor(theme)
+})
 
 // ─── Canvas ripple state ───────────────────────────────────────────────────────
 let ctx = null
@@ -81,6 +111,7 @@ function lerpCursor() {
     ringEl.value.style.transform = `translate(${ringPos.x - 18}px, ${ringPos.y - 18}px)`
 
     cursorRaf = requestAnimationFrame(lerpCursor)
+    applyCursorColor(themeStore.resolvedTheme)
 }
 
 // ─── Interactive element detection ────────────────────────────────────────────
@@ -178,7 +209,6 @@ onUnmounted(() => {
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: #9500FF;
     pointer-events: none;
     z-index: 9999;
     will-change: transform;
@@ -193,7 +223,7 @@ onUnmounted(() => {
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    border: 1.5px solid rgba(149, 0, 255, 0.85);
+    border: 1.5px solid transparent;
     pointer-events: none;
     z-index: 9998;
     will-change: transform;
