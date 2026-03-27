@@ -32,7 +32,7 @@ const isClicking = ref(false)
 const themeStore = useThemeStore()
 
 const CURSOR_COLORS = {
-    dark:  '#ffffff',
+    dark:  '#9500FF',
     light: '#6AFF00',
 }
 
