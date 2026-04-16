@@ -245,4 +245,76 @@ function extractEquityData(sheet) {
     }
 }
 
-module.exports = { extractEquityData };
+/**
+ * Score a sheet by how likely it is to be an equity source — either a
+ * balance sheet (Form 1) with equity row codes, or a dedicated Form 4.
+ *
+ * Signals:
+ *   +3  has code column header AND at least one equity row code (410/420/430/440/450/480)
+ *       → balance sheet path
+ *   +2 per FORM4_COLUMN_PATTERNS column header match in any row, cap +8
+ *       (shareCapital / sharePremium / reserves / treasuryStock / retainedEarnings / total)
+ *   +2  has at least one FORM4_ROW_PATTERNS row match
+ *       → Form 4 path
+ *   +1  row count >= 10
+ *
+ * Either path alone can produce a high enough score; pickBestSheet will pick
+ * whichever sheet scores highest, and detectSourceType() then decides the pipeline.
+ */
+function scoreEquityCandidate(sheet) {
+    if (!sheet || !sheet.rowCount) return 0;
+
+    const rows = sheet.rows || sheet.data || [];
+    const rowCount = Math.min(sheet.rowCount || rows.length, 80);
+
+    let hasCodeHeader = false;
+    let hasEquityCode = false;
+    let form4ColumnHits = 0;
+    let hasForm4Row = false;
+
+    const form4ColsMatched = new Set();
+
+    for (let ri = 0; ri < rowCount; ri++) {
+        const row = Array.isArray(rows[ri]) ? rows[ri] : (rows[ri]?.cells || []);
+        if (!row || row.length === 0) continue;
+
+        // Balance sheet signals
+        for (let ci = 0; ci < Math.min(row.length, 10); ci++) {
+            const text = normalizeText(getCellText(row[ci]));
+            if (!text) continue;
+
+            if (!hasCodeHeader && (text.includes('код стр') || text.includes('сатр коди'))) {
+                hasCodeHeader = true;
+            }
+            if (!hasEquityCode && /^(410|420|430|440|450|480)$/.test(text)) {
+                hasEquityCode = true;
+            }
+
+            // Form 4 column headers (dedupe by key, one hit per column type)
+            for (const { key, pattern } of FORM4_COLUMN_PATTERNS) {
+                if (!form4ColsMatched.has(key) && pattern.test(getCellText(row[ci]))) {
+                    form4ColsMatched.add(key);
+                    form4ColumnHits++;
+                }
+            }
+        }
+
+        // Form 4 row pattern signals (check full row text)
+        if (!hasForm4Row) {
+            const rowText = row.map(c => getCellText(c)).join(' ');
+            if (FORM4_ROW_PATTERNS.some(p => p.pattern.test(rowText))) {
+                hasForm4Row = true;
+            }
+        }
+    }
+
+    let score = 0;
+    if (hasCodeHeader && hasEquityCode) score += 3;
+    score += Math.min(form4ColumnHits * 2, 8);
+    if (hasForm4Row) score += 2;
+    if (sheet.rowCount >= 10) score += 1;
+
+    return score;
+}
+
+module.exports = { extractEquityData, scoreEquityCandidate };

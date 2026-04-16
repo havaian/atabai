@@ -4,8 +4,8 @@
 
 'use strict';
 
-const { readExcelFile } = require('./readers/excelReader');
-const { extractEquityData } = require('./extractors/equity');
+const { readExcelFile, pickBestSheet } = require('./readers/excelReader');
+const { extractEquityData, scoreEquityCandidate } = require('./extractors/equity');
 const { transformToIFRSEquity } = require('./transformers/equity');
 const { styleEquityReport } = require('./stylers/equity');
 
@@ -36,7 +36,10 @@ async function processEquityTemplate(input) {
             throw new Error('No worksheets found in the file');
         }
 
-        const sheet = normalizedWorkbook.sheets[0];
+        const sheet = pickBestSheet(normalizedWorkbook, scoreEquityCandidate, {
+            minScore: 3, // either balance-sheet signals OR ≥2 form4 column headers
+            label: 'equity statement',
+        });
         global.logger.logInfo('[EQUITY PROCESSOR] File read, processing first sheet');
 
         // Step 2: Extract

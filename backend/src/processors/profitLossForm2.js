@@ -10,10 +10,10 @@
 
 'use strict';
 
-const { readExcelFile } = require('./readers/excelReader');
-const { extractProfitLossForm2Data, isForm2 } = require('./extractors/profitLossForm2');
+const { readExcelFile, pickBestSheet } = require('./readers/excelReader');
+const { extractProfitLossForm2Data, isForm2, scoreForm2PLCandidate } = require('./extractors/profitLossForm2');
+const { extractProfitLossData, scoreBudgetPLCandidate } = require('./extractors/profitLoss');
 const { transformForm2ToIFRS } = require('./transformers/profitLossForm2');
-const { extractProfitLossData } = require('./extractors/profitLoss');
 const { transformToIFRSProfitLoss } = require('./transformers/profitLoss');
 const { styleProfitLossReport } = require('./stylers/profitLoss');
 
@@ -43,7 +43,14 @@ async function processProfitLossForm2Template(input) {
             throw new Error('No worksheets found in the file');
         }
 
-        const sheet = normalizedWorkbook.sheets[0];
+        const combinedScorer = (sheet) => Math.max(
+            scoreForm2PLCandidate(sheet),
+            scoreBudgetPLCandidate(sheet)
+        );
+        const sheet = pickBestSheet(normalizedWorkbook, combinedScorer, {
+            minScore: 6,
+            label: 'P&L statement',
+        });
 
         // Step 2: Detect actual format
         const isStandardForm2 = isForm2(sheet);

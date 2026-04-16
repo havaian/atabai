@@ -1,7 +1,7 @@
 // processors/cashFlow.js - FINAL: Updated to work with simplified extractor/transformer
 
-const { readExcelFile } = require('./readers/excelReader');
-const { extractCashFlowData } = require('./extractors/cashFlow');
+const { readExcelFile, pickBestSheet } = require('./readers/excelReader');
+const { extractCashFlowData, scoreCashFlowCandidate } = require('./extractors/cashFlow');
 const { transformToIFRSCashFlow } = require('./transformers/cashFlow');
 const { styleCashFlowReport } = require('./stylers/cashFlow');
 
@@ -25,7 +25,10 @@ async function processCashFlowTemplate(input) {
             throw new Error('No worksheets found in the file');
         }
 
-        const sheet = normalizedWorkbook.sheets[0];
+        const sheet = pickBestSheet(normalizedWorkbook, scoreCashFlowCandidate, {
+            minScore: 8, // at least 2 of the 3 main sections detected
+            label: 'cash flow statement',
+        });
 
         // Extract (returns dataMap, periods, reconciliationItems, additionalSourcesItems)
         const extracted = extractCashFlowData(sheet);

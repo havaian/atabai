@@ -4,10 +4,10 @@
 
 'use strict';
 
-const { readExcelFile }          = require('./readers/excelReader');
-const { extractProfitLossData }  = require('./extractors/profitLoss');
+const { readExcelFile, pickBestSheet } = require('./readers/excelReader');
+const { extractProfitLossData, scoreBudgetPLCandidate } = require('./extractors/profitLoss');
 const { transformToIFRSProfitLoss } = require('./transformers/profitLoss');
-const { styleProfitLossReport }  = require('./stylers/profitLoss');
+const { styleProfitLossReport } = require('./stylers/profitLoss');
 
 /**
  * Process a Profit & Loss report from NSBU format to IFRS format.
@@ -36,7 +36,10 @@ async function processProfitLossTemplate(input) {
             throw new Error('No worksheets found in the file');
         }
 
-        const sheet = normalizedWorkbook.sheets[0];
+        const sheet = pickBestSheet(normalizedWorkbook, scoreBudgetPLCandidate, {
+            minScore: 7, // at least revenue (+4) + cogs (+4) = 8; bar slightly lower
+            label: 'budget P&L',
+        });
         global.logger.logInfo('[PL PROCESSOR] File read, processing first sheet');
 
         // ── Step 2: Extract ───────────────────────────────────────────────────
@@ -58,10 +61,10 @@ async function processProfitLossTemplate(input) {
 
         // ── Summary ───────────────────────────────────────────────────────────
         result.summary.transformations = extracted.revenueItems.length + extracted.cogsItems.length;
-        result.summary.changes         = ifrsLayout.rows.filter((r) => r.type === 'item').length;
-        result.summary.originalRows    = extracted.revenueItems.length + extracted.cogsItems.length;
-        result.summary.processedRows   = ifrsLayout.rows.length;
-        
+        result.summary.changes = ifrsLayout.rows.filter((r) => r.type === 'item').length;
+        result.summary.originalRows = extracted.revenueItems.length + extracted.cogsItems.length;
+        result.summary.processedRows = ifrsLayout.rows.length;
+
         return result;
 
     } catch (error) {

@@ -134,7 +134,7 @@ function extractCashFlowData(sheet) {
             }
             if (yearValue) {
                 result.periods.forEach(p => {
-                    const MONTH_ORDER = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+                    const MONTH_ORDER = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
                     if (MONTH_ORDER.includes(p.label)) {
                         p.label = `${p.label} ${yearValue}`;
                     }
@@ -142,32 +142,32 @@ function extractCashFlowData(sheet) {
                 global.logger.logInfo(`[CF EXTRACTOR] Appended year ${yearValue} to month-only period labels`);
             }
         }
-        
+
         // ─── Derive period end date from the last actual month period ─────────────────
         // Periods are labelled "Jan 2025", "Feb 2025", etc. by formatPeriodLabel().
         // The last column may be a budget/annual total ("Бюджет на 2025 г.") which is
         // not a real month — skip it and find the last proper month period.
-        const MONTH_ORDER = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        const MONTH_ORDER = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
         const DAYS_IN_MONTH = (month, year) => new Date(year, month + 1, 0).getDate();
-        
+
         const monthPeriods = result.periods.filter(p => {
             const parts = p.label.split(' ');
             return parts.length === 2 && MONTH_ORDER.includes(parts[0]) && /^\d{4}$/.test(parts[1]);
         });
-        
+
         if (monthPeriods.length > 0) {
-            const last  = monthPeriods[monthPeriods.length - 1];
+            const last = monthPeriods[monthPeriods.length - 1];
             const [mon, yr] = last.label.split(' ');
-            const monthIdx  = MONTH_ORDER.indexOf(mon);       // 0-based
-            const year      = parseInt(yr, 10);
-            const lastDay   = DAYS_IN_MONTH(monthIdx, year);
-            const dd        = String(lastDay).padStart(2, '0');
-            const mm        = String(monthIdx + 1).padStart(2, '0');
+            const monthIdx = MONTH_ORDER.indexOf(mon);       // 0-based
+            const year = parseInt(yr, 10);
+            const lastDay = DAYS_IN_MONTH(monthIdx, year);
+            const dd = String(lastDay).padStart(2, '0');
+            const mm = String(monthIdx + 1).padStart(2, '0');
             result.metadata.period = `For the period ended ${dd}.${mm}.${yr}`;
             global.logger.logInfo(`[CF EXTRACTOR] Derived period end date: ${result.metadata.period}`);
         }
         // ─────────────────────────────────────────────────────────────────────────────
-        
+
     }
 
     // Find where data starts
@@ -516,6 +516,61 @@ function isSectionHeader(text, sectionType) {
     return section === sectionType;
 }
 
-module.exports = {
-    extractCashFlowData
-};
+/**
+ * Score a sheet by how likely it is to be a cash flow statement.
+ *
+ * Signals (using the same vocabulary as detectSection/isFCFMarker):
+ *   +4  has OPERATING section marker (операцион / operatsion)
+ *   +4  has INVESTING section marker (инвестицион / investitsion)
+ *   +4  has FINANCING section marker (финансов / moliyaviy)
+ *   +2  has CF or FCF marker (свободный денежный поток / erkin pul oqimi / FCF)
+ *   +1  row count >= 20
+ */
+function scoreCashFlowCandidate(sheet) {
+    if (!sheet || !sheet.rowCount) return 0;
+
+    let hasOperating = false;
+    let hasInvesting = false;
+    let hasFinancing = false;
+    let hasFCF = false;
+
+    const rows = sheet.data || [];
+    const rowCount = Math.min(sheet.rowCount, rows.length);
+
+    for (let ri = 0; ri < rowCount; ri++) {
+        const row = Array.isArray(rows[ri]) ? rows[ri] : (rows[ri]?.cells || []);
+        if (!row || row.length === 0) continue;
+        const firstCell = row[0];
+        const raw = firstCell && firstCell.value ? String(firstCell.value).trim() : '';
+        if (!raw) continue;
+        const lower = raw.toLowerCase();
+
+        if (!hasOperating && (lower.includes('операцион') || lower.includes('operatsion'))) {
+            hasOperating = true;
+        }
+        if (!hasInvesting && (lower.includes('инвестицион') || lower.includes('investitsion'))) {
+            hasInvesting = true;
+        }
+        if (!hasFinancing && (lower.includes('финансов') || lower.includes('moliyaviy'))) {
+            hasFinancing = true;
+        }
+        if (!hasFCF && (
+            lower === 'fcf' || lower === 'free cash flow' ||
+            lower.includes('свободный денежный поток') ||
+            lower.includes('erkin pul oqimi')
+        )) {
+            hasFCF = true;
+        }
+    }
+
+    let score = 0;
+    if (hasOperating) score += 4;
+    if (hasInvesting) score += 4;
+    if (hasFinancing) score += 4;
+    if (hasFCF) score += 2;
+    if (sheet.rowCount >= 20) score += 1;
+
+    return score;
+}
+
+module.exports = { extractCashFlowData, scoreCashFlowCandidate };

@@ -654,4 +654,55 @@ function extractProfitLossData(sheet) {
     };
 }
 
-module.exports = { extractProfitLossData };
+/**
+ * Score a sheet by how likely it is to be the budget-format P&L
+ * (construction/project budget, not standard NSBU Form 2).
+ *
+ * Signals:
+ *   +4  has ДОХОДЫ section marker
+ *   +4  has РАСХОДЫ or ПРЯМЫЕ РАСХОДЫ section marker
+ *   +3  has "Накладные проекта" (project overhead section)
+ *   +3  has "Административно-хозяйственные" (admin section)
+ *   +1  row count >= 20
+ *
+ * Note: this scorer is MUTUALLY EXCLUSIVE with scoreProfitLossForm2Candidate.
+ * The processor (profitLossForm2.js) decides which pipeline to use via
+ * isForm2() on the picked sheet — so pickBestSheet should be called with
+ * a *combined* scorer (max of form2 + budget scores) to pick the sheet,
+ * then isForm2() disambiguates the pipeline. See processor diff below.
+ */
+function scoreBudgetPLCandidate(sheet) {
+    if (!sheet || !sheet.rowCount) return 0;
+
+    let score = 0;
+    let hasRevenue = false;
+    let hasCogs = false;
+    let hasOverhead = false;
+    let hasAdmin = false;
+
+    const scanRows = Math.min(sheet.rowCount, 200);
+    const rows = sheet.data || [];
+
+    for (let ri = 0; ri < scanRows; ri++) {
+        const row = Array.isArray(rows[ri]) ? rows[ri] : (rows[ri]?.cells || []);
+        if (!row || row.length === 0) continue;
+        const firstCell = row[0];
+        const label = firstCell && firstCell.value ? String(firstCell.value).trim() : '';
+        if (!label) continue;
+
+        if (!hasRevenue && /^ДОХОДЫ/i.test(label)) hasRevenue = true;
+        if (!hasCogs && /^(РАСХОДЫ|ПРЯМЫЕ РАСХОДЫ)/i.test(label)) hasCogs = true;
+        if (!hasOverhead && /^Накладные проекта/i.test(label)) hasOverhead = true;
+        if (!hasAdmin && /^Административно-хозяйственные/i.test(label)) hasAdmin = true;
+    }
+
+    if (hasRevenue) score += 4;
+    if (hasCogs) score += 4;
+    if (hasOverhead) score += 3;
+    if (hasAdmin) score += 3;
+    if (sheet.rowCount >= 20) score += 1;
+
+    return score;
+}
+
+module.exports = { extractProfitLossData, scoreBudgetPLCandidate };

@@ -232,4 +232,52 @@ function extractProfitLossForm2Data(sheet) {
     };
 }
 
-module.exports = { extractProfitLossForm2Data, isForm2 };
+/**
+ * Score a sheet by how likely it is to be a standard NSBU Form 2 P&L
+ * (ОКУД 0710002) with numeric row codes (010, 020, ..., 150).
+ *
+ * Signals:
+ *   +2 per matching row code in the first 5 columns, cap +16
+ *   +2  has period-header keyword ("текущ", "отчет", "предыдущ", 4-digit year)
+ *
+ * isForm2() uses ≥3 codes as the binary detector — this scorer is a continuous
+ * version so pickBestSheet can rank competing sheets.
+ */
+function scoreForm2PLCandidate(sheet) {
+    if (!sheet || !sheet.rowCount) return 0;
+
+    const knownCodes = new Set(Object.keys(FORM2_ROW_CODES));
+    let codeHits = 0;
+    let hasPeriodHeader = false;
+
+    const scanRows = Math.min(sheet.rowCount, 100);
+
+    for (let ri = 0; ri < scanRows; ri++) {
+        const row = getRow(sheet, ri);
+        if (!row || row.length === 0) continue;
+
+        // Count code hits in first 5 columns (code column varies by exporter)
+        for (let ci = 0; ci < Math.min(row.length, 5); ci++) {
+            const text = getCellText(row[ci]).trim();
+            if (knownCodes.has(text)) {
+                codeHits++;
+                break; // one hit per row max
+            }
+        }
+
+        // Period header scan
+        if (!hasPeriodHeader) {
+            const rowText = row.map(c => getCellText(c)).join(' ').toLowerCase();
+            if (/текущ|отчет|current|prior|предыдущ|\b20[1-9]\d\b/.test(rowText)) {
+                hasPeriodHeader = true;
+            }
+        }
+    }
+
+    let score = Math.min(codeHits * 2, 16);
+    if (hasPeriodHeader) score += 2;
+
+    return score;
+}
+
+module.exports = { extractProfitLossForm2Data, isForm2, scoreForm2PLCandidate };
