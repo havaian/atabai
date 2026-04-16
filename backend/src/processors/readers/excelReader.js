@@ -309,6 +309,54 @@ function eachCellInRow(normalizedSheet, row, callback) {
     });
 }
 
+/**
+ * Pick the best-matching sheet from a normalized workbook using a scoring function.
+ * Runs `scoreFn(sheet)` on every sheet and returns the highest scorer.
+ *
+ * @param {Object} normalizedWorkbook - Workbook from readExcelFile (has .sheets array)
+ * @param {Function} scoreFn - (sheet) => number. Higher is better. Returning 0/negative
+ *                             means "not a match".
+ * @param {Object} [opts]
+ * @param {number} [opts.minScore=1] - Sheets scoring below this are treated as no-match.
+ * @param {string} [opts.label='sheet'] - Used in the error message when nothing matches.
+ * @returns {Object} The winning normalized sheet.
+ * @throws If no sheet meets minScore.
+ */
+function pickBestSheet(normalizedWorkbook, scoreFn, opts = {}) {
+    const { minScore = 1, label = 'sheet' } = opts;
+
+    if (!normalizedWorkbook || !Array.isArray(normalizedWorkbook.sheets) || normalizedWorkbook.sheets.length === 0) {
+        throw new Error(`Could not detect ${label} structure: workbook has no sheets`);
+    }
+
+    const scored = normalizedWorkbook.sheets.map((sheet, idx) => ({
+        sheet,
+        idx,
+        score: scoreFn(sheet) || 0,
+    }));
+
+    // Sort by score desc, then by original index asc (stable tiebreak — prefer earlier sheets)
+    scored.sort((a, b) => (b.score - a.score) || (a.idx - b.idx));
+
+    if (global.logger && global.logger.logInfo) {
+        const summary = scored
+            .map(s => `${s.sheet.name || `#${s.idx}`}=${s.score}`)
+            .join(', ');
+        global.logger.logInfo(`[SHEET PICKER] ${label} scores: ${summary}`);
+    }
+
+    const winner = scored[0];
+    if (!winner || winner.score < minScore) {
+        const names = normalizedWorkbook.sheets.map(s => s.name || '(unnamed)').join(', ');
+        throw new Error(
+            `Could not detect ${label} structure in any worksheet ` +
+            `(checked: ${names}). Expected headers/markers were not found.`
+        );
+    }
+
+    return winner.sheet;
+}
+
 module.exports = {
     readExcelFile,
     normalizeExcelJSWorkbook,
@@ -316,6 +364,7 @@ module.exports = {
     getCell,
     getRow,
     eachCellInRow,
+    pickBestSheet,
     getCellValueFromExcelJS,
     getCellValueFromXLSX
 };

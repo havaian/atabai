@@ -3,6 +3,62 @@
 const { getCell, getRow, eachCellInRow } = require('../readers/excelReader');
 
 /**
+ * Score a sheet by how likely it is to be the main balance sheet.
+ * Used by the processor via pickBestSheet() to select the right sheet in
+ * multi-sheet NSBU exports (e.g. West-format files where sheet 0 is a cover
+ * page and the balance is on sheet 1).
+ *
+ * Scoring signals (tuned against real NSBU files):
+ *   +3  has code column header ("сатр коди" / "код стр")
+ *   +3  has "Актив" / "Aktiv" section marker (distinguishes the main balance
+ *       from auxiliary sheets like off-balance items which also have codes)
+ *   +2  per row with a 3-digit numeric code in any cell (cap +10)
+ *   +1  has "баланс" / "buxgalteriya" in top rows
+ *   +1  row count >= 30
+ */
+function scoreBalanceSheetCandidate(sheet) {
+    if (!sheet || !sheet.rowCount) return 0;
+
+    let score = 0;
+    let hasCodeHeader = false;
+    let hasAktivMarker = false;
+    let hasBalansTitle = false;
+    let codeRowMatches = 0;
+
+    const scanRows = Math.min(sheet.rowCount, 120);
+
+    for (let rowNum = 1; rowNum <= scanRows; rowNum++) {
+        eachCellInRow(sheet, rowNum, (cell) => {
+            const cellText = getCellText(cell);
+            if (!cellText) return;
+            const normalized = normalizeText(cellText);
+
+            if (!hasCodeHeader && (normalized.includes('сатр коди') || normalized.includes('код стр'))) {
+                hasCodeHeader = true;
+            }
+            if (!hasAktivMarker && (normalized === 'актив' || normalized === 'aktiv')) {
+                hasAktivMarker = true;
+            }
+            if (!hasBalansTitle && (normalized.includes('баланс') || normalized.includes('buxgalteriya'))) {
+                hasBalansTitle = true;
+            }
+            // Count 3-digit row codes (010, 020, ..., 780, etc.)
+            if (/^0?\d{2,3}$/.test(normalized) && parseInt(normalized, 10) >= 10 && parseInt(normalized, 10) <= 999) {
+                codeRowMatches++;
+            }
+        });
+    }
+
+    if (hasCodeHeader) score += 3;
+    if (hasAktivMarker) score += 3;
+    if (hasBalansTitle) score += 1;
+    score += Math.min(codeRowMatches * 2, 10);
+    if (sheet.rowCount >= 30) score += 1;
+
+    return score;
+}
+
+/**
  * Balance Sheet Data Extractor
  * Detects structure and extracts raw data from normalized workbook
  */
@@ -319,5 +375,6 @@ module.exports = {
     extractBalanceSheetData,
     detectBalanceSheetStructure,
     extractMetadata,
-    extractDataMap
+    extractDataMap,
+    scoreBalanceSheetCandidate
 };

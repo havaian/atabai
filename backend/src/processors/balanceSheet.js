@@ -1,7 +1,7 @@
 // processors/balanceSheet.js
 
-const { readExcelFile } = require('./readers/excelReader');
-const { extractBalanceSheetData } = require('./extractors/balanceSheet');
+const { readExcelFile, pickBestSheet } = require('./readers/excelReader');
+const { extractBalanceSheetData, scoreBalanceSheetCandidate } = require('./extractors/balanceSheet');
 const { transformToIFRSStructure } = require('./transformers/balanceSheet');
 const { styleReport } = require('./stylers/balanceSheet');
 
@@ -36,7 +36,12 @@ async function processBalanceSheetTemplate(input) {
             throw new Error('No worksheets found in the file');
         }
 
-        const sheet = normalizedWorkbook.sheets[0];
+        // Select the best-matching sheet (handles multi-sheet NSBU exports where
+        // sheet 0 is a cover page and the actual balance is on a later sheet).
+        const sheet = pickBestSheet(normalizedWorkbook, scoreBalanceSheetCandidate, {
+            minScore: 6, // must clear at least code-header (3) + aktiv-marker (3)
+            label: 'balance sheet',
+        });
 
         // Step 2: Extract data from the sheet
         const extracted = extractBalanceSheetData(sheet);
