@@ -32,7 +32,7 @@
             </div>
         </div>
 
-        <CursorEffect />
+        <!-- <CursorEffect /> -->
     </div>
 </template>
 
@@ -43,7 +43,7 @@ import { XMarkIcon } from '@heroicons/vue/24/outline'
 import { useAuthStore } from '@/stores/auth'
 import Navbar from '@/components/layout/Navbar.vue'
 import Footer from '@/components/layout/Footer.vue'
-import CursorEffect from '@/components/CursorEffect.vue'
+// import CursorEffect from '@/components/CursorEffect.vue'
 
 const authStore = useAuthStore()
 const route = useRoute()
