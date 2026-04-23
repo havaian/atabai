@@ -92,9 +92,10 @@ const rootRef = ref(null)
 const univerHostRef = ref(null)
 
 // Univer instance handles — kept in closure, not reactive (Univer internals hate reactivity)
-let ICommandService = null
 let univerInstance = null
 let workbookRef = null
+let ICommandService = null
+let SetWorksheetActiveOperation = null
 
 // ── Lifecycle ─────────────────────────────────────────────────────────────
 onMounted(() => {
@@ -200,7 +201,10 @@ async function mountUniver(transformation) {
     ])
 
     const { Univer, UniverInstanceType, LocaleType, merge, ICommandService: CoreICommandService } = core
+    const { UniverSheetsPlugin, SetWorksheetActiveOperation } = sheets
+
     ICommandService = CoreICommandService
+    SetWorksheetActiveOperation = sheets.SetWorksheetActiveOperation
 
     const mergedLocale = merge(
         {},
@@ -248,13 +252,11 @@ async function mountUniver(transformation) {
 
 function switchSheet(which) {
     activeSheet.value = which
-    if (!univerInstance || !ICommandService) return
+    if (!univerInstance || !ICommandService || !SetWorksheetActiveOperation) return
     try {
         const sheetId = which === 'original' ? 'sheet-original' : 'sheet-ifrs'
-        const injector = univerInstance.__getInjector()
-        const commandService = injector.get(ICommandService)
-        // Canonical Univer sheet-activation command id
-        commandService.executeCommand('sheet.operation.set-worksheet-activate', {
+        const commandService = univerInstance.__getInjector().get(ICommandService)
+        commandService.executeCommand(SetWorksheetActiveOperation.id, {
             unitId: 'tv-workbook',
             subUnitId: sheetId,
         })
