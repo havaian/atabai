@@ -128,7 +128,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useFilesStore } from '@/stores/files'
@@ -146,7 +146,7 @@ const file = ref(null)
 const isLoading = ref(true)
 const error = ref('')
 
-const fileId = route.params.fileId || route.params.id
+const fileId = computed(() => route.params.fileId || route.params.id)
 
 const templateLabel = computed(() => {
     const keys = {
@@ -219,16 +219,24 @@ async function deleteFile() {
     }
 }
 
-onMounted(async () => {
+async function loadFile() {
+    isLoading.value = true
+    error.value = ''
+    file.value = null
     try {
-        const data = await filesStore.getFileDetails(fileId)
-        // API returns { success: true, file: {...} }
+        const data = await filesStore.getFileDetails(fileId.value)
         file.value = data?.file || data
     } catch (e) {
         error.value = t('results.loadFailed')
     } finally {
         isLoading.value = false
     }
+}
+
+onMounted(loadFile)
+
+watch(fileId, (newId, oldId) => {
+    if (newId && newId !== oldId) loadFile()
 })
 </script>
 
