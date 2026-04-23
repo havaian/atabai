@@ -201,7 +201,6 @@ async function mountUniver(transformation) {
     ])
 
     const { Univer, UniverInstanceType, LocaleType, merge, ICommandService: CoreICommandService } = core
-    const { UniverSheetsPlugin, SetWorksheetActiveOperation } = sheets
 
     ICommandService = CoreICommandService
     SetWorksheetActiveOperation = sheets.SetWorksheetActiveOperation
