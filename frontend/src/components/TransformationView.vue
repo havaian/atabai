@@ -93,7 +93,6 @@ const univerHostRef = ref(null)
 
 // Univer instance handles — kept in closure, not reactive (Univer internals hate reactivity)
 let univerInstance = null
-let workbookRef = null
 
 // ── Lifecycle ─────────────────────────────────────────────────────────────
 onMounted(() => {
@@ -236,20 +235,25 @@ async function mountUniver(transformation) {
 
 function switchSheet(which) {
     activeSheet.value = which
-    if (!workbookRef) return
+    if (!univerInstance) return
     try {
         const sheetId = which === 'original' ? 'sheet-original' : 'sheet-ifrs'
-        workbookRef.setActiveSheet(sheetId)
+        // Univer 0.20 uses command system. SetWorksheetActiveOperation is the
+        // canonical way to switch active sheet without reaching into internal state.
+        const commandService = univerInstance.__getInjector().get(Symbol.for('ICommandService'))
+        commandService.executeCommand('sheet.operation.set-worksheet-activate', {
+            unitId: 'tv-workbook',
+            subUnitId: sheetId,
+        })
     } catch (err) {
-        // Fallback: setActiveSheet may not exist on the unit directly in 0.20;
-        // try reaching into the unit's internal sheets map.
+        console.warn('[TransformationView] switchSheet via command failed:', err)
+        // Fallback: reach into the unit directly
         try {
-            const sheet = workbookRef.getSheetBySheetId?.(
-                which === 'original' ? 'sheet-original' : 'sheet-ifrs'
-            )
-            if (sheet) workbookRef.setActiveRange?.(sheet)
-        } catch (_) {
-            console.warn('[TransformationView] switchSheet fallback failed:', err)
+            const unit = univerInstance.getUnit?.('tv-workbook')
+            const sheetId = which === 'original' ? 'sheet-original' : 'sheet-ifrs'
+            unit?.setActiveSheet?.(sheetId)
+        } catch (err2) {
+            console.warn('[TransformationView] switchSheet fallback also failed:', err2)
         }
     }
 }
@@ -270,13 +274,15 @@ function destroyUniver() {
 function buildWorkbookData(tr) {
     return {
         id: 'tv-workbook',
+        sheetOrder: ['sheet-original', 'sheet-ifrs'],
         name: 'transformation',
+        appVersion: '0.20.0',
         locale: 'enUS',
+        styles: {},
         sheets: {
             'sheet-original': buildOriginalSheet(tr),
             'sheet-ifrs': buildIfrsSheet(tr),
         },
-        sheetOrder: ['sheet-original', 'sheet-ifrs'],
     }
 }
 
@@ -298,6 +304,31 @@ function cell(value, style = {}) {
     const c = { v: value }
     if (Object.keys(style).length) c.s = style
     return c
+}
+
+// Minimal-but-complete worksheet scaffold. All fields are required by
+// Univer 0.20's selection/render services or rendering will fail with
+// "cannot read properties of undefined (reading 'worksheet')".
+function worksheetBase(id, name) {
+    return {
+        id,
+        name,
+        tabColor: '',
+        hidden: 0,
+        zoomRatio: 1,
+        freeze: { startRow: -1, startColumn: -1, xSplit: 0, ySplit: 0 },
+        scrollTop: 0,
+        scrollLeft: 0,
+        defaultColumnWidth: 110,
+        defaultRowHeight: 24,
+        mergeData: [],
+        rowData: {},
+        columnData: {},
+        rowHeader: { width: 46 },
+        columnHeader: { height: 20 },
+        showGridlines: 1,
+        rightToLeft: 0,
+    }
 }
 
 function buildOriginalSheet(tr) {
@@ -331,11 +362,10 @@ function buildOriginalSheet(tr) {
     })
 
     return {
-        id: 'sheet-original',
-        name: 'Original',
-        cellData,
+        ...worksheetBase('sheet-original', 'Original'),
         rowCount: Math.max(r + 5, 50),
         columnCount: 8,
+        cellData,
         columnData: {
             0: { w: 80 },
             1: { w: 280 },
@@ -343,7 +373,6 @@ function buildOriginalSheet(tr) {
             3: { w: 130 },
             4: { w: 240 },
         },
-        freeze: { startRow: 1, startColumn: 0, xSplit: 0, ySplit: 1 },
     }
 }
 
@@ -365,11 +394,10 @@ function buildIfrsSheet(tr) {
         1: cell('Beginning', headerStyle()),
         2: cell('Ending', headerStyle()),
         3: cell('NSBU Code', headerStyle()),
-        4: cell('', headerStyle()), // flags column
+        4: cell('', headerStyle()),
     }
     r++
 
-    // Sections
     sections.forEach(section => {
         // Section header row
         cellData[r] = {
@@ -397,7 +425,6 @@ function buildIfrsSheet(tr) {
             r++
         })
 
-        // Section total
         cellData[r] = {
             0: cell(`Total — ${section.name}`, totalStyle()),
             1: cell(section.totalStart || 0, { ...totalStyle(), n: { pattern: NUM_FMT } }),
@@ -410,11 +437,10 @@ function buildIfrsSheet(tr) {
     })
 
     return {
-        id: 'sheet-ifrs',
-        name: 'IFRS',
-        cellData,
+        ...worksheetBase('sheet-ifrs', 'IFRS'),
         rowCount: Math.max(r + 5, 50),
         columnCount: 8,
+        cellData,
         columnData: {
             0: { w: 340 },
             1: { w: 140 },
@@ -422,7 +448,6 @@ function buildIfrsSheet(tr) {
             3: { w: 100 },
             4: { w: 100 },
         },
-        freeze: { startRow: 3, startColumn: 0, xSplit: 0, ySplit: 3 },
     }
 }
 

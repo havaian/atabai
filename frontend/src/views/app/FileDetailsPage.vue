@@ -79,7 +79,7 @@
                     <span class="transformation-toggle-label">
                         {{ $t('transformation.sectionTitle') }}
                     </span>
-                    <span class="transformation-toggle-hint">
+                    <span v-if="!isTransformationOpen" class="transformation-toggle-hint">
                         {{ $t('transformation.sectionHint') }}
                     </span>
                 </button>
