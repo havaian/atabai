@@ -92,6 +92,7 @@ const rootRef = ref(null)
 const univerHostRef = ref(null)
 
 // Univer instance handles — kept in closure, not reactive (Univer internals hate reactivity)
+let ICommandService = null
 let univerInstance = null
 let workbookRef = null
 
@@ -111,9 +112,10 @@ async function load() {
 
     try {
         const data = await filesStore.fetchTransformation(props.fileId)
+        // Flip phase FIRST so the <div ref="univerHostRef"> gets rendered
+        phase.value = 'ready'
         await nextTick()
         await mountUniver(data)
-        phase.value = 'ready'
     } catch (err) {
         if (err.code === 'TRANSFORMATION_NOT_AVAILABLE') {
             phase.value = 'needs-regenerate'
@@ -142,6 +144,15 @@ async function doRegenerate() {
 
 // ── Univer mount ──────────────────────────────────────────────────────────
 async function mountUniver(transformation) {
+    if (!univerHostRef.value) {
+        console.warn('[TransformationView] host element not mounted yet')
+        // Wait one more tick and retry
+        await nextTick()
+        if (!univerHostRef.value) {
+            throw new Error('Univer host container never mounted')
+        }
+    }
+    
     // Lazy-import Univer and locales. Paths are for 0.20.x plugin mode.
     const [
         core,
@@ -188,7 +199,8 @@ async function mountUniver(transformation) {
         import('@univerjs/sheets-formula-ui/lib/index.css'),
     ])
 
-    const { Univer, UniverInstanceType, LocaleType, merge } = core
+    const { Univer, UniverInstanceType, LocaleType, merge, ICommandService: CoreICommandService } = core
+    ICommandService = CoreICommandService
 
     const mergedLocale = merge(
         {},
@@ -236,26 +248,18 @@ async function mountUniver(transformation) {
 
 function switchSheet(which) {
     activeSheet.value = which
-    if (!univerInstance) return
+    if (!univerInstance || !ICommandService) return
     try {
         const sheetId = which === 'original' ? 'sheet-original' : 'sheet-ifrs'
-        // Univer 0.20 uses command system. SetWorksheetActiveOperation is the
-        // canonical way to switch active sheet without reaching into internal state.
-        const commandService = univerInstance.__getInjector().get(Symbol.for('ICommandService'))
+        const injector = univerInstance.__getInjector()
+        const commandService = injector.get(ICommandService)
+        // Canonical Univer sheet-activation command id
         commandService.executeCommand('sheet.operation.set-worksheet-activate', {
             unitId: 'tv-workbook',
             subUnitId: sheetId,
         })
     } catch (err) {
-        console.warn('[TransformationView] switchSheet via command failed:', err)
-        // Fallback: reach into the unit directly
-        try {
-            const unit = univerInstance.getUnit?.('tv-workbook')
-            const sheetId = which === 'original' ? 'sheet-original' : 'sheet-ifrs'
-            unit?.setActiveSheet?.(sheetId)
-        } catch (err2) {
-            console.warn('[TransformationView] switchSheet fallback also failed:', err2)
-        }
+        console.warn('[TransformationView] switchSheet failed:', err)
     }
 }
 
