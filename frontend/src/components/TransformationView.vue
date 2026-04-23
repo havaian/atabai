@@ -93,8 +93,7 @@ const univerHostRef = ref(null)
 
 // Univer instance handles — kept in closure, not reactive (Univer internals hate reactivity)
 let univerInstance = null
-let univerDisposers = []
-let facadeApi = null
+let workbookRef = null
 
 // ── Lifecycle ─────────────────────────────────────────────────────────────
 onMounted(() => {
@@ -143,26 +142,24 @@ async function doRegenerate() {
 
 // ── Univer mount ──────────────────────────────────────────────────────────
 async function mountUniver(transformation) {
-    // Lazy-import Univer only when we actually need to render. This keeps
-    // it out of the main bundle; first mount triggers the chunk download.
+    // Lazy-import Univer and locales. Paths are for 0.20.x plugin mode.
     const [
-        { Univer, UniverInstanceType, LocaleType, merge },
-        { UniverRenderEnginePlugin },
-        { UniverFormulaEnginePlugin },
-        { UniverUIPlugin },
-        { UniverDocsPlugin },
-        { UniverDocsUIPlugin },
-        { UniverSheetsPlugin },
-        { UniverSheetsUIPlugin },
-        { UniverSheetsFormulaPlugin },
-        { UniverSheetsFormulaUIPlugin },
-        { FUniver },
-        DesignEnUS,
-        UIEnUS,
-        DocsUIEnUS,
-        SheetsEnUS,
-        SheetsUIEnUS,
-        SheetsFormulaUIEnUS,
+        core,
+        renderEngine,
+        formulaEngine,
+        ui,
+        docs,
+        docsUi,
+        sheets,
+        sheetsUi,
+        sheetsFormula,
+        sheetsFormulaUi,
+        DesignLocale,
+        UILocale,
+        DocsUILocale,
+        SheetsLocale,
+        SheetsUILocale,
+        SheetsFormulaUILocale,
     ] = await Promise.all([
         import('@univerjs/core'),
         import('@univerjs/engine-render'),
@@ -174,16 +171,15 @@ async function mountUniver(transformation) {
         import('@univerjs/sheets-ui'),
         import('@univerjs/sheets-formula'),
         import('@univerjs/sheets-formula-ui'),
-        import('@univerjs/core/facade').then(m => m).catch(() => import('@univerjs/core')),
-        import('@univerjs/design/lib/locale/en-US.json'),
-        import('@univerjs/ui/lib/locale/en-US.json'),
-        import('@univerjs/docs-ui/lib/locale/en-US.json'),
-        import('@univerjs/sheets/lib/locale/en-US.json'),
-        import('@univerjs/sheets-ui/lib/locale/en-US.json'),
-        import('@univerjs/sheets-formula-ui/lib/locale/en-US.json'),
+        import('@univerjs/design/locale/en-US'),
+        import('@univerjs/ui/locale/en-US'),
+        import('@univerjs/docs-ui/locale/en-US'),
+        import('@univerjs/sheets/locale/en-US'),
+        import('@univerjs/sheets-ui/locale/en-US'),
+        import('@univerjs/sheets-formula-ui/locale/en-US'),
     ])
 
-    // Univer CSS — loaded only when component actually mounts (tree-split chunk)
+    // CSS — only packages that actually ship styles.
     await Promise.all([
         import('@univerjs/design/lib/index.css'),
         import('@univerjs/ui/lib/index.css'),
@@ -192,79 +188,79 @@ async function mountUniver(transformation) {
         import('@univerjs/sheets-formula-ui/lib/index.css'),
     ])
 
-    // Build the workbook data with both sheets
-    const workbookData = buildWorkbookData(transformation)
+    const { Univer, UniverInstanceType, LocaleType, merge } = core
 
-    // Create Univer with minimal UI
+    const mergedLocale = merge(
+        {},
+        DesignLocale.default,
+        UILocale.default,
+        DocsUILocale.default,
+        SheetsLocale.default,
+        SheetsUILocale.default,
+        SheetsFormulaUILocale.default,
+    )
+
     univerInstance = new Univer({
         locale: LocaleType.EN_US,
         locales: {
-            [LocaleType.EN_US]: merge(
-                {},
-                DesignEnUS.default || DesignEnUS,
-                UIEnUS.default || UIEnUS,
-                DocsUIEnUS.default || DocsUIEnUS,
-                SheetsEnUS.default || SheetsEnUS,
-                SheetsUIEnUS.default || SheetsUIEnUS,
-                SheetsFormulaUIEnUS.default || SheetsFormulaUIEnUS,
-            ),
+            [LocaleType.EN_US]: mergedLocale,
         },
     })
 
-    univerInstance.registerPlugin(UniverRenderEnginePlugin)
-    univerInstance.registerPlugin(UniverFormulaEnginePlugin)
-
-    // UI plugin — mount into our container, hide toolbar / formula bar / tabs
-    univerInstance.registerPlugin(UniverUIPlugin, {
+    univerInstance.registerPlugin(renderEngine.UniverRenderEnginePlugin)
+    univerInstance.registerPlugin(formulaEngine.UniverFormulaEnginePlugin)
+    univerInstance.registerPlugin(ui.UniverUIPlugin, {
         container: univerHostRef.value,
-        header: false,           // hides toolbar row
-        footer: false,           // hides bottom sheet tabs
-        contextMenu: false,      // disable right-click menu — it's readonly
+        header: false,
+        footer: false,
+        contextMenu: false,
     })
-
-    univerInstance.registerPlugin(UniverDocsPlugin)
-    univerInstance.registerPlugin(UniverDocsUIPlugin, {
-        // Cell editor UI hidden via readonly, but plugin is required
+    univerInstance.registerPlugin(docs.UniverDocsPlugin)
+    univerInstance.registerPlugin(docsUi.UniverDocsUIPlugin)
+    univerInstance.registerPlugin(sheets.UniverSheetsPlugin)
+    univerInstance.registerPlugin(sheetsUi.UniverSheetsUIPlugin, {
+        formulaBar: false,
     })
-    univerInstance.registerPlugin(UniverSheetsPlugin)
-    univerInstance.registerPlugin(UniverSheetsUIPlugin, {
-        formulaBar: false,       // no formula bar
-    })
-    univerInstance.registerPlugin(UniverSheetsFormulaPlugin)
-    univerInstance.registerPlugin(UniverSheetsFormulaUIPlugin)
+    univerInstance.registerPlugin(sheetsFormula.UniverSheetsFormulaPlugin)
+    univerInstance.registerPlugin(sheetsFormulaUi.UniverSheetsFormulaUIPlugin)
 
-    // Create the workbook
-    univerInstance.createUnit(UniverInstanceType.UNIVER_SHEET, workbookData)
+    const workbookData = buildWorkbookData(transformation)
+    const workbook = univerInstance.createUnit(UniverInstanceType.UNIVER_SHEET, workbookData)
 
-    // Get Facade API for sheet switching
-    facadeApi = FUniver.newAPI ? FUniver.newAPI(univerInstance) : null
+    // Stash for sheet switching — we use Univer's low-level API rather than
+    // the facade, which has moved across versions.
+    workbookRef = workbook
 
-    // Default to original sheet
     switchSheet('original')
 }
 
 function switchSheet(which) {
     activeSheet.value = which
-    if (!facadeApi) return
+    if (!workbookRef) return
     try {
-        const wb = facadeApi.getActiveWorkbook()
-        if (!wb) return
         const sheetId = which === 'original' ? 'sheet-original' : 'sheet-ifrs'
-        wb.setActiveSheet(sheetId)
+        workbookRef.setActiveSheet(sheetId)
     } catch (err) {
-        console.warn('[TransformationView] switchSheet failed:', err)
+        // Fallback: setActiveSheet may not exist on the unit directly in 0.20;
+        // try reaching into the unit's internal sheets map.
+        try {
+            const sheet = workbookRef.getSheetBySheetId?.(
+                which === 'original' ? 'sheet-original' : 'sheet-ifrs'
+            )
+            if (sheet) workbookRef.setActiveRange?.(sheet)
+        } catch (_) {
+            console.warn('[TransformationView] switchSheet fallback failed:', err)
+        }
     }
 }
 
 function destroyUniver() {
     try {
-        univerDisposers.forEach(d => { try { d?.() } catch (_) { /* ignore */ } })
-        univerDisposers = []
         if (univerInstance) {
             univerInstance.dispose()
             univerInstance = null
         }
-        facadeApi = null
+        workbookRef = null
     } catch (err) {
         console.warn('[TransformationView] destroy failed:', err)
     }
