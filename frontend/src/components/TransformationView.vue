@@ -93,6 +93,7 @@ const univerHostRef = ref(null)
 
 // Univer instance handles — kept in closure, not reactive (Univer internals hate reactivity)
 let univerInstance = null
+let workbookRef = null
 
 // ── Lifecycle ─────────────────────────────────────────────────────────────
 onMounted(() => {
