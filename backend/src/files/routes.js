@@ -39,11 +39,11 @@ router.get('/template/:templateType', authenticateJWT, filesController.getTempla
 router.get('/status/:jobId', authenticateJWT, filesController.getProcessingStatus);
 
 /**
- * @route   GET /api/files/:fileId
- * @desc    Get file details with before/after data
+ * @route   POST /api/files/retry/:jobId
+ * @desc    Retry failed processing
  * @access  Private
  */
-router.get('/:fileId', authenticateJWT, filesController.getFileDetails);
+router.post('/retry/:jobId', authenticateJWT, filesController.retryProcessing);
 
 /**
  * @route   GET /api/files/:fileId/download
@@ -53,17 +53,35 @@ router.get('/:fileId', authenticateJWT, filesController.getFileDetails);
 router.get('/:fileId/download', authenticateJWT, filesController.downloadFile);
 
 /**
+ * @route   GET /api/files/:fileId/transformation
+ * @desc    Get enriched before/after transformation data for a completed file
+ * @access  Private
+ */
+router.get('/:fileId/transformation', authenticateJWT, filesController.getTransformation);
+
+/**
+ * @route   POST /api/files/:fileId/transformation/regenerate
+ * @desc    Re-run the processor on the original to produce transformation JSON
+ *          (used for files processed before this feature existed)
+ * @access  Private
+ */
+router.post('/:fileId/transformation/regenerate',
+    authenticateJWT,
+    filesController.regenerateTransformation
+);
+
+/**
+ * @route   GET /api/files/:fileId
+ * @desc    Get file details with before/after data
+ * @access  Private
+ */
+router.get('/:fileId', authenticateJWT, filesController.getFileDetails);
+
+/**
  * @route   DELETE /api/files/:fileId
  * @desc    Delete file and cleanup
  * @access  Private
  */
 router.delete('/:fileId', authenticateJWT, filesController.deleteFile);
-
-/**
- * @route   POST /api/files/retry/:jobId
- * @desc    Retry failed processing
- * @access  Private
- */
-router.post('/retry/:jobId', authenticateJWT, filesController.retryProcessing);
 
 module.exports = router;

@@ -11,6 +11,8 @@ const { processProfitLossTemplate } = require('../processors/profitLoss');
 const { processProfitLossForm2Template } = require('../processors/profitLossForm2');
 const { processEquityTemplate } = require('../processors/equity');
 const templateTypes = require('../utils/templateTypes')
+const { enrichTransformation } = require('./transformationEnrichment');
+const transformationLock = require('./transformationLock');
 
 /**
  * Upload and process Excel file
@@ -441,6 +443,8 @@ async function deleteFile(req, res) {
         const filesToDelete = [`/uploads/${file.filePath}`];
         if (file.processedFilePath) {
             filesToDelete.push(`/uploads/${file.processedFilePath}`);
+            // Companion transformation JSON (may or may not exist — Promise.allSettled handles absence gracefully)
+            filesToDelete.push(`/uploads/${file.processedFilePath}.transformation.json`);
         }
 
         await Promise.allSettled(filesToDelete.map(async (filePath) => {
@@ -606,6 +610,22 @@ async function processFileAsync(fileRecord, processingJob) {
 
         await result.workbook.xlsx.writeFile(`/uploads/${processedFilename}`);
 
+        // Write sibling transformation.json for before/after diff view.
+        // Non-fatal: if this fails, upload still succeeds — user just won't see the diff.
+        if (result.transformation) {
+            const transformationPath = `/uploads/${processedFilename}.transformation.json`;
+            try {
+                await fs.writeFile(
+                    transformationPath,
+                    JSON.stringify(result.transformation),
+                    'utf8'
+                );
+                global.logger.logInfo(`Transformation JSON written: ${transformationPath}`);
+            } catch (err) {
+                global.logger.logError(`Failed to write transformation JSON: ${transformationPath}`, err);
+            }
+        }
+
         processingJob.progress = 90;
         await processingJob.save();
 
@@ -684,6 +704,210 @@ function extractWorksheetPreview(worksheet) {
     return preview;
 }
 
+/**
+ * Get the stored transformation JSON for a completed file, enriched with
+ * live mapping metadata. Returns TRANSFORMATION_NOT_AVAILABLE if the sibling
+ * JSON doesn't exist (old file, or template that doesn't produce it yet) —
+ * frontend can call regenerateTransformation to populate it.
+ */
+async function getTransformation(req, res) {
+    try {
+        const { fileId } = req.params;
+
+        const file = await File.findOne({
+            _id: fileId,
+            userId: req.user._id
+        }).lean();
+
+        if (!file) {
+            return res.status(404).json({
+                success: false,
+                error: 'FILE_NOT_FOUND',
+                message: 'File not found'
+            });
+        }
+
+        if (file.status !== 'completed') {
+            return res.status(400).json({
+                success: false,
+                error: 'FILE_NOT_READY',
+                message: 'File has not finished processing'
+            });
+        }
+
+        if (!file.processedFilePath) {
+            return res.status(400).json({
+                success: false,
+                error: 'NO_PROCESSED_FILE',
+                message: 'Processed file not available'
+            });
+        }
+
+        const jsonPath = `/uploads/${file.processedFilePath}.transformation.json`;
+
+        let raw;
+        try {
+            raw = await fs.readFile(jsonPath, 'utf8');
+        } catch (err) {
+            if (err.code === 'ENOENT') {
+                return res.status(404).json({
+                    success: false,
+                    error: 'TRANSFORMATION_NOT_AVAILABLE',
+                    message: 'Transformation data not available — regenerate to produce it'
+                });
+            }
+            throw err;
+        }
+
+        let parsed;
+        try {
+            parsed = JSON.parse(raw);
+        } catch (err) {
+            global.logger.logError(`Corrupt transformation JSON: ${jsonPath}`, err);
+            return res.status(500).json({
+                success: false,
+                error: 'TRANSFORMATION_CORRUPT',
+                message: 'Transformation data is corrupted — regenerate to rebuild'
+            });
+        }
+
+        let enriched;
+        try {
+            enriched = enrichTransformation(file.templateType, parsed);
+        } catch (err) {
+            if (err.code === 'TEMPLATE_NOT_SUPPORTED') {
+                return res.status(400).json({
+                    success: false,
+                    error: 'TEMPLATE_NOT_SUPPORTED',
+                    message: err.message
+                });
+            }
+            throw err;
+        }
+
+        res.status(200).json({
+            success: true,
+            transformation: enriched
+        });
+
+    } catch (error) {
+        global.logger.logError('Get transformation error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'FETCH_ERROR',
+            message: 'Failed to get transformation'
+        });
+    }
+}
+
+/**
+ * Regenerate the transformation JSON for a completed file by re-running the
+ * processor on the stored original. Used for files that predate the
+ * transformation feature, or to recover from a corrupt JSON.
+ *
+ * Atomic write (tmp + rename) prevents half-written files.
+ * In-memory lock prevents concurrent regeneration on the same fileId.
+ */
+async function regenerateTransformation(req, res) {
+    const { fileId } = req.params;
+
+    if (!transformationLock.tryAcquire(fileId)) {
+        return res.status(409).json({
+            success: false,
+            error: 'REGENERATION_IN_PROGRESS',
+            message: 'Transformation is already being regenerated for this file'
+        });
+    }
+
+    try {
+        const file = await File.findOne({
+            _id: fileId,
+            userId: req.user._id
+        });
+
+        if (!file) {
+            return res.status(404).json({
+                success: false,
+                error: 'FILE_NOT_FOUND',
+                message: 'File not found'
+            });
+        }
+
+        if (file.status !== 'completed') {
+            return res.status(400).json({
+                success: false,
+                error: 'FILE_NOT_READY',
+                message: 'File has not finished processing'
+            });
+        }
+
+        if (!file.processedFilePath) {
+            return res.status(400).json({
+                success: false,
+                error: 'NO_PROCESSED_FILE',
+                message: 'Processed file not available'
+            });
+        }
+
+        // Only balance sheet produces transformation data today. Other templates
+        // reach this branch and are rejected until their processors are updated.
+        if (file.templateType !== 'balanceSheet') {
+            return res.status(400).json({
+                success: false,
+                error: 'TEMPLATE_NOT_SUPPORTED',
+                message: `Template '${file.templateType}' does not support transformation regeneration yet`
+            });
+        }
+
+        const originalPath = `/uploads/${file.filePath}`;
+        try {
+            await fs.access(originalPath);
+        } catch (err) {
+            return res.status(400).json({
+                success: false,
+                error: 'ORIGINAL_FILE_MISSING',
+                message: 'Original uploaded file is no longer available on the server'
+            });
+        }
+
+        // Re-run the processor. Workbook output is discarded — existing processed
+        // xlsx stays valid; we only need the fresh result.transformation.
+        const result = await processBalanceSheetTemplate(originalPath);
+
+        if (!result.transformation) {
+            // Defensive: processor ran but didn't produce transformation data.
+            return res.status(500).json({
+                success: false,
+                error: 'REGENERATION_FAILED',
+                message: 'Processor did not produce transformation data'
+            });
+        }
+
+        const finalPath = `/uploads/${file.processedFilePath}.transformation.json`;
+        const tmpPath = `${finalPath}.tmp.${crypto.randomUUID()}`;
+
+        await fs.writeFile(tmpPath, JSON.stringify(result.transformation), 'utf8');
+        await fs.rename(tmpPath, finalPath);
+
+        global.logger.logInfo(`Transformation regenerated for file ${fileId}: ${finalPath}`);
+
+        res.status(200).json({
+            success: true,
+            message: 'Transformation regenerated successfully'
+        });
+
+    } catch (error) {
+        global.logger.logError(`Regenerate transformation error for file ${fileId}:`, error);
+        res.status(500).json({
+            success: false,
+            error: 'REGENERATION_ERROR',
+            message: 'Failed to regenerate transformation'
+        });
+    } finally {
+        transformationLock.release(fileId);
+    }
+}
+
 module.exports = {
     uploadAndProcess,
     getFileHistory,
@@ -692,5 +916,8 @@ module.exports = {
     getFileDetails,
     downloadFile,
     deleteFile,
-    retryProcessing
+    retryProcessing,
+    extractWorksheetPreview,
+    getTransformation,
+    regenerateTransformation
 };

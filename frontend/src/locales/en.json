@@ -1,16 +1,16 @@
 {
   "landing": {
     "hero": {
-        "badge": "NSBU → IFRS Automation Platform",
-        "titlePre": "Automate",
-        "titleHighlight": "IFRS.",
-        "titlePost": "Powered by AI.",
-        "subtitle": "Turn complex financial data into accurate, audit-ready IFRS reports — faster, cheaper, and with full transparency.",
-        "bookDemo": "Book a demo",
-        "howItWorks": "How it works"
+      "badge": "NSBU → IFRS Automation Platform",
+      "titlePre": "Automate",
+      "titleHighlight": "IFRS.",
+      "titlePost": "Powered by AI.",
+      "subtitle": "Turn complex financial data into accurate, audit-ready IFRS reports — faster, cheaper, and with full transparency.",
+      "bookDemo": "Book a demo",
+      "howItWorks": "How it works"
     },
     "trust": {
-        "builtFor": "Built for Uzbekistan"
+      "builtFor": "Built for Uzbekistan"
     },
     "hiw": {
       "label": "Process",
@@ -961,5 +961,28 @@
     "back": "Back",
     "goBack": "Go back",
     "backToDashboard": "Back to Dashboard"
+  },
+  "transformation": {
+    "sectionTitle": "Before / after",
+    "sectionHint": "Click to view the data diff",
+    "loading": "Loading transformation…",
+    "generate": "Generate diff view",
+    "generating": "Generating…",
+    "notAvailable": {
+      "title": "Transformation data not yet available",
+      "description": "This file was processed before the diff view was added. Click below to generate it."
+    },
+    "unsupported": {
+      "title": "Diff view not yet supported for this template",
+      "description": "The diff view currently supports balance sheet files only."
+    },
+    "error": {
+      "title": "Failed to load transformation",
+      "generic": "Something went wrong. Please try again."
+    },
+    "toggle": {
+      "original": "Original",
+      "ifrs": "IFRS"
+    }
   }
 }

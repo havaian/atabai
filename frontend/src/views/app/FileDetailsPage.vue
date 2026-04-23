@@ -72,6 +72,22 @@
                 </ul>
             </div>
 
+            <!-- Transformation diff view (collapsed by default; Univer lazy-loads on expand) -->
+            <div v-if="showTransformation" class="transformation-section">
+                <button class="transformation-toggle" @click="toggleTransformation">
+                    <ChevronDownIcon class="w-4 h-4 transformation-chevron" :class="{ open: isTransformationOpen }" />
+                    <span class="transformation-toggle-label">
+                        {{ $t('transformation.sectionTitle') }}
+                    </span>
+                    <span class="transformation-toggle-hint">
+                        {{ $t('transformation.sectionHint') }}
+                    </span>
+                </button>
+                <div v-if="isTransformationOpen" class="transformation-body">
+                    <TransformationView :file-id="file.id" />
+                </div>
+            </div>
+
             <!-- File info -->
             <div class="file-info-section">
                 <div class="file-info-header">{{ $t('results.fileDetails') }}</div>
@@ -134,8 +150,15 @@ import { useI18n } from 'vue-i18n'
 import { useFilesStore } from '@/stores/files'
 import {
     ArrowLeftIcon, ArrowDownTrayIcon, PlusIcon, TrashIcon,
-    CheckCircleIcon, ExclamationCircleIcon, ExclamationTriangleIcon
+    CheckCircleIcon, ExclamationCircleIcon, ExclamationTriangleIcon,
+    ChevronDownIcon
 } from '@heroicons/vue/24/outline'
+import { defineAsyncComponent } from 'vue'
+
+// Lazy-load TransformationView + its Univer deps on first expand
+const TransformationView = defineAsyncComponent(() =>
+    import('@/components/TransformationView.vue')
+)
 
 const router = useRouter()
 const route = useRoute()
@@ -145,6 +168,17 @@ const filesStore = useFilesStore()
 const file = ref(null)
 const isLoading = ref(true)
 const error = ref('')
+
+const isTransformationOpen = ref(false)
+
+const showTransformation = computed(() => {
+    return file.value?.status === 'completed'
+        && file.value?.templateType === 'balanceSheet'
+})
+
+function toggleTransformation() {
+    isTransformationOpen.value = !isTransformationOpen.value
+}
 
 const fileId = computed(() => route.params.fileId || route.params.id)
 
@@ -602,6 +636,59 @@ watch(fileId, (newId, oldId) => {
 .action-btn-ghost:hover {
     color: #EF4444;
     background: rgba(248, 113, 113, 0.08);
+}
+
+/* ─── Transformation section ─────────────────────────────────────────────── */
+.transformation-section {
+    background: var(--ws-surface);
+    border: 1px solid var(--ws-border);
+    border-radius: 14px;
+    overflow: hidden;
+}
+
+.transformation-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 16px 20px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--ws-text);
+    transition: background 0.12s;
+    text-align: left;
+}
+
+.transformation-toggle:hover {
+    background: var(--ws-bg);
+}
+
+.transformation-chevron {
+    color: var(--ws-text-3);
+    transition: transform 0.2s;
+    flex-shrink: 0;
+}
+
+.transformation-chevron.open {
+    transform: rotate(180deg);
+}
+
+.transformation-toggle-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ws-text);
+}
+
+.transformation-toggle-hint {
+    font-size: 12.5px;
+    color: var(--ws-text-3);
+    margin-left: auto;
+}
+
+.transformation-body {
+    padding: 0 20px 20px;
+    border-top: 1px solid var(--ws-border-2);
 }
 
 @media (max-width: 640px) {

@@ -364,6 +364,34 @@ export const useFilesStore = defineStore('files', () => {
         }
     }
 
+    async function fetchTransformation(fileId) {
+        try {
+            const response = await apiClient.get(`/files/${fileId}/transformation`)
+            return response.data.transformation
+        } catch (err) {
+            const code = err.response?.data?.error
+            // Let the component distinguish these specific codes — don't mutate global error state
+            // for expected "not ready" conditions.
+            const e = new Error(err.response?.data?.message || 'Failed to fetch transformation')
+            e.code = code
+            e.status = err.response?.status
+            throw e
+        }
+    }
+
+    async function regenerateTransformation(fileId) {
+        try {
+            const response = await apiClient.post(`/files/${fileId}/transformation/regenerate`)
+            return response.data
+        } catch (err) {
+            const code = err.response?.data?.error
+            const e = new Error(err.response?.data?.message || 'Failed to regenerate transformation')
+            e.code = code
+            e.status = err.response?.status
+            throw e
+        }
+    }
+
     return {
         // State
         files,
@@ -395,6 +423,8 @@ export const useFilesStore = defineStore('files', () => {
         invalidateCache,
         addUploadedFile,
         updateFileStatus,
-        clearState
+        clearState,
+        fetchTransformation,
+        regenerateTransformation
     }
 })

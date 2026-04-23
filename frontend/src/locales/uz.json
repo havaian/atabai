@@ -972,5 +972,28 @@
     "back": "Orqaga",
     "goBack": "Orqaga",
     "backToDashboard": "Boshqaruv paneliga qaytish"
+  },
+  "transformation": {
+    "sectionTitle": "Avval / Keyin",
+    "sectionHint": "Maʼlumotlar farqini koʻrish uchun bosing",
+    "loading": "Transformatsiya yuklanmoqda…",
+    "generate": "Farqni yaratish",
+    "generating": "Yaratilmoqda…",
+    "notAvailable": {
+      "title": "Transformatsiya maʼlumotlari hali tayyor emas",
+      "description": "Ushbu fayl ushbu funksiya qoʻshilishidan oldin qayta ishlangan. Maʼlumotlarni yaratish uchun quyidagi tugmani bosing."
+    },
+    "unsupported": {
+      "title": "Ushbu shablon uchun farq hali qoʻllab-quvvatlanmaydi",
+      "description": "Ayni paytda faqat balans hisoboti uchun mavjud."
+    },
+    "error": {
+      "title": "Transformatsiyani yuklab boʻlmadi",
+      "generic": "Nimadir xato ketdi. Qayta urinib koʻring."
+    },
+    "toggle": {
+      "original": "Asl",
+      "ifrs": "XHMS"
+    }
   }
 }

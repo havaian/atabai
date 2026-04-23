@@ -65,10 +65,51 @@ async function processBalanceSheetTemplate(input) {
         result.workbook = await styleReport(styledData, 'balanceSheet');
 
         // Update summary
+        // Update summary
         result.summary.transformations = extracted.dataMap.size;
         result.summary.changes = ifrsStructure.sections.reduce((sum, s) => sum + s.items.length, 0);
         result.summary.originalRows = extracted.dataMap.size;
         result.summary.processedRows = ifrsStructure.sections.reduce((sum, s) => sum + s.items.length, 0);
+
+        // Transformation data for before/after diff view — persisted by controller as sibling JSON
+        result.transformation = {
+            version: 1,
+            template: 'balanceSheet',
+            generatedAt: new Date().toISOString(),
+            source: {
+                metadata: {
+                    companyName: extracted.metadata.companyName,
+                    reportDate: extracted.metadata.reportDate,
+                    inn: extracted.metadata.inn
+                },
+                rows: Array.from(extracted.dataMap.values()).map(r => ({
+                    nsbuCode: r.code,
+                    label: r.name || '',
+                    start: r.start || 0,
+                    end: r.end || 0
+                }))
+            },
+            target: {
+                title: styledData.title,
+                sections: ifrsStructure.sections.map(s => ({
+                    name: s.name,
+                    totalStart: s.totalStart,
+                    totalEnd: s.totalEnd,
+                    items: s.items.map(it => ({
+                        nsbuCode: it.nsbuCode || null,
+                        label: it.label,
+                        start: it.start,
+                        end: it.end,
+                        isNegative: it.isNegative === true,
+                        isCalculated: it.isCalculated === true
+                    }))
+                })),
+                totalAssetsStart: ifrsStructure.totalAssetsStart,
+                totalAssetsEnd: ifrsStructure.totalAssetsEnd,
+                totalEquityLiabStart: ifrsStructure.totalEquityLiabStart,
+                totalEquityLiabEnd: ifrsStructure.totalEquityLiabEnd
+            }
+        };
 
         return result;
 

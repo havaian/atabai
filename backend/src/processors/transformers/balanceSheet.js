@@ -43,6 +43,7 @@ function transformToIFRSStructure(dataMap) {
             const endVal = isNeg ? -(nsbuData.end || 0) : (nsbuData.end || 0);
 
             const item = {
+                nsbuCode: code,
                 label: mapping.ifrsClassification,
                 start: startVal,
                 end: endVal,
@@ -92,6 +93,7 @@ function transformToIFRSStructure(dataMap) {
         const calcEnd = op === '-' ? aEnd - bEnd : aEnd + bEnd;
 
         const item = {
+            nsbuCode: code,
             label: mapping.ifrsClassification,
             start: calcStart,
             end: calcEnd,
