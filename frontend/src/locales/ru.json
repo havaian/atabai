@@ -155,6 +155,27 @@
     "bookDemo": "Забронировать демо",
     "loginGoogle": "Войти через Google"
   },
+  "transformVisual": {
+    "nsbuLabel": "НСБУ",
+    "ifrsLabel": "МСФО / IFRS",
+    "arrowLabel": "~ 15 сек",
+    "nsbu": {
+      "colItem": "Статья",
+      "colAmount": "Сумма (сум)",
+      "row1": "010 — Осн. средства",
+      "row2": "020 — Амортизация",
+      "errorRow": "Ручной расчёт",
+      "errorValue": "Ошибка ±12%"
+    },
+    "ifrs": {
+      "colItem": "Статья",
+      "colAmount": "Сумма (UZS)",
+      "row1": "ОС — Стоимость",
+      "row2": "Накопл. амортизация",
+      "successRow": "Соответствует IAS 16",
+      "successValue": "Проверено"
+    }
+  },
   "stats": {
     "seconds": "сек",
     "minute": "мин",

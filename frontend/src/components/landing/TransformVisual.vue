@@ -6,26 +6,26 @@
                 <div class="sheet-header">
                     <div class="sheet-label sheet-label-nsbu">
                         <span class="sheet-label-dot"></span>
-                        НСБУ
+                        {{ $t('transformVisual.nsbuLabel') }}
                     </div>
                     <span class="sheet-tag sheet-tag-nsbu">.xlsx</span>
                 </div>
                 <div class="sheet-body">
                     <div class="sheet-row sheet-row-header">
-                        <div class="sheet-cell">Статья</div>
-                        <div class="sheet-cell sheet-cell-value">Сумма (сум)</div>
+                        <div class="sheet-cell">{{ $t('transformVisual.nsbu.colItem') }}</div>
+                        <div class="sheet-cell sheet-cell-value">{{ $t('transformVisual.nsbu.colAmount') }}</div>
                     </div>
                     <div class="sheet-row">
-                        <div class="sheet-cell">010 — Осн. средства</div>
+                        <div class="sheet-cell">{{ $t('transformVisual.nsbu.row1') }}</div>
                         <div class="sheet-cell sheet-cell-value">1,250,000</div>
                     </div>
                     <div class="sheet-row">
-                        <div class="sheet-cell">020 — Амортизация</div>
+                        <div class="sheet-cell">{{ $t('transformVisual.nsbu.row2') }}</div>
                         <div class="sheet-cell sheet-cell-value">-320,000</div>
                     </div>
                     <div class="sheet-row sheet-row-error">
-                        <div class="sheet-cell">⚠ Ручной расчёт</div>
-                        <div class="sheet-cell sheet-cell-value">Ошибка ±12%</div>
+                        <div class="sheet-cell">⚠ {{ $t('transformVisual.nsbu.errorRow') }}</div>
+                        <div class="sheet-cell sheet-cell-value">{{ $t('transformVisual.nsbu.errorValue') }}</div>
                     </div>
                 </div>
             </div>
@@ -35,7 +35,7 @@
                 <div class="transform-arrow-circle">
                     <ArrowRightIcon class="w-5 h-5" />
                 </div>
-                <span class="transform-arrow-label">~ 15 сек</span>
+                <span class="transform-arrow-label">{{ $t('transformVisual.arrowLabel') }}</span>
             </div>
 
             <!-- After: IFRS -->
@@ -43,26 +43,26 @@
                 <div class="sheet-header">
                     <div class="sheet-label sheet-label-ifrs">
                         <span class="sheet-label-dot"></span>
-                        МСФО / IFRS
+                        {{ $t('transformVisual.ifrsLabel') }}
                     </div>
                     <span class="sheet-tag sheet-tag-ifrs">IAS 16</span>
                 </div>
                 <div class="sheet-body">
                     <div class="sheet-row sheet-row-header">
-                        <div class="sheet-cell">Line Item</div>
-                        <div class="sheet-cell sheet-cell-value">Amount (UZS)</div>
+                        <div class="sheet-cell">{{ $t('transformVisual.ifrs.colItem') }}</div>
+                        <div class="sheet-cell sheet-cell-value">{{ $t('transformVisual.ifrs.colAmount') }}</div>
                     </div>
                     <div class="sheet-row">
-                        <div class="sheet-cell">PPE — Cost</div>
+                        <div class="sheet-cell">{{ $t('transformVisual.ifrs.row1') }}</div>
                         <div class="sheet-cell sheet-cell-value">1,250,000</div>
                     </div>
                     <div class="sheet-row">
-                        <div class="sheet-cell">Accum. Depr.</div>
+                        <div class="sheet-cell">{{ $t('transformVisual.ifrs.row2') }}</div>
                         <div class="sheet-cell sheet-cell-value">-312,500</div>
                     </div>
                     <div class="sheet-row sheet-row-success">
-                        <div class="sheet-cell">✓ IAS 16 compliant</div>
-                        <div class="sheet-cell sheet-cell-value">Validated</div>
+                        <div class="sheet-cell">✓ {{ $t('transformVisual.ifrs.successRow') }}</div>
+                        <div class="sheet-cell sheet-cell-value">{{ $t('transformVisual.ifrs.successValue') }}</div>
                     </div>
                 </div>
             </div>

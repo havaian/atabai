@@ -155,6 +155,27 @@
     "bookDemo": "Demo bron qilish",
     "loginGoogle": "Google orqali kirish"
   },
+  "transformVisual": {
+    "nsbuLabel": "BHMS",
+    "ifrsLabel": "XHMS / IFRS",
+    "arrowLabel": "~ 15 son.",
+    "nsbu": {
+      "colItem": "Modda",
+      "colAmount": "Summa (soʻm)",
+      "row1": "010 — Asosiy vositalar",
+      "row2": "020 — Amortizatsiya",
+      "errorRow": "Qoʻlda hisoblash",
+      "errorValue": "±12% xato"
+    },
+    "ifrs": {
+      "colItem": "Modda",
+      "colAmount": "Summa (UZS)",
+      "row1": "AV — Tannarx",
+      "row2": "Toʻplangan amort.",
+      "successRow": "IAS 16 ga muvofiq",
+      "successValue": "Tasdiqlangan"
+    }
+  },
   "stats": {
     "seconds": "son.",
     "minute": "daq.",

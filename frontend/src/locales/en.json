@@ -155,6 +155,27 @@
     "bookDemo": "Book Demo",
     "loginGoogle": "Sign in with Google"
   },
+  "transformVisual": {
+    "nsbuLabel": "NSBU",
+    "ifrsLabel": "IFRS",
+    "arrowLabel": "~ 15 sec",
+    "nsbu": {
+      "colItem": "Item",
+      "colAmount": "Amount (UZS)",
+      "row1": "010 — Fixed Assets",
+      "row2": "020 — Depreciation",
+      "errorRow": "Manual calculation",
+      "errorValue": "±12% error"
+    },
+    "ifrs": {
+      "colItem": "Line Item",
+      "colAmount": "Amount (UZS)",
+      "row1": "PPE — Cost",
+      "row2": "Accum. Depr.",
+      "successRow": "IAS 16 compliant",
+      "successValue": "Validated"
+    }
+  },
   "stats": {
     "seconds": "sec",
     "minute": "min",
