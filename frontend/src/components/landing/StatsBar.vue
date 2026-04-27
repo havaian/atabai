@@ -1,53 +1,55 @@
 <template>
     <div class="stats-bar">
-        <div v-for="stat in stats" :key="stat.label" class="stats-item">
+        <div v-for="stat in stats" :key="stat.labelKey" class="stats-item">
             <div class="stats-value">
-                {{ stat.value }}<span class="stats-value-accent">{{ stat.accent }}</span>
+                {{ stat.value }}<span class="stats-value-accent">{{ $t(stat.accentKey) }}</span>
             </div>
-            <div v-if="stat.oldValue" class="stats-comparison">
-                <span class="stats-old">{{ stat.oldValue }}</span>
+            <div v-if="stat.oldKey" class="stats-comparison">
+                <span class="stats-old">{{ $t(stat.oldKey) }}</span>
                 <span class="stats-arrow">→</span>
-                <span>{{ stat.newValue }}</span>
+                <span>{{ $t(stat.newKey) }}</span>
             </div>
             <div v-else class="stats-comparison">
-                {{ stat.note }}
+                {{ $t(stat.noteKey) }}
             </div>
-            <div class="stats-description">{{ stat.label }}</div>
+            <div class="stats-description">{{ $t(stat.labelKey) }}</div>
         </div>
     </div>
 </template>
 
 <script setup>
+// Translation keys live under stats.* in the locale files.
+// Numeric values stay hardcoded — they're locale-agnostic.
 const stats = [
     {
         value: '~15',
-        accent: ' сек',
-        oldValue: '2-3 часа',
-        newValue: '15 сек',
-        label: 'Время обработки'
+        accentKey: 'stats.seconds',
+        oldKey: 'stats.timeOld',
+        newKey: 'stats.timeNew',
+        labelKey: 'stats.analysisTime'
     },
     {
         value: '99.9',
-        accent: '%',
-        oldValue: '±12% ошибок',
-        newValue: 'точно',
-        label: 'Точность расчётов'
+        accentKey: 'stats.percent',
+        oldKey: 'stats.accuracyOld',
+        newKey: 'stats.accuracyNew',
+        labelKey: 'stats.accuracy'
     },
     {
         value: '24',
-        accent: '/7',
-        oldValue: null,
-        newValue: null,
-        note: 'без выходных',
-        label: 'Доступность'
+        accentKey: 'stats.slashSeven',
+        oldKey: null,
+        newKey: null,
+        noteKey: 'stats.availabilityNote',
+        labelKey: 'stats.availability'
     },
     {
         value: '60',
-        accent: '%',
-        oldValue: null,
-        newValue: null,
-        note: 'экономия времени',
-        label: 'Эффективность'
+        accentKey: 'stats.percent',
+        oldKey: null,
+        newKey: null,
+        noteKey: 'stats.efficiencyNote',
+        labelKey: 'stats.timeSaving'
     }
 ]
 </script>

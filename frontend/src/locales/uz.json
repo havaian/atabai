@@ -2,9 +2,9 @@
   "landing": {
     "hero": {
       "badge": "NSBU → IFRS Automation Platform",
-      "titlePre": "Avtomatlashtirish",
-      "titleHighlight": "XMHS.",
-      "titlePost": "AI asosida.",
+      "titlePre": "XMHS",
+      "titleHighlight": "avtomatlashtirish",
+      "titlePost": "Su'niy intellekt bilan integratsiya",
       "subtitle": "Moliyaviy ma'lumotlarni aniq, audit uchun tayyor XMHS hisobotlariga aylantiring — tezroq, arzonroq va to'liq shaffoflik bilan.",
       "bookDemo": "Demo buyurtma qilish",
       "howItWorks": "Bu qanday ishlaydi"
@@ -158,10 +158,18 @@
   "stats": {
     "seconds": "son.",
     "minute": "daq.",
+    "percent": "%",
+    "slashSeven": "/7",
     "analysisTime": "Tahlil vaqti",
     "accuracy": "Hisob-kitob aniqligi",
     "availability": "Mavjudlik",
-    "timeSaving": "Vaqt tejash"
+    "timeSaving": "Vaqt tejash",
+    "timeOld": "2-3 soat",
+    "timeNew": "15 son.",
+    "accuracyOld": "±12% xato",
+    "accuracyNew": "aniq",
+    "availabilityNote": "dam olishsiz",
+    "efficiencyNote": "vaqt tejash"
   },
   "howItWorks": {
     "title": "Qanday ishlaydi",

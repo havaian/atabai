@@ -3,8 +3,8 @@
     "hero": {
       "badge": "NSBU → IFRS Automation Platform",
       "titlePre": "Automate",
-      "titleHighlight": "IFRS.",
-      "titlePost": "Powered by AI.",
+      "titleHighlight": "IFRS",
+      "titlePost": "Integrated with AI",
       "subtitle": "Turn complex financial data into accurate, audit-ready IFRS reports — faster, cheaper, and with full transparency.",
       "bookDemo": "Book a demo",
       "howItWorks": "How it works"
@@ -156,12 +156,20 @@
     "loginGoogle": "Sign in with Google"
   },
   "stats": {
-    "seconds": "sec.",
-    "minute": "min.",
-    "analysisTime": "Analysis time",
+    "seconds": "sec",
+    "minute": "min",
+    "percent": "%",
+    "slashSeven": "/7",
+    "analysisTime": "Processing time",
     "accuracy": "Calculation accuracy",
-    "availability": "Available",
-    "timeSaving": "Time savings"
+    "availability": "Availability",
+    "timeSaving": "Efficiency",
+    "timeOld": "2-3 hours",
+    "timeNew": "15 sec",
+    "accuracyOld": "±12% errors",
+    "accuracyNew": "precise",
+    "availabilityNote": "no days off",
+    "efficiencyNote": "time saving"
   },
   "howItWorks": {
     "title": "How it works",

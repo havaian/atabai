@@ -3,8 +3,8 @@
     "hero": {
       "badge": "NSBU → IFRS Automation Platform",
       "titlePre": "Автоматизация",
-      "titleHighlight": "МСФО.",
-      "titlePost": "На основе ИИ.",
+      "titleHighlight": "МСФО",
+      "titlePost": "С ИИ-интеграцией",
       "subtitle": "Превращайте финансовые данные в точные, готовые к аудиту отчёты МСФО — быстрее, дешевле и с полной прозрачностью.",
       "bookDemo": "Забронировать демо",
       "howItWorks": "Как это работает"
@@ -156,12 +156,20 @@
     "loginGoogle": "Войти через Google"
   },
   "stats": {
-    "seconds": "сек.",
-    "minute": "мин.",
-    "analysisTime": "Время анализа",
-    "accuracy": "Точность расчетов",
+    "seconds": "сек",
+    "minute": "мин",
+    "percent": "%",
+    "slashSeven": "/7",
+    "analysisTime": "Время обработки",
+    "accuracy": "Точность расчётов",
     "availability": "Доступность",
-    "timeSaving": "Экономия времени"
+    "timeSaving": "Эффективность",
+    "timeOld": "2-3 часа",
+    "timeNew": "15 сек",
+    "accuracyOld": "±12% ошибок",
+    "accuracyNew": "точно",
+    "availabilityNote": "без выходных",
+    "efficiencyNote": "экономия времени"
   },
   "howItWorks": {
     "title": "Как это работает",
