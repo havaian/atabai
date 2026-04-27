@@ -122,7 +122,7 @@
     "language": "Til"
   },
   "dashboard": {
-    "welcome": "Qaytib kelganingiz bilan, {name}!",
+    "welcome": "Xush kelibsiz, {name}!",
     "subtitle": "Moliyaviy hujjatlaringizni qayta ishlashni boshlash uchun shablonni tanlang",
     "newProject": "Yangi loyiha",
     "recentFiles": "Oxirgi fayllar",
