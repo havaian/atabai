@@ -347,9 +347,19 @@ function extractProfitLossForm2Data(sheet) {
         // Label column is typically the column to the LEFT of the code column
         // (in UzTelecom layout: A=label, B=code) but some exporters put it
         // to the RIGHT (codeColIdx + 1). Try both, prefer non-empty.
-        let label = getCellText(row[codeColIdx + 1]).trim();
-        if (!label && codeColIdx > 0) {
-            label = getCellText(row[codeColIdx - 1]).trim();
+        // Try LEFT side first (label typically precedes code in human-readable
+        // layouts like UzTelecom: A=label, B=code). Only fall back to RIGHT if
+        // there's nothing useful on the left. Reject pure-numeric strings since
+        // those are values bleeding in from the data columns.
+        const isLabel = (s) => s && s.trim().length > 0 && !/^-?\d+(\.\d+)?$/.test(s.trim());
+        let label = '';
+        if (codeColIdx > 0) {
+            const left = getCellText(row[codeColIdx - 1]).trim();
+            if (isLabel(left)) label = left;
+        }
+        if (!label) {
+            const right = getCellText(row[codeColIdx + 1]).trim();
+            if (isLabel(right)) label = right;
         }
         if (!label) label = rowDef.label;
 
