@@ -1,224 +1,307 @@
-// processors/transformers/profitLossForm2.js
+// mappings/profitLossForm2Mapping.js
 //
-// Transforms NSBU Form 2 extracted data into IFRS P&L layout descriptor.
-// Layout follows the canonical NSBU Form 2 row order (010 → 270) with
-// English IFRS classifications. Calculated row formulas come from the
-// mapping's `formula` field — the mapping is the single source of truth.
+// NSBU Form 2 (Отчет о финансовых результатах, ОКУД 0710002) row code mapping.
 //
-// SIGN CONVENTION:
-//   NSBU Form 2 stores all values as positive magnitudes. The mapping
-//   marks deduction rows (cost of sales, expenses, taxes) with isNegative:
-//   true. At render time we negate the values for those items so that
-//   plain summation in subtotal rows produces the correct signed result.
-//   The styler doesn't need to know about signs — the values it sums
-//   already encode them.
+// SOURCE OF TRUTH: Order of the Minister of Finance of the Republic of
+// Uzbekistan No. 140 (27.12.2002), Appendix No. 2, in the editions of:
+//   - Order No. 10 (23.01.2019, reg. № 1209-10)
+//   - Earlier amendments: 2004, 2012, 2016, 2017
+// Russian descriptions match the legal text verbatim. Calculated row formulas
+// come directly from the form's own row labels (e.g. "(стр.030-040+090)").
+//
+// IFRS classifications follow IAS 1 presentation requirements; sign
+// conventions reflect how each line presents in IFRS (positive contribution
+// to profit vs. deduction).
+//
+// Used both by the extractor (to detect known codes) and by the transformation
+// enricher (to attach IFRS metadata to source rows at read time).
 
 'use strict';
 
-const { FORM2_ROW_CODES } = require('../../mappings/profitLossForm2Mapping');
+// ─── Row codes ────────────────────────────────────────────────────────────────
+// Each entry covers ALL codes that appear on the official NSBU Form 2.
+// Calculated rows include a `formula` field with referenced row codes.
+const FORM2_ROW_CODES = {
+    // ── REVENUE ──────────────────────────────────────────────────────────────
+    '010': {
+        label: 'Revenue (net)',
+        section: 'revenue',
+        ifrsClassification: 'Revenue',
+        nsbuDescription: 'Чистая выручка от реализации продукции (товаров, работ и услуг)',
+        isCalculated: false,
+    },
 
-function transformForm2ToIFRS(extracted) {
-    global.logger.logInfo('[PL-F2 TRANSFORMER] Starting transformation');
+    // ── COST OF SALES ────────────────────────────────────────────────────────
+    '020': {
+        label: 'Cost of sales',
+        section: 'cogs',
+        ifrsClassification: 'Cost of sales',
+        nsbuDescription: 'Себестоимость реализованной продукции (товаров, работ и услуг)',
+        isCalculated: false,
+        isNegative: true,
+    },
 
-    const { periods, dataMap } = extracted;
-    const n = periods.length;
+    // ── GROSS PROFIT (calculated: 010 - 020) ─────────────────────────────────
+    '030': {
+        label: 'Gross profit',
+        section: 'gross',
+        ifrsClassification: 'Gross profit',
+        nsbuDescription: 'Валовая прибыль (убыток) от реализации продукции',
+        isCalculated: true,
+        formula: { op: 'subtract', operands: ['010', '020'] },
+    },
 
-    const nullArr = () => new Array(n).fill(null);
-    const norm = (arr) => {
-        if (!arr || arr.length === 0) return nullArr();
-        return arr.map(v => (v === undefined ? null : v));
-    };
+    // ── PERIOD EXPENSES (calculated: 050+060+070+080) ────────────────────────
+    '040': {
+        label: 'Period expenses, total',
+        section: 'opex',
+        ifrsClassification: 'Operating expenses, total',
+        nsbuDescription: 'Расходы периода, всего',
+        isCalculated: true,
+        formula: { op: 'add', operands: ['050', '060', '070', '080'] },
+        isNegative: true,
+    },
+    '050': {
+        label: 'Selling expenses',
+        section: 'opex',
+        ifrsClassification: 'Selling and distribution expenses',
+        nsbuDescription: 'Расходы по реализации',
+        isCalculated: false,
+        isNegative: true,
+    },
+    '060': {
+        label: 'Administrative expenses',
+        section: 'opex',
+        ifrsClassification: 'Administrative expenses',
+        nsbuDescription: 'Административные расходы',
+        isCalculated: false,
+        isNegative: true,
+    },
+    '070': {
+        label: 'Other operating expenses',
+        section: 'opex',
+        ifrsClassification: 'Other operating expenses',
+        nsbuDescription: 'Прочие операционные расходы',
+        isCalculated: false,
+        isNegative: true,
+    },
+    '080': {
+        // NSBU treats this as a deferred / future-deductible expense.
+        // For IFRS reporting purposes this is typically immaterial / nil.
+        label: 'Period expenses deductible in future',
+        section: 'opex',
+        ifrsClassification: 'Deferred period expenses',
+        nsbuDescription: 'Расходы отчетного периода, вычитаемые из налогооблагаемой прибыли в будущем',
+        isCalculated: false,
+        isNegative: true,
+    },
 
-    const rows = [];
-    // code → layout row index, populated as we render
-    const codeToRowIdx = {};
+    // ── OTHER OPERATING INCOME ───────────────────────────────────────────────
+    '090': {
+        label: 'Other operating income',
+        section: 'otherOp',
+        ifrsClassification: 'Other operating income',
+        nsbuDescription: 'Прочие доходы от основной деятельности',
+        isCalculated: false,
+    },
 
-    // ─── Helpers (closures over rows, codeToRowIdx, dataMap, etc.) ───────────
+    // ── OPERATING PROFIT (calculated: 030 - 040 + 090) ───────────────────────
+    '100': {
+        label: 'Operating profit / (loss)',
+        section: 'operating',
+        ifrsClassification: 'Profit / (loss) from operations',
+        nsbuDescription: 'Прибыль (убыток) от основной деятельности',
+        isCalculated: true,
+        formula: {
+            op: 'compose', operands: [
+                { op: 'subtract', operands: ['030', '040'] },
+                '090'
+            ], reducer: 'add'
+        },
+    },
 
-    function hasNonNullValue(arr) {
-        return Array.isArray(arr) && arr.some(v => v != null && v !== 0);
-    }
+    // ── FINANCE INCOME (calculated total: 120+130+140+150+160) ───────────────
+    '110': {
+        label: 'Finance income, total',
+        section: 'finance',
+        ifrsClassification: 'Finance income',
+        nsbuDescription: 'Доходы от финансовой деятельности, всего',
+        isCalculated: true,
+        formula: { op: 'add', operands: ['120', '130', '140', '150', '160'] },
+    },
+    '120': {
+        label: 'Dividend income',
+        section: 'finance',
+        ifrsClassification: 'Dividend income',
+        nsbuDescription: 'Доходы в виде дивидендов',
+        isCalculated: false,
+    },
+    '130': {
+        label: 'Interest income',
+        section: 'finance',
+        ifrsClassification: 'Interest income',
+        nsbuDescription: 'Доходы в виде процентов',
+        isCalculated: false,
+    },
+    '140': {
+        label: 'Finance lease income',
+        section: 'finance',
+        ifrsClassification: 'Finance lease income',
+        nsbuDescription: 'Доходы от финансовой аренды',
+        isCalculated: false,
+    },
+    '150': {
+        label: 'Foreign exchange gains',
+        section: 'finance',
+        ifrsClassification: 'Foreign exchange gains',
+        nsbuDescription: 'Доходы от валютных курсовых разниц',
+        isCalculated: false,
+    },
+    '160': {
+        label: 'Other finance income',
+        section: 'finance',
+        ifrsClassification: 'Other finance income',
+        nsbuDescription: 'Прочие доходы от финансовой деятельности',
+        isCalculated: false,
+    },
 
-    function pushSection(label) {
-        rows.push({ type: 'title', label });
-    }
+    // ── FINANCE COSTS (calculated total: 180+190+200+210) ────────────────────
+    '170': {
+        label: 'Finance costs, total',
+        section: 'finance',
+        ifrsClassification: 'Finance costs',
+        nsbuDescription: 'Расходы по финансовой деятельности',
+        isCalculated: true,
+        formula: { op: 'add', operands: ['180', '190', '200', '210'] },
+        isNegative: true,
+    },
+    '180': {
+        label: 'Interest expense',
+        section: 'finance',
+        ifrsClassification: 'Interest expense',
+        nsbuDescription: 'Расходы в виде процентов',
+        isCalculated: false,
+        isNegative: true,
+    },
+    '190': {
+        label: 'Finance lease interest expense',
+        section: 'finance',
+        ifrsClassification: 'Finance lease interest expense',
+        nsbuDescription: 'Расходы в виде процентов по финансовой аренде',
+        isCalculated: false,
+        isNegative: true,
+    },
+    '200': {
+        label: 'Foreign exchange losses',
+        section: 'finance',
+        ifrsClassification: 'Foreign exchange losses',
+        nsbuDescription: 'Убытки от валютных курсовых разниц',
+        isCalculated: false,
+        isNegative: true,
+    },
+    '210': {
+        label: 'Other finance costs',
+        section: 'finance',
+        ifrsClassification: 'Other finance costs',
+        nsbuDescription: 'Прочие расходы по финансовой деятельности',
+        isCalculated: false,
+        isNegative: true,
+    },
 
-    function pushItemIfPresent(code) {
-        const row = dataMap[code];
-        if (!row) return false;
-        const def = FORM2_ROW_CODES[code];
-        if (!def) return false;
+    // ── PROFIT FROM ALL OPERATING ACTIVITIES (calculated: 100 + 110 - 170) ───
+    '220': {
+        label: 'Profit / (loss) from operations and finance',
+        section: 'pretax',
+        ifrsClassification: 'Profit before extraordinary items',
+        nsbuDescription: 'Прибыль (убыток) от общехозяйственной деятельности',
+        isCalculated: true,
+        formula: {
+            op: 'compose', operands: [
+                '100',
+                '110',
+                { op: 'negate', operand: '170' }
+            ], reducer: 'add'
+        },
+    },
 
-        const labelText = def.ifrsClassification || def.label || row.label || code;
-        const sign = def.isNegative === true ? -1 : 1;
-        const rawValues = norm(row.values);
-        const signedValues = rawValues.map(v => v == null ? null : sign * v);
+    // ── EXTRAORDINARY ITEMS ──────────────────────────────────────────────────
+    '230': {
+        label: 'Extraordinary gains / (losses)',
+        section: 'extraordinary',
+        // NOTE: IFRS (IAS 1.87) prohibits presenting items as "extraordinary".
+        // For the IFRS output, this maps into "Other gains/(losses)" if non-zero.
+        ifrsClassification: 'Other gains / (losses)',
+        nsbuDescription: 'Чрезвычайные прибыли и убытки',
+        isCalculated: false,
+    },
 
-        codeToRowIdx[code] = rows.length;
-        rows.push({
-            type: 'item',
-            label: labelText,
-            values: signedValues,
-            nsbuCode: code,
-            isNegative: def.isNegative === true,
-        });
-        return true;
-    }
+    // ── PROFIT BEFORE TAX (calculated: 220 +/- 230) ──────────────────────────
+    '240': {
+        label: 'Profit / (loss) before tax',
+        section: 'pretax',
+        ifrsClassification: 'Profit before income tax',
+        nsbuDescription: 'Прибыль (убыток) до уплаты налога на прибыль',
+        isCalculated: true,
+        formula: { op: 'add', operands: ['220', '230'] },
+    },
 
-    function pushCalculatedFromMapping(code, displayLabel) {
-        const def = FORM2_ROW_CODES[code];
-        if (!def) return;
+    // ── TAX ──────────────────────────────────────────────────────────────────
+    '250': {
+        label: 'Income tax',
+        section: 'tax',
+        ifrsClassification: 'Income tax expense',
+        nsbuDescription: 'Налог на прибыль',
+        isCalculated: false,
+        isNegative: true,
+    },
+    '260': {
+        label: 'Other mandatory profit-related payments',
+        section: 'tax',
+        // Per IAS 12, only income taxes go in tax expense; mandatory levies on
+        // profit are typically also reported in tax line for IFRS presentation.
+        ifrsClassification: 'Other taxes on profit',
+        nsbuDescription: 'Прочие налоги и другие обязательные платежи от прибыли',
+        isCalculated: false,
+        isNegative: true,
+    },
 
-        codeToRowIdx[code] = rows.length;
-        rows.push({
-            type: 'calculated',
-            label: displayLabel,
-            nsbuCode: code,
-            // addRefs filled in second pass after all rows are placed
-            addRefs: [],
-        });
-    }
+    // ── NET PROFIT (calculated: 240 - 250 - 260) ─────────────────────────────
+    '270': {
+        label: 'Net profit / (loss) for the period',
+        section: 'net',
+        ifrsClassification: 'Profit / (loss) for the period',
+        nsbuDescription: 'Чистая прибыль (убыток) отчетного периода',
+        isCalculated: true,
+        formula: {
+            op: 'compose', operands: [
+                '240',
+                { op: 'negate', operand: '250' },
+                { op: 'negate', operand: '260' }
+            ], reducer: 'add'
+        },
+    },
+};
 
-    // ─── Render rows in canonical NSBU Form 2 order ──────────────────────────
-
-    pushSection('I. REVENUE');
-    pushItemIfPresent('010');
-    rows.push({ type: 'blank' });
-
-    pushSection('II. COST OF SALES');
-    pushItemIfPresent('020');
-    rows.push({ type: 'blank' });
-
-    // 030 = Gross profit (010 + 020 — sign already applied to 020)
-    pushCalculatedFromMapping('030', 'III. GROSS PROFIT');
-    rows.push({ type: 'blank' });
-
-    // Period expenses section — only render if any sub-item present
-    const anyOpex = !!(dataMap['050'] || dataMap['060'] || dataMap['070'] || dataMap['080']);
-    if (anyOpex) {
-        pushSection('IV. PERIOD EXPENSES');
-        pushItemIfPresent('050');
-        pushItemIfPresent('060');
-        pushItemIfPresent('070');
-        pushItemIfPresent('080');
-        // 040 = total period expenses
-        pushCalculatedFromMapping('040', 'Total period expenses');
-        rows.push({ type: 'blank' });
-    }
-
-    if (dataMap['090']) {
-        pushSection('V. OTHER OPERATING INCOME');
-        pushItemIfPresent('090');
-        rows.push({ type: 'blank' });
-    }
-
-    // 100 = Operating profit (030 + 040 + 090; signs baked in)
-    pushCalculatedFromMapping('100', 'VI. OPERATING PROFIT / (LOSS)');
-    rows.push({ type: 'blank' });
-
-    const anyFinanceIncome = !!(dataMap['120'] || dataMap['130'] || dataMap['140'] ||
-                                dataMap['150'] || dataMap['160']);
-    if (anyFinanceIncome) {
-        pushSection('VII. FINANCE INCOME');
-        pushItemIfPresent('120');
-        pushItemIfPresent('130');
-        pushItemIfPresent('140');
-        pushItemIfPresent('150');
-        pushItemIfPresent('160');
-        pushCalculatedFromMapping('110', 'Total finance income');
-        rows.push({ type: 'blank' });
-    }
-
-    const anyFinanceCost = !!(dataMap['180'] || dataMap['190'] || dataMap['200'] || dataMap['210']);
-    if (anyFinanceCost) {
-        pushSection('VIII. FINANCE COSTS');
-        pushItemIfPresent('180');
-        pushItemIfPresent('190');
-        pushItemIfPresent('200');
-        pushItemIfPresent('210');
-        pushCalculatedFromMapping('170', 'Total finance costs');
-        rows.push({ type: 'blank' });
-    }
-
-    // 220 = Profit from operations and finance (100 + 110 + 170)
-    // Signs already baked into 170's items, so this sums correctly.
-    pushCalculatedFromMapping('220', 'IX. PROFIT FROM OPERATIONS AND FINANCE');
-    rows.push({ type: 'blank' });
-
-    // 230 = Other gains/losses (only render if non-zero in source)
-    if (dataMap['230'] && hasNonNullValue(dataMap['230'].values)) {
-        pushSection('X. OTHER GAINS / (LOSSES)');
-        pushItemIfPresent('230');
-        rows.push({ type: 'blank' });
-    }
-
-    // 240 = Profit before tax
-    pushCalculatedFromMapping('240', 'XI. PROFIT BEFORE TAX');
-    rows.push({ type: 'blank' });
-
-    if (dataMap['250'] || dataMap['260']) {
-        pushSection('XII. INCOME TAX');
-        pushItemIfPresent('250');
-        pushItemIfPresent('260');
-        rows.push({ type: 'blank' });
-    }
-
-    // 270 = Net profit
-    pushCalculatedFromMapping('270', 'XIII. NET PROFIT / (LOSS)');
-
-    // ─── Second pass: resolve calculated rows' formulas into addRefs ─────────
-    // Walk each `calculated` row, look up its formula in the mapping, and
-    // translate operand codes into layout row indices. Codes not present in
-    // codeToRowIdx (i.e., the underlying item wasn't in dataMap) are silently
-    // skipped — the calculated row will just sum what's available.
-    for (let i = 0; i < rows.length; i++) {
-        const row = rows[i];
-        if (row.type !== 'calculated') continue;
-
-        const def = FORM2_ROW_CODES[row.nsbuCode];
-        if (!def || !def.formula) continue;
-
-        row.addRefs = resolveFormulaToAddRefs(def.formula, codeToRowIdx);
-    }
-
-    global.logger.logInfo(`[PL-F2 TRANSFORMER] Output rows: ${rows.length}, mapped codes: ${Object.keys(codeToRowIdx).length}`);
-
-    // No named refs needed — formula resolution uses layout indices only.
-    return { periods, rows, namedRefs: {} };
-}
+// Codes the extractor should NOT extract values for — they are computed from
+// other rows. (Same set as before, expanded for the full form.)
+const CALCULATED_CODES = new Set(
+    Object.entries(FORM2_ROW_CODES)
+        .filter(([, def]) => def.isCalculated)
+        .map(([code]) => code)
+);
 
 /**
- * Walk a structured formula and collect layout row indices for each operand
- * code. Signs are NOT applied here — they're baked into the stored item
- * values via isNegative handling at render time, so plain summation works.
- *
- * Formula AST shapes:
- *   { op: 'add', operands: [code1, code2, ...] }
- *   { op: 'subtract', operands: [a, b] }     — second operand should be isNegative in mapping
- *   { op: 'negate', operand: code }          — operand should be isNegative in mapping
- *   { op: 'compose', operands: [...] }       — flatten all operands
+ * Look up mapping for a Form 2 row code.
+ * @param {string} code - Padded 3-digit code (e.g., '010', '040')
+ * @returns {Object|null}
  */
-function resolveFormulaToAddRefs(formula, codeToRowIdx) {
-    const refs = [];
-    walkFormula(formula, codeToRowIdx, refs);
-    return refs;
+function getProfitLossForm2Mapping(code) {
+    const c = String(code).padStart(3, '0').trim();
+    return FORM2_ROW_CODES[c] || null;
 }
 
-function walkFormula(node, codeToRowIdx, out) {
-    if (!node) return;
-
-    if (typeof node === 'string') {
-        const idx = codeToRowIdx[node];
-        if (idx !== undefined) out.push(idx);
-        return;
-    }
-
-    if (typeof node === 'object' && node.op) {
-        const operands = node.operands || (node.operand !== undefined ? [node.operand] : []);
-        for (const operand of operands) {
-            walkFormula(operand, codeToRowIdx, out);
-        }
-    }
-}
-
-module.exports = { transformForm2ToIFRS };
+module.exports = {
+    FORM2_ROW_CODES,
+    CALCULATED_CODES,
+    getProfitLossForm2Mapping,
+};

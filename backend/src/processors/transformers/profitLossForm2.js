@@ -1,16 +1,22 @@
 // processors/transformers/profitLossForm2.js
-// Transforms standard NSBU Form 2 extracted data into the IFRS P&L layout
-// descriptor. Reuses the same row-type schema as the budget P&L transformer
-// so the existing profitLoss styler can render it without modification.
+//
+// Transforms NSBU Form 2 extracted data into IFRS P&L layout descriptor.
+// Layout follows the canonical NSBU Form 2 row order (010 → 270) with
+// English IFRS classifications. Calculated row formulas come from the
+// mapping's `formula` field — the mapping is the single source of truth.
+//
+// SIGN CONVENTION:
+//   NSBU Form 2 stores all values as positive magnitudes. The mapping
+//   marks deduction rows (cost of sales, expenses, taxes) with isNegative:
+//   true. At render time we negate the values for those items so that
+//   plain summation in subtotal rows produces the correct signed result.
+//   The styler doesn't need to know about signs — the values it sums
+//   already encode them.
 
 'use strict';
 
-/**
- * Transform extracted Form 2 data into IFRS P&L layout.
- *
- * @param {Object} extracted - Output of extractProfitLossForm2Data()
- * @returns {Object} { periods, rows, namedRefs } — same shape as budget transformer
- */
+const { FORM2_ROW_CODES } = require('../../mappings/profitLossForm2Mapping');
+
 function transformForm2ToIFRS(extracted) {
     global.logger.logInfo('[PL-F2 TRANSFORMER] Starting transformation');
 
@@ -23,268 +29,196 @@ function transformForm2ToIFRS(extracted) {
         return arr.map(v => (v === undefined ? null : v));
     };
 
-    // Helper to get values for a row code, applying sign if isNegative
-    const vals = (code) => {
-        const row = dataMap[code];
-        if (!row) return nullArr();
-        const raw = norm(row.values);
-        // NSBU Form 2 stores costs as positives; we keep them as positives
-        // and let the IFRS presentation logic (styler numFmt) handle negatives.
-        // The isNegative flag is preserved in the item for the styler.
-        return raw;
-    };
-
     const rows = [];
+    // code → layout row index, populated as we render
+    const codeToRowIdx = {};
 
-    // ─── I. REVENUE ───────────────────────────────────────────────────────────
-    rows.push({ type: 'title', label: 'I. REVENUE' });
+    // ─── Helpers (closures over rows, codeToRowIdx, dataMap, etc.) ───────────
 
-    const revenueStart = rows.length;
-    rows.push({
-        type: 'item',
-        label: dataMap['010']?.label || 'Net revenue from sales',
-        values: vals('010'),
-        nsbuCode: '010',
-    });
-    const revenueEnd = rows.length;
+    function hasNonNullValue(arr) {
+        return Array.isArray(arr) && arr.some(v => v != null && v !== 0);
+    }
 
-    rows.push({
-        type: 'total',
-        label: 'Total Revenue',
-        sumRange: { from: revenueStart, to: revenueEnd },
-    });
-    rows.push({ type: 'blank' });
+    function pushSection(label) {
+        rows.push({ type: 'title', label });
+    }
 
-    // ─── II. COST OF SALES ────────────────────────────────────────────────────
-    rows.push({ type: 'title', label: 'II. COST OF SALES' });
+    function pushItemIfPresent(code) {
+        const row = dataMap[code];
+        if (!row) return false;
+        const def = FORM2_ROW_CODES[code];
+        if (!def) return false;
 
-    const cogsStart = rows.length;
-    rows.push({
-        type: 'item',
-        label: dataMap['020']?.label || 'Cost of sales',
-        values: vals('020'),
-        nsbuCode: '020',
-        isNegative: true,
-    });
-    const cogsEnd = rows.length;
+        const labelText = def.ifrsClassification || def.label || row.label || code;
+        const sign = def.isNegative === true ? -1 : 1;
+        const rawValues = norm(row.values);
+        const signedValues = rawValues.map(v => v == null ? null : sign * v);
 
-    rows.push({
-        type: 'total',
-        label: 'Total Cost of Sales',
-        sumRange: { from: cogsStart, to: cogsEnd },
-    });
-    rows.push({ type: 'blank' });
-
-    // ─── III. GROSS PROFIT ────────────────────────────────────────────────────
-    const grossProfitIndex = rows.length;
-    rows.push({
-        type: 'calculated',
-        label: 'III. GROSS PROFIT',
-        addRefs: ['totalRevenue', 'totalCOGS'],
-    });
-    rows.push({ type: 'blank' });
-
-    // ─── IV. OPERATING EXPENSES ───────────────────────────────────────────────
-    rows.push({ type: 'title', label: 'IV. OPERATING EXPENSES' });
-
-    const opexStart = rows.length;
-
-    if (dataMap['040']) {
+        codeToRowIdx[code] = rows.length;
         rows.push({
             type: 'item',
-            label: dataMap['040'].label || 'Selling expenses',
-            values: vals('040'),
-            nsbuCode: '040',
-            isNegative: true,
+            label: labelText,
+            values: signedValues,
+            nsbuCode: code,
+            isNegative: def.isNegative === true,
         });
+        return true;
     }
 
-    if (dataMap['050']) {
+    function pushCalculatedFromMapping(code, displayLabel) {
+        const def = FORM2_ROW_CODES[code];
+        if (!def) return;
+
+        codeToRowIdx[code] = rows.length;
         rows.push({
-            type: 'item',
-            label: dataMap['050'].label || 'Administrative expenses',
-            values: vals('050'),
-            nsbuCode: '050',
-            isNegative: true,
+            type: 'calculated',
+            label: displayLabel,
+            nsbuCode: code,
+            // addRefs filled in second pass after all rows are placed
+            addRefs: [],
         });
     }
 
-    const opexEnd = rows.length;
+    // ─── Render rows in canonical NSBU Form 2 order ──────────────────────────
 
-    if (opexEnd > opexStart) {
-        rows.push({
-            type: 'total',
-            label: 'Total Operating Expenses',
-            sumRange: { from: opexStart, to: opexEnd },
-        });
-    }
+    pushSection('I. REVENUE');
+    pushItemIfPresent('010');
     rows.push({ type: 'blank' });
 
-    // ─── V. OTHER OPERATING ───────────────────────────────────────────────────
-    if (dataMap['060'] || dataMap['070']) {
-        rows.push({ type: 'title', label: 'V. OTHER OPERATING INCOME / (EXPENSES)' });
+    pushSection('II. COST OF SALES');
+    pushItemIfPresent('020');
+    rows.push({ type: 'blank' });
 
-        const otherOpStart = rows.length;
+    // 030 = Gross profit (010 + 020 — sign already applied to 020)
+    pushCalculatedFromMapping('030', 'III. GROSS PROFIT');
+    rows.push({ type: 'blank' });
 
-        if (dataMap['060']) {
-            rows.push({
-                type: 'item',
-                label: dataMap['060'].label || 'Other operating income',
-                values: vals('060'),
-                nsbuCode: '060',
-            });
-        }
-
-        if (dataMap['070']) {
-            rows.push({
-                type: 'item',
-                label: dataMap['070'].label || 'Other operating expenses',
-                values: vals('070'),
-                nsbuCode: '070',
-                isNegative: true,
-            });
-        }
-
-        const otherOpEnd = rows.length;
-        rows.push({
-            type: 'total',
-            label: 'Net other operating',
-            sumRange: { from: otherOpStart, to: otherOpEnd },
-        });
+    // Period expenses section — only render if any sub-item present
+    const anyOpex = !!(dataMap['050'] || dataMap['060'] || dataMap['070'] || dataMap['080']);
+    if (anyOpex) {
+        pushSection('IV. PERIOD EXPENSES');
+        pushItemIfPresent('050');
+        pushItemIfPresent('060');
+        pushItemIfPresent('070');
+        pushItemIfPresent('080');
+        // 040 = total period expenses
+        pushCalculatedFromMapping('040', 'Total period expenses');
         rows.push({ type: 'blank' });
     }
-
-    // ─── VI. OPERATING PROFIT (EBIT) ──────────────────────────────────────────
-    const ebitIndex = rows.length;
-    rows.push({
-        type: 'calculated',
-        label: 'VI. OPERATING PROFIT / (LOSS) (EBIT)',
-        // = Gross Profit + Operating Expenses total + Other operating total
-        // Use named refs and positional refs together
-        addRefs: ['grossProfit', ...(opexEnd > opexStart ? [opexEnd] : []),
-            ...(dataMap['060'] || dataMap['070'] ? [rows.findIndex(
-                r => r.label === 'Net other operating'
-            )] : [])],
-    });
-    rows.push({ type: 'blank' });
-
-    // ─── VII. FINANCE INCOME / (COSTS) ────────────────────────────────────────
-    rows.push({ type: 'title', label: 'VII. FINANCE INCOME / (COSTS)' });
-
-    const financeStart = rows.length;
 
     if (dataMap['090']) {
-        rows.push({
-            type: 'item',
-            label: dataMap['090'].label || 'Finance income',
-            values: vals('090'),
-            nsbuCode: '090',
-        });
-    } else {
-        rows.push({ type: 'item', label: '  Finance income', values: nullArr() });
-    }
-
-    if (dataMap['100']) {
-        rows.push({
-            type: 'item',
-            label: dataMap['100'].label || 'Finance costs',
-            values: vals('100'),
-            nsbuCode: '100',
-            isNegative: true,
-        });
-    } else {
-        rows.push({ type: 'item', label: '  Finance costs', values: nullArr() });
-    }
-
-    const financeEnd = rows.length;
-
-    const netFinanceIndex = rows.length;
-    rows.push({
-        type: 'total',
-        label: 'Net finance income / (costs)',
-        sumRange: { from: financeStart, to: financeEnd },
-    });
-    rows.push({ type: 'blank' });
-
-    // ─── VIII. OTHER INCOME / (EXPENSES) ─────────────────────────────────────
-    if (dataMap['110'] || dataMap['120']) {
-        rows.push({ type: 'title', label: 'VIII. OTHER INCOME / (EXPENSES)' });
-
-        const otherStart = rows.length;
-
-        if (dataMap['110']) {
-            rows.push({
-                type: 'item',
-                label: dataMap['110'].label || 'Other income',
-                values: vals('110'),
-                nsbuCode: '110',
-            });
-        }
-
-        if (dataMap['120']) {
-            rows.push({
-                type: 'item',
-                label: dataMap['120'].label || 'Other expenses',
-                values: vals('120'),
-                nsbuCode: '120',
-                isNegative: true,
-            });
-        }
-
-        const otherEnd = rows.length;
-        rows.push({
-            type: 'total',
-            label: 'Net other income / (expenses)',
-            sumRange: { from: otherStart, to: otherEnd },
-        });
+        pushSection('V. OTHER OPERATING INCOME');
+        pushItemIfPresent('090');
         rows.push({ type: 'blank' });
     }
 
-    // ─── IX. PROFIT BEFORE TAX ────────────────────────────────────────────────
-    const pbtIndex = rows.length;
-    rows.push({
-        type: 'calculated',
-        label: 'IX. PROFIT BEFORE TAX',
-        addRefs: [ebitIndex, netFinanceIndex,
-            ...(rows.findIndex(r => r.label === 'Net other income / (expenses)') >= 0
-                ? [rows.findIndex(r => r.label === 'Net other income / (expenses)')]
-                : [])
-        ],
-    });
+    // 100 = Operating profit (030 + 040 + 090; signs baked in)
+    pushCalculatedFromMapping('100', 'VI. OPERATING PROFIT / (LOSS)');
     rows.push({ type: 'blank' });
 
-    // ─── X. INCOME TAX ────────────────────────────────────────────────────────
-    rows.push({ type: 'title', label: 'X. INCOME TAX' });
+    const anyFinanceIncome = !!(dataMap['120'] || dataMap['130'] || dataMap['140'] ||
+                                dataMap['150'] || dataMap['160']);
+    if (anyFinanceIncome) {
+        pushSection('VII. FINANCE INCOME');
+        pushItemIfPresent('120');
+        pushItemIfPresent('130');
+        pushItemIfPresent('140');
+        pushItemIfPresent('150');
+        pushItemIfPresent('160');
+        pushCalculatedFromMapping('110', 'Total finance income');
+        rows.push({ type: 'blank' });
+    }
 
-    const incomeTaxIndex = rows.length;
-    rows.push({
-        type: 'item',
-        label: dataMap['140']?.label || 'Income tax expense',
-        values: vals('140'),
-        nsbuCode: '140',
-        isNegative: true,
-    });
+    const anyFinanceCost = !!(dataMap['180'] || dataMap['190'] || dataMap['200'] || dataMap['210']);
+    if (anyFinanceCost) {
+        pushSection('VIII. FINANCE COSTS');
+        pushItemIfPresent('180');
+        pushItemIfPresent('190');
+        pushItemIfPresent('200');
+        pushItemIfPresent('210');
+        pushCalculatedFromMapping('170', 'Total finance costs');
+        rows.push({ type: 'blank' });
+    }
+
+    // 220 = Profit from operations and finance (100 + 110 + 170)
+    // Signs already baked into 170's items, so this sums correctly.
+    pushCalculatedFromMapping('220', 'IX. PROFIT FROM OPERATIONS AND FINANCE');
     rows.push({ type: 'blank' });
 
-    // ─── XI. NET PROFIT / (LOSS) ──────────────────────────────────────────────
-    rows.push({
-        type: 'calculated',
-        label: 'XI. NET PROFIT / (LOSS)',
-        addRefs: [pbtIndex, incomeTaxIndex],
-    });
+    // 230 = Other gains/losses (only render if non-zero in source)
+    if (dataMap['230'] && hasNonNullValue(dataMap['230'].values)) {
+        pushSection('X. OTHER GAINS / (LOSSES)');
+        pushItemIfPresent('230');
+        rows.push({ type: 'blank' });
+    }
 
-    // Named refs for the styler's formula resolution
-    const totalRevenueRowIdx = rows.findIndex(r => r.type === 'total' && r.label === 'Total Revenue');
-    const totalCOGSRowIdx = rows.findIndex(r => r.type === 'total' && r.label === 'Total Cost of Sales');
-    const namedRefs = {
-        totalRevenue: totalRevenueRowIdx,
-        totalCOGS: totalCOGSRowIdx,
-        grossProfit: grossProfitIndex,
-    };
+    // 240 = Profit before tax
+    pushCalculatedFromMapping('240', 'XI. PROFIT BEFORE TAX');
+    rows.push({ type: 'blank' });
 
-    global.logger.logInfo(`[PL-F2 TRANSFORMER] Output rows: ${rows.length}`);
+    if (dataMap['250'] || dataMap['260']) {
+        pushSection('XII. INCOME TAX');
+        pushItemIfPresent('250');
+        pushItemIfPresent('260');
+        rows.push({ type: 'blank' });
+    }
 
-    return { periods, rows, namedRefs };
+    // 270 = Net profit
+    pushCalculatedFromMapping('270', 'XIII. NET PROFIT / (LOSS)');
+
+    // ─── Second pass: resolve calculated rows' formulas into addRefs ─────────
+    // Walk each `calculated` row, look up its formula in the mapping, and
+    // translate operand codes into layout row indices. Codes not present in
+    // codeToRowIdx (i.e., the underlying item wasn't in dataMap) are silently
+    // skipped — the calculated row will just sum what's available.
+    for (let i = 0; i < rows.length; i++) {
+        const row = rows[i];
+        if (row.type !== 'calculated') continue;
+
+        const def = FORM2_ROW_CODES[row.nsbuCode];
+        if (!def || !def.formula) continue;
+
+        row.addRefs = resolveFormulaToAddRefs(def.formula, codeToRowIdx);
+    }
+
+    global.logger.logInfo(`[PL-F2 TRANSFORMER] Output rows: ${rows.length}, mapped codes: ${Object.keys(codeToRowIdx).length}`);
+
+    // No named refs needed — formula resolution uses layout indices only.
+    return { periods, rows, namedRefs: {} };
+}
+
+/**
+ * Walk a structured formula and collect layout row indices for each operand
+ * code. Signs are NOT applied here — they're baked into the stored item
+ * values via isNegative handling at render time, so plain summation works.
+ *
+ * Formula AST shapes:
+ *   { op: 'add', operands: [code1, code2, ...] }
+ *   { op: 'subtract', operands: [a, b] }     — second operand should be isNegative in mapping
+ *   { op: 'negate', operand: code }          — operand should be isNegative in mapping
+ *   { op: 'compose', operands: [...] }       — flatten all operands
+ */
+function resolveFormulaToAddRefs(formula, codeToRowIdx) {
+    const refs = [];
+    walkFormula(formula, codeToRowIdx, refs);
+    return refs;
+}
+
+function walkFormula(node, codeToRowIdx, out) {
+    if (!node) return;
+
+    if (typeof node === 'string') {
+        const idx = codeToRowIdx[node];
+        if (idx !== undefined) out.push(idx);
+        return;
+    }
+
+    if (typeof node === 'object' && node.op) {
+        const operands = node.operands || (node.operand !== undefined ? [node.operand] : []);
+        for (const operand of operands) {
+            walkFormula(operand, codeToRowIdx, out);
+        }
+    }
 }
 
 module.exports = { transformForm2ToIFRS };
