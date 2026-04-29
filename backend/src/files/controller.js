@@ -6,6 +6,7 @@ const crypto = require('crypto');
 const File = require('./model');
 const ProcessingJob = require('../jobs/model');
 const { processBalanceSheetTemplate } = require('../processors/balanceSheet');
+const { processProfitLossForm2Template } = require('../processors/profitLossForm2');
 const { processCashFlowTemplate } = require('../processors/cashFlow');
 const { processProfitLossTemplate } = require('../processors/profitLoss');
 const { processProfitLossForm2Template } = require('../processors/profitLossForm2');
@@ -849,9 +850,10 @@ async function regenerateTransformation(req, res) {
             });
         }
 
-        // Only balance sheet produces transformation data today. Other templates
-        // reach this branch and are rejected until their processors are updated.
-        if (file.templateType !== 'balanceSheet') {
+        // Templates that support transformation regeneration. Add new templates
+        // here as their processors learn to produce result.transformation.
+        const supportedTemplates = new Set(['balanceSheet', 'profitLossForm2', 'cashFlow', 'profitLoss', 'equity']);
+        if (!supportedTemplates.has(file.templateType)) {
             return res.status(400).json({
                 success: false,
                 error: 'TEMPLATE_NOT_SUPPORTED',
@@ -870,9 +872,21 @@ async function regenerateTransformation(req, res) {
             });
         }
 
-        // Re-run the processor. Workbook output is discarded — existing processed
-        // xlsx stays valid; we only need the fresh result.transformation.
-        const result = await processBalanceSheetTemplate(originalPath);
+        // Re-run the right processor for this template. Workbook output is
+        // discarded — existing processed xlsx stays valid; we only need the
+        // fresh result.transformation.
+        let result;
+        if (file.templateType === 'balanceSheet') {
+            result = await processBalanceSheetTemplate(originalPath);
+        } else if (file.templateType === 'profitLossForm2') {
+            result = await processProfitLossForm2Template(originalPath);
+        } else if (file.templateType === 'cashFlow') {
+            result = await processCashFlowTemplate(originalPath);
+        } else if (file.templateType === 'profitLoss') {
+            result = await processProfitLossTemplate(originalPath);
+        } else if (file.templateType === 'equity') {
+            result = await processEquityTemplate(originalPath);
+        }
 
         if (!result.transformation) {
             // Defensive: processor ran but didn't produce transformation data.

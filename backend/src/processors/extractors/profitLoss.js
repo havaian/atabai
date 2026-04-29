@@ -305,7 +305,7 @@ function findSectionBoundaries(rowCount, getCellValue) {
         }
     }
 
-    global.logger.logInfo('[PL EXTRACTOR] Section boundaries:', JSON.stringify(bounds));
+    global.logger.logInfo(`[PL EXTRACTOR] Section boundaries: ${JSON.stringify(bounds)}`);
     return bounds;
 }
 

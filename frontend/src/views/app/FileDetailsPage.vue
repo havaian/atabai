@@ -172,8 +172,10 @@ const error = ref('')
 const isTransformationOpen = ref(false)
 
 const showTransformation = computed(() => {
-    return file.value?.status === 'completed'
-        && file.value?.templateType === 'balanceSheet'
+    if (file.value?.status !== 'completed') return false
+    // Templates that have transformation diff view support
+    const supportedTemplates = ['balanceSheet', 'profitLossForm2', 'cashFlow', 'profitLoss', 'equity']
+    return supportedTemplates.includes(file.value?.templateType)
 })
 
 function toggleTransformation() {

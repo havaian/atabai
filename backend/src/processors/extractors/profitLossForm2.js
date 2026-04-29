@@ -5,23 +5,9 @@
 
 'use strict';
 
-// Form 2 row codes and their IFRS classification
-const FORM2_ROW_CODES = {
-    '010': { label: 'Revenue (net)', section: 'revenue' },
-    '020': { label: 'Cost of sales', section: 'cogs', isNegative: true },
-    '040': { label: 'Selling expenses', section: 'opex', isNegative: true },
-    '050': { label: 'Administrative expenses', section: 'opex', isNegative: true },
-    '060': { label: 'Other operating income', section: 'otherOp' },
-    '070': { label: 'Other operating expenses', section: 'otherOp', isNegative: true },
-    '090': { label: 'Finance income', section: 'finance' },
-    '100': { label: 'Finance costs', section: 'finance', isNegative: true },
-    '110': { label: 'Other income', section: 'otherIncome' },
-    '120': { label: 'Other expenses', section: 'otherIncome', isNegative: true },
-    '140': { label: 'Income tax expense', section: 'tax', isNegative: true },
-};
-
-// Codes that are computed, not extracted
-const CALCULATED_CODES = new Set(['030', '080', '130', '150']);
+// Mapping data lives in its own module so the transformation enricher and
+// other consumers can use it without depending on extractor internals.
+const { FORM2_ROW_CODES, CALCULATED_CODES } = require('../../mappings/profitLossForm2Mapping');
 
 function getCellText(cell) {
     if (!cell) return '';
@@ -41,6 +27,73 @@ function getCellNumber(cell) {
     }
     const n = Number(v);
     return (isNaN(n) || v === null || v === undefined || v === '') ? null : n;
+}
+
+/**
+ * Detect period columns. Returns an array of period descriptors:
+ *   { label, colIndex }                            — single column layout
+ *   { label, incomeColIndex, expenseColIndex }     — two-axis layout
+ *
+ * Looks for the Russian sub-headers "Доходы (прибыль)" and "Расходы (убытки)"
+ * within the first 5 rows. If found in pairs, builds two-axis periods.
+ * Otherwise falls back to single-column scan.
+ */
+function detectPeriods(sheet, rowCount, codeColIdx) {
+    const incomeRe = /Доход[ыа]\s*\(прибыль/i;
+    const expenseRe = /Расход[ыа]\s*\(убыт/i;
+    const periodHeaderRe = /(За\s+отчетн|За\s+соответствующ|За\s+текущ|За\s+предыдущ|reporting|prior|current)/i;
+
+    // Scan first 6 rows for period sub-headers
+    let subHeaderRow = -1;
+    let pairs = []; // [{incomeCol, expenseCol}, ...]
+
+    for (let ri = 0; ri < Math.min(rowCount, 6); ri++) {
+        const row = getRow(sheet, ri);
+        const tempPairs = [];
+        let lastIncomeCol = -1;
+
+        for (let ci = 0; ci < row.length; ci++) {
+            const text = getCellText(row[ci]).trim();
+            if (incomeRe.test(text)) {
+                lastIncomeCol = ci;
+            } else if (expenseRe.test(text) && lastIncomeCol >= 0) {
+                tempPairs.push({ incomeCol: lastIncomeCol, expenseCol: ci });
+                lastIncomeCol = -1;
+            }
+        }
+
+        if (tempPairs.length >= 1) {
+            subHeaderRow = ri;
+            pairs = tempPairs;
+            break;
+        }
+    }
+
+    if (pairs.length > 0) {
+        // Two-axis layout. Look in row above subHeaderRow for period labels.
+        const labelRow = subHeaderRow > 0 ? getRow(sheet, subHeaderRow - 1) : [];
+
+        return pairs.map((pair, idx) => {
+            // Find the merged-cell label that spans this pair (typically
+            // sits in the income column of labelRow)
+            let label = getCellText(labelRow[pair.incomeCol]).trim();
+            if (!label || !periodHeaderRe.test(label)) {
+                // Try the expense column too
+                const altLabel = getCellText(labelRow[pair.expenseCol]).trim();
+                if (altLabel && periodHeaderRe.test(altLabel)) label = altLabel;
+            }
+            if (!label) label = idx === 0 ? 'Prior Period' : 'Current Period';
+            return {
+                label,
+                incomeColIndex: pair.incomeCol,
+                expenseColIndex: pair.expenseCol,
+            };
+        });
+    }
+
+    // Fallback: single-column layout. Default to one period in column codeColIdx + 2.
+    global.logger.logInfo('[PL-F2 EXTRACTOR] No two-axis period headers found, using single-column fallback');
+    return [{ label: 'Current Period', colIndex: codeColIdx + 2 }];
 }
 
 function getRow(sheet, ri) {
@@ -70,10 +123,15 @@ function isForm2(sheet) {
     let hits = 0;
     for (let ri = 0; ri < Math.min(rowCount, 80); ri++) {
         const row = getRow(sheet, ri);
-        const code = getCellText(row[0]).trim();
-        if (knownCodes.has(code)) {
-            hits++;
-            if (hits >= 3) return true;
+        // Code column varies by exporter (some put codes in A, others in B).
+        // Scan first 5 columns to match scoreForm2PLCandidate behavior.
+        for (let ci = 0; ci < Math.min(row.length, 5); ci++) {
+            const code = getCellText(row[ci]).trim();
+            if (knownCodes.has(code)) {
+                hits++;
+                if (hits >= 3) return true;
+                break; // one hit per row max
+            }
         }
     }
     return false;
@@ -90,24 +148,81 @@ function extractProfitLossForm2Data(sheet) {
     const rowCount = sheet.rowCount || (sheet.data || sheet.rows || []).length;
 
     // Detect code column (first column containing a known 3-digit code)
+    // Detect code column (first column containing a known 3-digit code).
+    // We trust FORM2_ROW_CODES as the source of truth for valid codes —
+    // checking the mapping is more robust than maintaining a regex range.
     let codeColIdx = 0;
     for (let ri = 0; ri < Math.min(rowCount, 30); ri++) {
         const row = getRow(sheet, ri);
+        let found = false;
         for (let ci = 0; ci < Math.min(row.length, 5); ci++) {
             const text = getCellText(row[ci]).trim();
-            if (/^0[1-9][0-9]$|^1[0-5][0-9]$/.test(text) && FORM2_ROW_CODES[text]) {
+            if (FORM2_ROW_CODES[text]) {
                 codeColIdx = ci;
+                found = true;
                 break;
             }
         }
+        if (found) break;
     }
 
     // Find value columns by scanning header rows for period labels.
-    // Form 2 (ОКУД 0710002): 2 columns — "Текущий период" / "Предыдущий год".
-    // Construction budget P&L: 12 monthly columns ("янв", "фев", …).
-    // Priority: month row first, then year/keyword row as fallback.
+    //
+    // Three layouts seen in the wild:
+    //   (0) Two-axis: each period has paired Income / Expense columns
+    //       (e.g. UzTelecom: "Доходы (прибыль)" / "Расходы (убытки)")
+    //   (1) Monthly: 12 columns labeled "янв", "фев", …
+    //   (2) Single-column-per-period with "текущий"/"отчётный"/year keywords
+    //
+    // We try Pass 0 first (most specific), then 1, then 2.
     let periods = [];
     let headerRowIdx = -1;
+
+    // ── Pass 0: Two-axis (Доходы / Расходы paired columns) ──────────────────
+    // For each pair found, the period's net value = income - expense.
+    const incomeRe = /Доход[ыа]\s*\(прибыль/i;
+    const expenseRe = /Расход[ыа]\s*\(убыт/i;
+    const periodLabelRe = /(За\s+отчетн|За\s+соответствующ|За\s+текущ|За\s+предыдущ|reporting|prior|current|\b20[1-9]\d\b)/i;
+
+    for (let ri = 0; ri < Math.min(rowCount, 6); ri++) {
+        const row = getRow(sheet, ri);
+        const tempPairs = [];
+        let lastIncomeCol = -1;
+
+        for (let ci = 0; ci < row.length; ci++) {
+            const text = getCellText(row[ci]).trim();
+            if (incomeRe.test(text)) {
+                lastIncomeCol = ci;
+            } else if (expenseRe.test(text) && lastIncomeCol >= 0) {
+                tempPairs.push({ incomeCol: lastIncomeCol, expenseCol: ci });
+                lastIncomeCol = -1;
+            }
+        }
+
+        if (tempPairs.length >= 1) {
+            // Look in the row above for the period label that spans this pair.
+            // In the legal Form 2 layout the label sits one row up, often
+            // merged across the two sub-columns (so it lands in incomeCol).
+            const labelRow = ri > 0 ? getRow(sheet, ri - 1) : [];
+
+            periods = tempPairs.map((pair, idx) => {
+                let label = getCellText(labelRow[pair.incomeCol]).trim();
+                if (!label || !periodLabelRe.test(label)) {
+                    const altLabel = getCellText(labelRow[pair.expenseCol]).trim();
+                    if (altLabel && periodLabelRe.test(altLabel)) label = altLabel;
+                }
+                if (!label) label = idx === 0 ? 'Prior Period' : 'Current Period';
+                return {
+                    label,
+                    incomeColIndex: pair.incomeCol,
+                    expenseColIndex: pair.expenseCol,
+                };
+            });
+            headerRowIdx = ri;
+            global.logger.logInfo(`[PL-F2 EXTRACTOR] Two-axis layout detected: ${periods.length} period(s)`);
+            break;
+        }
+    }
 
     const MONTH_NAMES_LC = [
         'янв', 'фев', 'мар', 'апр', 'май', 'июн',
@@ -209,12 +324,38 @@ function extractProfitLossForm2Data(sheet) {
         const code = getCellText(row[codeColIdx]).trim();
         if (!FORM2_ROW_CODES[code]) continue;
 
-        const values = periods.map(p => getCellNumber(row[p.colIndex]));
+        // Skip calculated codes — they're computed by the transformer from other rows
+        if (CALCULATED_CODES.has(code)) continue;
+
+        // Read values per period. Two-axis periods have paired income/expense
+        // columns; single-axis periods have a single colIndex.
+        const values = periods.map(p => {
+            if (p.colIndex !== undefined) {
+                return getCellNumber(row[p.colIndex]);
+            }
+            // Two-axis: net = income - expense (treat null as 0 here since
+            // the form fills one or the other side, never both as null)
+            const inc = getCellNumber(row[p.incomeColIndex]);
+            const exp = getCellNumber(row[p.expenseColIndex]);
+            const incNum = inc == null ? 0 : inc;
+            const expNum = exp == null ? 0 : exp;
+            return incNum - expNum;
+        });
+
         const rowDef = FORM2_ROW_CODES[code];
+
+        // Label column is typically the column to the LEFT of the code column
+        // (in UzTelecom layout: A=label, B=code) but some exporters put it
+        // to the RIGHT (codeColIdx + 1). Try both, prefer non-empty.
+        let label = getCellText(row[codeColIdx + 1]).trim();
+        if (!label && codeColIdx > 0) {
+            label = getCellText(row[codeColIdx - 1]).trim();
+        }
+        if (!label) label = rowDef.label;
 
         dataMap[code] = {
             code,
-            label: getCellText(row[codeColIdx + 1]) || rowDef.label,
+            label,
             ifrsLabel: rowDef.label,
             section: rowDef.section,
             isNegative: rowDef.isNegative || false,
