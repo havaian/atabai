@@ -375,11 +375,18 @@ function extractProfitLossForm2Data(sheet) {
 
     global.logger.logInfo(`[PL-F2 EXTRACTOR] Extracted ${Object.keys(dataMap).length} rows`);
 
+    // Detect whether the source layout produced signed values already.
+    // Two-axis layouts (paired Income/Expense columns) compute net = income -
+    // expense, so values are inherently signed. Single-column layouts produce
+    // raw magnitudes that need sign application by the transformer.
+    const valuesArePreSigned = periods.some(p => p.incomeColIndex !== undefined);
+
     return {
         metadata: { companyName, period: '' },
         periods,
         columnCount: n,
         dataMap,
+        valuesArePreSigned,
     };
 }
 

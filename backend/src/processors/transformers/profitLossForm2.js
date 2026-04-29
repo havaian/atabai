@@ -20,7 +20,7 @@ const { FORM2_ROW_CODES } = require('../../mappings/profitLossForm2Mapping');
 function transformForm2ToIFRS(extracted) {
     global.logger.logInfo('[PL-F2 TRANSFORMER] Starting transformation');
 
-    const { periods, dataMap } = extracted;
+    const { periods, dataMap, valuesArePreSigned } = extracted;
     const n = periods.length;
 
     const nullArr = () => new Array(n).fill(null);
@@ -50,7 +50,11 @@ function transformForm2ToIFRS(extracted) {
         if (!def) return false;
 
         const labelText = def.ifrsClassification || def.label || row.label || code;
-        const sign = def.isNegative === true ? -1 : 1;
+        // Apply sign convention only if extractor didn't already produce signed
+        // values. Two-axis source layouts compute net = income - expense, so
+        // values are already correctly signed; applying isNegative again would
+        // double-negate.
+        const sign = (def.isNegative === true && !valuesArePreSigned) ? -1 : 1;
         const rawValues = norm(row.values);
         const signedValues = rawValues.map(v => v == null ? null : sign * v);
 
@@ -181,6 +185,7 @@ function transformForm2ToIFRS(extracted) {
         row.addRefs = resolveFormulaToAddRefs(def.formula, codeToRowIdx);
     }
 
+    global.logger.logInfo(`[PL-F2 TRANSFORMER] valuesArePreSigned: ${valuesArePreSigned}`);
     global.logger.logInfo(`[PL-F2 TRANSFORMER] Output rows: ${rows.length}, mapped codes: ${Object.keys(codeToRowIdx).length}`);
 
     // No named refs needed — formula resolution uses layout indices only.
