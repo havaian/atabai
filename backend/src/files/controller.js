@@ -9,7 +9,6 @@ const { processBalanceSheetTemplate } = require('../processors/balanceSheet');
 const { processProfitLossForm2Template } = require('../processors/profitLossForm2');
 const { processCashFlowTemplate } = require('../processors/cashFlow');
 const { processProfitLossTemplate } = require('../processors/profitLoss');
-const { processProfitLossForm2Template } = require('../processors/profitLossForm2');
 const { processEquityTemplate } = require('../processors/equity');
 const templateTypes = require('../utils/templateTypes')
 const { enrichTransformation } = require('./transformationEnrichment');
