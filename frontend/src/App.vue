@@ -13,8 +13,8 @@
             <Footer />
         </div>
 
-        <!-- Loading Overlay -->
-        <div v-if="authStore.isLoading"
+        <!-- Loading Overlay (hidden on auth pages — they render their own spinner) -->
+        <div v-if="authStore.isLoading && !isAuthRoute"
             class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div class="bg-white rounded-lg p-6 flex items-center space-x-4">
                 <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -56,6 +56,8 @@ const showNavbar = computed(() => {
 const showFooter = computed(() => {
     return route.meta?.showFooter !== false // Default to true unless explicitly false
 })
+
+const isAuthRoute = computed(() => route.path.startsWith('/auth/') || route.path === '/login')
 
 onMounted(async () => {
     try {
