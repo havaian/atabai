@@ -93,10 +93,11 @@ function resize() {
 function drawFrame() {
     ctx.clearRect(0, 0, width, height)
 
-    // Dark theme dots subtler against the darker gradient
+    // Adaptive dot color: white on dark theme, purple-tinted on light theme
+    // — pure white would be invisible on the light theme's tinted-purple card
     const dotColor = themeStore.isDark
-        ? 'rgba(255, 255, 255, 0.13)'
-        : 'rgba(255, 255, 255, 0.20)'
+        ? 'rgba(255, 255, 255, 0.42)'
+        : 'rgba(149, 0, 255, 0.32)'
 
     ctx.fillStyle = dotColor
     ctx.beginPath()
@@ -239,11 +240,13 @@ onBeforeUnmount(() => {
     padding: 4rem 2rem;
     text-align: center;
     overflow: hidden;
-    background: linear-gradient(135deg, #9500FF 0%, #7C3AED 40%, #5B21B6 100%);
+    background: rgba(149, 0, 255, 0.08);
+    border: 1px solid rgba(149, 0, 255, 0.18);
 }
 
 .cta-card-dark {
-    background: linear-gradient(135deg, #4A007A 0%, #3B1A7A 40%, #2D1560 100%);
+    background: rgba(149, 0, 255, 0.10);
+    border-color: rgba(149, 0, 255, 0.22);
 }
 
 .cta-dots {
@@ -264,7 +267,7 @@ onBeforeUnmount(() => {
     font-size: clamp(2rem, 4vw, 3rem);
     font-weight: 800;
     letter-spacing: -0.03em;
-    color: white;
+    color: var(--landing-text);
     margin-bottom: 1rem;
     line-height: 1.1;
 }
@@ -289,14 +292,14 @@ onBeforeUnmount(() => {
     cursor: pointer;
     transition: all .3s;
     border: none;
-    background: white;
-    color: #5B21B6;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    background: #9500FF;
+    color: #fff;
+    box-shadow: 0 4px 20px rgba(149, 0, 255, 0.25), 0 1px 4px rgba(149, 0, 255, 0.1);
 }
 
 .cta-btn:hover {
-    background: rgba(255, 255, 255, 0.92);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    background: #A020FF;
+    box-shadow: 0 8px 32px rgba(149, 0, 255, 0.35), 0 2px 8px rgba(149, 0, 255, 0.15);
 }
 
 @media (max-width: 768px) {
