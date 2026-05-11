@@ -127,7 +127,9 @@
     "howItWorks": "Как это работает",
     "pricing": "Цены",
     "language": "Язык",
-    "signIn": "Войти"
+    "signIn": "Войти",
+    "themeToDark": "Переключить на тёмную тему",
+    "themeToLight": "Переключить на светлую тему"
   },
   "dashboard": {
     "welcome": "С возвращением, {name}!",

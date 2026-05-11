@@ -7,7 +7,7 @@ const STORAGE_KEY = 'atabai-theme'
     ; (() => {
         try {
             const saved = localStorage.getItem(STORAGE_KEY)
-            const theme = (saved === 'light' || saved === 'dark') ? saved : 'dark'
+            const theme = (saved === 'light' || saved === 'dark') ? saved : 'light'
             const root = document.documentElement
             root.setAttribute('data-theme', theme)
             if (theme === 'dark') root.classList.add('dark')
@@ -19,8 +19,8 @@ export const useThemeStore = defineStore('theme', () => {
     const preference = ref((() => {
         try {
             const saved = localStorage.getItem(STORAGE_KEY)
-            return (saved === 'light' || saved === 'dark') ? saved : 'dark'
-        } catch (e) { return 'dark' }
+            return (saved === 'light' || saved === 'dark') ? saved : 'light'
+        } catch (e) { return 'light' }
     })())
 
     const resolvedTheme = computed(() => preference.value)

@@ -127,7 +127,9 @@
     "howItWorks": "Qanday ishlaydi",
     "pricing": "Narxlar",
     "language": "Til",
-    "signIn": "Kirish"
+    "signIn": "Kirish",
+    "themeToDark": "Tungi mavzuga o'tish",
+    "themeToLight": "Yorug' mavzuga o'tish"
   },
   "dashboard": {
     "welcome": "Xush kelibsiz, {name}!",

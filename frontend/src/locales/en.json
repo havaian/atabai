@@ -127,7 +127,9 @@
     "howItWorks": "How It Works",
     "pricing": "Pricing",
     "language": "Language",
-    "signIn": "Sign in"
+    "signIn": "Sign in",
+    "themeToDark": "Switch to dark theme",
+    "themeToLight": "Switch to light theme"
   },
   "dashboard": {
     "welcome": "Welcome back, {name}!",
