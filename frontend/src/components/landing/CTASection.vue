@@ -274,7 +274,8 @@ onBeforeUnmount(() => {
 
 .cta-subtitle {
     font-size: clamp(.95rem, 2vw, 1.1rem);
-    color: rgba(255, 255, 255, 0.65);
+    color: var(--landing-text);
+    opacity: 0.78;
     max-width: 480px;
     margin: 0 auto 2.5rem;
     line-height: 1.6;
