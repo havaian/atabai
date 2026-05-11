@@ -46,6 +46,14 @@
     --auth-card-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
     --auth-title: #111827;
     --auth-sub: #9CA3AF;
+    
+    /* Loading overlay */
+    --overlay-bg: rgba(255, 255, 255, 0.55);
+    --overlay-card-bg: #FFFFFF;
+    --overlay-card-border: rgba(124, 58, 237, 0.15);
+    --overlay-card-shadow: 0 8px 32px rgba(124, 58, 237, 0.18), 0 2px 8px rgba(0, 0, 0, 0.04);
+    --overlay-spinner-track: rgba(124, 58, 237, 0.15);
+    --overlay-text: rgba(17, 16, 24, 0.78);
 
     /* Misc pages (ComingSoon, Help) */
     --misc-bg: #F4F2F9;
@@ -120,6 +128,14 @@ html.dark {
     --auth-card-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
     --auth-title: #F0ECF6;
     --auth-sub: rgba(240, 236, 246, 0.45);
+
+    /* Loading overlay */
+    --overlay-bg: rgba(7, 6, 11, 0.55);
+    --overlay-card-bg: #171523;
+    --overlay-card-border: rgba(149, 0, 255, 0.18);
+    --overlay-card-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 2px 8px rgba(149, 0, 255, 0.1);
+    --overlay-spinner-track: rgba(240, 236, 246, 0.1);
+    --overlay-text: rgba(240, 236, 246, 0.85);
 
     /* Misc pages */
     --misc-bg: #07060B;

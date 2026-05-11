@@ -14,13 +14,14 @@
         </div>
 
         <!-- Loading Overlay (hidden on auth pages — they render their own spinner) -->
-        <div v-if="authStore.isLoading && !isAuthRoute"
-            class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div class="bg-white rounded-lg p-6 flex items-center space-x-4">
-                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                <span class="text-gray-700">{{ authStore.loadingMessage || 'Loading...' }}</span>
+        <Transition name="overlay-fade">
+            <div v-if="authStore.isLoading && !isAuthRoute" class="overlay-loader">
+                <div class="overlay-loader-card">
+                    <div class="overlay-loader-spinner"></div>
+                    <span class="overlay-loader-text">{{ authStore.loadingMessage || $t('common.loading') }}</span>
+                </div>
             </div>
-        </div>
+        </Transition>
 
         <!-- Error Message -->
         <div v-if="authStore.error" class="fixed bottom-4 right-4 z-50 max-w-md">
@@ -147,5 +148,63 @@ body {
     .btn-secondary {
         @apply px-4 py-2 text-sm;
     }
+}
+
+/* ===== Global loading overlay ===== */
+.overlay-loader {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--overlay-bg);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+}
+
+.overlay-loader-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 22px;
+    background: var(--overlay-card-bg);
+    border: 1px solid var(--overlay-card-border);
+    border-radius: 14px;
+    box-shadow: var(--overlay-card-shadow);
+}
+
+.overlay-loader-spinner {
+    width: 22px;
+    height: 22px;
+    border: 2.5px solid var(--overlay-spinner-track);
+    border-top-color: #9500FF;
+    border-radius: 50%;
+    animation: overlay-spin 0.85s linear infinite;
+    flex-shrink: 0;
+}
+
+.overlay-loader-text {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--overlay-text);
+    letter-spacing: -0.005em;
+}
+
+@keyframes overlay-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Fade transition */
+.overlay-fade-enter-active,
+.overlay-fade-leave-active {
+    transition: opacity 0.2s ease;
+}
+
+.overlay-fade-enter-from,
+.overlay-fade-leave-to {
+    opacity: 0;
 }
 </style>
