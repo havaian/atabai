@@ -98,7 +98,6 @@ import {
     Squares2X2Icon
 } from '@heroicons/vue/24/outline'
 import LogoComponent from '@/components/Logo.vue'
-import GoogleIcon from '@/components/icons/GoogleIcon.vue'
 import { useAuthStore } from '@/stores/auth'
 import { useThemeStore } from '@/stores/theme'
 import { availableLocales, changeLocale } from '@/utils/i18n'
