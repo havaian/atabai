@@ -126,7 +126,8 @@
     "features": "Imkoniyatlar",
     "howItWorks": "Qanday ishlaydi",
     "pricing": "Narxlar",
-    "language": "Til"
+    "language": "Til",
+    "signIn": "Kirish"
   },
   "dashboard": {
     "welcome": "Xush kelibsiz, {name}!",

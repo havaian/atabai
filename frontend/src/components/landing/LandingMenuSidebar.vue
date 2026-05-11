@@ -70,11 +70,10 @@
 
                 <!-- Auth footer -->
                 <div class="lsb-footer">
-                    <button v-if="!authStore.isAuthenticated" class="lsb-auth-btn"
-                        @click="authStore.login(); menuOpen = false">
-                        <GoogleIcon :size="16" />
-                        {{ $t('auth.signInWithGoogle') }}
-                    </button>
+                    <RouterLink v-if="!authStore.isAuthenticated" to="/login" class="lsb-auth-btn"
+                        @click="menuOpen = false">
+                        {{ $t('nav.signIn') }}
+                    </RouterLink>
                     <button v-else class="lsb-auth-btn lsb-auth-btn--dashboard"
                         @click="router.push('/app/dashboard'); menuOpen = false">
                         {{ $t('nav.dashboard') }}

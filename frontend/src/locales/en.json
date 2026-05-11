@@ -126,7 +126,8 @@
     "features": "Features",
     "howItWorks": "How It Works",
     "pricing": "Pricing",
-    "language": "Language"
+    "language": "Language",
+    "signIn": "Sign in"
   },
   "dashboard": {
     "welcome": "Welcome back, {name}!",

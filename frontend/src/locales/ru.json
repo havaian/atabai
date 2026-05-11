@@ -126,7 +126,8 @@
     "features": "Возможности",
     "howItWorks": "Как это работает",
     "pricing": "Цены",
-    "language": "Язык"
+    "language": "Язык",
+    "signIn": "Войти"
   },
   "dashboard": {
     "welcome": "С возвращением, {name}!",

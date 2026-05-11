@@ -10,10 +10,19 @@
                     <LogoComponent />
                 </RouterLink>
 
-                <!-- Hamburger — all screen sizes -->
-                <button class="navbar-burger" @click="menuOpen = !menuOpen" :aria-label="$t('nav.openMenu')">
-                    <Bars3Icon class="w-5 h-5" />
-                </button>
+                <!-- Right side: auth button + hamburger -->
+                <div class="navbar-actions">
+                    <RouterLink v-if="!authStore.isAuthenticated" to="/login" class="navbar-auth-btn navbar-auth-btn--signin">
+                        {{ $t('nav.signIn') }}
+                    </RouterLink>
+                    <RouterLink v-else to="/app/dashboard" class="navbar-auth-btn navbar-auth-btn--dashboard">
+                        {{ $t('nav.dashboard') }}
+                    </RouterLink>
+
+                    <button class="navbar-burger" @click="menuOpen = !menuOpen" :aria-label="$t('nav.openMenu')">
+                        <Bars3Icon class="w-5 h-5" />
+                    </button>
+                </div>
 
             </div>
         </div>
@@ -30,6 +39,8 @@ import { Bars3Icon } from '@heroicons/vue/24/outline'
 import LogoComponent from '@/components/Logo.vue'
 import LandingMenuSidebar from '@/components/landing/LandingMenuSidebar.vue'
 import { useLandingMenu } from '@/composables/useLandingMenu'
+import { useAuthStore } from '@/stores/auth'
+const authStore = useAuthStore()
 
 const { menuOpen } = useLandingMenu()
 const route = useRoute()
@@ -162,6 +173,56 @@ html.dark body {
         transform: none;
         border-radius: 0;
         overflow: visible;
+    }
+}
+
+.navbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.navbar-auth-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 18px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+    white-space: nowrap;
+    line-height: 1;
+}
+
+.navbar-auth-btn--signin {
+    background: #9500FF;
+    color: #fff;
+    border: 1px solid transparent;
+}
+
+.navbar-auth-btn--signin:hover {
+    background: #7B00D4;
+}
+
+.navbar-auth-btn--dashboard {
+    background: var(--sb-item-hover);
+    color: var(--sb-text-hover);
+    border: 1px solid var(--sb-border);
+}
+
+.navbar-auth-btn--dashboard:hover {
+    background: var(--sb-item-active-bg);
+    color: var(--sb-text-active);
+}
+
+/* Mobile — slightly smaller padding so the button doesn't crowd the burger */
+@media (max-width: 480px) {
+    .navbar-auth-btn {
+        padding: 7px 14px;
+        font-size: 12.5px;
     }
 }
 </style>
