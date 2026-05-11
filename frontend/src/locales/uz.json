@@ -77,7 +77,12 @@
     "completingLogin": "Tizimga kirishni yakunlash...",
     "authenticationFailed": "Autentifikatsiya xatosi. Iltimos, qaytadan urinib ko'ring.",
     "invalidAuthParams": "Autentifikatsiya parametrlari noto'g'ri.",
-    "tryAgain": "Qaytadan urinish"
+    "tryAgain": "Qaytadan urinish",
+    "signInTitle": "ATABAI tizimiga kirish",
+    "signInSubtitle": "Davom etish uchun Google hisobingiz orqali kiring.",
+    "signInRequiredTitle": "Kirish talab qilinadi",
+    "signInRequiredSubtitle": "Bu sahifaga kirish uchun tizimga kirishingiz kerak. Kirgandan so'ng sizni qaytaramiz.",
+    "backToHome": "Bosh sahifaga"
   },
   "pageTitles": {
     "/": "Bosh sahifa",
@@ -92,7 +97,8 @@
     "/auth/success": "Muvaffaqiyatli kirish",
     "/settings": "Sozlamalar",
     "/help": "Yordam",
-    "/upload": "Fayl yuklash"
+    "/upload": "Fayl yuklash",
+    "/login": "Kirish"
   },
   "pageDescriptions": {
     "/": "XMHS ni avtomatlashtiring. Su'niy Intellekt bilan.. Murakkab moliyaviy ma'lumotlarni aniq, auditga tayyor XMHS hisobotlariga aylantiring — tezroq, arzonroq va to'liq shaffoflik bilan..",
@@ -107,7 +113,8 @@
     "/auth/success": "ATABAI platformasida autentifikatsiyangiz yakunlanmoqda",
     "/settings": "ATABAI foydalanuvchi sozlamalari - afzalliklar, obuna va hisob ma'lumotlarini boshqaring",
     "/help": "ATABAI uchun yordam va qo'llab-quvvatlash - XMHS avtomatlashtiruvi haqida savollarda biz bilan bog'laning",
-    "/upload": "NZBH formatidan XMHS ga avtomatlashtirilgan hisob-kitoblar bilan aylantirish uchun Excel faylingizni yuklang"
+    "/upload": "NZBH formatidan XMHS ga avtomatlashtirilgan hisob-kitoblar bilan aylantirish uchun Excel faylingizni yuklang",
+    "/login": "XMHS avtomatlashtirish platformasiga kirish uchun ATABAI-ga Google hisobingiz orqali kiring."
   },
   "nav": {
     "home": "Bosh sahifa",

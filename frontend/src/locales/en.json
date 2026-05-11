@@ -77,7 +77,12 @@
     "completingLogin": "Completing login...",
     "authenticationFailed": "Authentication failed. Please try again.",
     "invalidAuthParams": "Invalid authentication parameters.",
-    "tryAgain": "Try Again"
+    "tryAgain": "Try Again",
+    "signInTitle": "Sign in to ATABAI",
+    "signInSubtitle": "Sign in with your Google account to continue.",
+    "signInRequiredTitle": "Sign in required",
+    "signInRequiredSubtitle": "You need to be signed in to access that page. We'll bring you back after sign-in.",
+    "backToHome": "Back to home"
   },
   "pageTitles": {
     "/": "Home",
@@ -92,7 +97,8 @@
     "/auth/success": "Login Successful",
     "/settings": "Settings",
     "/help": "Help",
-    "/upload": "Upload File"
+    "/upload": "Upload File",
+    "/login": "Sign in"
   },
   "pageDescriptions": {
     "/": "Automate IFRS. Powered by AI.. Turn complex financial data into accurate, audit-ready IFRS reports — faster, cheaper, and with full transparency..",
@@ -107,7 +113,8 @@
     "/auth/success": "Completing your authentication to ATABAI platform",
     "/settings": "ATABAI user settings - manage preferences, subscription and account details",
     "/help": "Get help and support for ATABAI - contact us for questions about IFRS automation",
-    "/upload": "Upload your Excel file to transform from Regional Standard to IFRS format with automated calculations"
+    "/upload": "Upload your Excel file to transform from Regional Standard to IFRS format with automated calculations",
+    "/login": "Sign in to ATABAI with your Google account to access the IFRS automation platform."
   },
   "nav": {
     "home": "Home",

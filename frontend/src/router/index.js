@@ -11,6 +11,7 @@ import LandingPage from '@/views/landing/LandingPage.vue'
 // ─── Auth ─────────────────────────────────────────────────────────────────────
 import OAuthCallback from '@/views/auth/OAuthCallback.vue'
 import AuthSuccess from '@/views/auth/AuthSuccess.vue'
+import LoginPage from '@/views/auth/LoginPage.vue'
 
 // ─── Misc ─────────────────────────────────────────────────────────────────────
 import ComingSoon from '@/views/misc/ComingSoon.vue'
@@ -70,6 +71,18 @@ const routes = [
             showFooter: false,
             titleKey: 'pageTitles./auth/callback',
             descriptionKey: 'pageDescriptions./auth/callback'
+        }
+    },
+    {
+        path: '/login',
+        name: 'Login',
+        component: LoginPage,
+        meta: {
+            showNavbar: false,
+            showFooter: false,
+            requiresGuest: true,
+            titleKey: 'pageTitles./login',
+            descriptionKey: 'pageDescriptions./login'
         }
     },
     {
@@ -219,7 +232,7 @@ router.beforeEach(async (to, from, next) => {
 
     if (to.meta?.requiresAuth && !authStore.isAuthenticated) {
         sessionStorage.setItem('redirectAfterLogin', to.fullPath)
-        return next('/')
+        return next('/login')
     }
 
     if (to.meta?.requiresGuest && authStore.isAuthenticated) {
