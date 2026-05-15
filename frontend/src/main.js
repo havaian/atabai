@@ -90,7 +90,7 @@ async function initializeApp() {
         app.use(axiosPlugin)
         const storedLocale = getStoredLocale()
         setLocale(storedLocale)
-        app.config.errorHandler = (err, instance, info) => { }
+        app.config.errorHandler = (err, instance, info) => { console.error('[Vue]', info, err) }
         app.mount('#app')
     } catch (error) {
         console.error('Failed to initialize app:', error)
