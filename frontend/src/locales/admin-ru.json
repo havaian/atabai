@@ -369,7 +369,7 @@
             "bulkAddHint": "Email через запятую или с новой строки",
             "bulkPlaceholder": "user1@example.com, user2@example.com\nuser3@example.com",
             "bulkAddSubmit": "Добавить все",
-            "bulkResult": "Добавлено: {added}, пропущено (дубли/неверный формат): {skipped}",
+            "bulkResult": "Добавлено: {added}, пропущено: {skipped}",
             "bulkError": "Ошибка массового добавления",
             "processing": "Обработка...",
             "emailPlaceholder": "email@example.com",

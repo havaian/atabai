@@ -369,7 +369,7 @@
             "bulkAddHint": "Emails separated by commas or newlines",
             "bulkPlaceholder": "user1@example.com, user2@example.com\nuser3@example.com",
             "bulkAddSubmit": "Add all",
-            "bulkResult": "Added: {added}, skipped (duplicates/invalid): {skipped}",
+            "bulkResult": "Added: {added}, skipped: {skipped}",
             "bulkError": "Bulk add failed",
             "processing": "Processing...",
             "emailPlaceholder": "email@example.com",

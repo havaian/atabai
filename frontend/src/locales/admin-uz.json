@@ -369,7 +369,7 @@
             "bulkAddHint": "Vergul yoki yangi qator bilan ajratilgan email'lar",
             "bulkPlaceholder": "user1@example.com, user2@example.com\nuser3@example.com",
             "bulkAddSubmit": "Hammasini qo‘shish",
-            "bulkResult": "Qo‘shildi: {added}, o‘tkazib yuborildi (dublikat/noto‘g‘ri): {skipped}",
+            "bulkResult": "Qo‘shildi: {added}, o‘tkazib yuborildi: {skipped}",
             "bulkError": "Ommaviy qo‘shishda xatolik",
             "processing": "Qayta ishlanmoqda...",
             "emailPlaceholder": "email@example.com",
