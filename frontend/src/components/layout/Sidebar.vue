@@ -130,6 +130,10 @@
                         <Cog6ToothIcon class="w-4 h-4" />
                         {{ $t('dashboard.settings') }}
                     </button>
+                    <button v-if="authStore.isAdmin" class="menu-item" @click="navigateTo('/admin')">
+                        <ShieldCheckIcon class="w-4 h-4" />
+                        Админ-панель
+                    </button>
                     <div class="menu-divider"></div>
                     <button class="menu-item menu-item-danger" @click="handleSignOut">
                         <ArrowRightOnRectangleIcon class="w-4 h-4" />
@@ -251,6 +255,7 @@ import {
     ArrowRightOnRectangleIcon, XMarkIcon,
     ChevronLeftIcon, ChevronRightIcon, ChevronDownIcon,
     Squares2X2Icon, SunIcon, MoonIcon, Cog6ToothIcon,
+    ShieldCheckIcon,
 } from '@heroicons/vue/24/outline'
 
 const props = defineProps({
