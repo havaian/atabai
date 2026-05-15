@@ -1,14 +1,20 @@
 import { createI18n } from 'vue-i18n'
+import axios from 'axios'
 
 // Available locales configuration
 export const availableLocales = [
     { code: 'en', name: 'English', flag: 'gb' },
     { code: 'ru', name: 'Русский', flag: 'ru' },
     { code: 'uz', name: "O'zbek", flag: 'uz' },
-]   
+]
 
 // Default locale
 const DEFAULT_LOCALE = 'ru'
+
+// API base — uses the same base URL convention as the rest of the app.
+// We use a bare axios call here (no apiClient) because i18n must load before
+// auth state exists and we don't want translations to fail if auth fails.
+const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api'
 
 // Get stored locale from localStorage
 export function getStoredLocale() {
@@ -36,7 +42,12 @@ export function setLocale(locale) {
     return validLocale
 }
 
-// Async function to load locale messages
+/**
+ * Stage 1: Load locale messages from bundled JSON files (synchronous-fast).
+ * This is the bootstrap source — guarantees UI has translations before any
+ * network request. After init, fetchAndMergeFromAPI() overlays fresh values
+ * from the database on top.
+ */
 async function loadLocaleMessages(locale) {
     try {
         const messages = await import(`../locales/${locale}.json`)
@@ -70,7 +81,151 @@ async function loadLocaleMessages(locale) {
     }
 }
 
-// Create i18n instance with initial setup
+// ─────────────────────────────────────────────────────────────────────────────
+// Stage 2: DB overlay (hot-reload from /api/locales/bundle)
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Last seen bundle versions per app. When server reports a newer version,
+// we re-fetch that app's bundle for the current locale.
+const lastSeenVersions = {} // { user: 3, admin: 7 } — keyed by app
+
+/**
+ * Deep-merge source into target. Mutates target. Strings in source override
+ * strings in target. New keys are added. Nested objects merge recursively.
+ *
+ * This is needed because vue-i18n setLocaleMessage replaces the whole message
+ * tree — we want to PRESERVE bundled values for keys the DB doesn't have,
+ * while overlaying DB values for keys that DO exist.
+ */
+function deepMerge(target, source) {
+    if (!source || typeof source !== 'object') return target
+    for (const key of Object.keys(source)) {
+        const sv = source[key]
+        if (sv && typeof sv === 'object' && !Array.isArray(sv)) {
+            if (!target[key] || typeof target[key] !== 'object') {
+                target[key] = {}
+            }
+            deepMerge(target[key], sv)
+        } else if (sv !== null && sv !== undefined) {
+            target[key] = sv
+        }
+    }
+    return target
+}
+
+/**
+ * Fetch the DB bundle for one app+lang and merge it into the current i18n
+ * messages for that locale.
+ *
+ * Best-effort: if the API isn't reachable (offline, server down, network
+ * error), silently fall back to bundled values that are already loaded.
+ */
+async function fetchAndMergeApp(app, locale) {
+    try {
+        const url = `${API_BASE}/locales/bundle/${app}/${locale}`
+        const { data } = await axios.get(url, { timeout: 8000 })
+        if (!data?.success || !data.bundle) return
+
+        // Track the version we just loaded so the poller knows when to refresh
+        if (typeof data.version === 'number') {
+            lastSeenVersions[app] = data.version
+        }
+
+        // Deep-merge the DB bundle on top of current messages, write back
+        const current = i18n.global.getLocaleMessage(locale) || {}
+        const merged = deepMerge({ ...current }, data.bundle)
+        i18n.global.setLocaleMessage(locale, merged)
+    } catch (err) {
+        // Don't log every 401/network blip — the bundled JSON is already serving.
+        // Only log unexpected errors to help diagnose real issues.
+        if (err.response && err.response.status >= 500) {
+            console.warn(`Locale bundle fetch failed for ${app}/${locale}:`, err.message)
+        }
+    }
+}
+
+/**
+ * Fetch both user and admin bundles for a given locale and merge them.
+ * Called after the initial bundled load and on each locale change.
+ */
+async function fetchAndMergeFromAPI(locale) {
+    // Run both in parallel — they're independent
+    await Promise.all([
+        fetchAndMergeApp('user', locale),
+        fetchAndMergeApp('admin', locale)
+    ])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Stage 3: Polling for version changes (hot-reload when admin edits a key)
+// ─────────────────────────────────────────────────────────────────────────────
+
+const POLL_INTERVAL_MS = 30 * 1000 // 30 seconds
+let pollTimer = null
+
+/**
+ * Start the version poll. Compares server versions against last-seen versions;
+ * if any app's version is newer, re-fetches and merges that app's bundle for
+ * the CURRENT locale.
+ *
+ * Skips when document is hidden (tab not focused) to avoid wasting requests;
+ * catches up on visibilitychange.
+ */
+function startBundleVersionPoll() {
+    if (pollTimer) return // already running
+
+    async function tick() {
+        // Skip when tab is hidden — saves bandwidth, we catch up on focus
+        if (typeof document !== 'undefined' && document.hidden) return
+
+        try {
+            const url = `${API_BASE}/locales/version`
+            const { data } = await axios.get(url, { timeout: 6000 })
+            if (!data?.success || !data.versions) return
+
+            const currentLocale = i18n.global.locale.value
+            const tasks = []
+            for (const app of ['user', 'admin']) {
+                const serverVersion = data.versions[app]
+                if (typeof serverVersion !== 'number') continue
+                const seen = lastSeenVersions[app]
+                if (seen === undefined || serverVersion > seen) {
+                    tasks.push(fetchAndMergeApp(app, currentLocale))
+                }
+            }
+            if (tasks.length > 0) {
+                await Promise.all(tasks)
+            }
+        } catch (err) {
+            // Silent — polling failures are common (offline, server restart)
+            // and the bundled JSON keeps the UI working.
+        }
+    }
+
+    pollTimer = setInterval(tick, POLL_INTERVAL_MS)
+
+    // Catch up immediately when tab regains focus
+    if (typeof document !== 'undefined') {
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) tick()
+        })
+    }
+}
+
+/**
+ * Force an immediate refresh of the current locale from the API.
+ * Used by the locale editor: after saving a key, call this to see the change
+ * everywhere in the UI without waiting for the poll.
+ */
+export async function refreshLocaleFromAPI() {
+    const currentLocale = i18n.global.locale.value
+    await fetchAndMergeFromAPI(currentLocale)
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Create the i18n instance
+// ─────────────────────────────────────────────────────────────────────────────
+
 const i18n = createI18n({
     legacy: false,
     locale: getStoredLocale(),
@@ -87,7 +242,7 @@ export function tObj(key) {
         const locale = i18n.global.locale.value
         const keys = key.split('.')
         let result = i18n.global.messages.value[locale]
-        
+
         for (const k of keys) {
             if (result && typeof result === 'object') {
                 result = result[k]
@@ -95,7 +250,7 @@ export function tObj(key) {
                 return key // Return key if path doesn't exist
             }
         }
-        
+
         return result !== undefined ? result : key
     } catch (error) {
         console.warn(`tObj failed for key: ${key}`, error)
@@ -130,6 +285,13 @@ async function initializeI18n() {
             }
 
             isInitialized = true
+
+            // Stage 2 + 3: kick off DB overlay + polling in the background.
+            // Don't await — UI is already usable with bundled translations.
+            // Errors are swallowed inside these functions.
+            fetchAndMergeFromAPI(locale).catch(() => { })
+            startBundleVersionPoll()
+
             return i18n
         } catch (error) {
             console.error('Failed to initialize i18n:', error)
@@ -150,7 +312,7 @@ export async function changeLocale(newLocale) {
     }
 
     try {
-        // Load messages if not already loaded
+        // Load bundled messages first (fast)
         if (!i18n.global.availableLocales.includes(validLocale)) {
             const messages = await loadLocaleMessages(validLocale)
             i18n.global.setLocaleMessage(validLocale, messages)
@@ -158,6 +320,12 @@ export async function changeLocale(newLocale) {
 
         // Set locale
         setLocale(validLocale)
+
+        // Now overlay DB values for the new locale (best-effort, async).
+        // Reset version tracking so the next poll re-fetches if needed.
+        delete lastSeenVersions.user
+        delete lastSeenVersions.admin
+        fetchAndMergeFromAPI(validLocale).catch(() => { })
 
         // Update page title for current route when locale changes
         if (typeof window !== 'undefined' && window.__VUE_ROUTER__) {
