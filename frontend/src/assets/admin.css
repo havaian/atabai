@@ -53,9 +53,10 @@
 /* ─── Stats grid ──────────────────────────────────────────────────────────── */
 .adm-stats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
     gap: 12px;
     margin-bottom: 24px;
+    align-items: stretch;
 }
 
 .adm-stat {
@@ -63,6 +64,10 @@
     border: 1px solid rgba(149, 0, 255, 0.12);
     border-radius: 10px;
     padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 88px;
 }
 
 .adm-stat-label {
@@ -70,13 +75,15 @@
     color: rgba(240, 236, 246, 0.5);
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    margin-bottom: 6px;
+    margin-bottom: 8px;
+    line-height: 1.3;
 }
 
 .adm-stat-value {
     font-size: 24px;
     font-weight: 600;
     color: rgba(240, 236, 246, 0.95);
+    line-height: 1;
 }
 
 /* ─── Tables ──────────────────────────────────────────────────────────────── */
@@ -367,6 +374,11 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 16px;
+    align-items: stretch;
+}
+
+.adm-grid-2 > * {
+    min-height: 100%;
 }
 
 @media (max-width: 768px) {

@@ -2,42 +2,42 @@
     <div class="adm-page">
         <div class="adm-page-header">
             <div>
-                <h1 class="adm-page-title">Обзор</h1>
-                <div class="adm-page-subtitle">Общая статистика системы</div>
+                <h1 class="adm-page-title">{{ $t('admin.dashboard.title') }}</h1>
+                <div class="adm-page-subtitle">{{ $t('admin.dashboard.subtitle') }}</div>
             </div>
             <button class="adm-btn adm-btn--ghost" @click="loadStats" :disabled="loading">
                 <RefreshCw :size="14" />
-                Обновить
+                {{ $t('admin.common.refresh') }}
             </button>
         </div>
 
-        <div v-if="loading" class="adm-empty">Загрузка...</div>
+        <div v-if="loading" class="adm-empty">{{ $t('admin.common.loading') }}</div>
         <div v-else-if="error" class="adm-empty">{{ error }}</div>
         <div v-else-if="stats">
             <!-- Top stats -->
             <div class="adm-stats-grid">
                 <div class="adm-stat">
-                    <div class="adm-stat-label">Пользователи</div>
+                    <div class="adm-stat-label">{{ $t('admin.dashboard.totalUsers') }}</div>
                     <div class="adm-stat-value">{{ stats.totalUsers }}</div>
                 </div>
                 <div class="adm-stat">
-                    <div class="adm-stat-label">Файлы</div>
+                    <div class="adm-stat-label">{{ $t('admin.dashboard.totalFiles') }}</div>
                     <div class="adm-stat-value">{{ stats.totalFiles }}</div>
                 </div>
                 <div class="adm-stat">
-                    <div class="adm-stat-label">Активных юзеров</div>
+                    <div class="adm-stat-label">{{ $t('admin.dashboard.activeUsers') }}</div>
                     <div class="adm-stat-value">{{ activeUsersCount }}</div>
                 </div>
                 <div class="adm-stat">
-                    <div class="adm-stat-label">Файлов завершено</div>
+                    <div class="adm-stat-label">{{ $t('admin.dashboard.filesCompleted') }}</div>
                     <div class="adm-stat-value">{{ filesByStatusMap.completed || 0 }}</div>
                 </div>
                 <div class="adm-stat">
-                    <div class="adm-stat-label">Файлов с ошибкой</div>
+                    <div class="adm-stat-label">{{ $t('admin.dashboard.filesFailed') }}</div>
                     <div class="adm-stat-value">{{ filesByStatusMap.failed || 0 }}</div>
                 </div>
                 <div class="adm-stat">
-                    <div class="adm-stat-label">В обработке</div>
+                    <div class="adm-stat-label">{{ $t('admin.dashboard.filesProcessing') }}</div>
                     <div class="adm-stat-value">{{ filesByStatusMap.processing || 0 }}</div>
                 </div>
             </div>
@@ -46,8 +46,8 @@
             <div class="adm-grid-2">
                 <!-- Users by role -->
                 <div class="adm-card">
-                    <h3 class="adm-card-title">Пользователи по ролям</h3>
-                    <div v-if="stats.usersByRole.length === 0" class="adm-muted adm-text-sm">Нет данных</div>
+                    <h3 class="adm-card-title">{{ $t('admin.dashboard.usersByRole') }}</h3>
+                    <div v-if="stats.usersByRole.length === 0" class="adm-muted adm-text-sm">{{ $t('admin.common.noData') }}</div>
                     <div v-else class="adm-bars">
                         <div v-for="r in stats.usersByRole" :key="r._id" class="adm-bar-row">
                             <span class="adm-bar-label">
@@ -60,8 +60,8 @@
 
                 <!-- Files by template type -->
                 <div class="adm-card">
-                    <h3 class="adm-card-title">Файлы по типу шаблона</h3>
-                    <div v-if="stats.filesByTemplate.length === 0" class="adm-muted adm-text-sm">Нет данных</div>
+                    <h3 class="adm-card-title">{{ $t('admin.dashboard.filesByTemplate') }}</h3>
+                    <div v-if="stats.filesByTemplate.length === 0" class="adm-muted adm-text-sm">{{ $t('admin.common.noData') }}</div>
                     <div v-else class="adm-bars">
                         <div v-for="t in stats.filesByTemplate" :key="t._id || 'unknown'" class="adm-bar-row">
                             <span class="adm-bar-label adm-mono">{{ t._id || '—' }}</span>
@@ -73,9 +73,9 @@
 
             <!-- Last 7 days -->
             <div class="adm-card" style="margin-top: 16px;">
-                <h3 class="adm-card-title">Файлы за последние 7 дней</h3>
+                <h3 class="adm-card-title">{{ $t('admin.dashboard.filesLast7Days') }}</h3>
                 <div v-if="stats.filesLast7Days.length === 0" class="adm-muted adm-text-sm">
-                    За последнюю неделю файлов не было
+                    {{ $t('admin.dashboard.noFilesThisWeek') }}
                 </div>
                 <div v-else class="adm-bars">
                     <div v-for="d in stats.filesLast7Days" :key="d._id" class="adm-bar-row">
@@ -90,10 +90,12 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useAdminStore } from '@/stores/admin'
 import { RefreshCw } from 'lucide-vue-next'
 
 const adminStore = useAdminStore()
+const { t } = useI18n()
 const stats = ref(null)
 const loading = ref(false)
 const error = ref(null)
@@ -110,9 +112,9 @@ const filesByStatusMap = computed(() => {
 })
 
 function roleLabel(role) {
-    if (role === 'super_admin') return 'Super'
-    if (role === 'admin') return 'Admin'
-    return 'User'
+    if (role === 'super_admin') return t('admin.roles.superShort')
+    if (role === 'admin') return t('admin.roles.admin')
+    return t('admin.roles.user')
 }
 
 async function loadStats() {
@@ -121,7 +123,7 @@ async function loadStats() {
     try {
         stats.value = await adminStore.fetchStats()
     } catch (err) {
-        error.value = err.response?.data?.message || 'Ошибка загрузки статистики'
+        error.value = err.response?.data?.message || t('admin.dashboard.loadStatsError')
     } finally {
         loading.value = false
     }

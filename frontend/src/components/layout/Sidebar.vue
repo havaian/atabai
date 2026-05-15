@@ -132,7 +132,7 @@
                     </button>
                     <button v-if="authStore.isAdmin" class="menu-item" @click="navigateTo('/admin')">
                         <ShieldCheckIcon class="w-4 h-4" />
-                        Админ-панель
+                        {{ $t('admin.nav.adminPanel') }}
                     </button>
                     <div class="menu-divider"></div>
                     <button class="menu-item menu-item-danger" @click="handleSignOut">

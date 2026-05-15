@@ -1,0 +1,1027 @@
+{
+  "landing": {
+    "hero": {
+      "badge": "NSBU → IFRS Automation Platform",
+      "titlePre": "Automate",
+      "titleHighlight": "IFRS",
+      "titlePost": "Integrated with AI",
+      "subtitle": "Turn complex financial data into accurate, audit-ready IFRS reports — faster, cheaper, and with full transparency.",
+      "bookDemo": "Book a demo",
+      "howItWorks": "How it works"
+    },
+    "trust": {
+      "builtFor": "Built for Uzbekistan"
+    },
+    "hiw": {
+      "label": "Process",
+      "subtitle": "Four simple steps from file upload to a ready IFRS report",
+      "proc": {
+        "read": "File read · 247 rows",
+        "structure": "Structure detected · NSBU",
+        "mapping": "IFRS code mapping · 34 items",
+        "formulas": "Applying IAS 16 formulas..."
+      },
+      "resultBadge": "12 changes · 8 formulas · IAS 16 compliant"
+    },
+    "wif": {
+      "label": "Who it's for",
+      "title": "Who ATABAI is for",
+      "subtitle": "For companies that need IFRS reporting without the overhead",
+      "sme": {
+        "title": "Uzbek SMEs",
+        "desc": "Small and medium enterprises entering international markets that need IFRS reporting for partners and investors.",
+        "tag1": "Export",
+        "tag2": "Investors",
+        "tag3": "Loans"
+      },
+      "accounting": {
+        "title": "Accounting Firms",
+        "desc": "Audit and consulting firms serving clients with international reporting requirements. Automate the routine.",
+        "tag1": "Audit",
+        "tag2": "Consulting",
+        "tag3": "Scale"
+      },
+      "international": {
+        "title": "International Companies",
+        "desc": "Companies with subsidiaries in Uzbekistan that need consolidated reporting in a single IFRS format for headquarters.",
+        "tag1": "Consolidation",
+        "tag2": "Subsidiaries",
+        "tag3": "HQ"
+      }
+    },
+    "feat": {
+      "label": "Capabilities",
+      "title": "Why ATABAI",
+      "accuracyDesc": "All calculations via Excel formulas, not hardcoded values. Auditors can verify every cell. 99.9% accuracy in mapping and calculations.",
+      "hardcode": "Hardcode",
+      "formulas": "Formulas",
+      "auditReady": "Audit-ready",
+      "cloud": {
+        "title": "24/7 Access",
+        "desc": "Cloud platform — work whenever convenient, from anywhere, no installation needed."
+      }
+    }
+  },
+  "auth": {
+    "signInWithGoogle": "Sign in with Google",
+    "signOut": "Sign Out",
+    "welcome": "Welcome",
+    "processingLogin": "Processing login...",
+    "pleaseWait": "Please wait while we sign you in",
+    "loginFailed": "Login Failed",
+    "loginSuccessful": "Login Successful",
+    "redirectingToDashboard": "Redirecting to dashboard...",
+    "oauthCancelled": "Login was cancelled",
+    "invalidOauthResponse": "Invalid OAuth response",
+    "unexpectedError": "An unexpected error occurred",
+    "completingLogin": "Completing login...",
+    "authenticationFailed": "Authentication failed. Please try again.",
+    "invalidAuthParams": "Invalid authentication parameters.",
+    "tryAgain": "Try Again",
+    "signInTitle": "Sign in to ATABAI",
+    "signInSubtitle": "Sign in with your Google account to continue.",
+    "signInRequiredTitle": "Sign in required",
+    "signInRequiredSubtitle": "You need to be signed in to access that page. We'll bring you back after sign-in.",
+    "backToHome": "Back to home"
+  },
+  "pageTitles": {
+    "/": "Home",
+    "/dashboard": "Dashboard",
+    "/templates": "Templates",
+    "/profile": "Profile",
+    "/history": "File history",
+    "/processing": "Processing file",
+    "/results": "Processing results",
+    "/coming-soon": "Coming soon",
+    "/auth/callback": "Signing in...",
+    "/auth/success": "Login Successful",
+    "/settings": "Settings",
+    "/help": "Help",
+    "/upload": "Upload File",
+    "/login": "Sign in"
+  },
+  "pageDescriptions": {
+    "/": "Automate IFRS. Powered by AI.. Turn complex financial data into accurate, audit-ready IFRS reports — faster, cheaper, and with full transparency..",
+    "/dashboard": "ATABAI Dashboard - manage files, IFRS templates and monitor the processing of financial documents.",
+    "/templates": "IFRS templates for automating depreciation calculations, discounts, asset impairment and financial reports.",
+    "/profile": "ATABAI user profile settings - manage subscription, preferences and personal data.",
+    "/history": "File processing history in ATABAI - view results, download processed documents and statistics.",
+    "/processing": "Processing Excel files according to IFRS standards - applying automation formulas and generating reports.",
+    "/results": "ATABAI file processing results - compare changes, detailed reports and export ready documents.",
+    "/coming-soon": "ATABAI will be available soon. The Excel calculation automation platform for IFRS is under development.",
+    "/auth/callback": "Processing your login...",
+    "/auth/success": "Completing your authentication to ATABAI platform",
+    "/settings": "ATABAI user settings - manage preferences, subscription and account details",
+    "/help": "Get help and support for ATABAI - contact us for questions about IFRS automation",
+    "/upload": "Upload your Excel file to transform from Regional Standard to IFRS format with automated calculations",
+    "/login": "Sign in to ATABAI with your Google account to access the IFRS automation platform."
+  },
+  "nav": {
+    "home": "Home",
+    "dashboard": "Dashboard",
+    "templates": "Templates",
+    "profile": "Profile",
+    "history": "File History",
+    "logout": "Sign Out",
+    "features": "Features",
+    "howItWorks": "How It Works",
+    "pricing": "Pricing",
+    "language": "Language",
+    "signIn": "Sign in",
+    "themeToDark": "Switch to dark theme",
+    "themeToLight": "Switch to light theme"
+  },
+  "dashboard": {
+    "welcome": "Welcome back, {name}!",
+    "subtitle": "Choose a template to start processing your financial documents",
+    "newProject": "New Project",
+    "recentFiles": "Recent Files",
+    "noFiles": "No files processed yet",
+    "settings": "Settings",
+    "help": "Get help",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "usageStats": "Usage Statistics",
+    "filesThisMonth": "Files this month",
+    "limit": "{current} of {total}",
+    "subscription": "Current Plan",
+    "upgrade": "Upgrade Plan",
+    "totalCompleted": "Completed",
+    "accuracy": "Accuracy",
+    "avgTime": "Avg Time",
+    "usage": "Usage",
+    "emptyState": "Here will be your recent files",
+    "chooseTemplate": "Transform a report",
+    "viewAll": "View all",
+    "noFilesYet": "No files processed yet",
+    "emptyDesc": "Upload your first NSBU report to get started with IFRS transformation.",
+    "welcomeBack": "Welcome back!",
+    "noFilesYetSidebar": "No files yet"
+  },
+  "hero": {
+    "title": "Automate IFRS. Powered by AI.",
+    "subtitle": "Turn complex financial data into accurate, audit-ready IFRS reports — faster, cheaper, and with full transparency.",
+    "tryFree": "Try for free",
+    "bookDemo": "Book Demo",
+    "loginGoogle": "Sign in with Google"
+  },
+  "transformVisual": {
+    "nsbuLabel": "NSBU",
+    "ifrsLabel": "IFRS",
+    "arrowLabel": "~ 15 sec",
+    "nsbu": {
+      "colItem": "Item",
+      "colAmount": "Amount (UZS)",
+      "row1": "010 — Fixed Assets",
+      "row2": "020 — Depreciation",
+      "errorRow": "Manual calculation",
+      "errorValue": "±12% error"
+    },
+    "ifrs": {
+      "colItem": "Line Item",
+      "colAmount": "Amount (UZS)",
+      "row1": "PPE — Cost",
+      "row2": "Accum. Depr.",
+      "successRow": "IAS 16 compliant",
+      "successValue": "Validated"
+    }
+  },
+  "stats": {
+    "seconds": "sec",
+    "minute": "min",
+    "percent": "%",
+    "slashSeven": "/7",
+    "analysisTime": "Processing time",
+    "accuracy": "Calculation accuracy",
+    "availability": "Availability",
+    "timeSaving": "Efficiency",
+    "timeOld": "2-3 hours",
+    "timeNew": "15 sec",
+    "accuracyOld": "±12% errors",
+    "accuracyNew": "precise",
+    "availabilityNote": "no days off",
+    "efficiencyNote": "time saving"
+  },
+  "howItWorks": {
+    "title": "How it works",
+    "step1": {
+      "title": "Upload Excel files",
+      "description": "Upload your financial Excel files for processing according to IFRS requirements",
+      "uploadText": "Drag files here or click to select",
+      "supportedFormats": "Supported formats: .xlsx, .xls, .csv"
+    },
+    "step2": {
+      "title": "Select IFRS template",
+      "description": "Choose the appropriate calculation template in accordance with IFRS"
+    },
+    "step3": {
+      "title": "Get ready results",
+      "description": "Download processed files with applied IFRS formulas and detailed change reports",
+      "processed": "File processed",
+      "changes": "Changes",
+      "formulas": "Formulas applied"
+    },
+    "step4": {
+      "title": "4. See the transformation",
+      "description": "Watch how your local format transforms into international IFRS standards",
+      "before": "Before (Regional Standard Format)",
+      "after": "After (IFRS Format)",
+      "transformation": "Transformation",
+      "compliant": "IFRS Compliant",
+      "keyChanges": "✨ Key Transformations Applied:",
+      "changes": {
+        "depreciation": "IAS 16 depreciation methods",
+        "discounts": "IFRS 15 revenue recognition",
+        "impairment": "IAS 36 impairment testing",
+        "translation": "English translations",
+        "standards": "Standard references"
+      },
+      "spreadsheet": {
+        "depreciation": {
+          "before": {
+            "headers": {
+              "code": "Account Code",
+              "item": "Item Name",
+              "amount": "Amount"
+            },
+            "data": {
+              "ppe": "Property, Plant & Equipment",
+              "depreciation": "PPE Depreciation",
+              "manual": "Manual calculation",
+              "calculation": "Manual calculation",
+              "error": "Error prone"
+            }
+          },
+          "after": {
+            "headers": {
+              "assets": "Assets",
+              "standard": "Standard",
+              "amount": "Amount"
+            },
+            "data": {
+              "ppe": "Property, plant and equipment",
+              "accumulated": "Accumulated depreciation",
+              "automated": "Automated",
+              "compliant": "IAS 16 compliant",
+              "accurate": "✓ Accurate"
+            }
+          }
+        },
+        "discounts": {
+          "before": {
+            "headers": {
+              "code": "Code",
+              "revenue": "Revenue",
+              "amount": "Amount"
+            },
+            "data": {
+              "sales": "Sales revenue",
+              "returns": "Returns and discounts",
+              "simple": "Simple",
+              "basic": "Basic discounts",
+              "nonifrs": "Non-IFRS"
+            }
+          },
+          "after": {
+            "headers": {
+              "revenue": "Revenue",
+              "standard": "Standard",
+              "amount": "Amount"
+            },
+            "data": {
+              "contracts": "Revenue from contracts",
+              "liabilities": "Contract liabilities",
+              "performance": "Performance obligations",
+              "method": "IFRS 15 method",
+              "compliant": "✓ Compliant"
+            }
+          }
+        },
+        "impairment": {
+          "before": {
+            "headers": {
+              "asset": "Asset",
+              "carrying": "Carrying Amount",
+              "status": "Status"
+            },
+            "data": {
+              "equipment": "Equipment",
+              "buildings": "Buildings",
+              "untested": "Not tested",
+              "notesting": "No testing",
+              "noias36": "No IAS 36 tests",
+              "risk": "Risk"
+            }
+          },
+          "after": {
+            "headers": {
+              "asset": "Asset",
+              "carrying": "Carrying Amount",
+              "status": "Status"
+            },
+            "data": {
+              "equipment": "Equipment (CGU 1)",
+              "buildings": "Buildings (CGU 2)",
+              "impaired": "Impaired",
+              "noimpairment": "No impairment",
+              "tested": "IAS 36 tested",
+              "recoverable": "Recoverable amount",
+              "validated": "✓ Validated"
+            }
+          }
+        }
+      }
+    },
+    "templates": {
+      "depreciation": {
+        "processed": "Asset schedules processed",
+        "changesLabel": "Depreciation entries",
+        "changes": "156",
+        "formulasLabel": "Asset calculations",
+        "formulas": "42"
+      },
+      "discounts": {
+        "processed": "Revenue analyzed",
+        "changesLabel": "Discount adjustments",
+        "changes": "293",
+        "formulasLabel": "Revenue formulas",
+        "formulas": "67"
+      },
+      "impairment": {
+        "processed": "Impairment tests completed",
+        "changesLabel": "Value adjustments",
+        "changes": "84",
+        "formulasLabel": "Impairment calculations",
+        "formulas": "28"
+      }
+    }
+  },
+  "templates": {
+    "depreciation": "Fixed Asset Depreciation",
+    "depreciationDescription": "Automate depreciation calculations according to IAS 16 standards with high precision and compliance",
+    "discounts": "Discount Calculations",
+    "discountsDescription": "Calculate revenue discounts and adjustments per IFRS 15 with automatic recognition rules",
+    "impairment": "Asset Impairment",
+    "impairmentDescription": "Perform comprehensive impairment testing and calculations according to IAS 36 requirements",
+    "reports": "Financial Reports",
+    "reportsDescription": "Generate comprehensive IFRS-compliant financial reports with automated compliance checks",
+    "balanceSheet": "Balance Sheet",
+    "balanceSheetDescription": "Transform Regional Standard balance sheet to IFRS format according to IAS 1 standards",
+    "cashFlow": "Cash Flow",
+    "cashFlowDescription": "Transform Regional Standard cash flow statement to IFRS format according to IAS 7 standards",
+    "profitLoss": "Profit & Loss",
+    "profitLossDescription": "Transform NSBU profit & loss (PnL) budget report to IFRS format with revenue and expense classification",
+    "profitLossForm2": "Profit & Loss (F.2)",
+    "profitLossForm2Description": "Transform standard NSBU Form 2 (ОКУД 0710002) profit & loss statement to IFRS format",
+    "equity": "Changes in Equity",
+    "equityDescription": "Generate IFRS Statement of Changes in Equity from a balance sheet or dedicated Form 4 file",
+    "category": {
+      "balanceSheet": "Financial Statements",
+      "cashFlow": "Financial Statements",
+      "profitLoss": "Financial Statements",
+      "profitLossForm2": "Financial Statements",
+      "equity": "Financial Statements"
+    }
+  },
+  "features": {
+    "title": "Why ATABAI is great",
+    "automation": {
+      "title": "Complete Automation",
+      "description": "Automatic application of IFRS formulas to your Excel files"
+    },
+    "compliance": {
+      "title": "IFRS Compliance",
+      "description": "Compliance with international financial reporting standards"
+    },
+    "accuracy": {
+      "title": "High Accuracy",
+      "description": "Minimizing errors in financial calculations"
+    },
+    "speed": {
+      "title": "Fast Processing",
+      "description": "Processing large files in minutes"
+    },
+    "easy": {
+      "title": "Easy to Use",
+      "description": "Intuitive interface requires no special training"
+    },
+    "universal": {
+      "title": "Universal",
+      "description": "Suitable for any type of calculation and report"
+    }
+  },
+  "pricing": {
+    "title": "ATABAI helps you save time and money",
+    "popular": "Popular",
+    "getStarted": "Get Started",
+    "contactUs": "Contact Us",
+    "basic": {
+      "title": "Basic",
+      "price": "Free",
+      "files": "3 files per month",
+      "templates": "Basic IFRS templates",
+      "history": "Last 10 files history",
+      "export": "Export processed files"
+    },
+    "premium": {
+      "title": "Premium",
+      "price": "On request",
+      "perMonth": "Custom pricing",
+      "files": "Unlimited files",
+      "templates": "All IFRS templates",
+      "priority": "Priority processing",
+      "history": "Complete processing history",
+      "support": "Technical support",
+      "api": "API access"
+    },
+    "enterprise": {
+      "title": "Enterprise",
+      "price": "Custom",
+      "custom": "Customize to your needs",
+      "dedicated": "Dedicated server",
+      "sla": "SLA agreement",
+      "training": "Team training"
+    }
+  },
+  "cta": {
+    "title": "Ready to see it in action?",
+    "subtitle": "Book a personalized demo and see how ATABAI transforms your IFRS workflow",
+    "button": "Book Demo"
+  },
+  "finalCta": {
+    "title": "Stop wrestling with NSBU.",
+    "subtitle": "Book a 30-minute demo and see how IFRS reports build themselves.",
+    "button": "Book Demo"
+  },
+  "comingSoon": {
+    "pageTitle": "Coming Soon",
+    "title": "Launching Soon!",
+    "description": "We're working hard to create the best platform for IFRS calculation automation. Our team is finalizing all features to provide you with an exceptional experience.",
+    "featuresTitle": "What's coming:",
+    "feature1": "Automated depreciation and impairment calculations",
+    "feature2": "Full compliance with IFRS standards",
+    "feature3": "Intuitive interface and fast processing",
+    "feature4": "Detailed reports and result exports",
+    "contactTitle": "Have questions?",
+    "contactDescription": "Contact us for more information or to be notified about the launch.",
+    "telegram": "Telegram",
+    "email": "Email",
+    "instagram": "Instagram",
+    "backToDashboard": "Back to main page"
+  },
+  "settings": {
+    "subtitle": "Manage your account preferences",
+    "soon": "Soon",
+    "account": "Account",
+    "accountDesc": "Your Google account details",
+    "plan": "Plan",
+    "planDesc": "Your current subscription",
+    "tabs": {
+      "personal": "Personal",
+      "usage": "Usage & Plan",
+      "billing": "Billing",
+      "privacy": "Privacy"
+    },
+    "personal": {
+      "title": "Personal Settings",
+      "description": "Manage your account preferences and display settings",
+      "language": "Language",
+      "languageDescription": "Select your preferred interface language",
+      "theme": "Theme",
+      "themeDescription": "Choose how ATABAI appears to you",
+      "themeLight": "Light",
+      "themeDark": "Dark",
+      "themeSystem": "System"
+    },
+    "saved": "Settings saved successfully",
+    "comingSoon": "Coming Soon",
+    "usageTabDescription": "View your usage statistics and manage subscription plan",
+    "billingTabDescription": "Manage billing information and payment methods",
+    "privacyTabDescription": "Control your privacy settings and data preferences"
+  },
+  "help": {
+    "title": "Need Help?",
+    "description": "We're here to help you with any questions about ATABAI and IFRS automation",
+    "telegram": "Telegram",
+    "email": "Email",
+    "instagram": "Instagram",
+    "backToDashboard": "Back to Dashboard"
+  },
+  "upload": {
+    "noTemplate": "No template selected.",
+    "dropTitle": "Drop your Excel file here",
+    "dropSub": "or click to browse · .xlsx, .xls up to 10 MB",
+    "processing": "Processing…",
+    "transformBtn": "Transform to IFRS",
+    "errorFileType": "Only .xlsx and .xls files are supported.",
+    "errorFileSize": "File must be under 10 MB.",
+    "errorUploadFailed": "Upload failed. Please try again.",
+    "previousFiles": "Previous files",
+    "title": "Upload File for Processing",
+    "backToDashboard": "Back to Dashboard",
+    "uploadSection": "Upload Your File",
+    "expectedFormat": "Expected File Format:",
+    "instructions": {
+      "depreciation": [
+        "Excel file with asset data in Regional Standard format",
+        "Columns: Asset Name, Original Cost, Purchase Date, Useful Life",
+        "Optional: Depreciation Method, Residual Value",
+        "Each row should represent one asset"
+      ],
+      "discounts": [
+        "Excel file with revenue/discount data in Regional Standard format",
+        "Columns: Transaction ID, Revenue Amount, Discount Type, Discount Value",
+        "Optional: Customer, Date, Product Category"
+      ],
+      "impairment": [
+        "Excel file with asset carrying values in Regional Standard format",
+        "Columns: Asset Name, Carrying Value, Fair Value, Cash Flow Data",
+        "Optional: Testing Date, Market Indicators"
+      ],
+      "balanceSheet": [
+        "Excel file with Regional Standard balance sheet format (Form № 1 - ОКУД 0710001)",
+        "Standard Uzbek balance sheet structure expected",
+        "Columns: Row Code, Description, Beginning Balance, Ending Balance",
+        "System will map Regional Standard codes to IFRS classifications"
+      ],
+      "cashFlow": {
+        "1": "Cash flow statement transformed from Regional Standard to IFRS format according to IAS 7 - Statement of Cash Flows",
+        "2": "Activities are classified into operating, investing, and financing categories",
+        "3": "Direct method is used to present operating cash flows where applicable",
+        "4": "Net amounts are calculated automatically for items with both inflows and outflows"
+      },
+      "profitLoss": {
+        "1": "Upload your NSBU profit & loss (PnL budget) report in Excel format",
+        "2": "Expected sections: ДОХОДЫ (Revenue), РАСХОДЫ/ПРЯМЫЕ РАСХОДЫ (Expenses), project-level line items",
+        "3": "Monthly columns (Jan–Dec) are detected automatically — both quarterly and annual layouts supported",
+        "4": "Both simple structures and nested project hierarchies are handled automatically"
+      },
+      "profitLossForm2": [
+        "Standard NSBU Form 2 (ОКУД 0710002) Excel file",
+        "Row codes in column A: 010, 020, 040, 050, 060, 070, 090, 100, 140",
+        "Value columns: current period and prior year comparison",
+        "The system auto-detects code column and period headers"
+      ],
+      "equity": [
+        "Option A — Balance sheet (Form 1): uploads opening/closing equity balances",
+        "Option B — Form 4 (Statement of Changes in Equity): full movement breakdown",
+        "Column headers must include: Уставный капитал, Нераспределённая прибыль, Итого",
+        "The system auto-detects which file type you uploaded"
+      ]
+    },
+    "dropZone": {
+      "title": "Drop your Excel file here",
+      "subtitle": "or click to browse files",
+      "chooseFile": "Choose File",
+      "supportedFormats": "Supports .xlsx and .xls files up to 10MB"
+    },
+    "selectedFile": {
+      "processFile": "Process File",
+      "processing": "Processing...",
+      "chooseDifferent": "Choose Different File"
+    },
+    "sampleFormat": {
+      "title": "Sample Excel Format",
+      "description": "Your Excel file should have similar column structure. The system will automatically detect columns and apply IFRS transformations."
+    },
+    "sampleHeaders": {
+      "depreciation": [
+        "Asset Name",
+        "Original Cost (UZS)",
+        "Purchase Date",
+        "Useful Life (Years)",
+        "Method"
+      ],
+      "discounts": [
+        "Transaction ID",
+        "Revenue (UZS)",
+        "Discount Type",
+        "Discount %",
+        "Customer"
+      ],
+      "impairment": [
+        "Asset Name",
+        "Carrying Value (UZS)",
+        "Fair Value (UZS)",
+        "Testing Date",
+        "Status"
+      ],
+      "balanceSheet": [
+        "Row Code",
+        "Description",
+        "Beginning Balance (UZS)",
+        "Ending Balance (UZS)"
+      ],
+      "cashFlow": ["Line Item", "Inflow (UZS)", "Outflow (UZS)", "Period"],
+      "profitLoss": ["Line Item", "Jan", "Feb", "Mar", "Q1 Total"]
+    },
+    "sampleData": {
+      "depreciation": [
+        [
+          "Office Building",
+          "1,000,000,000",
+          "2020-01-15",
+          "40",
+          "Straight-line"
+        ],
+        [
+          "Manufacturing Equipment",
+          "500,000,000",
+          "2021-06-01",
+          "10",
+          "Declining Balance"
+        ],
+        ["Vehicles", "150,000,000", "2022-03-10", "5", "Straight-line"]
+      ],
+      "discounts": [
+        ["TXN001", "50,000,000", "Volume", "5", "Customer A"],
+        ["TXN002", "25,000,000", "Early Payment", "2", "Customer B"],
+        ["TXN003", "75,000,000", "Seasonal", "10", "Customer C"]
+      ],
+      "impairment": [
+        [
+          "Warehouse",
+          "800,000,000",
+          "750,000,000",
+          "2024-12-01",
+          "Test Required"
+        ],
+        [
+          "Retail Store",
+          "300,000,000",
+          "320,000,000",
+          "2024-12-01",
+          "No Impairment"
+        ],
+        [
+          "Production Line",
+          "600,000,000",
+          "550,000,000",
+          "2024-12-01",
+          "Impaired"
+        ]
+      ],
+      "balanceSheet": [
+        ["010", "Fixed Assets - Gross", "379,046,345", "364,903,106"],
+        ["011", "Accumulated Depreciation", "141,246,647", "147,353,112"],
+        ["220", "Trade Receivables", "411,581,488", "403,315,404"]
+      ],
+      "cashFlow": [
+        ["Cash receipts from customers", "1,340,638,713,954", "", "2024"],
+        ["Cash paid to suppliers", "", "1,014,597,002,120", "2024"],
+        ["Income taxes paid", "44,790,796,191", "111,219,623,676", "2024"]
+      ],
+      "profitLoss": [
+        [
+          "ДОХОДЫ",
+          "13,401,292,006",
+          "16,267,193,950",
+          "24,940,189,708",
+          "54,608,675,664"
+        ],
+        [
+          "  Project A",
+          "3,984,766,273",
+          "6,556,622,772",
+          "14,583,296,586",
+          "25,124,685,631"
+        ],
+        [
+          "ПРЯМЫЕ РАСХОДЫ",
+          "-10,231,003,458",
+          "-12,765,430,110",
+          "-19,382,540,020",
+          "-42,378,973,588"
+        ],
+        [
+          "Накладные проекта",
+          "-1,284,505,663",
+          "-1,284,505,663",
+          "-1,284,505,663",
+          "-3,853,516,989"
+        ]
+      ]
+    },
+    "recentFiles": {
+      "title": "Recent {template} Files",
+      "description": "Your recently processed files for this template",
+      "viewAll": "View All →",
+      "loading": "Loading recent files...",
+      "empty": "No files processed yet",
+      "emptyAction": "Process your first {template} file above"
+    },
+    "supportedFormats": "Supports .xlsx and .xls files up to 50MB"
+  },
+  "processing": {
+    "subtitle": "Mapping NSBU accounts and generating the structured report…",
+    "doneSubtitle": "Your IFRS report is ready to download.",
+    "failedSubtitle": "Something went wrong while transforming your file.",
+    "rowsTransformed": "Rows transformed",
+    "lineItemsMapped": "Line items mapped",
+    "processingTime": "Processing time",
+    "title": "Processing Your File",
+    "status": {
+      "pending": "Pending",
+      "uploaded": "Uploaded",
+      "processing": "Processing",
+      "completed": "Completed",
+      "failed": "Failed"
+    },
+    "statusDescription": {
+      "pending": "Your file is in queue for processing",
+      "processing": "Applying IFRS transformations to your data",
+      "completed": "File successfully processed and ready for download",
+      "failed": "An error occurred while processing the file"
+    },
+    "steps": {
+      "upload": "File uploaded successfully",
+      "validation": "Validating file format",
+      "transformation": "Applying IFRS transformations",
+      "completion": "Generating results"
+    },
+    "results": {
+      "title": "Processing Results",
+      "transformations": "Transformations",
+      "changes": "Changes",
+      "rows": "Processed Rows"
+    },
+    "actions": {
+      "download": "Download Result",
+      "downloading": "Downloading...",
+      "retry": "Retry",
+      "retrying": "Retrying...",
+      "backToDashboard": "Back to Dashboard",
+      "uploadNew": "Upload New File",
+      "viewResults": "View Results",
+      "retryUpload": "Upload Again",
+      "viewDetails": "View details"
+    },
+    "duration": "Processing time: {duration}",
+    "timeFormat": {
+      "seconds": "{count} sec",
+      "minutes": "{count} min"
+    },
+    "stuck": {
+      "statusTitle": "Processing Stuck",
+      "statusDescription": "Your file processing appears to be stuck or taking longer than expected.",
+      "title": "Processing Appears Stuck",
+      "description": "Your file has been processing for an unusually long time. This sometimes happens with very large files or temporary server issues.",
+      "suggestions": "You can try uploading the file again, or contact support if this problem continues.",
+      "pollingInfo": "Checked {attempts} times over {duration} minutes",
+      "troubleshooting": {
+        "title": "Troubleshooting Tips:",
+        "tip1": "Large files (>10MB) may take several minutes to process",
+        "tip2": "Complex calculations require more processing time",
+        "tip3": "Server maintenance may temporarily slow processing"
+      }
+    },
+    "progress": "Progress",
+    "error": "Processing Error"
+  },
+  "results": {
+    "loadFailed": "Could not load file details.",
+    "deleteFailed": "Failed to delete file.",
+    "templateUsed": "Template used",
+    "processed": "Processed",
+    "fileDetails": "File details",
+    "originalFile": "Original file",
+    "template": "Template",
+    "status": "Status",
+    "uploaded": "Uploaded",
+    "completed": "Completed",
+    "fileSize": "File size",
+    "notes": "Notes",
+    "processAnother": "Process another file",
+    "confirmDelete": "Delete this file? This cannot be undone.",
+    "title": "File Results",
+    "error": {
+      "title": "Error Loading File",
+      "fetchFailed": "Failed to load file details. Please try again."
+    },
+    "overview": {
+      "title": "Overview",
+      "template": "Template",
+      "processed": "Processed",
+      "size": "File Size"
+    },
+    "transformations": {
+      "title": "Transformations",
+      "total": "Total Applied",
+      "changes": "Changes Made"
+    },
+    "warnings": {
+      "title": "Warnings",
+      "total": "Total Warnings",
+      "details": "Warning Details",
+      "row": "Row"
+    },
+    "comparison": {
+      "before": "Before",
+      "after": "After",
+      "sideBySide": "Side by Side",
+      "beforeData": "Original Data (Regional Standard Format)",
+      "afterData": "Processed Data (IFRS Format)",
+      "originalFormat": "Original format from your uploaded file",
+      "ifrsFormat": "IFRS compliant format with applied transformations",
+      "showingRows": "Showing {shown} of {total} rows"
+    },
+    "compliance": {
+      "title": "IFRS Compliance Notes",
+      "depreciation": {
+        "1": "All depreciation calculations follow IAS 16 - Property, Plant and Equipment standards",
+        "2": "Carrying amounts represent cost less accumulated depreciation and impairment losses",
+        "3": "Depreciation rates are based on estimated useful lives and residual values",
+        "4": "Impairment tests are recommended for assets with indicators of impairment"
+      },
+      "discounts": {
+        "1": "All revenue recognition follows IFRS 15 - Revenue from Contracts with Customers",
+        "2": "Transaction prices are adjusted for variable consideration including discounts",
+        "3": "Revenue recognition timing is determined based on performance obligation satisfaction",
+        "4": "Contract liabilities represent obligations to transfer goods/services"
+      },
+      "impairment": {
+        "1": "All impairment testing follows IAS 36 - Impairment of Assets standards",
+        "2": "Recoverable amount is the higher of fair value less costs to sell and value in use",
+        "3": "Impairment loss is recognized when carrying amount exceeds recoverable amount",
+        "4": "Cash generating units (CGUs) are identified for assets that do not generate independent cash flows"
+      },
+      "balanceSheet": {
+        "1": "Balance sheet transformed from Regional Standard to IFRS format according to IAS 1 - Presentation of Financial Statements",
+        "2": "Current/non-current classification follows the 12-month operating cycle test",
+        "3": "All Regional Standard account codes have been mapped to appropriate IFRS line items",
+        "4": "This mapping provides structure alignment but does not replace full IFRS adjustments and professional audit"
+      },
+      "cashFlow": {
+        "processed": "Cash flow items processed",
+        "changesLabel": "Line item transformations",
+        "changes": "185",
+        "formulasLabel": "Net calculations",
+        "formulas": "24"
+      },
+      "profitLoss": {
+        "1": "P&L statement transformed from NSBU budget format to IFRS structure per IAS 1",
+        "2": "Revenue is classified as contract revenue from construction services per IFRS 15",
+        "3": "Expenses are classified into Cost of Sales, Operating Expenses, and D&A per IAS 1",
+        "4": "EBITDA, EBIT, and Net Profit are calculated using Excel formulas for full auditability"
+      }
+    },
+    "pagination": {
+      "rowsPerPage": "Rows per page",
+      "showing": "Showing {start}-{end} of {total} rows",
+      "previous": "Previous",
+      "next": "Next",
+      "page": "Page",
+      "of": "of"
+    },
+    "balanceSheet": {
+      "title": "STATEMENT OF FINANCIAL POSITION (IFRS)",
+      "asAt": "As at {date}",
+      "inn": "INN: {inn}",
+      "columns": {
+        "ifrsCode": "IFRS Code",
+        "lineItem": "Line Item",
+        "nsbuCode": "Regional Standard Code",
+        "beginningBalance": "Beginning Balance (sum)",
+        "endingBalance": "Ending Balance (sum)"
+      },
+      "sections": {
+        "nonCurrentAssets": "Non-Current Assets",
+        "currentAssets": "Current Assets",
+        "equity": "Equity",
+        "nonCurrentLiabilities": "Non-Current Liabilities",
+        "currentLiabilities": "Current Liabilities"
+      },
+      "total": "Total {section}",
+      "totalAssets": "TOTAL ASSETS",
+      "totalEquityLiabilities": "TOTAL EQUITY AND LIABILITIES"
+    },
+    "cashFlow": {
+      "title": "STATEMENT OF CASH FLOWS (IFRS)",
+      "period": "For the period ended {date}",
+      "inn": "INN: {inn}",
+      "columns": {
+        "lineItem": "Cash Flow Item",
+        "amount": "Amount (UZS)"
+      },
+      "sections": {
+        "operating": "Operating Activities",
+        "investing": "Investing Activities",
+        "financing": "Financing Activities",
+        "reconciliation": "Reconciliation"
+      },
+      "totals": {
+        "netOperating": "Net cash from operating activities",
+        "netInvesting": "Net cash from investing activities",
+        "netFinancing": "Net cash from financing activities",
+        "netChange": "Net increase/(decrease) in cash",
+        "fxEffects": "Effect of exchange rate changes",
+        "cashBeginning": "Cash at beginning of period",
+        "cashEnding": "Cash at end of period"
+      }
+    }
+  },
+  "history": {
+    "newFile": "New file",
+    "file": "file",
+    "files": "files",
+    "dateJustNow": "just now",
+    "dateMinutesAgo": "{n}m ago",
+    "dateHoursAgo": "{n}h ago",
+    "dateYesterday": "Yesterday",
+    "title": "File History",
+    "subtitle": "View and manage all your processed files",
+    "filters": {
+      "search": "Search",
+      "searchPlaceholder": "Search by file name...",
+      "status": "Status",
+      "allStatuses": "All Statuses",
+      "template": "Template",
+      "allTemplates": "All Templates",
+      "dateRange": "Date Range",
+      "allDates": "All Dates",
+      "today": "Today",
+      "thisWeek": "This Week",
+      "thisMonth": "This Month",
+      "thisQuarter": "Last 3 Months",
+      "clearAll": "Clear All Filters"
+    },
+    "table": {
+      "fileName": "File Name",
+      "template": "Template",
+      "status": "Status",
+      "processed": "Date",
+      "actions": "Actions",
+      "completed": "Completed"
+    },
+    "actions": {
+      "view": "View Results",
+      "viewProcessing": "View Processing",
+      "download": "Download",
+      "retry": "Retry Processing",
+      "delete": "Delete",
+      "confirmDelete": "Are you sure you want to delete '{name}'? This action cannot be undone."
+    },
+    "error": {
+      "title": "Error Loading Files",
+      "fetchFailed": "Failed to load file history. Please try again."
+    },
+    "empty": {
+      "title": "No Files Yet",
+      "description": "You haven't uploaded any files for processing yet.",
+      "uploadFirst": "Upload Your First File"
+    },
+    "noResults": {
+      "title": "No Files Found",
+      "description": "No files match your current filters. Try adjusting your search criteria."
+    },
+    "showingResults": "Showing {count} of {total} files",
+    "pagination": {
+      "showing": "Showing {start} to {end} of {total} results",
+      "previous": "Previous",
+      "next": "Next",
+      "of": "of"
+    }
+  },
+  "common": {
+    "goHome": "Go Home",
+    "loading": "Loading...",
+    "uploading": "Uploading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "upload": "Upload",
+    "download": "Download",
+    "process": "Process",
+    "downloading": "Downloading...",
+    "retry": "Retry",
+    "back": "Back",
+    "goBack": "Go back",
+    "backToDashboard": "Back to Dashboard"
+  },
+  "transformation": {
+    "sectionTitle": "Before / after",
+    "sectionHint": "Click to view the data diff",
+    "loading": "Loading transformation…",
+    "generate": "Generate diff view",
+    "generating": "Generating…",
+    "notAvailable": {
+      "title": "Transformation data not yet available",
+      "description": "This file was processed before the diff view was added. Click below to generate it."
+    },
+    "unsupported": {
+      "title": "Diff view not yet supported for this template",
+      "description": "The diff view currently supports balance sheet files only."
+    },
+    "error": {
+      "title": "Failed to load transformation",
+      "generic": "Something went wrong. Please try again."
+    },
+    "toggle": {
+      "original": "Original",
+      "ifrs": "IFRS"
+    }
+  }
+}

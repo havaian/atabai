@@ -162,7 +162,7 @@ export const useAdminStore = defineStore('admin', () => {
 
     async function adminLogout2FA() {
         try {
-            await apiClient.post('/admin/2fa/logout', null, adminRequestConfig())
+            await apiClient.post('/admin/2fa/logout', {}, adminRequestConfig())
         } catch (err) {
             // Idempotent — swallow errors
         }
@@ -269,7 +269,7 @@ export const useAdminStore = defineStore('admin', () => {
     }
 
     async function createDraft(reportType) {
-        const response = await adminPost(`/admin/mappings/${reportType}/draft`, null)
+        const response = await adminPost(`/admin/mappings/${reportType}/draft`, {})
         return response.data
     }
 
@@ -304,7 +304,7 @@ export const useAdminStore = defineStore('admin', () => {
     }
 
     async function runMappingSeed() {
-        const response = await adminPost('/admin/mappings/seed', null)
+        const response = await adminPost('/admin/mappings/seed', {})
         return response.data
     }
 

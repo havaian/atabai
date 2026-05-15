@@ -3,68 +3,68 @@
         <div class="adm-page-header">
             <div>
                 <router-link to="/admin/users" class="adm-page-subtitle" style="text-decoration: none;">
-                    ← Пользователи
+                    {{ $t('admin.userDetail.backLink') }}
                 </router-link>
                 <h1 class="adm-page-title" v-if="user">{{ user.name }}</h1>
-                <h1 class="adm-page-title" v-else>Пользователь</h1>
+                <h1 class="adm-page-title" v-else>{{ $t('admin.userDetail.defaultTitle') }}</h1>
                 <div v-if="user" class="adm-page-subtitle adm-mono">{{ user.email }}</div>
             </div>
             <div class="adm-row" v-if="user && isSuperAdmin && !isSelf">
                 <button class="adm-btn adm-btn--ghost" @click="showRoleModal = true">
-                    Изменить роль
+                    {{ $t('admin.userDetail.changeRole') }}
                 </button>
                 <button
                     class="adm-btn"
                     :class="user.isActive ? 'adm-btn--danger' : 'adm-btn--primary'"
                     @click="toggleActive"
                 >
-                    {{ user.isActive ? 'Деактивировать' : 'Активировать' }}
+                    {{ user.isActive ? $t('admin.userDetail.deactivate') : $t('admin.userDetail.activate') }}
                 </button>
             </div>
         </div>
 
-        <div v-if="loading" class="adm-empty">Загрузка...</div>
+        <div v-if="loading" class="adm-empty">{{ $t('admin.common.loading') }}</div>
         <div v-else-if="error" class="adm-empty">{{ error }}</div>
         <template v-else-if="user">
             <!-- User info card -->
             <div class="adm-card">
-                <h3 class="adm-card-title">Информация</h3>
+                <h3 class="adm-card-title">{{ $t('admin.userDetail.infoSection') }}</h3>
                 <div class="adm-grid-2">
                     <div>
                         <div class="adm-field">
-                            <div class="adm-field-label">Роль</div>
+                            <div class="adm-field-label">{{ $t('admin.userDetail.fieldRole') }}</div>
                             <span class="adm-badge" :class="`adm-badge--role-${user.role}`">{{ user.role }}</span>
                         </div>
                         <div class="adm-field">
-                            <div class="adm-field-label">Статус</div>
+                            <div class="adm-field-label">{{ $t('admin.userDetail.fieldStatus') }}</div>
                             <span class="adm-badge" :class="user.isActive ? 'adm-badge--active' : 'adm-badge--inactive'">
-                                {{ user.isActive ? 'активен' : 'деактивирован' }}
+                                {{ user.isActive ? $t('admin.common.active') : $t('admin.common.inactive') }}
                             </span>
                         </div>
                         <div class="adm-field">
-                            <div class="adm-field-label">Подписка</div>
+                            <div class="adm-field-label">{{ $t('admin.userDetail.fieldSubscription') }}</div>
                             <span class="adm-text-sm">{{ user.subscriptionType }}</span>
                         </div>
                         <div class="adm-field">
-                            <div class="adm-field-label">Язык</div>
+                            <div class="adm-field-label">{{ $t('admin.userDetail.fieldLanguage') }}</div>
                             <span class="adm-text-sm">{{ user.preferences?.language || '—' }}</span>
                         </div>
                     </div>
                     <div>
                         <div class="adm-field">
-                            <div class="adm-field-label">Регистрация</div>
+                            <div class="adm-field-label">{{ $t('admin.userDetail.fieldCreated') }}</div>
                             <span class="adm-text-sm">{{ formatDate(user.createdAt) }}</span>
                         </div>
                         <div class="adm-field">
-                            <div class="adm-field-label">Последний вход</div>
+                            <div class="adm-field-label">{{ $t('admin.userDetail.fieldLastLogin') }}</div>
                             <span class="adm-text-sm">{{ formatDate(user.lastLoginAt) }}</span>
                         </div>
                         <div class="adm-field">
-                            <div class="adm-field-label">Google ID</div>
+                            <div class="adm-field-label">{{ $t('admin.userDetail.fieldGoogleId') }}</div>
                             <span class="adm-mono adm-text-xs">{{ user.googleId }}</span>
                         </div>
                         <div class="adm-field">
-                            <div class="adm-field-label">User ID</div>
+                            <div class="adm-field-label">{{ $t('admin.userDetail.fieldUserId') }}</div>
                             <span class="adm-mono adm-text-xs">{{ user._id }}</span>
                         </div>
                     </div>
@@ -73,22 +73,22 @@
 
             <!-- File stats -->
             <div class="adm-card">
-                <h3 class="adm-card-title">Статистика файлов</h3>
+                <h3 class="adm-card-title">{{ $t('admin.userDetail.fileStatsSection') }}</h3>
                 <div class="adm-stats-grid" style="margin-bottom: 0;">
                     <div class="adm-stat">
-                        <div class="adm-stat-label">Всего</div>
+                        <div class="adm-stat-label">{{ $t('admin.userDetail.fileStatsTotal') }}</div>
                         <div class="adm-stat-value">{{ fileStats?.total || 0 }}</div>
                     </div>
                     <div class="adm-stat">
-                        <div class="adm-stat-label">Завершено</div>
+                        <div class="adm-stat-label">{{ $t('admin.userDetail.fileStatsCompleted') }}</div>
                         <div class="adm-stat-value">{{ fileStats?.completed || 0 }}</div>
                     </div>
                     <div class="adm-stat">
-                        <div class="adm-stat-label">Ошибки</div>
+                        <div class="adm-stat-label">{{ $t('admin.userDetail.fileStatsFailed') }}</div>
                         <div class="adm-stat-value">{{ fileStats?.failed || 0 }}</div>
                     </div>
                     <div class="adm-stat">
-                        <div class="adm-stat-label">В обработке</div>
+                        <div class="adm-stat-label">{{ $t('admin.userDetail.fileStatsProcessing') }}</div>
                         <div class="adm-stat-value">{{ fileStats?.processing || 0 }}</div>
                     </div>
                 </div>
@@ -96,18 +96,18 @@
 
             <!-- Files list -->
             <div class="adm-card">
-                <h3 class="adm-card-title">Файлы пользователя</h3>
-                <div v-if="filesLoading" class="adm-empty">Загрузка...</div>
-                <div v-else-if="files.length === 0" class="adm-empty">Нет файлов</div>
+                <h3 class="adm-card-title">{{ $t('admin.userDetail.filesSection') }}</h3>
+                <div v-if="filesLoading" class="adm-empty">{{ $t('admin.common.loading') }}</div>
+                <div v-else-if="files.length === 0" class="adm-empty">{{ $t('admin.userDetail.filesNone') }}</div>
                 <div v-else class="adm-table-wrap">
                     <table class="adm-table">
                         <thead>
                             <tr>
-                                <th>Имя файла</th>
-                                <th>Тип</th>
-                                <th>Статус</th>
-                                <th>Размер</th>
-                                <th>Создан</th>
+                                <th>{{ $t('admin.userDetail.tableFileName') }}</th>
+                                <th>{{ $t('admin.userDetail.tableType') }}</th>
+                                <th>{{ $t('admin.files.tableStatus') }}</th>
+                                <th>{{ $t('admin.userDetail.tableSize') }}</th>
+                                <th>{{ $t('admin.userDetail.tableCreated') }}</th>
                                 <th></th>
                             </tr>
                         </thead>
@@ -122,7 +122,7 @@
                                 <td class="adm-text-sm adm-muted">{{ formatDate(f.createdAt) }}</td>
                                 <td>
                                     <button class="adm-btn adm-btn--sm adm-btn--ghost" @click.stop="openFile(f._id)">
-                                        Открыть
+                                        {{ $t('admin.common.open') }}
                                     </button>
                                 </td>
                             </tr>
@@ -130,33 +130,33 @@
                     </table>
                 </div>
                 <div v-if="filesPagination && filesPagination.pages > 1" class="adm-pagination">
-                    <span>Стр. {{ filesPagination.page }} из {{ filesPagination.pages }}</span>
+                    <span>{{ $t('admin.userDetail.pageOf', { page: filesPagination.page, pages: filesPagination.pages }) }}</span>
                     <div class="adm-pagination-buttons">
                         <button class="adm-btn adm-btn--sm adm-btn--ghost"
                             @click="loadFiles(filesPagination.page - 1)"
-                            :disabled="filesPagination.page <= 1">Назад</button>
+                            :disabled="filesPagination.page <= 1">{{ $t('admin.common.prev') }}</button>
                         <button class="adm-btn adm-btn--sm adm-btn--ghost"
                             @click="loadFiles(filesPagination.page + 1)"
-                            :disabled="filesPagination.page >= filesPagination.pages">Вперёд</button>
+                            :disabled="filesPagination.page >= filesPagination.pages">{{ $t('admin.common.next') }}</button>
                     </div>
                 </div>
             </div>
 
             <!-- Overrides -->
             <div class="adm-card">
-                <h3 class="adm-card-title">Индивидуальные оверрайды маппинга</h3>
-                <div v-if="overridesLoading" class="adm-empty">Загрузка...</div>
+                <h3 class="adm-card-title">{{ $t('admin.userDetail.overridesSection') }}</h3>
+                <div v-if="overridesLoading" class="adm-empty">{{ $t('admin.common.loading') }}</div>
                 <div v-else-if="overrides.length === 0" class="adm-empty">
-                    Нет оверрайдов — применяется глобальный маппинг
+                    {{ $t('admin.userDetail.overridesNone') }}
                 </div>
                 <div v-else class="adm-table-wrap">
                     <table class="adm-table">
                         <thead>
                             <tr>
-                                <th>Тип отчёта</th>
-                                <th>НСБУ-код</th>
-                                <th>IFRS</th>
-                                <th>Секция</th>
+                                <th>{{ $t('admin.userDetail.overrideReportType') }}</th>
+                                <th>{{ $t('admin.userDetail.overrideCode') }}</th>
+                                <th>{{ $t('admin.userDetail.overrideIFRS') }}</th>
+                                <th>{{ $t('admin.userDetail.overrideSection') }}</th>
                                 <th></th>
                             </tr>
                         </thead>
@@ -169,7 +169,7 @@
                                 <td>
                                     <button v-if="isSuperAdmin"
                                         class="adm-btn adm-btn--sm adm-btn--danger"
-                                        @click="deleteOverride(o)">Удалить</button>
+                                        @click="deleteOverride(o)">{{ $t('admin.common.delete') }}</button>
                                 </td>
                             </tr>
                         </tbody>
@@ -181,9 +181,9 @@
         <!-- Role change modal -->
         <div v-if="showRoleModal" class="adm-modal-backdrop" @click.self="showRoleModal = false">
             <div class="adm-modal">
-                <h3 class="adm-modal-title">Изменить роль</h3>
+                <h3 class="adm-modal-title">{{ $t('admin.userDetail.roleModalTitle') }}</h3>
                 <div class="adm-field">
-                    <div class="adm-field-label">Новая роль</div>
+                    <div class="adm-field-label">{{ $t('admin.userDetail.roleModalNew') }}</div>
                     <select v-model="newRole" class="adm-select">
                         <option value="user">user</option>
                         <option value="admin">admin</option>
@@ -191,11 +191,11 @@
                     </select>
                 </div>
                 <div class="adm-text-sm adm-muted">
-                    Внимание: super_admin имеет полный доступ ко всем функциям, включая управление маппингами и ролями других пользователей.
+                    {{ $t('admin.userDetail.roleModalWarning') }}
                 </div>
                 <div class="adm-modal-actions">
-                    <button class="adm-btn adm-btn--ghost" @click="showRoleModal = false">Отмена</button>
-                    <button class="adm-btn adm-btn--primary" @click="confirmRoleChange">Сохранить</button>
+                    <button class="adm-btn adm-btn--ghost" @click="showRoleModal = false">{{ $t('admin.common.cancel') }}</button>
+                    <button class="adm-btn adm-btn--primary" @click="confirmRoleChange">{{ $t('admin.common.save') }}</button>
                 </div>
             </div>
         </div>
@@ -204,11 +204,14 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useAdminStore } from '@/stores/admin'
 
 const route = useRoute()
+const router = useRouter()
 const adminStore = useAdminStore()
+const { t, locale } = useI18n()
 
 const user = ref(null)
 const fileStats = ref(null)
@@ -238,7 +241,7 @@ async function loadUser() {
         fileStats.value = data.fileStats
         newRole.value = data.user.role
     } catch (err) {
-        error.value = err.response?.data?.message || 'Ошибка загрузки пользователя'
+        error.value = err.response?.data?.message || t('admin.userDetail.loadError')
     } finally {
         loading.value = false
     }
@@ -275,41 +278,42 @@ async function confirmRoleChange() {
         showRoleModal.value = false
         await loadUser()
     } catch (err) {
-        alert(err.response?.data?.message || 'Ошибка изменения роли')
+        alert(err.response?.data?.message || t('admin.common.error'))
     }
 }
 
 async function toggleActive() {
     if (!user.value) return
-    const action = user.value.isActive ? 'деактивировать' : 'активировать'
-    if (!confirm(`Точно ${action} пользователя ${user.value.email}?`)) return
+    const action = user.value.isActive
+        ? t('admin.userDetail.deactivate').toLowerCase()
+        : t('admin.userDetail.activate').toLowerCase()
+    if (!confirm(t('admin.userDetail.confirmToggleActive', { action, email: user.value.email }))) return
     try {
         await adminStore.updateUserActive(userId.value, !user.value.isActive)
         await loadUser()
     } catch (err) {
-        alert(err.response?.data?.message || 'Ошибка')
+        alert(err.response?.data?.message || t('admin.common.error'))
     }
 }
 
 async function deleteOverride(o) {
-    if (!confirm(`Удалить оверрайд для ${o.reportType} / ${o.nsbuRowCode}?`)) return
+    if (!confirm(t('admin.userDetail.confirmDeleteOverride', { reportType: o.reportType, code: o.nsbuRowCode }))) return
     try {
         await adminStore.deleteUserOverride(userId.value, o.reportType, o.nsbuRowCode)
         await loadOverrides()
     } catch (err) {
-        alert(err.response?.data?.message || 'Ошибка удаления')
+        alert(err.response?.data?.message || t('admin.common.error'))
     }
 }
 
-import { useRouter } from 'vue-router'
-const router = useRouter()
 function openFile(fileId) {
     router.push(`/admin/files/${fileId}`)
 }
 
 function formatDate(d) {
     if (!d) return '—'
-    return new Date(d).toLocaleString('ru-RU', {
+    const localeMap = { ru: 'ru-RU', en: 'en-GB', uz: 'uz-UZ' }
+    return new Date(d).toLocaleString(localeMap[locale.value] || 'ru-RU', {
         day: '2-digit', month: '2-digit', year: 'numeric',
         hour: '2-digit', minute: '2-digit'
     })

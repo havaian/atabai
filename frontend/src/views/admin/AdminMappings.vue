@@ -2,21 +2,21 @@
     <div class="adm-page">
         <div class="adm-page-header">
             <div>
-                <h1 class="adm-page-title">Маппинги</h1>
-                <div class="adm-page-subtitle">Преобразование НСБУ → IFRS</div>
+                <h1 class="adm-page-title">{{ $t('admin.mappings.title') }}</h1>
+                <div class="adm-page-subtitle">{{ $t('admin.mappings.subtitle') }}</div>
             </div>
             <div class="adm-row">
                 <button v-if="isSuperAdmin"
                     class="adm-btn adm-btn--ghost"
                     @click="runSeed"
                     :disabled="seeding"
-                    title="Импортирует маппинги из файлов src/mappings/*.js. Идемпотентно: уже опубликованные типы пропускаются.">
-                    {{ seeding ? 'Импорт...' : 'Запустить seed' }}
+                    :title="$t('admin.mappings.seedTooltip')">
+                    {{ seeding ? $t('admin.mappings.runningSeed') : $t('admin.mappings.runSeed') }}
                 </button>
             </div>
         </div>
 
-        <div v-if="loading" class="adm-empty">Загрузка...</div>
+        <div v-if="loading" class="adm-empty">{{ $t('admin.common.loading') }}</div>
         <div v-else-if="error" class="adm-empty">{{ error }}</div>
         <div v-else>
             <div v-for="reportType in REPORT_TYPES" :key="reportType" class="adm-card">
@@ -26,34 +26,34 @@
                         <button class="adm-btn adm-btn--sm adm-btn--ghost"
                             @click="openSet(publishedFor(reportType))"
                             v-if="publishedFor(reportType)">
-                            Открыть published
+                            {{ $t('admin.mappings.openPublished') }}
                         </button>
                         <button v-if="isSuperAdmin && publishedFor(reportType) && !draftFor(reportType)"
                             class="adm-btn adm-btn--sm adm-btn--primary"
                             @click="createDraft(reportType)">
-                            Создать draft
+                            {{ $t('admin.mappings.createDraft') }}
                         </button>
                         <button v-if="draftFor(reportType)"
                             class="adm-btn adm-btn--sm adm-btn--primary"
                             @click="openSet(draftFor(reportType))">
-                            Открыть draft
+                            {{ $t('admin.mappings.openDraft') }}
                         </button>
                     </div>
                 </div>
 
                 <div v-if="!grouped[reportType] || grouped[reportType].length === 0" class="adm-empty">
-                    Нет ни одной версии. Запустите seed.
+                    {{ $t('admin.mappings.noVersions') }}
                 </div>
                 <div v-else class="adm-table-wrap">
                     <table class="adm-table">
                         <thead>
                             <tr>
-                                <th>v</th>
-                                <th>Статус</th>
-                                <th>Строк</th>
-                                <th>Опубликовано</th>
-                                <th>Автор</th>
-                                <th>Заметки</th>
+                                <th>{{ $t('admin.mappings.tableVersion') }}</th>
+                                <th>{{ $t('admin.mappings.tableStatus') }}</th>
+                                <th>{{ $t('admin.mappings.tableRowCount') }}</th>
+                                <th>{{ $t('admin.mappings.tablePublished') }}</th>
+                                <th>{{ $t('admin.mappings.tableAuthor') }}</th>
+                                <th>{{ $t('admin.mappings.tableNotes') }}</th>
                                 <th></th>
                             </tr>
                         </thead>
@@ -70,12 +70,12 @@
                                     {{ s.notes || '—' }}
                                 </td>
                                 <td>
-                                    <button class="adm-btn adm-btn--sm adm-btn--ghost" @click="openSet(s)">Открыть</button>
+                                    <button class="adm-btn adm-btn--sm adm-btn--ghost" @click="openSet(s)">{{ $t('admin.common.open') }}</button>
                                     <button v-if="isSuperAdmin && s.status !== 'published'"
                                         class="adm-btn adm-btn--sm adm-btn--danger"
                                         style="margin-left: 6px;"
                                         @click="deleteSet(s)">
-                                        Удалить
+                                        {{ $t('admin.common.delete') }}
                                     </button>
                                 </td>
                             </tr>
@@ -90,10 +90,12 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useAdminStore } from '@/stores/admin'
 
 const router = useRouter()
 const adminStore = useAdminStore()
+const { t, locale } = useI18n()
 
 const REPORT_TYPES = ['balance_sheet', 'cash_flow', 'profit_loss_form2', 'equity']
 
@@ -105,12 +107,13 @@ const grouped = ref({})
 const isSuperAdmin = computed(() => adminStore.isSuperAdmin)
 
 function reportTypeLabel(rt) {
-    return {
-        balance_sheet: 'Баланс (Form 1)',
-        cash_flow: 'Движение денежных средств',
-        profit_loss_form2: 'Прибыль и убытки (Form 2)',
-        equity: 'Изменения в капитале'
-    }[rt] || rt
+    const key = {
+        balance_sheet: 'admin.mappings.reportTypeBalanceSheet',
+        cash_flow: 'admin.mappings.reportTypeCashFlow',
+        profit_loss_form2: 'admin.mappings.reportTypeProfitLossForm2',
+        equity: 'admin.mappings.reportTypeEquity'
+    }[rt]
+    return key ? t(key) : rt
 }
 
 function publishedFor(rt) {
@@ -128,20 +131,20 @@ async function loadSets() {
         const data = await adminStore.listMappingSets()
         grouped.value = data.grouped || {}
     } catch (err) {
-        error.value = err.response?.data?.message || 'Ошибка загрузки маппингов'
+        error.value = err.response?.data?.message || t('admin.mappings.loadError')
     } finally {
         loading.value = false
     }
 }
 
 async function runSeed() {
-    if (!confirm('Запустить seed? Существующие published-наборы не будут затронуты.')) return
+    if (!confirm(t('admin.mappings.seedConfirm'))) return
     seeding.value = true
     try {
         await adminStore.runMappingSeed()
         await loadSets()
     } catch (err) {
-        alert(err.response?.data?.message || 'Ошибка seed')
+        alert(err.response?.data?.message || t('admin.mappings.seedError'))
     } finally {
         seeding.value = false
     }
@@ -152,17 +155,17 @@ async function createDraft(reportType) {
         const data = await adminStore.createDraft(reportType)
         router.push(`/admin/mappings/sets/${data.draft._id}`)
     } catch (err) {
-        alert(err.response?.data?.message || 'Ошибка создания draft')
+        alert(err.response?.data?.message || t('admin.mappings.createDraftError'))
     }
 }
 
 async function deleteSet(s) {
-    if (!confirm(`Удалить ${s.reportType} v${s.version} (${s.status})?`)) return
+    if (!confirm(t('admin.mappings.deleteSetConfirm', { reportType: s.reportType, version: s.version, status: s.status }))) return
     try {
         await adminStore.deleteSet(s._id)
         await loadSets()
     } catch (err) {
-        alert(err.response?.data?.message || 'Ошибка удаления')
+        alert(err.response?.data?.message || t('admin.mappings.deleteSetError'))
     }
 }
 
@@ -172,7 +175,8 @@ function openSet(s) {
 
 function formatDate(d) {
     if (!d) return '—'
-    return new Date(d).toLocaleString('ru-RU', {
+    const localeMap = { ru: 'ru-RU', en: 'en-GB', uz: 'uz-UZ' }
+    return new Date(d).toLocaleString(localeMap[locale.value] || 'ru-RU', {
         day: '2-digit', month: '2-digit', year: 'numeric',
         hour: '2-digit', minute: '2-digit'
     })

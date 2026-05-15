@@ -5,6 +5,7 @@ const usersController = require('./users.controller');
 const filesController = require('./files.controller');
 const mappingsController = require('./mappings.controller');
 const twoFactorController = require('./twoFactor.controller');
+const localesController = require('./locales.controller');
 
 const router = express.Router();
 
@@ -116,5 +117,18 @@ router.delete(
     requireSuperAdmin,
     mappingsController.deleteUserOverride
 );
+
+// --- Locales (i18n editor) ---
+
+// Read endpoints — admin or super_admin
+router.get('/locales', localesController.listKeys);
+router.get('/locales/namespaces', localesController.listNamespaces);
+router.get('/locales/stats', localesController.getStats);
+
+// Mutations — super_admin only
+router.post('/locales/keys', requireSuperAdmin, localesController.createKey);
+router.patch('/locales/keys/:keyId', requireSuperAdmin, localesController.updateKey);
+router.delete('/locales/keys/:keyId', requireSuperAdmin, localesController.deleteKey);
+router.post('/locales/seed', requireSuperAdmin, localesController.manualSeed);
 
 module.exports = router;

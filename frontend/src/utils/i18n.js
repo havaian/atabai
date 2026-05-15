@@ -40,7 +40,18 @@ export function setLocale(locale) {
 async function loadLocaleMessages(locale) {
     try {
         const messages = await import(`../locales/${locale}.json`)
-        return messages.default
+        const baseMessages = messages.default
+
+        // Merge admin namespace locale (separate file to keep main locale files
+        // stable when admin UI strings change).
+        try {
+            const adminMessages = await import(`../locales/admin-${locale}.json`)
+            // Admin file has shape { admin: {...} } — merge at root level
+            return { ...baseMessages, ...adminMessages.default }
+        } catch (adminErr) {
+            // No admin locale for this language — proceed without it
+            return baseMessages
+        }
     } catch (error) {
         console.warn(`Failed to load locale ${locale}, falling back to ${DEFAULT_LOCALE}`)
         if (locale !== DEFAULT_LOCALE) {

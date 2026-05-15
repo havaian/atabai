@@ -4,10 +4,10 @@
         <aside class="adm-sidebar" :class="{ 'adm-sidebar--collapsed': !sidebarOpen }">
             <div class="adm-sidebar-header">
                 <router-link to="/admin" class="adm-brand">
-                    <span class="adm-brand-text">ATABAI</span>
-                    <span class="adm-brand-tag">admin</span>
+                    <span class="adm-brand-text">{{ $t('admin.layout.brand') }}</span>
+                    <span class="adm-brand-tag">{{ $t('admin.layout.brandTag') }}</span>
                 </router-link>
-                <button class="adm-sidebar-toggle" @click="sidebarOpen = !sidebarOpen" :title="sidebarOpen ? 'Свернуть' : 'Развернуть'">
+                <button class="adm-sidebar-toggle" @click="sidebarOpen = !sidebarOpen" :title="sidebarOpen ? $t('admin.common.back') : $t('admin.common.open')">
                     <component :is="sidebarOpen ? PanelLeftClose : PanelLeftOpen" :size="18" />
                 </button>
             </div>
@@ -18,7 +18,8 @@
                     :key="item.path"
                     :to="item.path"
                     class="adm-nav-item"
-                    active-class="adm-nav-item--active"
+                    :active-class="item.exact ? '' : 'adm-nav-item--active'"
+                    :exact-active-class="item.exact ? 'adm-nav-item--active' : ''"
                 >
                     <component :is="item.icon" :size="18" class="adm-nav-icon" />
                     <span class="adm-nav-label" v-show="sidebarOpen">{{ item.label }}</span>
@@ -34,14 +35,14 @@
                     v-if="adminStore.hasValidAdminSession"
                     class="adm-back-link"
                     @click="logout2FA"
-                    title="Выйти из 2FA-сессии"
+                    :title="$t('admin.nav.logout2FA')"
                 >
                     <LockKeyhole :size="16" />
-                    <span v-show="sidebarOpen">Сбросить 2FA</span>
+                    <span v-show="sidebarOpen">{{ $t('admin.nav.logout2FA') }}</span>
                 </button>
-                <router-link to="/app/dashboard" class="adm-back-link" title="Вернуться в приложение">
+                <router-link to="/app/dashboard" class="adm-back-link" :title="$t('admin.nav.backToApp')">
                     <ArrowLeft :size="16" />
-                    <span v-show="sidebarOpen">В приложение</span>
+                    <span v-show="sidebarOpen">{{ $t('admin.nav.backToApp') }}</span>
                 </router-link>
             </div>
         </aside>
@@ -50,12 +51,12 @@
         <main class="adm-main">
             <div class="adm-content">
                 <div v-if="!adminStore.accessChecked" class="adm-loading">
-                    Проверка доступа...
+                    {{ $t('admin.layout.accessCheck') }}
                 </div>
                 <div v-else-if="!adminStore.isAdmin" class="adm-forbidden">
-                    <h2>Доступ запрещён</h2>
-                    <p>У вас нет прав администратора.</p>
-                    <router-link to="/app/dashboard" class="adm-btn">Вернуться в приложение</router-link>
+                    <h2>{{ $t('admin.layout.forbiddenTitle') }}</h2>
+                    <p>{{ $t('admin.layout.forbiddenText') }}</p>
+                    <router-link to="/app/dashboard" class="adm-btn">{{ $t('admin.layout.backToAppBtn') }}</router-link>
                 </div>
                 <AdminTwoFactorGate
                     v-else-if="!adminStore.hasValidAdminSession"
@@ -70,6 +71,7 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useAdminStore } from '@/stores/admin'
 import AdminTwoFactorGate from '@/views/admin/AdminTwoFactorGate.vue'
 import {
@@ -86,26 +88,27 @@ import {
 
 const router = useRouter()
 const adminStore = useAdminStore()
+const { t } = useI18n()
 
 const sidebarOpen = ref(true)
 
-const navItems = [
-    { path: '/admin', label: 'Обзор', icon: LayoutDashboard },
-    { path: '/admin/users', label: 'Пользователи', icon: Users },
-    { path: '/admin/files', label: 'Файлы', icon: FileText },
-    { path: '/admin/mappings', label: 'Маппинги', icon: Network },
-    { path: '/admin/security', label: 'Безопасность', icon: ShieldCheck }
-]
+const navItems = computed(() => [
+    { path: '/admin', label: t('admin.nav.dashboard'), icon: LayoutDashboard, exact: true },
+    { path: '/admin/users', label: t('admin.nav.users'), icon: Users },
+    { path: '/admin/files', label: t('admin.nav.files'), icon: FileText },
+    { path: '/admin/mappings', label: t('admin.nav.mappings'), icon: Network },
+    { path: '/admin/security', label: t('admin.nav.security'), icon: ShieldCheck }
+])
 
 const roleLabel = computed(() => {
     const role = adminStore.adminInfo?.role
-    if (role === 'super_admin') return 'Super Admin'
-    if (role === 'admin') return 'Admin'
+    if (role === 'super_admin') return t('admin.roles.superAdmin')
+    if (role === 'admin') return t('admin.roles.admin')
     return ''
 })
 
 async function logout2FA() {
-    if (!confirm('Сбросить 2FA-сессию? Потребуется снова ввести код.')) return
+    if (!confirm(t('admin.layout.resetSessionPrompt'))) return
     await adminStore.adminLogout2FA()
 }
 

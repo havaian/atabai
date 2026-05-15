@@ -3,22 +3,20 @@
         <div class="adm-2fa-card">
             <!-- Loading state -->
             <div v-if="loading" class="adm-2fa-state">
-                <div class="adm-muted">Проверка статуса 2FA...</div>
+                <div class="adm-muted">{{ $t('admin.twoFactor.loadingStatus') }}</div>
             </div>
 
             <!-- Setup flow (not enrolled yet) -->
             <template v-else-if="phase === 'setup'">
-                <h2 class="adm-2fa-title">Настройка 2FA</h2>
+                <h2 class="adm-2fa-title">{{ $t('admin.twoFactor.setupTitle') }}</h2>
                 <p class="adm-2fa-text">
-                    Доступ к админ-панели требует двухфакторной аутентификации.
-                    Откройте приложение Authenticator (Google Authenticator, Authy, 1Password)
-                    и отсканируйте QR-код.
+                    {{ $t('admin.twoFactor.setupText') }}
                 </p>
                 <div v-if="qrDataUrl" class="adm-2fa-qr">
-                    <img :src="qrDataUrl" alt="QR-код для TOTP" />
+                    <img :src="qrDataUrl" :alt="$t('admin.twoFactor.qrAlt')" />
                 </div>
                 <div class="adm-field">
-                    <div class="adm-field-label">Введите 6-значный код из приложения</div>
+                    <div class="adm-field-label">{{ $t('admin.twoFactor.codeLabel') }}</div>
                     <input
                         v-model="codeInput"
                         @keyup.enter="confirmSetup"
@@ -35,35 +33,32 @@
                     @click="confirmSetup"
                     :disabled="busy || codeInput.length !== 6"
                 >
-                    {{ busy ? 'Проверка...' : 'Подтвердить и активировать' }}
+                    {{ busy ? $t('admin.twoFactor.checking') : $t('admin.twoFactor.confirmActivate') }}
                 </button>
             </template>
 
             <!-- Show backup codes (one-time, after confirm) -->
             <template v-else-if="phase === 'backup-codes'">
-                <h2 class="adm-2fa-title">2FA активирована</h2>
+                <h2 class="adm-2fa-title">{{ $t('admin.twoFactor.activatedTitle') }}</h2>
                 <p class="adm-2fa-text">
-                    <strong>Сохраните эти резервные коды в надёжное место.</strong>
-                    Каждый код можно использовать ровно один раз, если у вас не будет доступа
-                    к приложению-аутентификатору. Они показываются только один раз.
+                    {{ $t('admin.twoFactor.activatedText') }}
                 </p>
                 <div class="adm-backup-codes">
                     <div v-for="c in backupCodes" :key="c" class="adm-backup-code">{{ c }}</div>
                 </div>
                 <div class="adm-2fa-actions">
-                    <button class="adm-btn adm-btn--ghost" @click="copyBackupCodes">Скопировать</button>
+                    <button class="adm-btn adm-btn--ghost" @click="copyBackupCodes">{{ $t('admin.common.copy') }}</button>
                     <button class="adm-btn adm-btn--primary" @click="finishSetup">
-                        Я сохранил коды
+                        {{ $t('admin.twoFactor.iSavedCodes') }}
                     </button>
                 </div>
             </template>
 
             <!-- Verify flow (enrolled, no valid session) -->
             <template v-else-if="phase === 'verify'">
-                <h2 class="adm-2fa-title">Подтверждение 2FA</h2>
+                <h2 class="adm-2fa-title">{{ $t('admin.twoFactor.verifyTitle') }}</h2>
                 <p class="adm-2fa-text">
-                    Введите 6-значный код из приложения-аутентификатора
-                    <span v-if="useBackupCode">или 10-значный резервный код</span>.
+                    {{ $t('admin.twoFactor.verifyText') }}<span v-if="useBackupCode">{{ $t('admin.twoFactor.verifyTextOrBackup') }}</span>.
                 </p>
                 <div class="adm-field">
                     <input
@@ -82,19 +77,18 @@
                     @click="doVerify"
                     :disabled="busy || codeInput.length < (useBackupCode ? 10 : 6)"
                 >
-                    {{ busy ? 'Проверка...' : 'Войти' }}
+                    {{ busy ? $t('admin.twoFactor.checking') : $t('admin.twoFactor.verifyAction') }}
                 </button>
                 <button class="adm-btn adm-btn--ghost adm-2fa-toggle" @click="toggleBackup">
-                    {{ useBackupCode ? 'Использовать код из приложения' : 'Использовать резервный код' }}
+                    {{ useBackupCode ? $t('admin.twoFactor.useAuthApp') : $t('admin.twoFactor.useBackupCode') }}
                 </button>
             </template>
 
             <!-- Setup-not-configured (server missing TOTP_ENCRYPTION_KEY) -->
             <template v-else-if="phase === 'not-configured'">
-                <h2 class="adm-2fa-title">2FA не настроена</h2>
+                <h2 class="adm-2fa-title">{{ $t('admin.twoFactor.notConfiguredTitle') }}</h2>
                 <p class="adm-2fa-text">
-                    Серверная переменная <code>TOTP_ENCRYPTION_KEY</code> не задана.
-                    Свяжитесь с администратором сервера.
+                    {{ $t('admin.twoFactor.notConfiguredText1') }} <code>TOTP_ENCRYPTION_KEY</code> {{ $t('admin.twoFactor.notConfiguredText2') }}
                 </p>
             </template>
         </div>
@@ -103,10 +97,12 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useAdminStore } from '@/stores/admin'
 
 const emit = defineEmits(['verified'])
 const adminStore = useAdminStore()
+const { t } = useI18n()
 
 const loading = ref(true)
 const busy = ref(false)
@@ -132,7 +128,7 @@ async function init() {
             await beginSetup()
         }
     } catch (err) {
-        error.value = err.response?.data?.message || 'Не удалось получить статус 2FA'
+        error.value = err.response?.data?.message || t('admin.twoFactor.statusError')
     } finally {
         loading.value = false
     }
@@ -144,7 +140,7 @@ async function beginSetup() {
         qrDataUrl.value = data.qrDataUrl
         phase.value = 'setup'
     } catch (err) {
-        error.value = err.response?.data?.message || 'Не удалось начать настройку 2FA'
+        error.value = err.response?.data?.message || t('admin.twoFactor.setupError')
     }
 }
 
@@ -158,7 +154,7 @@ async function confirmSetup() {
         phase.value = 'backup-codes'
         codeInput.value = ''
     } catch (err) {
-        error.value = err.response?.data?.message || 'Неверный код'
+        error.value = err.response?.data?.message || t('admin.twoFactor.invalidCode')
     } finally {
         busy.value = false
     }
@@ -174,7 +170,7 @@ async function doVerify() {
         codeInput.value = ''
         emit('verified')
     } catch (err) {
-        error.value = err.response?.data?.message || 'Неверный код'
+        error.value = err.response?.data?.message || t('admin.twoFactor.invalidCode')
     } finally {
         busy.value = false
     }

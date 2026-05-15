@@ -24,6 +24,7 @@ const userRoutes = require('./user/routes');
 const fileRoutes = require('./files/routes');
 const templateRoutes = require('./templates/routes');
 const adminRoutes = require('./admin/routes');
+const publicLocaleRoutes = require('./admin/publicLocaleRoutes');
 
 const app = express();
 
@@ -121,6 +122,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/files', fileRoutes);
 app.use('/api/templates', templateRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/locales', publicLocaleRoutes);
 
 // Root endpoint
 app.get('/', (req, res) => {
@@ -149,6 +151,11 @@ const initializeApp = async () => {
         // Best-effort idempotent mapping seed (doesn't block startup on failure)
         const { runSeedAtStartup } = require('./admin/mappingSeed');
         await runSeedAtStartup();
+
+        // Best-effort idempotent locale seed — populates LocaleKey collection
+        // from the bundled JSON files in src/admin/seedLocales/.
+        const { runSeedAtStartup: runLocaleSeedAtStartup } = require('./admin/localeSeed');
+        await runLocaleSeedAtStartup();
 
         // await connectRedis();
         // global.logger.logInfo('Redis connected successfully', { category: 'startup' });

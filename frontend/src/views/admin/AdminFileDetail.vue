@@ -3,9 +3,9 @@
         <div class="adm-page-header">
             <div>
                 <router-link to="/admin/files" class="adm-page-subtitle" style="text-decoration: none;">
-                    ← Файлы
+                    {{ $t('admin.fileDetail.backLink') }}
                 </router-link>
-                <h1 class="adm-page-title">{{ file?.originalName || 'Файл' }}</h1>
+                <h1 class="adm-page-title">{{ file?.originalName || $t('admin.fileDetail.defaultTitle') }}</h1>
                 <div v-if="file" class="adm-page-subtitle">
                     {{ file.templateType }} ·
                     <span class="adm-badge" :class="`adm-badge--status-${file.status}`">{{ file.status }}</span>
@@ -14,7 +14,7 @@
             <div class="adm-row" v-if="file">
                 <button class="adm-btn adm-btn--ghost" @click="downloadOriginal" :disabled="downloading">
                     <Download :size="14" />
-                    Оригинал
+                    {{ $t('admin.fileDetail.downloadOriginal') }}
                 </button>
                 <button
                     v-if="file.processedFilePath"
@@ -23,21 +23,21 @@
                     :disabled="downloading"
                 >
                     <Download :size="14" />
-                    Результат
+                    {{ $t('admin.fileDetail.downloadProcessed') }}
                 </button>
             </div>
         </div>
 
-        <div v-if="loading" class="adm-empty">Загрузка...</div>
+        <div v-if="loading" class="adm-empty">{{ $t('admin.common.loading') }}</div>
         <div v-else-if="error" class="adm-empty">{{ error }}</div>
         <template v-else-if="file">
             <!-- Info -->
             <div class="adm-card">
-                <h3 class="adm-card-title">Информация</h3>
+                <h3 class="adm-card-title">{{ $t('admin.fileDetail.infoSection') }}</h3>
                 <div class="adm-grid-2">
                     <div>
                         <div class="adm-field">
-                            <div class="adm-field-label">Владелец</div>
+                            <div class="adm-field-label">{{ $t('admin.fileDetail.fieldOwner') }}</div>
                             <router-link v-if="file.userId"
                                 :to="`/admin/users/${file.userId._id}`"
                                 style="color: #c084fc; text-decoration: none;">
@@ -45,33 +45,33 @@
                             </router-link>
                         </div>
                         <div class="adm-field">
-                            <div class="adm-field-label">Тип шаблона</div>
+                            <div class="adm-field-label">{{ $t('admin.fileDetail.fieldTemplateType') }}</div>
                             <span class="adm-text-sm">{{ file.templateType }}</span>
                         </div>
                         <div class="adm-field">
-                            <div class="adm-field-label">Размер</div>
+                            <div class="adm-field-label">{{ $t('admin.fileDetail.fieldSize') }}</div>
                             <span class="adm-text-sm">{{ formatSize(file.fileSize) }}</span>
                         </div>
                         <div class="adm-field">
-                            <div class="adm-field-label">Job ID</div>
+                            <div class="adm-field-label">{{ $t('admin.fileDetail.fieldJobId') }}</div>
                             <span class="adm-mono adm-text-xs">{{ file.jobId }}</span>
                         </div>
                     </div>
                     <div>
                         <div class="adm-field">
-                            <div class="adm-field-label">Создан</div>
+                            <div class="adm-field-label">{{ $t('admin.fileDetail.fieldCreated') }}</div>
                             <span class="adm-text-sm">{{ formatDate(file.createdAt) }}</span>
                         </div>
                         <div class="adm-field">
-                            <div class="adm-field-label">Завершён</div>
+                            <div class="adm-field-label">{{ $t('admin.fileDetail.fieldCompleted') }}</div>
                             <span class="adm-text-sm">{{ formatDate(file.completedAt) }}</span>
                         </div>
                         <div class="adm-field">
-                            <div class="adm-field-label">Имя файла на диске</div>
+                            <div class="adm-field-label">{{ $t('admin.fileDetail.fieldDiskFile') }}</div>
                             <span class="adm-mono adm-text-xs">{{ file.filePath }}</span>
                         </div>
                         <div class="adm-field" v-if="file.processedFilePath">
-                            <div class="adm-field-label">Результат на диске</div>
+                            <div class="adm-field-label">{{ $t('admin.fileDetail.fieldDiskProcessed') }}</div>
                             <span class="adm-mono adm-text-xs">{{ file.processedFilePath }}</span>
                         </div>
                     </div>
@@ -80,27 +80,27 @@
 
             <!-- Result -->
             <div class="adm-card" v-if="file.result">
-                <h3 class="adm-card-title">Результат обработки</h3>
+                <h3 class="adm-card-title">{{ $t('admin.fileDetail.resultSection') }}</h3>
                 <div class="adm-stats-grid" style="margin-bottom: 0;">
                     <div class="adm-stat">
-                        <div class="adm-stat-label">Трансформаций</div>
+                        <div class="adm-stat-label">{{ $t('admin.fileDetail.resultTransformations') }}</div>
                         <div class="adm-stat-value">{{ file.result.transformations || 0 }}</div>
                     </div>
                     <div class="adm-stat">
-                        <div class="adm-stat-label">Изменений</div>
+                        <div class="adm-stat-label">{{ $t('admin.fileDetail.resultChanges') }}</div>
                         <div class="adm-stat-value">{{ file.result.changes || 0 }}</div>
                     </div>
                     <div class="adm-stat">
-                        <div class="adm-stat-label">Строк (orig)</div>
+                        <div class="adm-stat-label">{{ $t('admin.fileDetail.resultOriginalRows') }}</div>
                         <div class="adm-stat-value">{{ file.result.originalRows || 0 }}</div>
                     </div>
                     <div class="adm-stat">
-                        <div class="adm-stat-label">Строк (proc)</div>
+                        <div class="adm-stat-label">{{ $t('admin.fileDetail.resultProcessedRows') }}</div>
                         <div class="adm-stat-value">{{ file.result.processedRows || 0 }}</div>
                     </div>
                 </div>
                 <div v-if="file.result.warnings?.length" style="margin-top: 16px;">
-                    <div class="adm-field-label">Предупреждения ({{ file.result.warnings.length }})</div>
+                    <div class="adm-field-label">{{ $t('admin.fileDetail.warningsLabel', { count: file.result.warnings.length }) }}</div>
                     <div class="adm-warnings-list">
                         <div v-for="(w, i) in file.result.warnings" :key="i" class="adm-warning-item">
                             <span class="adm-badge" :class="`adm-badge--status-${w.severity === 'error' ? 'failed' : (w.severity === 'warning' ? 'processing' : 'uploaded')}`">
@@ -115,25 +115,33 @@
 
             <!-- Error -->
             <div class="adm-card" v-if="file.error">
-                <h3 class="adm-card-title">Ошибка</h3>
+                <h3 class="adm-card-title">{{ $t('admin.fileDetail.errorSection') }}</h3>
                 <pre class="adm-error-pre">{{ file.error }}</pre>
             </div>
 
             <!-- Transformation JSON -->
             <div class="adm-card">
                 <div class="adm-row" style="justify-content: space-between; margin-bottom: 12px;">
-                    <h3 class="adm-card-title" style="margin: 0;">Transformation snapshot</h3>
-                    <button class="adm-btn adm-btn--sm adm-btn--ghost"
-                        @click="loadTransformation"
-                        :disabled="transformationLoading">
-                        {{ transformation ? 'Обновить' : 'Загрузить' }}
-                    </button>
+                    <h3 class="adm-card-title" style="margin: 0;">{{ $t('admin.fileDetail.snapshotSection') }}</h3>
+                    <div class="adm-row" style="gap: 8px;">
+                        <button v-if="transformation"
+                            class="adm-btn adm-btn--sm adm-btn--ghost"
+                            @click="copyTransformation"
+                            :disabled="transformationLoading">
+                            {{ copyState }}
+                        </button>
+                        <button class="adm-btn adm-btn--sm adm-btn--ghost"
+                            @click="loadTransformation"
+                            :disabled="transformationLoading">
+                            {{ transformation ? $t('admin.fileDetail.snapshotRefresh') : $t('admin.fileDetail.snapshotLoad') }}
+                        </button>
+                    </div>
                 </div>
-                <div v-if="transformationLoading" class="adm-empty">Загрузка...</div>
+                <div v-if="transformationLoading" class="adm-empty">{{ $t('admin.common.loading') }}</div>
                 <div v-else-if="transformationError" class="adm-empty">{{ transformationError }}</div>
                 <pre v-else-if="transformation" class="adm-json-pre">{{ JSON.stringify(transformation, null, 2) }}</pre>
                 <div v-else class="adm-muted adm-text-sm">
-                    Нажмите «Загрузить», чтобы увидеть transformation.json для этого файла
+                    {{ $t('admin.fileDetail.snapshotHint') }}
                 </div>
             </div>
         </template>
@@ -143,11 +151,13 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useAdminStore } from '@/stores/admin'
 import { Download } from 'lucide-vue-next'
 
 const route = useRoute()
 const adminStore = useAdminStore()
+const { t, locale } = useI18n()
 
 const file = ref(null)
 const loading = ref(false)
@@ -156,6 +166,7 @@ const error = ref(null)
 const transformation = ref(null)
 const transformationLoading = ref(false)
 const transformationError = ref(null)
+const copyState = ref(t('admin.common.copy'))
 
 const downloading = ref(false)
 
@@ -168,7 +179,7 @@ async function loadFile() {
         const data = await adminStore.getFileDetails(fileId.value)
         file.value = data.file
     } catch (err) {
-        error.value = err.response?.data?.message || 'Ошибка загрузки файла'
+        error.value = err.response?.data?.message || t('admin.fileDetail.loadError')
     } finally {
         loading.value = false
     }
@@ -181,9 +192,22 @@ async function loadTransformation() {
         const data = await adminStore.getFileTransformation(fileId.value)
         transformation.value = data.transformation
     } catch (err) {
-        transformationError.value = err.response?.data?.message || 'Ошибка загрузки'
+        transformationError.value = err.response?.data?.message || t('admin.common.error')
     } finally {
         transformationLoading.value = false
+    }
+}
+
+async function copyTransformation() {
+    if (!transformation.value) return
+    try {
+        await navigator.clipboard.writeText(JSON.stringify(transformation.value, null, 2))
+        copyState.value = t('admin.common.copied')
+        setTimeout(() => { copyState.value = t('admin.common.copy') }, 1800)
+    } catch (err) {
+        // Fallback for browsers/contexts without clipboard API (e.g. non-HTTPS)
+        copyState.value = t('admin.common.error')
+        setTimeout(() => { copyState.value = t('admin.common.copy') }, 1800)
     }
 }
 
@@ -209,7 +233,7 @@ async function doDownload(type) {
         document.body.removeChild(a)
         URL.revokeObjectURL(url)
     } catch (err) {
-        alert(err.response?.data?.message || 'Ошибка скачивания')
+        alert(err.response?.data?.message || t('admin.fileDetail.downloadError'))
     } finally {
         downloading.value = false
     }
@@ -217,7 +241,8 @@ async function doDownload(type) {
 
 function formatDate(d) {
     if (!d) return '—'
-    return new Date(d).toLocaleString('ru-RU', {
+    const localeMap = { ru: 'ru-RU', en: 'en-GB', uz: 'uz-UZ' }
+    return new Date(d).toLocaleString(localeMap[locale.value] || 'ru-RU', {
         day: '2-digit', month: '2-digit', year: 'numeric',
         hour: '2-digit', minute: '2-digit'
     })

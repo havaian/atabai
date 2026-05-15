@@ -2,38 +2,38 @@
     <div class="adm-page">
         <div class="adm-page-header">
             <div>
-                <h1 class="adm-page-title">Безопасность</h1>
-                <div class="adm-page-subtitle">Двухфакторная аутентификация и резервные коды</div>
+                <h1 class="adm-page-title">{{ $t('admin.security.title') }}</h1>
+                <div class="adm-page-subtitle">{{ $t('admin.security.subtitle') }}</div>
             </div>
         </div>
 
-        <div v-if="loading" class="adm-empty">Загрузка...</div>
+        <div v-if="loading" class="adm-empty">{{ $t('admin.common.loading') }}</div>
         <template v-else>
             <!-- 2FA status -->
             <div class="adm-card">
-                <h3 class="adm-card-title">Статус 2FA</h3>
+                <h3 class="adm-card-title">{{ $t('admin.security.statusSection') }}</h3>
                 <div class="adm-grid-2">
                     <div>
                         <div class="adm-field">
-                            <div class="adm-field-label">Состояние</div>
+                            <div class="adm-field-label">{{ $t('admin.security.fieldState') }}</div>
                             <span class="adm-badge" :class="status?.totpEnabled ? 'adm-badge--active' : 'adm-badge--inactive'">
-                                {{ status?.totpEnabled ? 'включено' : 'выключено' }}
+                                {{ status?.totpEnabled ? $t('admin.security.stateEnabled') : $t('admin.security.stateDisabled') }}
                             </span>
                         </div>
                         <div v-if="status?.totpEnabledAt" class="adm-field">
-                            <div class="adm-field-label">Активировано</div>
+                            <div class="adm-field-label">{{ $t('admin.security.fieldEnabledAt') }}</div>
                             <span class="adm-text-sm">{{ formatDate(status.totpEnabledAt) }}</span>
                         </div>
                     </div>
                     <div>
                         <div class="adm-field">
-                            <div class="adm-field-label">Шифрование настроено</div>
+                            <div class="adm-field-label">{{ $t('admin.security.fieldEncryption') }}</div>
                             <span class="adm-text-sm">
-                                {{ status?.encryptionConfigured ? 'Да' : 'Нет — установите TOTP_ENCRYPTION_KEY' }}
+                                {{ status?.encryptionConfigured ? $t('admin.security.encryptionYes') : $t('admin.security.encryptionNo') }}
                             </span>
                         </div>
                         <div v-if="adminStore.adminSessionExpiresAt" class="adm-field">
-                            <div class="adm-field-label">Текущая сессия истекает</div>
+                            <div class="adm-field-label">{{ $t('admin.security.fieldSessionExpires') }}</div>
                             <span class="adm-text-sm">{{ formatDate(adminStore.adminSessionExpiresAt) }}</span>
                         </div>
                     </div>
@@ -42,32 +42,31 @@
 
             <!-- Backup codes regeneration -->
             <div v-if="status?.totpEnabled" class="adm-card">
-                <h3 class="adm-card-title">Резервные коды</h3>
+                <h3 class="adm-card-title">{{ $t('admin.security.backupSection') }}</h3>
                 <p class="adm-text-sm adm-muted" style="margin-bottom: 14px;">
-                    Резервные коды позволяют войти без приложения-аутентификатора (один код = один вход).
-                    Регенерация уничтожает все старые коды и создаёт новые 10 штук — старые перестают работать.
+                    {{ $t('admin.security.backupDescription') }}
                 </p>
 
                 <div v-if="newBackupCodes.length > 0" class="adm-card" style="background: rgba(34, 197, 94, 0.06); border-color: rgba(34, 197, 94, 0.25); margin-bottom: 14px;">
                     <p class="adm-text-sm" style="margin-bottom: 10px;">
-                        <strong>Новые резервные коды</strong> — сохраните их сейчас, повторно показаны не будут:
+                        <strong>{{ $t('admin.security.newCodesTitle') }}</strong>{{ $t('admin.security.newCodesDescription') }}
                     </p>
                     <div class="adm-backup-codes">
                         <div v-for="c in newBackupCodes" :key="c" class="adm-backup-code">{{ c }}</div>
                     </div>
                     <div class="adm-row" style="margin-top: 12px; gap: 8px;">
                         <button class="adm-btn adm-btn--sm adm-btn--ghost" @click="copyBackupCodes">
-                            Скопировать все
+                            {{ $t('admin.security.copyAll') }}
                         </button>
                         <button class="adm-btn adm-btn--sm adm-btn--primary" @click="newBackupCodes = []">
-                            Я сохранил коды
+                            {{ $t('admin.security.saved') }}
                         </button>
                     </div>
                 </div>
 
                 <div v-else>
                     <div class="adm-field">
-                        <div class="adm-field-label">Текущий TOTP-код для подтверждения</div>
+                        <div class="adm-field-label">{{ $t('admin.security.currentTotpLabel') }}</div>
                         <input
                             v-model="regenerateCode"
                             class="adm-input"
@@ -83,7 +82,7 @@
                         @click="doRegenerate"
                         :disabled="busy || regenerateCode.length !== 6"
                     >
-                        {{ busy ? 'Регенерация...' : 'Сгенерировать новые коды' }}
+                        {{ busy ? $t('admin.security.regenerating') : $t('admin.security.regenerate') }}
                     </button>
                     <div v-if="regenerateError" class="adm-2fa-error">{{ regenerateError }}</div>
                 </div>
@@ -91,13 +90,12 @@
 
             <!-- Disable 2FA -->
             <div v-if="status?.totpEnabled" class="adm-card">
-                <h3 class="adm-card-title">Отключить 2FA</h3>
+                <h3 class="adm-card-title">{{ $t('admin.security.disableSection') }}</h3>
                 <p class="adm-text-sm adm-muted" style="margin-bottom: 14px;">
-                    После отключения для повторного входа в админ-панель снова потребуется новая настройка 2FA.
-                    Все резервные коды также будут аннулированы. Это действие нельзя отменить.
+                    {{ $t('admin.security.disableDescription') }}
                 </p>
                 <div class="adm-field">
-                    <div class="adm-field-label">Текущий TOTP-код для подтверждения</div>
+                    <div class="adm-field-label">{{ $t('admin.security.currentTotpLabel') }}</div>
                     <input
                         v-model="disableCode"
                         class="adm-input"
@@ -113,7 +111,7 @@
                     @click="doDisable"
                     :disabled="busy || disableCode.length !== 6"
                 >
-                    {{ busy ? 'Отключение...' : 'Отключить 2FA' }}
+                    {{ busy ? $t('admin.security.disabling') : $t('admin.security.disable') }}
                 </button>
                 <div v-if="disableError" class="adm-2fa-error">{{ disableError }}</div>
             </div>
@@ -123,9 +121,11 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useAdminStore } from '@/stores/admin'
 
 const adminStore = useAdminStore()
+const { t, locale } = useI18n()
 
 const loading = ref(true)
 const busy = ref(false)
@@ -158,7 +158,7 @@ async function doRegenerate() {
         newBackupCodes.value = data.backupCodes || []
         regenerateCode.value = ''
     } catch (err) {
-        regenerateError.value = err.response?.data?.message || 'Не удалось сгенерировать коды'
+        regenerateError.value = err.response?.data?.message || t('admin.security.regenerateError')
     } finally {
         busy.value = false
     }
@@ -166,7 +166,7 @@ async function doRegenerate() {
 
 async function doDisable() {
     if (disableCode.value.length !== 6) return
-    if (!confirm('Точно отключить 2FA? Все резервные коды будут аннулированы.')) return
+    if (!confirm(t('admin.security.disableConfirm'))) return
     busy.value = true
     disableError.value = null
     try {
@@ -175,7 +175,7 @@ async function doDisable() {
         await loadStatus()
         // adminLayout will show the setup gate on next render because session is cleared
     } catch (err) {
-        disableError.value = err.response?.data?.message || 'Не удалось отключить 2FA'
+        disableError.value = err.response?.data?.message || t('admin.security.disableError')
     } finally {
         busy.value = false
     }
@@ -189,7 +189,8 @@ async function copyBackupCodes() {
 
 function formatDate(d) {
     if (!d) return '—'
-    return new Date(d).toLocaleString('ru-RU', {
+    const localeMap = { ru: 'ru-RU', en: 'en-GB', uz: 'uz-UZ' }
+    return new Date(d).toLocaleString(localeMap[locale.value] || 'ru-RU', {
         day: '2-digit', month: '2-digit', year: 'numeric',
         hour: '2-digit', minute: '2-digit'
     })
