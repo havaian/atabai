@@ -26,6 +26,12 @@ const userSchema = new mongoose.Schema({
         type: String,
         default: null
     },
+    role: {
+        type: String,
+        enum: ['user', 'admin', 'super_admin'],
+        default: 'user',
+        index: true
+    },
     subscriptionType: {
         type: String,
         enum: ['basic', 'premium'],
@@ -91,6 +97,28 @@ const userSchema = new mongoose.Schema({
     refreshTokenSecretCreatedAt: {
         type: Date,
         required: false
+    },
+
+    // ─── TOTP 2FA (admin only) ────────────────────────────────────────────
+    // Encrypted TOTP secret (AES-256-GCM, see totpCrypto.js). Never exposed.
+    totpSecret: {
+        type: String,
+        required: false,
+        select: false
+    },
+    totpEnabled: {
+        type: Boolean,
+        default: false
+    },
+    totpEnabledAt: {
+        type: Date,
+        required: false
+    },
+    // bcrypt hashes of 10 one-time backup codes. Used codes are removed from the array.
+    totpBackupCodes: {
+        type: [String],
+        default: [],
+        select: false
     }
 }, {
     timestamps: true,
@@ -100,6 +128,8 @@ const userSchema = new mongoose.Schema({
             delete ret.__v;
             delete ret.refreshTokenSecret; // Never expose secret
             delete ret.refreshTokenSecretCreatedAt;
+            delete ret.totpSecret;         // Never expose TOTP secret
+            delete ret.totpBackupCodes;    // Never expose backup code hashes
             return ret;
         }
     }
@@ -242,6 +272,18 @@ userSchema.statics.findOrCreateFromGoogle = async function (profile) {
             user.name = profile.displayName || user.name;
             user.email = profile.emails?.[0]?.value || user.email;
             user.picture = profile.photos?.[0]?.value || user.picture;
+
+            // Bootstrap super_admin role from ENV ADMIN_EMAILS on login
+            // Only promotes 'user' → 'super_admin'; never demotes
+            const adminEmails = (process.env.ADMIN_EMAILS || '')
+                .split(',')
+                .map(e => e.trim().toLowerCase())
+                .filter(Boolean);
+            if (user.role === 'user' && adminEmails.includes(user.email.toLowerCase())) {
+                user.role = 'super_admin';
+                global.logger.logInfo(`User promoted to super_admin via ADMIN_EMAILS: ${user.email}`, { category: 'auth' });
+            }
+
             await user.updateLastLogin();
 
             // Ensure user has a refresh token secret
@@ -250,12 +292,23 @@ userSchema.statics.findOrCreateFromGoogle = async function (profile) {
             return user;
         }
 
+        // Bootstrap super_admin role from ENV ADMIN_EMAILS for new users
+        const newUserEmail = profile.emails?.[0]?.value;
+        const adminEmails = (process.env.ADMIN_EMAILS || '')
+            .split(',')
+            .map(e => e.trim().toLowerCase())
+            .filter(Boolean);
+        const initialRole = newUserEmail && adminEmails.includes(newUserEmail.toLowerCase())
+            ? 'super_admin'
+            : 'user';
+
         // Create new user
         user = new this({
             googleId: profile.id,
-            email: profile.emails?.[0]?.value,
+            email: newUserEmail,
             name: profile.displayName,
-            picture: profile.photos?.[0]?.value
+            picture: profile.photos?.[0]?.value,
+            role: initialRole
         });
 
         // Generate initial refresh token secret

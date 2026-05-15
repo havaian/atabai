@@ -18,6 +18,8 @@ export const useAuthStore = defineStore('auth', () => {
     const monthlyLimit = computed(() => subscriptionType.value === 'basic' ? 5 : Infinity)
     const canProcessFiles = computed(() => filesProcessedThisMonth.value < monthlyLimit.value)
     const filesCompletedThisMonth = computed(() => user.value?.filesCompletedThisMonth || 0)
+    const userRole = computed(() => user.value?.role || 'user')
+    const isAdmin = computed(() => ['admin', 'super_admin'].includes(userRole.value))
 
     // Actions
     async function login() {
@@ -205,6 +207,8 @@ export const useAuthStore = defineStore('auth', () => {
         filesCompletedThisMonth,
         monthlyLimit,
         canProcessFiles,
+        userRole,
+        isAdmin,
         // Actions
         login,
         handleOAuthCallback,

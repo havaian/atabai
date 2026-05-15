@@ -23,6 +23,7 @@ const authRoutes = require('./auth/routes');
 const userRoutes = require('./user/routes');
 const fileRoutes = require('./files/routes');
 const templateRoutes = require('./templates/routes');
+const adminRoutes = require('./admin/routes');
 
 const app = express();
 
@@ -119,6 +120,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/files', fileRoutes);
 app.use('/api/templates', templateRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Root endpoint
 app.get('/', (req, res) => {
@@ -143,6 +145,10 @@ const initializeApp = async () => {
         // Connect to MongoDB
         await connectDatabase(process.env.MONGO_URI);
         global.logger.logInfo('✅ Mongodb connected successfully');
+
+        // Best-effort idempotent mapping seed (doesn't block startup on failure)
+        const { runSeedAtStartup } = require('./admin/mappingSeed');
+        await runSeedAtStartup();
 
         // await connectRedis();
         // global.logger.logInfo('Redis connected successfully', { category: 'startup' });

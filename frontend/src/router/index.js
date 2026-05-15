@@ -25,6 +25,17 @@ import ProcessingPage from '@/views/app/ProcessingPage.vue'
 import FileDetailsPage from '@/views/app/FileDetailsPage.vue'
 import FileHistoryPage from '@/views/app/FileHistoryPage.vue'
 
+// ─── Admin ────────────────────────────────────────────────────────────────────
+import AdminLayout from '@/layouts/AdminLayout.vue'
+import AdminDashboard from '@/views/admin/AdminDashboard.vue'
+import AdminUsers from '@/views/admin/AdminUsers.vue'
+import AdminUserDetail from '@/views/admin/AdminUserDetail.vue'
+import AdminFiles from '@/views/admin/AdminFiles.vue'
+import AdminFileDetail from '@/views/admin/AdminFileDetail.vue'
+import AdminMappings from '@/views/admin/AdminMappings.vue'
+import AdminMappingEditor from '@/views/admin/AdminMappingEditor.vue'
+import AdminSecuritySettings from '@/views/admin/AdminSecuritySettings.vue'
+
 const routes = [
     // ── Landing ──────────────────────────────────────────────────────────────
     {
@@ -165,6 +176,61 @@ const routes = [
                     titleKey: 'pageTitles./settings',
                     descriptionKey: 'pageDescriptions./settings'
                 }
+            }
+        ]
+    },
+
+    // ── Admin (requires admin role; further checked in AdminLayout) ──────────
+    {
+        path: '/admin',
+        component: AdminLayout,
+        meta: {
+            requiresAuth: true,
+            requiresAdmin: true,
+            showNavbar: false,
+            showFooter: false
+        },
+        children: [
+            {
+                path: '',
+                name: 'AdminDashboard',
+                component: AdminDashboard,
+                meta: { titleKey: null, descriptionKey: null }
+            },
+            {
+                path: 'users',
+                name: 'AdminUsers',
+                component: AdminUsers
+            },
+            {
+                path: 'users/:userId',
+                name: 'AdminUserDetail',
+                component: AdminUserDetail
+            },
+            {
+                path: 'files',
+                name: 'AdminFiles',
+                component: AdminFiles
+            },
+            {
+                path: 'files/:fileId',
+                name: 'AdminFileDetail',
+                component: AdminFileDetail
+            },
+            {
+                path: 'mappings',
+                name: 'AdminMappings',
+                component: AdminMappings
+            },
+            {
+                path: 'mappings/sets/:setId',
+                name: 'AdminMappingEditor',
+                component: AdminMappingEditor
+            },
+            {
+                path: 'security',
+                name: 'AdminSecuritySettings',
+                component: AdminSecuritySettings
             }
         ]
     },

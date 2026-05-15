@@ -5,7 +5,21 @@ const { extractCashFlowData, scoreCashFlowCandidate } = require('./extractors/ca
 const { transformToIFRSCashFlow } = require('./transformers/cashFlow');
 const { styleCashFlowReport } = require('./stylers/cashFlow');
 
-async function processCashFlowTemplate(input) {
+/**
+ * Process a cash flow statement.
+ * @param {string|Buffer|ExcelJS.Workbook} input
+ * @param {Object} [options]
+ * @param {string} [options.userId] - Reserved for future per-user customization
+ *
+ * NOTE on cash flow mapping: the current cash flow transformer uses its own
+ * embedded LABEL_MAP for label translation, not the row-code mapping from
+ * src/mappings/cashFlowMapping.js. The DB mapping for cash_flow is therefore
+ * editable in the admin (and stored), but does not currently affect
+ * transformation. Wiring cash flow to DB requires refactoring the transformer
+ * to use row-code mappings — a separate work item.
+ */
+async function processCashFlowTemplate(input, options = {}) {
+    // options.userId reserved — see JSDoc above
     const result = {
         workbook: null,
         summary: {

@@ -13,9 +13,13 @@ const { styleProfitLossReport } = require('./stylers/profitLoss');
  * Process a Profit & Loss report from NSBU format to IFRS format.
  *
  * @param {string|Buffer|ExcelJS.Workbook} input - File path, buffer, or workbook
+ * @param {Object} [options]
+ * @param {string} [options.userId] - Reserved (this is the budget P&L pipeline
+ *                                    which doesn't use a row-code mapping)
  * @returns {Object} { workbook, summary }
  */
-async function processProfitLossTemplate(input) {
+async function processProfitLossTemplate(input, options = {}) {
+    // options.userId reserved — see JSDoc above
     const result = {
         workbook: null,
         summary: {

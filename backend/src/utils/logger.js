@@ -10,6 +10,32 @@ if (!fs.existsSync(logsDir)) {
 }
 
 /**
+ * Safe JSON stringify that handles circular references and non-serializable values.
+ * Used by logger formatters to prevent crashes on objects like axios errors,
+ * which contain Agent/ClientRequest with circular references.
+ */
+const safeStringify = (obj, indent = 2) => {
+    const seen = new WeakSet();
+    return JSON.stringify(obj, (key, value) => {
+        // Strip known problematic axios/http internals to keep logs readable
+        if (key === 'agent' || key === 'socket' || key === '_httpMessage' || key === 'req' || key === 'res') {
+            return '[Stripped]';
+        }
+        if (typeof value === 'object' && value !== null) {
+            if (seen.has(value)) {
+                return '[Circular]';
+            }
+            seen.add(value);
+        }
+        // Functions and undefined become null in default JSON.stringify; mark them explicitly
+        if (typeof value === 'function') {
+            return '[Function]';
+        }
+        return value;
+    }, indent);
+};
+
+/**
  * Extract caller information from stack trace
  * @param {number} skipFrames - Number of frames to skip (default: 3)
  * @returns {Object} - File name and line number
@@ -110,13 +136,8 @@ const logFormat = winston.format.combine(
         delete cleanMeta.caller;
 
         if (Object.keys(cleanMeta).length > 0) {
-            // Stringify with proper UTF-8 handling
-            const metaStr = JSON.stringify(cleanMeta, (key, value) => {
-                if (typeof value === 'string') {
-                    return value; // Keep strings as-is for proper UTF-8
-                }
-                return value;
-            }, 2);
+            // Stringify with proper UTF-8 handling and circular reference protection
+            const metaStr = safeStringify(cleanMeta, 2);
             log += ` | ${metaStr}`;
         }
 
@@ -163,7 +184,7 @@ const consoleFormat = winston.format.combine(
         delete cleanMeta.caller;
 
         if (Object.keys(cleanMeta).length > 0) {
-            const metaStr = JSON.stringify(cleanMeta, null, 2);
+            const metaStr = safeStringify(cleanMeta, 2);
             log += ` ${metaStr}`;
         }
 

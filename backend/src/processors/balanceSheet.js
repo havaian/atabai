@@ -4,6 +4,7 @@ const { readExcelFile, pickBestSheet } = require('./readers/excelReader');
 const { extractBalanceSheetData, scoreBalanceSheetCandidate } = require('./extractors/balanceSheet');
 const { transformToIFRSStructure } = require('./transformers/balanceSheet');
 const { styleReport } = require('./stylers/balanceSheet');
+const { getBalanceSheetMapping } = require('../services/mappingResolver');
 
 /**
  * Balance Sheet Processor - Modular Architecture
@@ -13,9 +14,11 @@ const { styleReport } = require('./stylers/balanceSheet');
 /**
  * Process balance sheet from file path, buffer, or ExcelJS Workbook
  * @param {string|Buffer|ExcelJS.Workbook} input - File path, buffer, or ExcelJS Workbook
+ * @param {Object} [options]
+ * @param {string} [options.userId] - Apply this user's overrides on top of the global mapping
  * @returns {Object} Processing result with workbook and summary
  */
-async function processBalanceSheetTemplate(input) {
+async function processBalanceSheetTemplate(input, options = {}) {
     const result = {
         workbook: null,
         summary: {
@@ -29,6 +32,9 @@ async function processBalanceSheetTemplate(input) {
     };
 
     try {
+        // Resolve the mapping (DB with file fallback, user overrides applied)
+        const mapping = await getBalanceSheetMapping(options.userId);
+
         // Step 1: Read Excel file (supports .xlsx, .xls, and ExcelJS Workbook)
         const normalizedWorkbook = await readExcelFile(input);
 
@@ -47,7 +53,7 @@ async function processBalanceSheetTemplate(input) {
         const extracted = extractBalanceSheetData(sheet);
 
         // Step 3: Transform to IFRS structure
-        const ifrsStructure = transformToIFRSStructure(extracted.dataMap);
+        const ifrsStructure = transformToIFRSStructure(extracted.dataMap, mapping);
 
         // Step 4: Style the output (now async due to logo loading)
         const styledData = {

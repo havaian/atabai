@@ -14,9 +14,20 @@ const { styleEquityReport } = require('./stylers/equity');
  * (Form 1) or a dedicated Form 4 file.
  *
  * @param {string|Buffer|ExcelJS.Workbook} input
+ * @param {Object} [options]
+ * @param {string} [options.userId] - Reserved for future per-user customization
+ *
+ * NOTE on equity mapping: unlike balance/cashflow/p&l, the equity extractor
+ * relies on regex patterns and a structured config that's deeply intertwined
+ * with extraction logic. Stage 3b keeps the equity extractor on file constants
+ * for safety. Edits in the admin /equity editor are saved to DB and visible
+ * there, but transformation still uses src/mappings/equityMapping.js as the
+ * source of truth. Switching equity to DB-driven is a separate work item.
+ *
  * @returns {Object} { workbook, summary }
  */
-async function processEquityTemplate(input) {
+async function processEquityTemplate(input, options = {}) {
+    // options.userId reserved — see JSDoc above
     const result = {
         workbook: null,
         summary: {

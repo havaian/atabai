@@ -10,12 +10,15 @@ const { BALANCE_SHEET_MAPPING } = require('../../mappings/accountMapping');
 /**
  * Transform extracted data to IFRS structure
  * @param {Map} dataMap - Raw data map from extractor
+ * @param {Object} [mapping] - Optional mapping (DB-resolved). Defaults to file constant.
  * @returns {Object} IFRS structure
  */
-function transformToIFRSStructure(dataMap) {
+function transformToIFRSStructure(dataMap, mapping) {
+    const mappingToUse = mapping || BALANCE_SHEET_MAPPING;
+
     // Dynamically extract ALL unique section names from the mapping
     const uniqueSections = [...new Set(
-        Object.values(BALANCE_SHEET_MAPPING).map(m => m.section)
+        Object.values(mappingToUse).map(m => m.section)
     )];
 
     // Initialize sections object dynamically
@@ -30,10 +33,10 @@ function transformToIFRSStructure(dataMap) {
     });
 
     // Process each code in the mapping
-    Object.keys(BALANCE_SHEET_MAPPING).forEach(code => {
+    Object.keys(mappingToUse).forEach(code => {
         if (dataMap.has(code)) {
             const nsbuData = dataMap.get(code);
-            const mapping = BALANCE_SHEET_MAPPING[code];
+            const mapping = mappingToUse[code];
 
             // BUG-003 FIX: respect isNegative flag (accumulated depreciation, treasury stock, etc.)
             // These are contra-accounts in NSBU — their NSBU values are stored as positives
@@ -64,8 +67,8 @@ function transformToIFRSStructure(dataMap) {
     // BUG-004 FIX: resolve isCalculated rows (012 Net PP&E, 022 Net Intangibles).
     // These rows never appear in dataMap (the extractor reads raw NSBU rows only),
     // so they were silently dropped. We compute them here from their formula references.
-    Object.keys(BALANCE_SHEET_MAPPING).forEach(code => {
-        const mapping = BALANCE_SHEET_MAPPING[code];
+    Object.keys(mappingToUse).forEach(code => {
+        const mapping = mappingToUse[code];
         if (!mapping.isCalculated) return;
         if (dataMap.has(code)) return; // already processed above (shouldn't happen, but guard)
 
@@ -77,7 +80,7 @@ function transformToIFRSStructure(dataMap) {
 
         // Retrieve values already placed in the sections (post-sign-correction)
         const findItemValue = (refCode, key) => {
-            const refMapping = BALANCE_SHEET_MAPPING[refCode];
+            const refMapping = mappingToUse[refCode];
             if (!refMapping) return 0;
             const sectionItems = sections[refMapping.section]?.items || [];
             const found = sectionItems.find(i => i.label === refMapping.ifrsClassification);

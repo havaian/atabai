@@ -575,27 +575,29 @@ async function processFileAsync(fileRecord, processingJob) {
         processingJob.progress = 30;
         await processingJob.save();
 
-        // Process based on template type
+        // Process based on template type. userId is passed so the mapping
+        // resolver can apply per-user overrides on top of the global mapping.
+        const processorOptions = { userId: processingJob.userId };
         let result;
         switch (processingJob.templateType) {
             case 'balanceSheet':
-                result = await processBalanceSheetTemplate(filePath);
+                result = await processBalanceSheetTemplate(filePath, processorOptions);
                 break;
 
             case 'cashFlow':
-                result = await processCashFlowTemplate(filePath);
+                result = await processCashFlowTemplate(filePath, processorOptions);
                 break;
 
             case 'profitLoss':
-                result = await processProfitLossTemplate(filePath);
+                result = await processProfitLossTemplate(filePath, processorOptions);
                 break;
 
             case 'profitLossForm2':
-                result = await processProfitLossForm2Template(filePath);
+                result = await processProfitLossForm2Template(filePath, processorOptions);
                 break;
 
             case 'equity':
-                result = await processEquityTemplate(filePath);
+                result = await processEquityTemplate(filePath, processorOptions);
                 break;
 
             default:
@@ -874,17 +876,18 @@ async function regenerateTransformation(req, res) {
         // Re-run the right processor for this template. Workbook output is
         // discarded — existing processed xlsx stays valid; we only need the
         // fresh result.transformation.
+        const processorOptions = { userId: file.userId };
         let result;
         if (file.templateType === 'balanceSheet') {
-            result = await processBalanceSheetTemplate(originalPath);
+            result = await processBalanceSheetTemplate(originalPath, processorOptions);
         } else if (file.templateType === 'profitLossForm2') {
-            result = await processProfitLossForm2Template(originalPath);
+            result = await processProfitLossForm2Template(originalPath, processorOptions);
         } else if (file.templateType === 'cashFlow') {
-            result = await processCashFlowTemplate(originalPath);
+            result = await processCashFlowTemplate(originalPath, processorOptions);
         } else if (file.templateType === 'profitLoss') {
-            result = await processProfitLossTemplate(originalPath);
+            result = await processProfitLossTemplate(originalPath, processorOptions);
         } else if (file.templateType === 'equity') {
-            result = await processEquityTemplate(originalPath);
+            result = await processEquityTemplate(originalPath, processorOptions);
         }
 
         if (!result.transformation) {

@@ -16,14 +16,17 @@ const { extractProfitLossData, scoreBudgetPLCandidate } = require('./extractors/
 const { transformForm2ToIFRS } = require('./transformers/profitLossForm2');
 const { transformToIFRSProfitLoss } = require('./transformers/profitLoss');
 const { styleProfitLossReport } = require('./stylers/profitLoss');
+const { getProfitLossForm2Mapping } = require('../services/mappingResolver');
 
 /**
  * Process a P&L statement submitted under the "profitLossForm2" template.
  *
  * @param {string|Buffer|ExcelJS.Workbook} input
+ * @param {Object} [options]
+ * @param {string} [options.userId] - Apply this user's overrides on top of the global mapping
  * @returns {Object} { workbook, summary }
  */
-async function processProfitLossForm2Template(input) {
+async function processProfitLossForm2Template(input, options = {}) {
     const result = {
         workbook: null,
         summary: {
@@ -37,6 +40,15 @@ async function processProfitLossForm2Template(input) {
     };
 
     try {
+        // Resolve mapping (DB with file fallback, user overrides applied)
+        const mapping = await getProfitLossForm2Mapping(options.userId);
+        // Calculated codes are derived from the mapping itself
+        const calculatedCodes = new Set(
+            Object.entries(mapping)
+                .filter(([, def]) => def.isCalculated)
+                .map(([code]) => code)
+        );
+
         // Step 1: Read
         const normalizedWorkbook = await readExcelFile(input);
         if (normalizedWorkbook.sheetCount === 0) {
@@ -60,8 +72,8 @@ async function processProfitLossForm2Template(input) {
 
         if (isStandardForm2) {
             // ── Genuine NSBU Form 2 (ОКУД 0710002) pipeline ──────────────────
-            extracted = extractProfitLossForm2Data(sheet);
-            ifrsLayout = transformForm2ToIFRS(extracted);
+            extracted = extractProfitLossForm2Data(sheet, mapping, calculatedCodes);
+            ifrsLayout = transformForm2ToIFRS(extracted, mapping);
 
             styledData = {
                 title: 'PROFIT & LOSS STATEMENT (IFRS) — Form 2',

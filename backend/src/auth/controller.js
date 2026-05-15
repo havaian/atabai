@@ -57,24 +57,17 @@ class AuthController {
      * POST /api/auth/google/callback
      */
     async handleGoogleCallback(req, res) {
-        global.logger.logInfo('🔧 OAuth callback received');
-        global.logger.logInfo('🔧 Request body:', req.body);
-
         try {
             const { code } = req.body;
 
             if (!code) {
-                global.logger.logInfo('❌ No OAuth code provided');
                 return res.status(400).json({
                     error: 'OAUTH_CODE_MISSING',
                     message: 'OAuth authorization code is required'
                 });
             }
 
-            global.logger.logInfo('🔧 OAuth code received:', code.substring(0, 10) + '...');
-
             // Exchange authorization code for access token
-            global.logger.logInfo('🔧 Exchanging code for tokens...');
             const tokenResponse = await axios.post('https://oauth2.googleapis.com/token', {
                 client_id: process.env.GOOGLE_CLIENT_ID,
                 client_secret: process.env.GOOGLE_CLIENT_SECRET,
@@ -84,10 +77,8 @@ class AuthController {
             });
 
             const { access_token } = tokenResponse.data;
-            global.logger.logInfo('🔧 Access token received');
 
             // Get user profile from Google
-            global.logger.logInfo('🔧 Fetching user profile from Google...');
             const profileResponse = await axios.get('https://www.googleapis.com/oauth2/v2/userinfo', {
                 headers: {
                     Authorization: `Bearer ${access_token}`
@@ -95,11 +86,6 @@ class AuthController {
             });
 
             const googleProfile = profileResponse.data;
-            global.logger.logInfo('🔧 Google profile received:', {
-                id: googleProfile.id,
-                email: googleProfile.email,
-                name: googleProfile.name
-            });
 
             // Find or create user
             const user = await User.findOrCreateFromGoogle({
@@ -109,11 +95,9 @@ class AuthController {
                 photos: [{ value: googleProfile.picture }]
             });
 
-            global.logger.logInfo(`🔧 User found/created: ${user.email}`);
             await user.updateLastLogin();
 
             // Generate tokens
-            global.logger.logInfo('🔧 Generating JWT tokens...');
             const { accessToken: jwtToken, refreshToken } = await authService.generateTokenPair(user);
 
             // Create session data
@@ -128,21 +112,10 @@ class AuthController {
             });
 
         } catch (error) {
-            global.logger.logError('❌ DETAILED OAuth callback error:', error);
-            global.logger.logError('❌ Error name:', error.name);
-            global.logger.logError('❌ Error message:', error.message);
-
-            if (error.response) {
-                global.logger.logError('❌ API Error response:', {
-                    status: error.response.status,
-                    data: error.response.data
-                });
-            }
-
-            global.logger.logError('Google OAuth callback error', {
-                error: error.message,
-                stack: error.stack,
-                apiError: error.response?.data,
+            global.logger.logError(error, {
+                context: 'Google OAuth callback',
+                apiErrorStatus: error.response?.status,
+                apiErrorData: error.response?.data,
                 category: 'auth-error'
             });
 
@@ -334,6 +307,7 @@ class AuthController {
                     email: user.email,
                     name: user.name,
                     picture: user.picture,
+                    role: user.role,
                     subscriptionType: user.subscriptionType,
                     filesProcessedThisMonth: user.filesProcessedThisMonth,
                     monthlyLimit: await getFileLimit(user.subscriptionType),

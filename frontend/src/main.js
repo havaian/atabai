@@ -7,6 +7,7 @@ import axiosPlugin from './plugins/axios'
 import App from './App.vue'
 import './assets/main.css'
 import './assets/theme.css'
+import './assets/admin.css'
 
 // Import your global components
 import globalComponents from './plugins/globalComponents'

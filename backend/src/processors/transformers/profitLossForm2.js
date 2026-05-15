@@ -17,7 +17,9 @@
 
 const { FORM2_ROW_CODES } = require('../../mappings/profitLossForm2Mapping');
 
-function transformForm2ToIFRS(extracted) {
+function transformForm2ToIFRS(extracted, mapping) {
+    const mappingToUse = mapping || FORM2_ROW_CODES;
+
     global.logger.logInfo('[PL-F2 TRANSFORMER] Starting transformation');
 
     const { periods, dataMap, valuesArePreSigned } = extracted;
@@ -46,7 +48,7 @@ function transformForm2ToIFRS(extracted) {
     function pushItemIfPresent(code) {
         const row = dataMap[code];
         if (!row) return false;
-        const def = FORM2_ROW_CODES[code];
+        const def = mappingToUse[code];
         if (!def) return false;
 
         const labelText = def.ifrsClassification || def.label || row.label || code;
@@ -70,7 +72,7 @@ function transformForm2ToIFRS(extracted) {
     }
 
     function pushCalculatedFromMapping(code, displayLabel) {
-        const def = FORM2_ROW_CODES[code];
+        const def = mappingToUse[code];
         if (!def) return;
 
         codeToRowIdx[code] = rows.length;
@@ -179,7 +181,7 @@ function transformForm2ToIFRS(extracted) {
         const row = rows[i];
         if (row.type !== 'calculated') continue;
 
-        const def = FORM2_ROW_CODES[row.nsbuCode];
+        const def = mappingToUse[row.nsbuCode];
         if (!def || !def.formula) continue;
 
         row.addRefs = resolveFormulaToAddRefs(def.formula, codeToRowIdx);

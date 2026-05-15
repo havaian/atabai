@@ -142,7 +142,13 @@ function isForm2(sheet) {
  * @param {Object} sheet - Normalized sheet from readExcelFile
  * @returns {Object} Extracted data (compatible with profitLossForm2 transformer)
  */
-function extractProfitLossForm2Data(sheet) {
+function extractProfitLossForm2Data(sheet, mapping, calculatedCodes) {
+    const mappingToUse = mapping || FORM2_ROW_CODES;
+    const calculatedToUse = calculatedCodes
+        || (mapping
+            ? new Set(Object.entries(mapping).filter(([, def]) => def.isCalculated).map(([code]) => code))
+            : CALCULATED_CODES);
+
     global.logger.logInfo('[PL-F2 EXTRACTOR] Starting Form 2 extraction');
 
     const rowCount = sheet.rowCount || (sheet.data || sheet.rows || []).length;
@@ -157,7 +163,7 @@ function extractProfitLossForm2Data(sheet) {
         let found = false;
         for (let ci = 0; ci < Math.min(row.length, 5); ci++) {
             const text = getCellText(row[ci]).trim();
-            if (FORM2_ROW_CODES[text]) {
+            if (mappingToUse[text]) {
                 codeColIdx = ci;
                 found = true;
                 break;
@@ -322,10 +328,10 @@ function extractProfitLossForm2Data(sheet) {
     for (let ri = 0; ri < rowCount; ri++) {
         const row = getRow(sheet, ri);
         const code = getCellText(row[codeColIdx]).trim();
-        if (!FORM2_ROW_CODES[code]) continue;
+        if (!mappingToUse[code]) continue;
 
         // Skip calculated codes — they're computed by the transformer from other rows
-        if (CALCULATED_CODES.has(code)) continue;
+        if (calculatedToUse.has(code)) continue;
 
         // Read values per period. Two-axis periods have paired income/expense
         // columns; single-axis periods have a single colIndex.
@@ -342,7 +348,7 @@ function extractProfitLossForm2Data(sheet) {
             return incNum - expNum;
         });
 
-        const rowDef = FORM2_ROW_CODES[code];
+        const rowDef = mappingToUse[code];
 
         // Label column is typically the column to the LEFT of the code column
         // (in UzTelecom layout: A=label, B=code) but some exporters put it
