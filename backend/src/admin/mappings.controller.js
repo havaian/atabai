@@ -1,4 +1,3 @@
-const mongoose = require('mongoose');
 const MappingSet = require('./models/mappingSet.model');
 const RowMapping = require('./models/rowMapping.model');
 const EquityMappingConfig = require('./models/equityMappingConfig.model');
@@ -224,11 +223,9 @@ async function createDraftFromPublished(req, res) {
  *   - Current published for this reportType → 'archived'
  *   - This draft → 'published', publishedAt + publishedBy set
  *
- * Atomic via mongoose session/transaction (requires MongoDB replica set).
- * Falls back to sequential update if transactions are unavailable.
+ * Sequential (non-transactional) — see comment inside for rationale.
  */
 async function publishDraft(req, res) {
-    let session = null;
     try {
         const { setId } = req.params;
         const draft = await MappingSet.findById(setId);
@@ -244,46 +241,32 @@ async function publishDraft(req, res) {
 
         const reportType = draft.reportType;
 
-        // Try transaction first
-        let useTransaction = true;
-        try {
-            session = await mongoose.startSession();
-            session.startTransaction();
-        } catch (err) {
-            useTransaction = false;
-            session = null;
+        // Sequential publish — no transaction.
+        // Transactions require a MongoDB replica set; on standalone deployments
+        // (like the current production VPS) startTransaction throws inside the
+        // first session-bound query. The window between the two saves below is
+        // microseconds; worst case is briefly having zero published sets for
+        // this reportType — much better than a 500 on every publish attempt.
+        // If/when we move to a replica set, this can be wrapped in a transaction
+        // by reverting to the version in git history before the standalone fix.
+        const currentPublished = await MappingSet.findOne({ reportType, status: 'published' });
+        if (currentPublished) {
+            currentPublished.status = 'archived';
+            await currentPublished.save();
         }
 
-        try {
-            const currentPublished = await MappingSet.findOne({ reportType, status: 'published' }, null, session ? { session } : {});
-            if (currentPublished) {
-                currentPublished.status = 'archived';
-                await currentPublished.save(session ? { session } : undefined);
-            }
-
-            draft.status = 'published';
-            draft.publishedAt = new Date();
-            draft.publishedBy = req.user._id;
-            if (req.body?.notes) draft.notes = req.body.notes;
-            await draft.save(session ? { session } : undefined);
-
-            if (session) await session.commitTransaction();
-        } catch (innerErr) {
-            if (session) {
-                try { await session.abortTransaction(); } catch (_) {}
-            }
-            throw innerErr;
-        } finally {
-            if (session) session.endSession();
-        }
+        draft.status = 'published';
+        draft.publishedAt = new Date();
+        draft.publishedBy = req.user._id;
+        if (req.body?.notes) draft.notes = req.body.notes;
+        await draft.save();
 
         global.logger.logSecurity('Mapping set published', {
             adminId: req.user._id,
             adminEmail: req.user.email,
             setId: draft._id,
             reportType,
-            version: draft.version,
-            atomic: useTransaction
+            version: draft.version
         }, 'info');
 
         // Invalidate resolver cache so the new mapping takes effect immediately
