@@ -115,7 +115,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useAdminStore } from '@/stores/admin'
 
-const { t, locale } = useI18n()
+const { t } = useI18n()
 const adminStore = useAdminStore()
 
 const enabled = ref(false)
@@ -134,11 +134,11 @@ const bulkResult = ref(null)
 
 const canEdit = computed(() => adminStore.adminInfo?.role === 'super_admin')
 
-const localeTag = computed(() => ({ ru: 'ru-RU', en: 'en-GB', uz: 'uz-UZ' }[locale.value] || 'en-GB'))
+const localeTag = 'en-GB'
 
 function formatDate(iso) {
     if (!iso) return ''
-    return new Date(iso).toLocaleDateString(localeTag.value, { day: '2-digit', month: 'short', year: 'numeric' })
+    return new Date(iso).toLocaleDateString(localeTag, { day: '2-digit', month: 'short', year: 'numeric' })
 }
 
 async function load() {
