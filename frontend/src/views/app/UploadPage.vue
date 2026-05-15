@@ -633,4 +633,23 @@ function statusClass(status) {
     text-align: center;
     color: var(--ws-text-3);
 }
+
+/* ─── Responsive ─────────────────────────────────────────────────────────── */
+@media (max-width: 767px) {
+    .upload-page {
+        padding: 20px 16px 48px !important;
+    }
+    .template-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+    .drop-zone {
+        padding: 32px 16px;
+    }
+    .file-selected {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}
 </style>

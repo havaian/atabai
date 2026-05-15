@@ -129,7 +129,9 @@
     "language": "Language",
     "signIn": "Sign in",
     "themeToDark": "Switch to dark theme",
-    "themeToLight": "Switch to light theme"
+    "themeToLight": "Switch to light theme",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu"
   },
   "dashboard": {
     "welcome": "Welcome back, {name}!",

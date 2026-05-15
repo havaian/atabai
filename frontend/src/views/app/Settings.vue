@@ -449,25 +449,47 @@ function selectTheme(value) {
 }
 
 /* ─── Responsive ─────────────────────────────────────────────────────────── */
-@media (max-width: 640px) {
+@media (max-width: 767px) {
     .settings-page {
         padding: 24px 16px 48px;
     }
 
     .settings-layout {
         grid-template-columns: 1fr;
+        gap: 16px;
     }
 
+    /* Tabs become a flex-wrap pill row instead of overflow-x scroll.
+       Scrolling tab strips are bad UX on mobile — users miss off-screen items. */
     .settings-nav {
         flex-direction: row;
-        overflow-x: auto;
+        flex-wrap: wrap;
+        gap: 6px;
         position: static;
+        overflow: visible;
+    }
+
+    .settings-tab {
+        flex: 0 0 auto;
+        padding: 8px 12px;
+        font-size: 13px;
+        border-radius: 999px;
+        background: var(--ws-surface-2);
+    }
+
+    .settings-tab .tab-soon {
+        display: none; /* "soon" pill takes too much width on mobile; tab still works */
     }
 
     .settings-row {
         flex-direction: column;
         align-items: flex-start;
         gap: 12px;
+    }
+
+    .panel-section {
+        padding: 18px;
+        gap: 18px;
     }
 
     .theme-options {

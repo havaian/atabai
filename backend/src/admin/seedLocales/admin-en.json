@@ -31,6 +31,7 @@
             "mappings": "Mappings",
             "security": "Security",
             "locales": "Localization",
+            "access": "Access",
             "backToApp": "Back to app",
             "logout2FA": "Reset 2FA",
             "adminPanel": "Admin Panel"
@@ -42,7 +43,11 @@
             "forbiddenTitle": "Access denied",
             "forbiddenText": "You don't have administrator permissions.",
             "backToAppBtn": "Back to app",
-            "resetSessionPrompt": "Reset 2FA session? You will need to enter the code again."
+            "resetSessionPrompt": "Reset 2FA session? You will need to enter the code again.",
+            "themeLight": "Light",
+            "themeDark": "Dark",
+            "themeToLight": "Switch to light theme",
+            "themeToDark": "Switch to dark theme"
         },
         "dashboard": {
             "title": "Overview",
@@ -99,6 +104,9 @@
             "fieldRole": "Role",
             "fieldStatus": "Status",
             "fieldSubscription": "Subscription",
+            "subUntil": "until",
+            "subNoExpiry": "No expiry",
+            "subUpdateError": "Failed to update subscription",
             "fieldLanguage": "Language",
             "fieldCreated": "Registration",
             "fieldLastLogin": "Last login",
@@ -202,6 +210,10 @@
             "backLink": "← Mappings",
             "versionLabel": "v{version}",
             "publishedAt": "published {date}",
+            "metaCreatedBy": "Created by",
+            "metaPublishedBy": "Published by",
+            "metaNotes": "What changed",
+            "metaSystem": "System",
             "addRow": "+ Add row",
             "publishDraft": "Publish draft",
             "viewTable": "Table",
@@ -343,6 +355,36 @@
             "editHint": "Click an RU/EN/UZ cell to edit. Enter saves, Esc cancels.",
             "fieldKey": "Key (dotted-path)",
             "fieldApp": "App"
+        },
+        "access": {
+            "title": "Platform access",
+            "subtitle": "Manage the email whitelist for sign-up and sign-in",
+            "statusOn": "Whitelist active",
+            "statusOnHint": "Only emails listed below can sign in to ATABAI.",
+            "statusOff": "Whitelist disabled",
+            "statusOffHint": "Any Google account can register. Set ENABLE_EMAIL_WHITELIST=true in .env to enable protection.",
+            "totalEntries": "Total entries",
+            "addEntry": "+ Add email",
+            "bulkAddTitle": "Bulk add",
+            "bulkAddHint": "Emails separated by commas or newlines",
+            "bulkPlaceholder": "user1@example.com, user2@example.com\nuser3@example.com",
+            "bulkAddSubmit": "Add all",
+            "bulkResult": "Added: {added}, skipped (duplicates/invalid): {skipped}",
+            "bulkError": "Bulk add failed",
+            "processing": "Processing...",
+            "emailPlaceholder": "email@example.com",
+            "notePlaceholder": "Note (optional)",
+            "colEmail": "Email",
+            "colNote": "Note",
+            "colAddedBy": "Added by",
+            "colAddedAt": "Date",
+            "systemAuthor": "System",
+            "empty": "Whitelist is empty. Add the first email using the button above.",
+            "loadError": "Failed to load whitelist",
+            "addError": "Failed to add email",
+            "duplicateError": "This email is already in the whitelist",
+            "removeConfirm": "Remove {email} from the whitelist? If the user is already registered, they remain in the system but future sign-ins will be blocked.",
+            "removeError": "Failed to delete entry"
         }
     }
 }

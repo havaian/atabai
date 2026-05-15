@@ -2,7 +2,7 @@ const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const JwtStrategy = require('passport-jwt').Strategy;
 const ExtractJwt = require('passport-jwt').ExtractJwt;
-const User = require('../models/User');
+const User = require('../user/model');
 
 // Validate required environment variables
 const requiredEnvVars = ['GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET', 'JWT_SECRET'];
@@ -21,15 +21,17 @@ passport.use(new GoogleStrategy({
     scope: ['profile', 'email']
 }, async (accessToken, refreshToken, profile, done) => {
     try {
-        global.logger.logInfo(`Google OAuth callback for user: ${profile.emails?.[0]?.value}`);
-
         // Find or create user from Google profile
         const user = await User.findOrCreateFromGoogle(profile);
-
-        global.logger.logInfo(`User authenticated: ${user.email}`);
         return done(null, user);
     } catch (error) {
-        global.logger.logError('Google OAuth error:', error);
+        // Whitelist denial is NOT an error — it's a known access control
+        // outcome. Pass it through `info` so the callback handler can redirect
+        // with a friendly message instead of surfacing as a 500.
+        if (error && error.code === 'WHITELIST_BLOCKED') {
+            return done(null, false, { code: 'WHITELIST_BLOCKED', email: error.blockedEmail });
+        }
+        global.logger.logError(error, { context: 'oauth/GoogleStrategy' });
         return done(error, null);
     }
 }));

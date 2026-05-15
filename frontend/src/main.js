@@ -8,6 +8,7 @@ import App from './App.vue'
 import './assets/main.css'
 import './assets/theme.css'
 import './assets/admin.css'
+import './assets/mobile-overrides.css' // Must be last — wins specificity battles
 
 // Import your global components
 import globalComponents from './plugins/globalComponents'

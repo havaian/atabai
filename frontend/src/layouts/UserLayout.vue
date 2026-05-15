@@ -2,14 +2,19 @@
 <template>
     <div class="ws-layout">
         <!-- Sidebar -->
-        <Sidebar :is-sidebar-open="isSidebarOpen" :is-mobile-menu-open="isSidebarOpen" :is-large-screen="isLargeScreen"
-            @toggle="toggleSidebar" @close="closeSidebar" />
+        <Sidebar
+            :is-sidebar-open="isSidebarOpen"
+            :is-mobile-menu-open="isMobileDrawerOpen"
+            :is-large-screen="isLargeScreen"
+            @toggle="toggleSidebar"
+            @close="closeMobileDrawer"
+        />
 
         <!-- Main content -->
         <div class="ws-main">
             <!-- Mobile header -->
             <div class="ws-mobile-header">
-                <button class="ws-mobile-menu-btn" @click="toggleSidebar">
+                <button class="ws-mobile-menu-btn" @click="openMobileDrawer" :aria-label="$t('nav.openMenu')">
                     <Bars3Icon class="h-5 w-5" />
                 </button>
                 <LogoComponent class="ws-mobile-logo" />
@@ -26,14 +31,35 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import Sidebar from '@/components/layout/Sidebar.vue'
 import LogoComponent from '@/components/Logo.vue'
 import { Bars3Icon } from '@heroicons/vue/24/outline'
 
-const isLargeScreen = ref(window.innerWidth >= 1024)
+// Single source of truth for "what is mobile". Matches Sidebar.vue's internal
+// breakpoint (must stay in sync — DRY violation but Sidebar is too big to refactor here).
+const MOBILE_BREAKPOINT = 768
+
+const isLargeScreen = ref(window.innerWidth >= MOBILE_BREAKPOINT)
+
+// Desktop: controls sidebar collapsed/expanded state.
+// Mobile: ignored — mobile uses isMobileDrawerOpen instead.
 const isSidebarOpen = ref(true)
 
-const handleResize = () => { isLargeScreen.value = window.innerWidth >= 1024 }
+// Mobile-only: controls drawer open/closed.
+// Always false on desktop (drawer simply isn't rendered there).
+const isMobileDrawerOpen = ref(false)
+
+const route = useRoute()
+
+const handleResize = () => {
+    const wasLarge = isLargeScreen.value
+    isLargeScreen.value = window.innerWidth >= MOBILE_BREAKPOINT
+    // Auto-close mobile drawer when resizing up to desktop
+    if (!wasLarge && isLargeScreen.value) {
+        isMobileDrawerOpen.value = false
+    }
+}
 
 onMounted(() => {
     const saved = localStorage.getItem('atabai-sidebar-open')
@@ -43,18 +69,39 @@ onMounted(() => {
 
 onUnmounted(() => window.removeEventListener('resize', handleResize))
 
+// Persist desktop sidebar state only (mobile drawer state is ephemeral)
 watch(isSidebarOpen, (v) => {
     localStorage.setItem('atabai-sidebar-open', JSON.stringify(v))
 })
 
-const toggleSidebar = () => { isSidebarOpen.value = !isSidebarOpen.value }
-const closeSidebar = () => { isSidebarOpen.value = false }
+// Auto-close mobile drawer on route change (so navigation feels right)
+watch(() => route.fullPath, () => {
+    if (!isLargeScreen.value) isMobileDrawerOpen.value = false
+})
+
+// Lock body scroll while mobile drawer is open
+watch(isMobileDrawerOpen, (open) => {
+    document.body.style.overflow = open ? 'hidden' : ''
+})
+
+const toggleSidebar = () => {
+    if (isLargeScreen.value) {
+        isSidebarOpen.value = !isSidebarOpen.value
+    } else {
+        isMobileDrawerOpen.value = !isMobileDrawerOpen.value
+    }
+}
+const openMobileDrawer = () => { isMobileDrawerOpen.value = true }
+const closeMobileDrawer = () => { isMobileDrawerOpen.value = false }
 </script>
 
 <style scoped>
 .ws-layout {
     display: flex;
     height: 100vh;
+    /* Use dynamic viewport height on supporting browsers (iOS Safari) so
+       address bar shrinking doesn't cut off bottom of pages. Fallback to 100vh. */
+    height: 100dvh;
     background: var(--ws-bg);
     overflow: hidden;
 }
@@ -72,6 +119,8 @@ const closeSidebar = () => { isSidebarOpen.value = false }
     flex: 1;
     overflow-y: auto;
     overflow-x: hidden;
+    /* iOS momentum scrolling */
+    -webkit-overflow-scrolling: touch;
 }
 
 .ws-content::-webkit-scrollbar {
@@ -101,7 +150,8 @@ const closeSidebar = () => { isSidebarOpen.value = false }
     border-bottom: 1px solid rgba(149, 0, 255, 0.1);
 }
 
-@media (max-width: 1023px) {
+/* Breakpoint changed from 1023 → 767 per spec (mobile = <768px) */
+@media (max-width: 767px) {
     .ws-mobile-header {
         display: flex;
     }

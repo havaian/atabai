@@ -129,7 +129,9 @@
     "language": "Til",
     "signIn": "Kirish",
     "themeToDark": "Tungi mavzuga o'tish",
-    "themeToLight": "Yorug' mavzuga o'tish"
+    "themeToLight": "Yorug' mavzuga o'tish",
+    "openMenu": "Menyuni ochish",
+    "closeMenu": "Menyuni yopish"
   },
   "dashboard": {
     "welcome": "Xush kelibsiz, {name}!",

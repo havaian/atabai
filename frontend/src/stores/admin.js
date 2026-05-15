@@ -213,6 +213,35 @@ export const useAdminStore = defineStore('admin', () => {
         return response.data
     }
 
+    async function updateUserSubscription(userId, subscriptionType, subscriptionExpiresAt = null) {
+        const response = await adminPatch(`/admin/users/${userId}/subscription`, {
+            subscriptionType,
+            subscriptionExpiresAt
+        })
+        return response.data
+    }
+
+    // ─── Email whitelist ──────────────────────────────────────────────────────
+    async function listWhitelist() {
+        const response = await adminGet('/admin/whitelist')
+        return response.data
+    }
+
+    async function addWhitelistEntry(email, note = '') {
+        const response = await adminPost('/admin/whitelist', { email, note })
+        return response.data
+    }
+
+    async function bulkAddWhitelist(emails, note = '') {
+        const response = await adminPost('/admin/whitelist/bulk', { emails, note })
+        return response.data
+    }
+
+    async function removeWhitelistEntry(entryId) {
+        const response = await adminDelete(`/admin/whitelist/${entryId}`)
+        return response.data
+    }
+
     // ─── Files ────────────────────────────────────────────────────────────────
     async function listAllFiles(params = {}) {
         const response = await adminGet('/admin/files', { params })
@@ -330,6 +359,42 @@ export const useAdminStore = defineStore('admin', () => {
         return response.data
     }
 
+    // ─── Locales (i18n editor) ───────────────────────────────────────────────
+    async function listLocaleKeys(params = {}) {
+        const response = await adminGet('/admin/locales', { params })
+        return response.data
+    }
+
+    async function listLocaleNamespaces() {
+        const response = await adminGet('/admin/locales/namespaces')
+        return response.data
+    }
+
+    async function fetchLocaleStats() {
+        const response = await adminGet('/admin/locales/stats')
+        return response.data
+    }
+
+    async function createLocaleKey(payload) {
+        const response = await adminPost('/admin/locales/keys', payload)
+        return response.data
+    }
+
+    async function updateLocaleKey(keyId, payload) {
+        const response = await adminPatch(`/admin/locales/keys/${keyId}`, payload)
+        return response.data
+    }
+
+    async function deleteLocaleKey(keyId) {
+        const response = await adminDelete(`/admin/locales/keys/${keyId}`)
+        return response.data
+    }
+
+    async function runLocaleSeed() {
+        const response = await adminPost('/admin/locales/seed', {})
+        return response.data
+    }
+
     return {
         // state
         adminInfo,
@@ -361,6 +426,12 @@ export const useAdminStore = defineStore('admin', () => {
         getUserFiles,
         updateUserRole,
         updateUserActive,
+        updateUserSubscription,
+        // whitelist
+        listWhitelist,
+        addWhitelistEntry,
+        bulkAddWhitelist,
+        removeWhitelistEntry,
         // files
         listAllFiles,
         getFileDetails,
@@ -383,6 +454,14 @@ export const useAdminStore = defineStore('admin', () => {
         // overrides
         listUserOverrides,
         upsertUserOverride,
-        deleteUserOverride
+        deleteUserOverride,
+        // locales
+        listLocaleKeys,
+        listLocaleNamespaces,
+        fetchLocaleStats,
+        createLocaleKey,
+        updateLocaleKey,
+        deleteLocaleKey,
+        runLocaleSeed
     }
 })

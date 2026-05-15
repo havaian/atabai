@@ -31,6 +31,7 @@
             "mappings": "Bog‘lanishlar",
             "security": "Xavfsizlik",
             "locales": "Tarjima",
+            "access": "Kirish",
             "backToApp": "Ilovaga qaytish",
             "logout2FA": "2FA seansini tugatish",
             "adminPanel": "Admin panel"
@@ -42,7 +43,11 @@
             "forbiddenTitle": "Kirish taqiqlangan",
             "forbiddenText": "Sizda administrator huquqlari yo‘q.",
             "backToAppBtn": "Ilovaga qaytish",
-            "resetSessionPrompt": "2FA seansini tugatish? Kodni qaytadan kiritish kerak bo‘ladi."
+            "resetSessionPrompt": "2FA seansini tugatish? Kodni qaytadan kiritish kerak bo‘ladi.",
+            "themeLight": "Yorug‘",
+            "themeDark": "Tungi",
+            "themeToLight": "Yorug‘ mavzuga o‘tish",
+            "themeToDark": "Tungi mavzuga o‘tish"
         },
         "dashboard": {
             "title": "Umumiy ko‘rinish",
@@ -99,6 +104,9 @@
             "fieldRole": "Rol",
             "fieldStatus": "Holat",
             "fieldSubscription": "Obuna",
+            "subUntil": "gacha",
+            "subNoExpiry": "Muddatsiz",
+            "subUpdateError": "Obunani yangilab bo‘lmadi",
             "fieldLanguage": "Til",
             "fieldCreated": "Ro‘yxatga olingan",
             "fieldLastLogin": "So‘nggi kirish",
@@ -202,6 +210,10 @@
             "backLink": "← Bog‘lanishlar",
             "versionLabel": "v{version}",
             "publishedAt": "{date} sanasida nashr etilgan",
+            "metaCreatedBy": "Yaratdi",
+            "metaPublishedBy": "Nashr etdi",
+            "metaNotes": "Nima o'zgardi",
+            "metaSystem": "Tizim",
             "addRow": "+ Satr qo‘shish",
             "publishDraft": "Draftni nashr etish",
             "viewTable": "Jadval",
@@ -343,6 +355,36 @@
             "editHint": "Tahrirlash uchun RU/EN/UZ katakni bosing. Enter — saqlash, Esc — bekor qilish.",
             "fieldKey": "Kalit (dotted-path)",
             "fieldApp": "Ilova"
+        },
+        "access": {
+            "title": "Platformaga kirish",
+            "subtitle": "Ro‘yxatdan o‘tish va kirish uchun email whitelist'ni boshqarish",
+            "statusOn": "Whitelist yoqilgan",
+            "statusOnHint": "ATABAI'ga faqat quyidagi ro‘yxatdagi email'lar kira oladi.",
+            "statusOff": "Whitelist o‘chirilgan",
+            "statusOffHint": "Har qanday Google akkaunti ro‘yxatdan o‘ta oladi. Himoyani yoqish uchun .env'da ENABLE_EMAIL_WHITELIST=true qiymatini o‘rnating.",
+            "totalEntries": "Jami yozuvlar",
+            "addEntry": "+ Email qo‘shish",
+            "bulkAddTitle": "Ommaviy qo‘shish",
+            "bulkAddHint": "Vergul yoki yangi qator bilan ajratilgan email'lar",
+            "bulkPlaceholder": "user1@example.com, user2@example.com\nuser3@example.com",
+            "bulkAddSubmit": "Hammasini qo‘shish",
+            "bulkResult": "Qo‘shildi: {added}, o‘tkazib yuborildi (dublikat/noto‘g‘ri): {skipped}",
+            "bulkError": "Ommaviy qo‘shishda xatolik",
+            "processing": "Qayta ishlanmoqda...",
+            "emailPlaceholder": "email@example.com",
+            "notePlaceholder": "Izoh (ixtiyoriy)",
+            "colEmail": "Email",
+            "colNote": "Izoh",
+            "colAddedBy": "Qo‘shdi",
+            "colAddedAt": "Sana",
+            "systemAuthor": "Tizim",
+            "empty": "Whitelist bo‘sh. Yuqoridagi tugma orqali birinchi email'ni qo‘shing.",
+            "loadError": "Whitelist'ni yuklashda xatolik",
+            "addError": "Email qo‘shishda xatolik",
+            "duplicateError": "Bu email allaqachon whitelist'da",
+            "removeConfirm": "{email} whitelist'dan o‘chirilsinmi? Agar foydalanuvchi ro‘yxatdan o‘tgan bo‘lsa — u tizimda qoladi, lekin keyingi kirishlar bloklanadi.",
+            "removeError": "Yozuvni o‘chirishda xatolik"
         }
     }
 }

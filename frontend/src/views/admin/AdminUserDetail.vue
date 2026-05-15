@@ -43,7 +43,36 @@
                         </div>
                         <div class="adm-field">
                             <div class="adm-field-label">{{ $t('admin.userDetail.fieldSubscription') }}</div>
-                            <span class="adm-text-sm">{{ user.subscriptionType }}</span>
+                            <div v-if="!subEditing" class="adm-subscription-display">
+                                <span class="adm-badge" :class="user.subscriptionType === 'premium' ? 'adm-badge--premium' : ''">
+                                    {{ user.subscriptionType }}
+                                </span>
+                                <span v-if="user.subscriptionExpiresAt" class="adm-text-xs adm-text-muted">
+                                    {{ $t('admin.userDetail.subUntil') }} {{ formatDate(user.subscriptionExpiresAt) }}
+                                </span>
+                                <button v-if="canEditSub" class="adm-btn-link" @click="startSubEdit">
+                                    {{ $t('admin.common.edit') }}
+                                </button>
+                            </div>
+                            <div v-else class="adm-subscription-edit">
+                                <select v-model="subForm.type" class="adm-input adm-input-sm">
+                                    <option value="basic">basic</option>
+                                    <option value="premium">premium</option>
+                                </select>
+                                <input
+                                    v-if="subForm.type === 'premium'"
+                                    type="date"
+                                    v-model="subForm.expires"
+                                    class="adm-input adm-input-sm"
+                                    :placeholder="$t('admin.userDetail.subNoExpiry')"
+                                />
+                                <button class="adm-btn-sm adm-btn--primary" :disabled="subSubmitting" @click="saveSubscription">
+                                    {{ subSubmitting ? '...' : $t('admin.common.save') }}
+                                </button>
+                                <button class="adm-btn-sm adm-btn--ghost" @click="cancelSubEdit">
+                                    {{ $t('admin.common.cancel') }}
+                                </button>
+                            </div>
                         </div>
                         <div class="adm-field">
                             <div class="adm-field-label">{{ $t('admin.userDetail.fieldLanguage') }}</div>
@@ -227,10 +256,46 @@ const error = ref(null)
 const showRoleModal = ref(false)
 const newRole = ref('user')
 
+// ── Subscription inline editor ──
+const subEditing = ref(false)
+const subSubmitting = ref(false)
+const subForm = ref({ type: 'basic', expires: '' })
+
 const isSuperAdmin = computed(() => adminStore.isSuperAdmin)
 const isSelf = computed(() => user.value?._id === adminStore.adminInfo?.id)
+const canEditSub = computed(() => isSuperAdmin.value)
 
 const userId = computed(() => route.params.userId)
+
+function startSubEdit() {
+    subForm.value.type = user.value?.subscriptionType || 'basic'
+    // Convert ISO date → YYYY-MM-DD for <input type="date">
+    const exp = user.value?.subscriptionExpiresAt
+    subForm.value.expires = exp ? new Date(exp).toISOString().slice(0, 10) : ''
+    subEditing.value = true
+}
+
+function cancelSubEdit() {
+    subEditing.value = false
+}
+
+async function saveSubscription() {
+    if (!user.value) return
+    subSubmitting.value = true
+    try {
+        const expires = subForm.value.type === 'premium' && subForm.value.expires
+            ? new Date(subForm.value.expires).toISOString()
+            : null
+        const res = await adminStore.updateUserSubscription(user.value._id, subForm.value.type, expires)
+        user.value.subscriptionType = res.user.subscriptionType
+        user.value.subscriptionExpiresAt = res.user.subscriptionExpiresAt
+        subEditing.value = false
+    } catch (err) {
+        alert(t('admin.userDetail.subUpdateError'))
+    } finally {
+        subSubmitting.value = false
+    }
+}
 
 async function loadUser() {
     loading.value = true

@@ -19,13 +19,13 @@
 .adm-page-title {
     font-size: 22px;
     font-weight: 600;
-    color: rgba(240, 236, 246, 0.95);
+    color: var(--ws-text, #f0ecf6);
     margin: 0;
 }
 
 .adm-page-subtitle {
     font-size: 13px;
-    color: rgba(240, 236, 246, 0.55);
+    color: var(--adm-text-muted);
     margin-top: 4px;
 }
 
@@ -44,7 +44,7 @@
 .adm-card-title {
     font-size: 14px;
     font-weight: 600;
-    color: rgba(240, 236, 246, 0.85);
+    color: var(--adm-text);
     margin: 0 0 12px 0;
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -72,7 +72,7 @@
 
 .adm-stat-label {
     font-size: 11px;
-    color: rgba(240, 236, 246, 0.5);
+    color: var(--adm-text-muted);
     text-transform: uppercase;
     letter-spacing: 0.08em;
     margin-bottom: 8px;
@@ -82,7 +82,7 @@
 .adm-stat-value {
     font-size: 24px;
     font-weight: 600;
-    color: rgba(240, 236, 246, 0.95);
+    color: var(--ws-text, #f0ecf6);
     line-height: 1;
 }
 
@@ -103,19 +103,19 @@
     text-align: left;
     padding: 10px 14px;
     background: rgba(20, 14, 32, 0.7);
-    color: rgba(240, 236, 246, 0.6);
+    color: var(--adm-text-muted);
     font-weight: 600;
     font-size: 11px;
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    border-bottom: 1px solid rgba(149, 0, 255, 0.15);
+    border-bottom: 1px solid var(--adm-border);
     white-space: nowrap;
 }
 
 .adm-table td {
     padding: 10px 14px;
     border-bottom: 1px solid rgba(149, 0, 255, 0.08);
-    color: rgba(240, 236, 246, 0.85);
+    color: var(--adm-text);
     vertical-align: middle;
 }
 
@@ -142,8 +142,8 @@
     gap: 6px;
     padding: 7px 14px;
     border: none;
-    background: rgba(149, 0, 255, 0.15);
-    color: rgba(240, 236, 246, 0.95);
+    background: var(--adm-nav-bg-active);
+    color: var(--ws-text, #f0ecf6);
     border-radius: 7px;
     font-size: 13px;
     font-weight: 500;
@@ -177,11 +177,11 @@
 
 .adm-btn--ghost {
     background: transparent;
-    border: 1px solid rgba(149, 0, 255, 0.2);
+    border: 1px solid var(--adm-border);
 }
 
 .adm-btn--ghost:hover {
-    background: rgba(149, 0, 255, 0.08);
+    background: var(--adm-nav-bg-hover);
 }
 
 .adm-btn--sm {
@@ -203,7 +203,7 @@
     background: rgba(15, 10, 26, 0.6);
     border: 1px solid rgba(149, 0, 255, 0.18);
     border-radius: 7px;
-    color: rgba(240, 236, 246, 0.95);
+    color: var(--ws-text, #f0ecf6);
     font-size: 13px;
     font-family: inherit;
     transition: border-color 0.12s;
@@ -236,7 +236,7 @@
     font-size: 11px;
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    color: rgba(240, 236, 246, 0.55);
+    color: var(--adm-text-muted);
     margin-bottom: 4px;
 }
 
@@ -253,7 +253,7 @@
 
 .adm-badge--role-user { background: rgba(100, 116, 139, 0.2); color: #94a3b8; }
 .adm-badge--role-admin { background: rgba(59, 130, 246, 0.18); color: #93c5fd; }
-.adm-badge--role-super_admin { background: rgba(168, 85, 247, 0.2); color: #c084fc; }
+.adm-badge--role-super_admin { background: rgba(168, 85, 247, 0.2); color: var(--adm-nav-text-active); }
 
 .adm-badge--status-uploaded { background: rgba(100, 116, 139, 0.2); color: #94a3b8; }
 .adm-badge--status-processing { background: rgba(234, 179, 8, 0.2); color: #fde047; }
@@ -293,7 +293,7 @@
     align-items: center;
     justify-content: space-between;
     margin-top: 14px;
-    color: rgba(240, 236, 246, 0.6);
+    color: var(--adm-text-muted);
     font-size: 12px;
 }
 
@@ -306,7 +306,7 @@
 .adm-empty {
     text-align: center;
     padding: 40px 20px;
-    color: rgba(240, 236, 246, 0.45);
+    color: var(--adm-text-muted);
     font-size: 13px;
 }
 
@@ -324,7 +324,7 @@
 
 .adm-modal {
     background: rgb(20, 14, 32);
-    border: 1px solid rgba(149, 0, 255, 0.2);
+    border: 1px solid var(--adm-border);
     border-radius: 12px;
     padding: 24px;
     max-width: 560px;
@@ -337,7 +337,7 @@
     font-size: 16px;
     font-weight: 600;
     margin: 0 0 16px 0;
-    color: rgba(240, 236, 246, 0.95);
+    color: var(--ws-text, #f0ecf6);
 }
 
 .adm-modal-actions {
@@ -354,7 +354,7 @@
 }
 
 .adm-muted {
-    color: rgba(240, 236, 246, 0.5);
+    color: var(--adm-text-muted);
 }
 
 .adm-text-sm { font-size: 12px; }
@@ -384,4 +384,104 @@
 @media (max-width: 768px) {
     .adm-grid-2 { grid-template-columns: 1fr; }
     .adm-page { padding: 16px; }
+}
+
+/* ─── Subscription inline editor (AdminUserDetail) ────────────────────── */
+.adm-subscription-display {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.adm-subscription-edit {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.adm-input-sm {
+    padding: 4px 8px !important;
+    font-size: 12px !important;
+    height: auto !important;
+}
+
+.adm-btn-sm {
+    padding: 4px 10px;
+    font-size: 12px;
+    border-radius: 6px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.adm-btn-link {
+    background: transparent;
+    border: none;
+    color: #9333ea;
+    cursor: pointer;
+    font-size: 12px;
+    padding: 2px 6px;
+    text-decoration: underline;
+}
+
+.adm-btn-link:hover {
+    color: var(--adm-nav-text-active);
+}
+
+.adm-badge--premium {
+    background: var(--adm-nav-bg-active);
+    color: var(--adm-nav-text-active);
+}
+
+.adm-text-muted {
+    color: var(--adm-text-muted);
+}
+
+/* ─── Mapping editor metadata card ────────────────────────────────────── */
+.adm-meta-card {
+    padding: 14px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.adm-meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.adm-meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 180px;
+}
+
+.adm-meta-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--adm-text-muted);
+}
+
+.adm-meta-value {
+    font-size: 13px;
+    color: var(--adm-text);
+}
+
+.adm-meta-notes {
+    border-top: 1px solid var(--adm-border-soft);
+    padding-top: 10px;
+}
+
+.adm-meta-notes-text {
+    font-size: 13px;
+    color: var(--adm-text);
+    line-height: 1.5;
+    margin-top: 4px;
+    white-space: pre-wrap;
 }

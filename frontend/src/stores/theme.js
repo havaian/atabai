@@ -95,6 +95,20 @@ export const useThemeStore = defineStore('theme', () => {
             '--landing-text-muted': 'rgba(240, 236, 246, 0.3)',
             '--landing-border': 'rgba(149, 0, 255, 0.08)',
             '--landing-border-accent': 'rgba(149, 0, 255, 0.12)',
+            // ── Admin panel tokens ────────────────────────────────────
+            // Used in AdminLayout.vue + admin.css. Kept separate from --ws-*
+            // so admin colors can be tuned independently if needed.
+            '--ws-bg-elevated': 'rgba(20, 14, 32, 0.95)',
+            '--adm-border': 'rgba(149, 0, 255, 0.15)',
+            '--adm-border-soft': 'rgba(149, 0, 255, 0.08)',
+            '--adm-nav-bg-hover': 'rgba(149, 0, 255, 0.08)',
+            '--adm-nav-bg-active': 'rgba(149, 0, 255, 0.15)',
+            '--adm-nav-text': 'rgba(240, 236, 246, 0.65)',
+            '--adm-nav-text-active': '#c084fc',
+            '--adm-text': 'rgba(240, 236, 246, 0.85)',
+            '--adm-text-muted': 'rgba(240, 236, 246, 0.55)',
+            '--adm-input-bg': 'rgba(0, 0, 0, 0.25)',
+            '--adm-table-header-bg': 'rgba(0, 0, 0, 0.18)',
         } : {
             '--ws-bg': '#F4F2F9',
             '--ws-surface': '#FFFFFF',
@@ -158,6 +172,18 @@ export const useThemeStore = defineStore('theme', () => {
             '--landing-text-muted': '#9890A8',
             '--landing-border': 'rgba(0, 0, 0, 0.06)',
             '--landing-border-accent': 'rgba(149, 0, 255, 0.12)',
+            // ── Admin panel tokens (light) ────────────────────────────
+            '--ws-bg-elevated': '#FFFFFF',
+            '--adm-border': 'rgba(124, 58, 237, 0.18)',
+            '--adm-border-soft': 'rgba(124, 58, 237, 0.08)',
+            '--adm-nav-bg-hover': 'rgba(124, 58, 237, 0.07)',
+            '--adm-nav-bg-active': 'rgba(124, 58, 237, 0.12)',
+            '--adm-nav-text': 'rgba(17, 16, 24, 0.65)',
+            '--adm-nav-text-active': '#7C3AED',
+            '--adm-text': 'rgba(17, 16, 24, 0.85)',
+            '--adm-text-muted': 'rgba(17, 16, 24, 0.55)',
+            '--adm-input-bg': '#FFFFFF',
+            '--adm-table-header-bg': 'rgba(17, 16, 24, 0.04)',
         }
         Object.entries(vars).forEach(([k, v]) => root.style.setProperty(k, v))
     }

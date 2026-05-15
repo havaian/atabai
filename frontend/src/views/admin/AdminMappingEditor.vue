@@ -32,6 +32,34 @@
         <div v-if="loading" class="adm-empty">{{ $t('admin.common.loading') }}</div>
         <div v-else-if="error" class="adm-empty">{{ error }}</div>
         <template v-else-if="set">
+            <!-- Metadata: who created/published this version + their notes -->
+            <div class="adm-card adm-meta-card">
+                <div class="adm-meta-row">
+                    <div class="adm-meta-item">
+                        <div class="adm-meta-label">{{ $t('admin.mappingEditor.metaCreatedBy') }}</div>
+                        <div class="adm-meta-value">
+                            {{ set.createdBy?.name || set.createdBy?.email || $t('admin.mappingEditor.metaSystem') }}
+                            <span v-if="set.createdAt" class="adm-muted adm-text-xs">
+                                · {{ formatDate(set.createdAt) }}
+                            </span>
+                        </div>
+                    </div>
+                    <div v-if="set.publishedBy" class="adm-meta-item">
+                        <div class="adm-meta-label">{{ $t('admin.mappingEditor.metaPublishedBy') }}</div>
+                        <div class="adm-meta-value">
+                            {{ set.publishedBy?.name || set.publishedBy?.email }}
+                            <span v-if="set.publishedAt" class="adm-muted adm-text-xs">
+                                · {{ formatDate(set.publishedAt) }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div v-if="set.notes" class="adm-meta-notes">
+                    <div class="adm-meta-label">{{ $t('admin.mappingEditor.metaNotes') }}</div>
+                    <div class="adm-meta-notes-text">{{ set.notes }}</div>
+                </div>
+            </div>
+
             <!-- View toggle -->
             <div class="adm-card" style="padding: 12px 16px;" v-if="isRowBased">
                 <div class="adm-row" style="gap: 8px;">
@@ -201,21 +229,41 @@
                     </div>
                     <div class="adm-field">
                         <div class="adm-field-label">{{ $t('admin.mappingEditor.fieldIFRS') }} *</div>
-                        <input v-model="rowForm.ifrsClassification" class="adm-input" placeholder="PP&E - Gross" />
+                        <AdminCombobox
+                            v-model="rowForm.ifrsClassification"
+                            :suggestions="suggestionsIfrs"
+                            datalist-id="mapeditor-ifrs"
+                            placeholder="PP&E - Gross"
+                        />
                     </div>
                 </div>
                 <div class="adm-field">
                     <div class="adm-field-label">{{ $t('admin.mappingEditor.fieldNsbuCodes') }}</div>
-                    <input v-model="rowForm.nsbuCodesString" class="adm-input" placeholder="0100, 0300" />
+                    <AdminCombobox
+                        v-model="rowForm.nsbuCodesString"
+                        :suggestions="suggestionsNsbuCodes"
+                        datalist-id="mapeditor-nsbu-codes"
+                        placeholder="0100, 0300"
+                    />
                 </div>
                 <div class="adm-grid-2">
                     <div class="adm-field">
                         <div class="adm-field-label">{{ $t('admin.mappingEditor.fieldSection') }}</div>
-                        <input v-model="rowForm.section" class="adm-input" placeholder="ASSETS - NON-CURRENT" />
+                        <AdminCombobox
+                            v-model="rowForm.section"
+                            :suggestions="suggestionsSection"
+                            datalist-id="mapeditor-section"
+                            placeholder="ASSETS - NON-CURRENT"
+                        />
                     </div>
                     <div class="adm-field">
                         <div class="adm-field-label">{{ $t('admin.mappingEditor.fieldSubsection') }}</div>
-                        <input v-model="rowForm.subsection" class="adm-input" placeholder="Property, Plant & Equipment" />
+                        <AdminCombobox
+                            v-model="rowForm.subsection"
+                            :suggestions="suggestionsSubsection"
+                            datalist-id="mapeditor-subsection"
+                            placeholder="Property, Plant & Equipment"
+                        />
                     </div>
                 </div>
                 <div class="adm-row" style="gap: 16px; margin: 12px 0;">
@@ -274,6 +322,7 @@ import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useAdminStore } from '@/stores/admin'
+import AdminCombobox from '@/components/admin/AdminCombobox.vue'
 import { VueFlow, MarkerType } from '@vue-flow/core'
 import { Background } from '@vue-flow/background'
 import { MiniMap } from '@vue-flow/minimap'
@@ -329,6 +378,38 @@ const availableSections = computed(() => {
     const s = new Set()
     rows.value.forEach(r => { if (r.section) s.add(r.section) })
     return Array.from(s).sort()
+})
+
+// ── Combobox suggestion sources ──
+// All four fields surface existing distinct values from rows.value as
+// autocomplete hints. As the methodology stabilizes, admin will start seeing
+// well-known classifications and pick them; new ones still allowed via
+// free-text input. See AdminCombobox.vue for rationale.
+const suggestionsIfrs = computed(() => {
+    const s = new Set()
+    rows.value.forEach(r => { if (r.ifrsClassification) s.add(r.ifrsClassification) })
+    return Array.from(s)
+})
+
+const suggestionsSection = computed(() => availableSections.value)
+
+const suggestionsSubsection = computed(() => {
+    const s = new Set()
+    rows.value.forEach(r => { if (r.subsection) s.add(r.subsection) })
+    return Array.from(s)
+})
+
+// NSBU codes: individual codes (e.g. '0100') unrolled from nsbuCodes arrays.
+// We surface ALL codes seen across rows so admin can spot which codes are
+// already mapped elsewhere — useful for catching accidental double-mappings.
+const suggestionsNsbuCodes = computed(() => {
+    const s = new Set()
+    rows.value.forEach(r => {
+        (r.nsbuCodes || []).forEach(c => {
+            if (c && c !== 'calculated') s.add(c)
+        })
+    })
+    return Array.from(s)
 })
 
 const filteredRows = computed(() => {

@@ -179,12 +179,10 @@ async function updateUserRole(req, res) {
 
         global.logger.logSecurity('User role changed', {
             adminId: req.user._id,
-            adminEmail: req.user.email,
             targetUserId: user._id,
-            targetEmail: user.email,
             previousRole,
             newRole: role
-        }, 'info');
+        });
 
         res.json({
             success: true,
@@ -243,13 +241,11 @@ async function updateUserActive(req, res) {
         user.isActive = isActive;
         await user.save();
 
-        global.logger.logSecurity('User active state changed', {
+        global.logger.logInfo(`User ${isActive ? 'activated' : 'deactivated'}: ${user.email}`, {
             adminId: req.user._id,
-            adminEmail: req.user.email,
             targetUserId: user._id,
-            targetEmail: user.email,
-            isActive
-        }, 'info');
+            category: 'admin'
+        });
 
         res.json({
             success: true,
@@ -264,6 +260,94 @@ async function updateUserActive(req, res) {
         res.status(500).json({
             error: 'INTERNAL_ERROR',
             message: 'Failed to update user active state'
+        });
+    }
+}
+
+/**
+ * PATCH /api/admin/users/:userId/subscription
+ * Update subscription type and expiry. super_admin only.
+ *
+ * Body: {
+ *   subscriptionType: 'basic' | 'premium',
+ *   subscriptionExpiresAt?: ISO date string | null
+ * }
+ *
+ * Use case: admin signs offline deal with a customer → manually grants premium
+ * for N days/months. Without this endpoint, admin would have to edit MongoDB
+ * directly.
+ *
+ * Notes:
+ *  - subscriptionExpiresAt is optional. null/omitted means "no expiry" (i.e.
+ *    premium until manually downgraded). For trials, pass a future date.
+ *  - When downgrading premium → basic, expiresAt is cleared.
+ */
+async function updateUserSubscription(req, res) {
+    try {
+        const { userId } = req.params;
+        const { subscriptionType, subscriptionExpiresAt } = req.body || {};
+
+        const VALID_TYPES = ['basic', 'premium'];
+        if (!VALID_TYPES.includes(subscriptionType)) {
+            return res.status(400).json({
+                error: 'INVALID_TYPE',
+                message: `subscriptionType must be one of: ${VALID_TYPES.join(', ')}`
+            });
+        }
+
+        // Parse expiry — accept null, undefined, or ISO string
+        let expiresAt = null;
+        if (subscriptionExpiresAt) {
+            const d = new Date(subscriptionExpiresAt);
+            if (isNaN(d.getTime())) {
+                return res.status(400).json({
+                    error: 'INVALID_EXPIRY',
+                    message: 'subscriptionExpiresAt must be a valid date or null'
+                });
+            }
+            expiresAt = d;
+        }
+
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({
+                error: 'USER_NOT_FOUND',
+                message: 'User not found'
+            });
+        }
+
+        const previousType = user.subscriptionType;
+        user.subscriptionType = subscriptionType;
+        // Downgrading clears expiry; upgrading sets it (or null = forever)
+        if (subscriptionType === 'basic') {
+            user.subscriptionExpiresAt = null;
+        } else {
+            user.subscriptionExpiresAt = expiresAt;
+        }
+        await user.save();
+
+        global.logger.logSecurity('Subscription changed by admin', {
+            adminId: req.user._id,
+            targetUserId: user._id,
+            previousType,
+            newType: subscriptionType,
+            expiresAt: user.subscriptionExpiresAt
+        }, 'info');
+
+        res.json({
+            success: true,
+            user: {
+                id: user._id,
+                email: user.email,
+                subscriptionType: user.subscriptionType,
+                subscriptionExpiresAt: user.subscriptionExpiresAt
+            }
+        });
+    } catch (error) {
+        global.logger.logError(error, { context: 'admin/updateUserSubscription', userId: req.params.userId });
+        res.status(500).json({
+            error: 'INTERNAL_ERROR',
+            message: 'Failed to update subscription'
         });
     }
 }
@@ -331,5 +415,6 @@ module.exports = {
     getUserDetails,
     updateUserRole,
     updateUserActive,
+    updateUserSubscription,
     getUserFiles
 };

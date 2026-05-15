@@ -684,4 +684,18 @@ onUnmounted(() => clearStatusPolling())
 .proc-nav-link:hover {
     color: var(--ws-text-2);
 }
+
+/* ─── Responsive ─────────────────────────────────────────────────────────── */
+@media (max-width: 767px) {
+    .proc-page {
+        padding: 20px 16px 48px !important;
+    }
+    .proc-card {
+        padding: 24px 16px;
+    }
+    .proc-file-pill {
+        flex-wrap: wrap;
+        font-size: 12px;
+    }
+}
 </style>

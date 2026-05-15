@@ -147,7 +147,14 @@
     <!-- Mobile drawer -->
     <Transition name="drawer">
         <div v-if="!isLargeScreen && isMobileMenuOpen" class="mobile-overlay" @click="$emit('close')">
-            <div class="mobile-drawer" @click.stop>
+            <div
+                class="mobile-drawer"
+                @click.stop
+                @touchstart="onDrawerTouchStart"
+                @touchmove="onDrawerTouchMove"
+                @touchend="onDrawerTouchEnd"
+                :style="drawerTransform"
+            >
 
                 <!-- Header -->
                 <div class="mobile-header">
@@ -180,6 +187,12 @@
                     <button class="nav-item" @click="() => { navigateTo('/app/settings'); $emit('close') }">
                         <Cog6ToothIcon class="nav-icon" />
                         <span class="nav-label">{{ $t('dashboard.settings') }}</span>
+                    </button>
+                    <!-- Admin entry: only visible if user has admin role -->
+                    <button v-if="authStore.isAdmin" class="nav-item nav-item-admin"
+                        @click="() => { navigateTo('/admin'); $emit('close') }">
+                        <ShieldCheckIcon class="nav-icon" />
+                        <span class="nav-label">{{ $t('admin.nav.adminPanel') }}</span>
                     </button>
                 </nav>
 
@@ -262,7 +275,6 @@ const props = defineProps({
     isSidebarOpen: Boolean,
     isMobileMenuOpen: Boolean,
 })
-defineEmits(['toggle', 'close'])
 
 const router = useRouter()
 const route = useRoute()
@@ -276,7 +288,39 @@ const selectedLanguage = ref(locale.value || 'ru')
 const shellRef = ref(null)
 const profileRef = ref(null)
 const langRef = ref(null)
-const isLargeScreen = ref(window.innerWidth >= 1024)
+const isLargeScreen = ref(window.innerWidth >= 768)
+
+// ── Mobile drawer swipe-to-close ───────────────────────────────────────────
+// User can swipe drawer left (>70px) to close it. Tracks touch position and
+// applies live transform so the drawer follows the finger. Snaps back on
+// release if threshold not met.
+const SWIPE_CLOSE_THRESHOLD = 70 // px
+const touchStartX = ref(0)
+const touchDeltaX = ref(0)
+const isSwiping = ref(false)
+const drawerTransform = computed(() => {
+    if (!isSwiping.value || touchDeltaX.value >= 0) return ''
+    return `transform: translateX(${touchDeltaX.value}px); transition: none;`
+})
+const _emit = defineEmits(['toggle', 'close'])
+function onDrawerTouchStart(e) {
+    if (!e.touches[0]) return
+    touchStartX.value = e.touches[0].clientX
+    touchDeltaX.value = 0
+    isSwiping.value = true
+}
+function onDrawerTouchMove(e) {
+    if (!isSwiping.value || !e.touches[0]) return
+    touchDeltaX.value = e.touches[0].clientX - touchStartX.value
+}
+function onDrawerTouchEnd() {
+    if (!isSwiping.value) return
+    isSwiping.value = false
+    if (touchDeltaX.value < -SWIPE_CLOSE_THRESHOLD) {
+        _emit('close')
+    }
+    touchDeltaX.value = 0
+}
 
 // ── Theme ──────────────────────────────────────────────────────────────────
 import { useThemeStore } from '@/stores/theme'
@@ -348,7 +392,7 @@ async function handleSignOut() {
     try { await authStore.logout(); router.push('/') } catch (e) { console.error(e) }
 }
 
-function onResize() { isLargeScreen.value = window.innerWidth >= 1024 }
+function onResize() { isLargeScreen.value = window.innerWidth >= 768 }
 
 onMounted(async () => {
     window.addEventListener('resize', onResize)
@@ -494,6 +538,19 @@ onUnmounted(() => window.removeEventListener('resize', onResize))
 .nav-item.icon-only {
     justify-content: center;
     padding: 8px;
+}
+
+/* Admin entry — visually distinct, marked with violet accent border */
+.nav-item-admin {
+    margin-top: 4px;
+    border-left: 2px solid var(--ws-primary, #765fc6);
+    padding-left: 8px;
+    color: var(--ws-primary, #765fc6);
+}
+
+.nav-item-admin:hover {
+    background: rgba(118, 95, 198, 0.1);
+    color: var(--ws-primary, #765fc6);
 }
 
 .nav-icon {

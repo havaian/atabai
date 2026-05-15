@@ -1,6 +1,18 @@
 <template>
     <div class="adm-layout">
-        <!-- Sidebar -->
+        <!-- Mobile top bar — only on <768px -->
+        <div class="adm-mobile-header">
+            <button class="adm-mobile-menu-btn" @click="openDrawer" :aria-label="$t('nav.openMenu')">
+                <Menu :size="20" />
+            </button>
+            <div class="adm-mobile-brand">
+                <span class="adm-mobile-brand-text">{{ $t('admin.layout.brand') }}</span>
+                <span class="adm-mobile-brand-tag">{{ $t('admin.layout.brandTag') }}</span>
+            </div>
+            <div class="adm-mobile-spacer"></div>
+        </div>
+
+        <!-- Desktop sidebar -->
         <aside class="adm-sidebar" :class="{ 'adm-sidebar--collapsed': !sidebarOpen }">
             <div class="adm-sidebar-header">
                 <router-link to="/admin" class="adm-brand">
@@ -32,6 +44,14 @@
                     <div class="adm-user-role">{{ roleLabel }}</div>
                 </div>
                 <button
+                    class="adm-back-link"
+                    @click="toggleTheme"
+                    :title="isDark ? $t('admin.layout.themeToLight') : $t('admin.layout.themeToDark')"
+                >
+                    <component :is="isDark ? Sun : Moon" :size="16" />
+                    <span v-show="sidebarOpen">{{ isDark ? $t('admin.layout.themeLight') : $t('admin.layout.themeDark') }}</span>
+                </button>
+                <button
                     v-if="adminStore.hasValidAdminSession"
                     class="adm-back-link"
                     @click="logout2FA"
@@ -46,6 +66,68 @@
                 </router-link>
             </div>
         </aside>
+
+        <!-- Mobile drawer -->
+        <Transition name="adm-drawer">
+            <div v-if="mobileDrawerOpen" class="adm-mobile-overlay" @click="closeDrawer">
+                <aside
+                    class="adm-mobile-drawer"
+                    @click.stop
+                    @touchstart="onDrawerTouchStart"
+                    @touchmove="onDrawerTouchMove"
+                    @touchend="onDrawerTouchEnd"
+                    :style="drawerTransform"
+                >
+                    <div class="adm-mobile-drawer-header">
+                        <div class="adm-brand">
+                            <span class="adm-brand-text">{{ $t('admin.layout.brand') }}</span>
+                            <span class="adm-brand-tag">{{ $t('admin.layout.brandTag') }}</span>
+                        </div>
+                        <button class="adm-sidebar-toggle" @click="closeDrawer" :aria-label="$t('nav.closeMenu')">
+                            <X :size="18" />
+                        </button>
+                    </div>
+
+                    <nav class="adm-nav">
+                        <router-link
+                            v-for="item in navItems"
+                            :key="item.path"
+                            :to="item.path"
+                            class="adm-nav-item"
+                            :active-class="item.exact ? '' : 'adm-nav-item--active'"
+                            :exact-active-class="item.exact ? 'adm-nav-item--active' : ''"
+                            @click="closeDrawer"
+                        >
+                            <component :is="item.icon" :size="18" class="adm-nav-icon" />
+                            <span class="adm-nav-label">{{ item.label }}</span>
+                        </router-link>
+                    </nav>
+
+                    <div class="adm-sidebar-footer">
+                        <div class="adm-user">
+                            <div class="adm-user-name">{{ adminStore.adminInfo?.name }}</div>
+                            <div class="adm-user-role">{{ roleLabel }}</div>
+                        </div>
+                        <button class="adm-back-link" @click="toggleTheme">
+                            <component :is="isDark ? Sun : Moon" :size="16" />
+                            <span>{{ isDark ? $t('admin.layout.themeLight') : $t('admin.layout.themeDark') }}</span>
+                        </button>
+                        <button
+                            v-if="adminStore.hasValidAdminSession"
+                            class="adm-back-link"
+                            @click="logout2FA"
+                        >
+                            <LockKeyhole :size="16" />
+                            <span>{{ $t('admin.nav.logout2FA') }}</span>
+                        </button>
+                        <router-link to="/app/dashboard" class="adm-back-link" @click="closeDrawer">
+                            <ArrowLeft :size="16" />
+                            <span>{{ $t('admin.nav.backToApp') }}</span>
+                        </router-link>
+                    </div>
+                </aside>
+            </div>
+        </Transition>
 
         <!-- Main content -->
         <main class="adm-main">
@@ -69,8 +151,8 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useAdminStore } from '@/stores/admin'
 import AdminTwoFactorGate from '@/views/admin/AdminTwoFactorGate.vue'
@@ -80,23 +162,43 @@ import {
     FileText,
     Network,
     ShieldCheck,
+    Languages,
+    UserCheck,
     ArrowLeft,
     PanelLeftClose,
     PanelLeftOpen,
-    LockKeyhole
+    LockKeyhole,
+    Menu,
+    X,
+    Sun,
+    Moon
 } from 'lucide-vue-next'
+import { useThemeStore } from '@/stores/theme'
 
 const router = useRouter()
+const route = useRoute()
 const adminStore = useAdminStore()
 const { t } = useI18n()
 
+// Theme — admin reuses the user-side theme store (single source of truth).
+// Toggling on either side updates both because data-theme is on <html>.
+const themeStore = useThemeStore()
+const isDark = computed(() => themeStore.resolvedTheme === 'dark')
+function toggleTheme() { themeStore.toggle() }
+
+// Desktop sidebar collapse state
 const sidebarOpen = ref(true)
+
+// Mobile drawer state (separate from sidebarOpen — see UserLayout.vue for rationale)
+const mobileDrawerOpen = ref(false)
 
 const navItems = computed(() => [
     { path: '/admin', label: t('admin.nav.dashboard'), icon: LayoutDashboard, exact: true },
     { path: '/admin/users', label: t('admin.nav.users'), icon: Users },
     { path: '/admin/files', label: t('admin.nav.files'), icon: FileText },
     { path: '/admin/mappings', label: t('admin.nav.mappings'), icon: Network },
+    { path: '/admin/locales', label: t('admin.nav.locales'), icon: Languages },
+    { path: '/admin/access', label: t('admin.nav.access'), icon: UserCheck },
     { path: '/admin/security', label: t('admin.nav.security'), icon: ShieldCheck }
 ])
 
@@ -114,17 +216,63 @@ async function logout2FA() {
 
 function on2FAVerified() {
     // After successful verify, hasValidAdminSession becomes true and router-view renders.
-    // No additional action needed.
+}
+
+const openDrawer = () => { mobileDrawerOpen.value = true }
+const closeDrawer = () => { mobileDrawerOpen.value = false }
+
+// Auto-close drawer on route change (so navigation feels natural)
+watch(() => route.fullPath, () => { mobileDrawerOpen.value = false })
+
+// Lock body scroll while drawer is open
+watch(mobileDrawerOpen, (open) => {
+    document.body.style.overflow = open ? 'hidden' : ''
+})
+
+// ── Swipe-to-close drawer (mirror UserLayout/Sidebar pattern) ──
+const SWIPE_CLOSE_THRESHOLD = 70
+const touchStartX = ref(0)
+const touchDeltaX = ref(0)
+const isSwiping = ref(false)
+const drawerTransform = computed(() => {
+    if (!isSwiping.value || touchDeltaX.value >= 0) return ''
+    return `transform: translateX(${touchDeltaX.value}px); transition: none;`
+})
+function onDrawerTouchStart(e) {
+    if (!e.touches[0]) return
+    touchStartX.value = e.touches[0].clientX
+    touchDeltaX.value = 0
+    isSwiping.value = true
+}
+function onDrawerTouchMove(e) {
+    if (!isSwiping.value || !e.touches[0]) return
+    touchDeltaX.value = e.touches[0].clientX - touchStartX.value
+}
+function onDrawerTouchEnd() {
+    if (!isSwiping.value) return
+    isSwiping.value = false
+    if (touchDeltaX.value < -SWIPE_CLOSE_THRESHOLD) closeDrawer()
+    touchDeltaX.value = 0
+}
+
+// Close drawer if window resizes to desktop
+const handleResize = () => {
+    if (window.innerWidth >= 768) mobileDrawerOpen.value = false
 }
 
 onMounted(async () => {
     const saved = localStorage.getItem('atabai-admin-sidebar-open')
     if (saved !== null) sidebarOpen.value = JSON.parse(saved)
-
+    window.addEventListener('resize', handleResize)
     await adminStore.checkAdminAccess()
 })
 
-// Persist sidebar state
+onUnmounted(() => {
+    window.removeEventListener('resize', handleResize)
+    document.body.style.overflow = ''
+})
+
+// Persist desktop sidebar state
 watch(sidebarOpen, (v) => {
     localStorage.setItem('atabai-admin-sidebar-open', JSON.stringify(v))
 })
@@ -134,19 +282,116 @@ watch(sidebarOpen, (v) => {
 .adm-layout {
     display: flex;
     height: 100vh;
+    /* Dynamic viewport height — handles iOS Safari address bar gracefully */
+    height: 100dvh;
     background: var(--ws-bg, #0f0a1a);
     color: var(--ws-text, #f0ecf6);
     overflow: hidden;
 }
 
-/* ─── Sidebar ────────────────────────────────────────────────────────────── */
+/* ─── Mobile top bar ─────────────────────────────────────────────────────── */
+.adm-mobile-header {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: var(--ws-bg-elevated, rgba(20, 14, 32, 0.95));
+    border-bottom: 1px solid var(--adm-border);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 40;
+}
+
+.adm-mobile-menu-btn {
+    background: transparent;
+    border: none;
+    color: var(--adm-text);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+}
+
+.adm-mobile-menu-btn:hover {
+    background: var(--adm-nav-bg-hover);
+}
+
+.adm-mobile-brand {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.1;
+}
+
+.adm-mobile-brand-text {
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.05em;
+    color: var(--ws-text, #f0ecf6);
+}
+
+.adm-mobile-brand-tag {
+    font-size: 9px;
+    color: #9333ea;
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+}
+
+.adm-mobile-spacer {
+    width: 32px;
+}
+
+/* ─── Mobile drawer ──────────────────────────────────────────────────────── */
+.adm-mobile-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    z-index: 50;
+}
+
+.adm-mobile-drawer {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 260px;
+    background: var(--ws-bg-elevated, rgba(20, 14, 32, 0.98));
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid var(--adm-border);
+}
+
+.adm-mobile-drawer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px;
+    border-bottom: 1px solid var(--adm-border-soft);
+}
+
+.adm-drawer-enter-active,
+.adm-drawer-leave-active {
+    transition: opacity 0.18s ease;
+}
+
+.adm-drawer-enter-from,
+.adm-drawer-leave-to {
+    opacity: 0;
+}
+
+/* ─── Desktop sidebar ────────────────────────────────────────────────────── */
 .adm-sidebar {
     width: 240px;
     flex-shrink: 0;
     display: flex;
     flex-direction: column;
     background: var(--ws-bg-elevated, rgba(20, 14, 32, 0.95));
-    border-right: 1px solid rgba(149, 0, 255, 0.15);
+    border-right: 1px solid var(--adm-border);
     transition: width 0.18s ease;
 }
 
@@ -159,7 +404,7 @@ watch(sidebarOpen, (v) => {
     align-items: center;
     justify-content: space-between;
     padding: 14px 14px;
-    border-bottom: 1px solid rgba(149, 0, 255, 0.1);
+    border-bottom: 1px solid var(--adm-border-soft);
     min-height: 56px;
 }
 
@@ -177,7 +422,7 @@ watch(sidebarOpen, (v) => {
     font-weight: 700;
     font-size: 14px;
     letter-spacing: 0.05em;
-    color: rgba(240, 236, 246, 0.95);
+    color: var(--ws-text, #f0ecf6);
 }
 
 .adm-brand-tag {
@@ -196,7 +441,7 @@ watch(sidebarOpen, (v) => {
 .adm-sidebar-toggle {
     background: transparent;
     border: none;
-    color: rgba(240, 236, 246, 0.5);
+    color: var(--adm-text-muted);
     cursor: pointer;
     padding: 6px;
     border-radius: 6px;
@@ -205,8 +450,8 @@ watch(sidebarOpen, (v) => {
 }
 
 .adm-sidebar-toggle:hover {
-    background: rgba(149, 0, 255, 0.1);
-    color: rgba(240, 236, 246, 0.9);
+    background: var(--adm-nav-bg-hover);
+    color: var(--adm-text);
 }
 
 /* ─── Nav ─────────────────────────────────────────────────────────────────── */
@@ -226,20 +471,20 @@ watch(sidebarOpen, (v) => {
     padding: 10px 12px;
     border-radius: 8px;
     text-decoration: none;
-    color: rgba(240, 236, 246, 0.65);
+    color: var(--adm-nav-text);
     font-size: 14px;
     transition: background 0.15s, color 0.15s;
     white-space: nowrap;
 }
 
 .adm-nav-item:hover {
-    background: rgba(149, 0, 255, 0.08);
-    color: rgba(240, 236, 246, 0.95);
+    background: var(--adm-nav-bg-hover);
+    color: var(--ws-text, #f0ecf6);
 }
 
 .adm-nav-item--active {
-    background: rgba(149, 0, 255, 0.15);
-    color: #c084fc;
+    background: var(--adm-nav-bg-active);
+    color: var(--adm-nav-text-active);
 }
 
 .adm-nav-icon {
@@ -249,7 +494,7 @@ watch(sidebarOpen, (v) => {
 /* ─── Sidebar footer ──────────────────────────────────────────────────────── */
 .adm-sidebar-footer {
     padding: 12px;
-    border-top: 1px solid rgba(149, 0, 255, 0.1);
+    border-top: 1px solid var(--adm-border-soft);
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -262,7 +507,7 @@ watch(sidebarOpen, (v) => {
 .adm-user-name {
     font-size: 13px;
     font-weight: 600;
-    color: rgba(240, 236, 246, 0.9);
+    color: var(--adm-text);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -282,13 +527,18 @@ watch(sidebarOpen, (v) => {
     padding: 8px 10px;
     border-radius: 6px;
     text-decoration: none;
-    color: rgba(240, 236, 246, 0.6);
+    color: var(--adm-text-muted);
     font-size: 13px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    text-align: left;
 }
 
 .adm-back-link:hover {
-    background: rgba(149, 0, 255, 0.08);
-    color: rgba(240, 236, 246, 0.95);
+    background: var(--adm-nav-bg-hover);
+    color: var(--ws-text, #f0ecf6);
 }
 
 /* ─── Main ────────────────────────────────────────────────────────────────── */
@@ -304,6 +554,7 @@ watch(sidebarOpen, (v) => {
     flex: 1;
     overflow-y: auto;
     overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
 }
 
 .adm-content::-webkit-scrollbar {
@@ -320,13 +571,13 @@ watch(sidebarOpen, (v) => {
 .adm-forbidden {
     padding: 40px;
     text-align: center;
-    color: rgba(240, 236, 246, 0.7);
+    color: var(--adm-text-muted);
 }
 
 .adm-forbidden h2 {
     font-size: 20px;
     margin-bottom: 8px;
-    color: rgba(240, 236, 246, 0.95);
+    color: var(--ws-text, #f0ecf6);
 }
 
 .adm-btn {
@@ -343,5 +594,21 @@ watch(sidebarOpen, (v) => {
 
 .adm-btn:hover {
     background: #a855f7;
+}
+
+/* ─── Mobile breakpoint switching ─────────────────────────────────────────── */
+@media (max-width: 767px) {
+    .adm-mobile-header {
+        display: flex;
+    }
+    .adm-mobile-overlay {
+        display: block;
+    }
+    .adm-sidebar {
+        display: none; /* desktop sidebar hidden on mobile */
+    }
+    .adm-content {
+        padding-top: 56px; /* compensate for fixed mobile header */
+    }
 }
 </style>

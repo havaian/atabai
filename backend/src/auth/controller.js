@@ -112,6 +112,15 @@ class AuthController {
             });
 
         } catch (error) {
+            // Whitelist denial — known access control, not a server error
+            if (error && error.code === 'WHITELIST_BLOCKED') {
+                global.logger.logInfo(`Whitelist blocked sign-in: ${error.blockedEmail}`, { category: 'auth' });
+                return res.status(403).json({
+                    error: 'WHITELIST_BLOCKED',
+                    message: 'Your email is not authorized to access ATABAI. Please contact the administrator.'
+                });
+            }
+
             global.logger.logError(error, {
                 context: 'Google OAuth callback',
                 apiErrorStatus: error.response?.status,
@@ -132,20 +141,14 @@ class AuthController {
  */
     async handlePassportCallback(req, res) {
         try {
-            global.logger.logInfo('🔧 Passport OAuth callback received');
-
             if (!req.user) {
-                global.logger.logInfo('❌ No user from Passport authentication');
                 return res.redirect(`${process.env.FRONTEND_URL}/login?error=oauth_failed`);
             }
-
-            global.logger.logInfo('🔧 User authenticated via Passport:', req.user.email);
 
             // Update last login
             await req.user.updateLastLogin();
 
             // Generate JWT tokens
-            global.logger.logInfo('🔧 Generating JWT tokens...');
             const { accessToken, refreshToken } = await authService.generateTokenPair(req.user);
 
             // Create session data
@@ -162,21 +165,12 @@ class AuthController {
                     subscriptionType: req.user.subscriptionType
                 }))}`;
 
-            global.logger.logInfo('🔧 Redirecting to:', `${process.env.FRONTEND_URL}/auth/success`);
-
-            global.logger.logInfo(`User logged in successfully via Passport: ${req.user.email}`, { category: 'auth' });
+            global.logger.logInfo(`User logged in: ${req.user.email}`, { category: 'auth' });
 
             res.redirect(redirectUrl);
 
         } catch (error) {
-            global.logger.logError('❌ Passport OAuth callback error:', error);
-
-            global.logger.logError('Passport OAuth callback error', {
-                error: error.message,
-                stack: error.stack,
-                category: 'auth-error'
-            });
-
+            global.logger.logError(error, { context: 'auth/handlePassportCallback' });
             res.redirect(`${process.env.FRONTEND_URL}/login?error=oauth_failed`);
         }
     }
@@ -188,14 +182,10 @@ class AuthController {
     async handleManualCallback(req, res) {
         // This is your existing handleGoogleCallback method
         // Just rename it to handleManualCallback
-        global.logger.logInfo('🔧 Manual OAuth callback received');
-        global.logger.logInfo('🔧 Request body:', req.body);
-
         try {
             const { code } = req.body;
 
             if (!code) {
-                global.logger.logInfo('❌ No OAuth code provided');
                 return res.status(400).json({
                     error: 'OAUTH_CODE_MISSING',
                     message: 'OAuth authorization code is required'
@@ -273,7 +263,7 @@ class AuthController {
             // Generate new access token (user already has secret loaded)
             const newAccessToken = await authService.generateAccessToken(user);
 
-            global.logger.logInfo(`Access token refreshed for user: ${user.email}`);
+            global.logger.logDebug(`Access token refreshed for user: ${user.email}`);
 
             res.json({
                 success: true,
@@ -418,7 +408,7 @@ class AuthController {
                 }
             }
 
-            global.logger.logInfo(`User logged out: ${user?.email || 'Unknown'}`);
+            global.logger.logDebug(`User logged out: ${user?.email || 'Unknown'}`);
 
             res.json({
                 success: true,

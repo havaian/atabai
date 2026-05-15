@@ -693,7 +693,7 @@ watch(fileId, (newId, oldId) => {
     border-top: 1px solid var(--ws-border-2);
 }
 
-@media (max-width: 640px) {
+@media (max-width: 767px) {
     .result-stats {
         grid-template-columns: repeat(2, 1fr);
     }

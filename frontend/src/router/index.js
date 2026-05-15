@@ -35,6 +35,8 @@ import AdminFileDetail from '@/views/admin/AdminFileDetail.vue'
 import AdminMappings from '@/views/admin/AdminMappings.vue'
 import AdminMappingEditor from '@/views/admin/AdminMappingEditor.vue'
 import AdminSecuritySettings from '@/views/admin/AdminSecuritySettings.vue'
+import AdminLocales from '@/views/admin/AdminLocales.vue'
+import AdminAccess from '@/views/admin/AdminAccess.vue'
 
 const routes = [
     // ── Landing ──────────────────────────────────────────────────────────────
@@ -231,6 +233,16 @@ const routes = [
                 path: 'security',
                 name: 'AdminSecuritySettings',
                 component: AdminSecuritySettings
+            },
+            {
+                path: 'locales',
+                name: 'AdminLocales',
+                component: AdminLocales
+            },
+            {
+                path: 'access',
+                name: 'AdminAccess',
+                component: AdminAccess
             }
         ]
     },

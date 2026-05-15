@@ -6,6 +6,7 @@ const filesController = require('./files.controller');
 const mappingsController = require('./mappings.controller');
 const twoFactorController = require('./twoFactor.controller');
 const localesController = require('./locales.controller');
+const whitelistController = require('./whitelist.controller');
 
 const router = express.Router();
 
@@ -69,6 +70,13 @@ router.get('/users/:userId/files', usersController.getUserFiles);
 // Role and active toggles — super_admin only
 router.patch('/users/:userId/role', requireSuperAdmin, usersController.updateUserRole);
 router.patch('/users/:userId/active', requireSuperAdmin, usersController.updateUserActive);
+router.patch('/users/:userId/subscription', requireSuperAdmin, usersController.updateUserSubscription);
+
+// --- Email whitelist ---
+router.get('/whitelist', whitelistController.listWhitelist);
+router.post('/whitelist', requireSuperAdmin, whitelistController.addEntry);
+router.post('/whitelist/bulk', requireSuperAdmin, whitelistController.bulkAdd);
+router.delete('/whitelist/:entryId', requireSuperAdmin, whitelistController.removeEntry);
 
 // --- Files ---
 

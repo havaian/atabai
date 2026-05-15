@@ -263,6 +263,29 @@ userSchema.methods.getRefreshTokenSecret = async function () {
 // Static method to find or create user from Google profile
 userSchema.statics.findOrCreateFromGoogle = async function (profile) {
     try {
+        const incomingEmail = profile.emails?.[0]?.value;
+
+        // ── Whitelist gate ────────────────────────────────────────────────
+        // If ENABLE_EMAIL_WHITELIST=true, the email must be in EmailWhitelist
+        // before we allow registration OR re-login. Existing super_admins
+        // bypass the check so we can't lock ourselves out.
+        // Caller (controller) catches WHITELIST_BLOCKED and redirects.
+        if (process.env.ENABLE_EMAIL_WHITELIST === 'true' && incomingEmail) {
+            const { isEmailAllowed } = require('../admin/whitelist.service');
+            const allowed = await isEmailAllowed(incomingEmail);
+            if (!allowed) {
+                // Existing super_admin always allowed — failsafe against lockout
+                const existing = await this.findOne({ email: incomingEmail.toLowerCase().trim() }).lean();
+                const isExistingSuperAdmin = existing && existing.role === 'super_admin';
+                if (!isExistingSuperAdmin) {
+                    const err = new Error('WHITELIST_BLOCKED');
+                    err.code = 'WHITELIST_BLOCKED';
+                    err.blockedEmail = incomingEmail;
+                    throw err;
+                }
+            }
+        }
+
         // Try to find existing user - explicitly select secret fields
         let user = await this.findOne({ googleId: profile.id })
             .select('+refreshTokenSecret +refreshTokenSecretCreatedAt');

@@ -603,14 +603,15 @@ function statusClass(status) {
 }
 
 /* ─── Responsive ─────────────────────────────────────────────────────────── */
-@media (max-width: 768px) {
+@media (max-width: 767px) {
     .dash {
-        padding: 24px 4rem 48px;
-        gap: 28px;
+        padding: 20px 16px 48px;
+        gap: 20px;
     }
 
     .stats-row {
         grid-template-columns: 1fr;
+        gap: 10px;
     }
 
     .template-grid {
@@ -619,6 +620,12 @@ function statusClass(status) {
 
     .dash-header {
         flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .dash-title {
+        font-size: 22px;
     }
 
     .files-table-row {

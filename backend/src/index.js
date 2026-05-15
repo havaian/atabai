@@ -146,7 +146,7 @@ const initializeApp = async () => {
     try {
         // Connect to MongoDB
         await connectDatabase(process.env.MONGO_URI);
-        global.logger.logInfo('✅ Mongodb connected successfully');
+        global.logger.logInfo('MongoDB connected', { category: 'startup' });
 
         // Best-effort idempotent mapping seed (doesn't block startup on failure)
         const { runSeedAtStartup } = require('./admin/mappingSeed');
@@ -157,13 +157,18 @@ const initializeApp = async () => {
         const { runSeedAtStartup: runLocaleSeedAtStartup } = require('./admin/localeSeed');
         await runLocaleSeedAtStartup();
 
+        // Email whitelist bootstrap — only when ENABLE_EMAIL_WHITELIST=true and
+        // the collection is empty. Auto-seeds existing users so we don't lock
+        // anyone out on first enable. Idempotent — safe to call every startup.
+        const { runBootstrapAtStartup: runWhitelistBootstrap } = require('./admin/whitelist.service');
+        await runWhitelistBootstrap();
+
         // await connectRedis();
         // global.logger.logInfo('Redis connected successfully', { category: 'startup' });
 
         const PORT = process.env.BACKEND_PORT || 3000;
         const server = app.listen(PORT, '0.0.0.0', () => {
-            global.logger.logInfo(`🚀 Server listening on port ${PORT}`);
-            global.logger.logInfo(`🚀 Server running in ${process.env.NODE_ENV} mode on port ${PORT}`, {
+            global.logger.logInfo(`Server listening on port ${PORT} (${process.env.NODE_ENV})`, {
                 port: PORT,
                 environment: process.env.NODE_ENV,
                 category: 'startup'
@@ -172,13 +177,11 @@ const initializeApp = async () => {
 
         // Graceful shutdown
         const gracefulShutdown = (signal) => {
-            global.logger.logInfo(`📡 Received ${signal}. Graceful shutdown initiated...`);
-            global.logger.logInfo(`Received ${signal}. Graceful shutdown initiated...`, { 
+            global.logger.logInfo(`Received ${signal}. Graceful shutdown initiated`, {
                 signal,
-                category: 'shutdown' 
+                category: 'shutdown'
             });
             server.close(() => {
-                global.logger.logInfo('🔴 HTTP server closed');
                 global.logger.logInfo('HTTP server closed', { category: 'shutdown' });
                 process.exit(0);
             });
@@ -188,14 +191,7 @@ const initializeApp = async () => {
         process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
     } catch (error) {
-        global.logger.logError('❌ INITIALIZATION ERROR:', error);
-        global.logger.logError('❌ Error message:', error.message);
-        global.logger.logError('❌ Error stack:', error.stack);
-        global.logger.logError('Failed to initialize application', { 
-            error: error.message,
-            stack: error.stack,
-            category: 'startup' 
-        });
+        global.logger.logError(error, { context: 'startup', category: 'startup' });
         process.exit(1);
     }
 };
