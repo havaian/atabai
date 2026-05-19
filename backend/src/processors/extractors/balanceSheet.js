@@ -1,6 +1,13 @@
 // processors/extractors/balanceSheet.js
 
 const { getCell, getRow, eachCellInRow } = require('../readers/excelReader');
+const {
+    findCodeColumnByDensity,
+    findDataStartRow,
+    findNameColumnByTextDensity,
+    sampleHeaderRegion,
+    throwDiagnosticError
+} = require('./_common/structureDiagnostics');
 
 /**
  * Score a sheet by how likely it is to be the main balance sheet.
@@ -95,7 +102,10 @@ function detectBalanceSheetStructure(sheet) {
     let dataStartRow = null;
     let lastMeaningfulRow = sheet.rowCount;
 
-    // Find code column and header row
+    // ── Pass 1: token-based detection (fast path, works for most formats) ──
+    // Find code column and header row by looking for the standard "код стр" /
+    // "сатр коди" tokens. We also scan for the "руководитель" line so we
+    // know where the data section ends.
     for (let rowNum = 1; rowNum <= Math.min(sheet.rowCount, 100); rowNum++) {
         eachCellInRow(sheet, rowNum, (cell, colNum) => {
             const cellText = getCellText(cell);
@@ -117,11 +127,38 @@ function detectBalanceSheetStructure(sheet) {
         if (rowNum > lastMeaningfulRow + 5) break;
     }
 
+    // ── Fallback 1: density-based code column detection ──
+    // Some NSBU exports use abbreviated or rearranged headers ("код" alone,
+    // "Sr.koDi", header merged into adjacent cell, etc.) so the token
+    // scan above misses the column. Instead, count cells that look like
+    // 3-digit codes (010, 020, ..., 780) per column and pick the densest.
+    // This is what catches "weird format day 1" before we add a new token.
     if (!codeColumn) {
-        throw new Error('Could not find code column in balance sheet');
+        const fallback = findCodeColumnByDensity(sheet);
+        if (fallback) {
+            codeColumn = fallback.column;
+            // We don't know the actual header row in this case — use the row
+            // just above the first code row, or row 1 if codes start at top.
+            const firstCodeRow = findDataStartRow(sheet, codeColumn);
+            headerRow = firstCodeRow ? Math.max(1, firstCodeRow - 1) : 1;
+            global.logger?.logInfo?.(
+                `[balance_sheet] Code column detected by density fallback at col ${codeColumn} ` +
+                `(${fallback.hits} code-like cells in ${fallback.scannedRows} rows).`,
+                { category: 'extractor' }
+            );
+        }
     }
 
-    // Find data start row (look for "АКТИВ")
+    if (!codeColumn) {
+        throwDiagnosticError('balance_sheet', 'code column', sheet, {
+            searchedFor: ['код стр', 'сатр коди', '+ density fallback (3-digit codes per column)'],
+            headerSample: sampleHeaderRegion(sheet, { scanRows: 30 })
+        });
+    }
+
+    // ── Pass 2: find "Актив" section marker (start of data block) ──
+    // Standard NSBU forms have an "АКТИВ" row right before the assets section,
+    // and "ПАССИВ" later for liabilities. We use the first one as data start.
     for (let rowNum = headerRow; rowNum <= Math.min(headerRow + 20, lastMeaningfulRow); rowNum++) {
         eachCellInRow(sheet, rowNum, (cell, colNum) => {
             const cellText = getCellText(cell);
@@ -136,11 +173,36 @@ function detectBalanceSheetStructure(sheet) {
         if (dataStartRow) break;
     }
 
+    // ── Fallback 2: derive data start from code column + name column ──
+    // If the "Актив" marker is missing (e.g. file uses a different word, or
+    // the section header is in a merged cell that didn't normalize), fall
+    // back to: data starts at the first row containing a code in codeColumn,
+    // and the name column is the text-densest column near the code column.
     if (!dataStartRow || !nameColumn) {
-        throw new Error('Could not find Assets section');
+        const firstCodeRow = findDataStartRow(sheet, codeColumn);
+        if (firstCodeRow) {
+            dataStartRow = firstCodeRow;
+            const fallbackName = findNameColumnByTextDensity(sheet, dataStartRow);
+            if (fallbackName) {
+                nameColumn = fallbackName;
+                global.logger?.logInfo?.(
+                    `[balance_sheet] Assets section marker not found; using first code row ` +
+                    `(R${dataStartRow}) as data start, col ${nameColumn} as name column.`,
+                    { category: 'extractor' }
+                );
+            }
+        }
     }
 
-    // Find value columns
+    if (!dataStartRow || !nameColumn) {
+        throwDiagnosticError('balance_sheet', 'Assets section', sheet, {
+            searchedFor: ['актив', 'aktiv', '+ first-code-row fallback'],
+            headerSample: sampleHeaderRegion(sheet, { scanRows: 30 }),
+            extra: { codeColumn, headerRow, dataStartRow, nameColumn }
+        });
+    }
+
+    // ── Pass 3: find value columns by header tokens ──
     const valueColumns = [];
     eachCellInRow(sheet, headerRow, (cell, colNum) => {
         const cellText = getCellText(cell);
@@ -155,8 +217,39 @@ function detectBalanceSheetStructure(sheet) {
         }
     });
 
+    // ── Fallback 3: also scan a few rows above/below headerRow ──
+    // Merged headers sometimes shift the "начало/конец" labels by one row.
+    // If we found none, look in ±2 rows around the header row.
     if (valueColumns.length === 0) {
-        throw new Error('Could not find value columns');
+        const startRow = Math.max(1, headerRow - 2);
+        const endRow = Math.min(sheet.rowCount, headerRow + 2);
+        for (let rowNum = startRow; rowNum <= endRow; rowNum++) {
+            if (rowNum === headerRow) continue;
+            eachCellInRow(sheet, rowNum, (cell, colNum) => {
+                const normalized = normalizeText(getCellText(cell));
+                if (normalized.includes('начало') || normalized.includes('бошига')) {
+                    valueColumns.push({ type: 'start', column: colNum });
+                }
+                if (normalized.includes('конец') || normalized.includes('охирига') || normalized.includes('охир')) {
+                    valueColumns.push({ type: 'end', column: colNum });
+                }
+            });
+        }
+        if (valueColumns.length > 0) {
+            global.logger?.logInfo?.(
+                `[balance_sheet] Value columns found via header-row neighborhood scan ` +
+                `(headerRow=${headerRow}).`,
+                { category: 'extractor' }
+            );
+        }
+    }
+
+    if (valueColumns.length === 0) {
+        throwDiagnosticError('balance_sheet', 'value columns', sheet, {
+            searchedFor: ['начало', 'бошига', 'конец', 'охирига', 'охир'],
+            headerSample: sampleHeaderRegion(sheet, { scanRows: Math.min(headerRow + 5, 30) }),
+            extra: { codeColumn, headerRow, dataStartRow, nameColumn }
+        });
     }
 
     return {

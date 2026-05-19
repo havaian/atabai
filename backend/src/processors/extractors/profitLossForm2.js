@@ -8,6 +8,10 @@
 // Mapping data lives in its own module so the transformation enricher and
 // other consumers can use it without depending on extractor internals.
 const { FORM2_ROW_CODES, CALCULATED_CODES } = require('../../mappings/profitLossForm2Mapping');
+const {
+    sampleHeaderRegionCb,
+    throwDiagnosticErrorCb
+} = require('./_common/structureDiagnostics');
 
 function getCellText(cell) {
     if (!cell) return '';
@@ -380,6 +384,45 @@ function extractProfitLossForm2Data(sheet, mapping, calculatedCodes) {
     }
 
     global.logger.logInfo(`[PL-F2 EXTRACTOR] Extracted ${Object.keys(dataMap).length} rows`);
+
+    // ── Post-extraction validation ──
+    // Catches silent-failure case where periods or dataMap stayed empty
+    // because the file uses a layout we don't yet recognize. Same rationale
+    // as in cashFlow extractor — surfacing a clear error with a sample of
+    // what we saw is far better than returning empty data.
+    const dataRowCount = Object.keys(dataMap).length;
+    if (periods.length === 0 || dataRowCount === 0) {
+        const getCellValueCb = (r, c) => {
+            const row = getRow(sheet, r);
+            return row && row[c] !== undefined ? row[c] : null;
+        };
+        throwDiagnosticErrorCb(
+            'profit_loss_form2',
+            periods.length === 0 ? 'period columns' : 'any P&L line codes',
+            getCellValueCb,
+            rowCount,
+            null,
+            {
+                searchedFor: periods.length === 0
+                    ? [
+                        'Доходы (прибыль) / Расходы (убытки) paired headers',
+                        'month names (янв/фев/.../jan/feb/...)',
+                        'period keywords (текущ, отчет, предыдущ, 4-digit year)'
+                    ]
+                    : [
+                        'NSBU Form 2 row codes (010, 020, ..., 150) in first 5 columns',
+                        `code column used: ${codeColIdx}`
+                    ],
+                headerSample: sampleHeaderRegionCb(getCellValueCb, rowCount, { scanRows: 20 }),
+                extra: {
+                    codeColIdx,
+                    headerRowIdx,
+                    periodsFound: periods.length,
+                    dataRowsFound: dataRowCount
+                }
+            }
+        );
+    }
 
     // Detect whether the source layout produced signed values already.
     // Two-axis layouts (paired Income/Expense columns) compute net = income -

@@ -659,12 +659,19 @@ async function processFileAsync(fileRecord, processingJob) {
     } catch (error) {
         global.logger.logError(`File processing failed: ${fileRecord.originalName}`, error);
 
-        // Update job as failed
+        // Update job as failed.
+        // If the error came from an extractor's defensive layer (see
+        // extractors/_common/structureDiagnostics.js), it carries a
+        // `diagnostic` property with structured info about what the parser
+        // expected vs. what it saw on the sheet. Persisting that under the
+        // existing `details` Mixed field lets us diagnose "weird format"
+        // failures without re-running locally — no schema change needed.
         processingJob.status = 'failed';
         processingJob.error = {
             message: error.message,
             stack: error.stack,
-            name: error.name
+            name: error.name,
+            details: error.diagnostic || undefined
         };
         await processingJob.save();
 

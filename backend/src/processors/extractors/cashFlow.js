@@ -1,5 +1,10 @@
 // extractors/cashFlow.js - PROPERLY FIXED: Keeps additional sources, fixes CF marker detection
 
+const {
+    sampleHeaderRegionCb,
+    throwDiagnosticErrorCb
+} = require('./_common/structureDiagnostics');
+
 function extractCashFlowData(sheet) {
     global.logger.logInfo('[CF EXTRACTOR] Starting extraction...');
 
@@ -386,6 +391,42 @@ function extractCashFlowData(sheet) {
     }
 
     global.logger.logInfo(`[CF EXTRACTOR] Complete. Items: ${itemsExtracted}, Additional Sources: ${result.additionalSourcesItems.size}, Reconciliation: ${result.reconciliationItems.size}`);
+
+    // ── Post-extraction validation ──
+    // Detect "silent failure" — extractor ran but found nothing meaningful.
+    // Before this layer, an unrecognized format would return an empty result
+    // that silently propagated through the pipeline, leaving the user with
+    // a blank output and no diagnostic. Now we fail loudly with a sample of
+    // what the parser actually saw so the dev can update heuristics.
+    //
+    // Threshold: 0 dataMap entries AND 0 reconciliation items AND 0
+    // additional sources AND no detected periods. If only some of these
+    // are zero, the file might be partially valid (e.g. CF with no
+    // reconciliation section) — don't false-positive on those.
+    const totalItems = result.dataMap.size + result.reconciliationItems.size + result.additionalSourcesItems.size;
+    if (totalItems === 0 && result.periods.length === 0) {
+        throwDiagnosticErrorCb(
+            'cash_flow',
+            'any recognizable cash-flow data',
+            getCellValue,
+            rowCount,
+            null,
+            {
+                searchedFor: [
+                    'month names (янв/фев/.../jan/feb/...)',
+                    'year/quarter headers',
+                    'numeric line codes',
+                    'section markers (movement of cash, reconciliation, additional sources)'
+                ],
+                headerSample: sampleHeaderRegionCb(getCellValue, rowCount, { scanRows: 25 }),
+                extra: {
+                    periodHeaderRow,
+                    dataStartRow,
+                    rowCount
+                }
+            }
+        );
+    }
 
     return result;
 }
