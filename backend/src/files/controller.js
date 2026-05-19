@@ -576,7 +576,8 @@ async function processFileAsync(fileRecord, processingJob) {
         await processingJob.save();
 
         // Process based on template type. userId is passed so the mapping
-        // resolver can apply per-user overrides on top of the global mapping.
+        // resolver can apply per-user MappingSets (see MappingSet.assignedUsers)
+        // instead of the global one when a user-specific published set exists.
         const processorOptions = { userId: processingJob.userId };
         let result;
         switch (processingJob.templateType) {

@@ -2,8 +2,8 @@
     <div class="adm-page">
         <div class="adm-page-header">
             <div>
-                <router-link to="/admin/files" class="adm-page-subtitle" style="text-decoration: none;">
-                    {{ $t('admin.fileDetail.backLink') }}
+                <router-link :to="backLink.to" class="adm-page-subtitle" style="text-decoration: none;">
+                    {{ $t(backLink.labelKey) }}
                 </router-link>
                 <h1 class="adm-page-title">{{ file?.originalName || $t('admin.fileDetail.defaultTitle') }}</h1>
                 <div v-if="file" class="adm-page-subtitle">
@@ -171,6 +171,22 @@ const copyState = ref(t('admin.common.copy'))
 const downloading = ref(false)
 
 const fileId = computed(() => route.params.fileId)
+
+// Back-link target depends on where the user came from. When opened via the
+// user-detail page, the link includes ?from=user&userId=X so we return to that
+// user's page. Otherwise we fall back to the generic file list.
+const backLink = computed(() => {
+    if (route.query.from === 'user' && route.query.userId) {
+        return {
+            to: `/admin/users/${route.query.userId}`,
+            labelKey: 'admin.fileDetail.backLinkUser'
+        }
+    }
+    return {
+        to: '/admin/files',
+        labelKey: 'admin.fileDetail.backLink'
+    }
+})
 
 async function loadFile() {
     loading.value = true

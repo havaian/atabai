@@ -43,14 +43,27 @@
                     <div class="adm-user-name">{{ adminStore.adminInfo?.name }}</div>
                     <div class="adm-user-role">{{ roleLabel }}</div>
                 </div>
-                <button
-                    class="adm-back-link"
-                    @click="toggleTheme"
-                    :title="isDark ? $t('admin.layout.themeToLight') : $t('admin.layout.themeToDark')"
-                >
-                    <component :is="isDark ? Sun : Moon" :size="16" />
-                    <span v-show="sidebarOpen">{{ isDark ? $t('admin.layout.themeLight') : $t('admin.layout.themeDark') }}</span>
-                </button>
+                <!-- Theme toggle — pill style, mirrors user-side Sidebar.vue.
+                     When sidebar is expanded: two side-by-side buttons (sun/moon).
+                     When collapsed: single icon button that toggles. -->
+                <div class="adm-theme-section" :class="{ 'adm-theme-section-collapsed': !sidebarOpen }">
+                    <div v-if="sidebarOpen" class="adm-theme-pill">
+                        <button class="adm-theme-pill-btn" :class="{ active: !isDark }"
+                            @click="themeStore.setTheme('light')"
+                            :title="$t('admin.layout.themeLight')">
+                            <Sun :size="14" />
+                        </button>
+                        <button class="adm-theme-pill-btn" :class="{ active: isDark }"
+                            @click="themeStore.setTheme('dark')"
+                            :title="$t('admin.layout.themeDark')">
+                            <Moon :size="14" />
+                        </button>
+                    </div>
+                    <button v-else class="adm-theme-icon-btn" @click="toggleTheme"
+                        :title="isDark ? $t('admin.layout.themeToLight') : $t('admin.layout.themeToDark')">
+                        <component :is="isDark ? Sun : Moon" :size="16" />
+                    </button>
+                </div>
                 <button
                     v-if="adminStore.hasValidAdminSession"
                     class="adm-back-link"
@@ -108,10 +121,21 @@
                             <div class="adm-user-name">{{ adminStore.adminInfo?.name }}</div>
                             <div class="adm-user-role">{{ roleLabel }}</div>
                         </div>
-                        <button class="adm-back-link" @click="toggleTheme">
-                            <component :is="isDark ? Sun : Moon" :size="16" />
-                            <span>{{ isDark ? $t('admin.layout.themeLight') : $t('admin.layout.themeDark') }}</span>
-                        </button>
+                        <!-- Theme toggle: always expanded view in mobile drawer -->
+                        <div class="adm-theme-section">
+                            <div class="adm-theme-pill">
+                                <button class="adm-theme-pill-btn" :class="{ active: !isDark }"
+                                    @click="themeStore.setTheme('light')"
+                                    :title="$t('admin.layout.themeLight')">
+                                    <Sun :size="14" />
+                                </button>
+                                <button class="adm-theme-pill-btn" :class="{ active: isDark }"
+                                    @click="themeStore.setTheme('dark')"
+                                    :title="$t('admin.layout.themeDark')">
+                                    <Moon :size="14" />
+                                </button>
+                            </div>
+                        </div>
                         <button
                             v-if="adminStore.hasValidAdminSession"
                             class="adm-back-link"
@@ -537,6 +561,75 @@ watch(sidebarOpen, (v) => {
 }
 
 .adm-back-link:hover {
+    background: var(--adm-nav-bg-hover);
+    color: var(--ws-text, #f0ecf6);
+}
+
+/* ─── Theme toggle (pill style — mirrors user-side Sidebar.vue) ─────────── */
+.adm-theme-section {
+    padding: 6px 4px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.adm-theme-section-collapsed {
+    justify-content: center;
+    padding: 6px 0;
+}
+
+.adm-theme-pill {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 50% 50%;
+    align-items: center;
+    background: var(--toggle-bg);
+    border-radius: 8px;
+    padding: 3px;
+    gap: 2px;
+}
+
+.adm-theme-pill-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 24px;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--toggle-icon);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    font-family: inherit;
+}
+
+.adm-theme-pill-btn.active {
+    background: var(--toggle-active-bg);
+    color: var(--toggle-icon-active);
+}
+
+.adm-theme-pill-btn:not(.active):hover {
+    color: var(--ws-text, #f0ecf6);
+    background: var(--adm-nav-bg-hover);
+}
+
+.adm-theme-icon-btn {
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 8px;
+    background: var(--toggle-bg);
+    color: var(--toggle-icon);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    font-family: inherit;
+}
+
+.adm-theme-icon-btn:hover {
     background: var(--adm-nav-bg-hover);
     color: var(--ws-text, #f0ecf6);
 }

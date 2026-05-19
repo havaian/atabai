@@ -32,17 +32,40 @@ const app = express();
 app.set('trust proxy', 1);
 
 // Rate limiting
+// Global limit — covers all requests. 600 / 15min = ~40 RPM per IP.
+// This is high enough to accommodate users sharing a NAT (e.g. mobile hotspot
+// with multiple devices) plus background polling (locale version poll every
+// 30s, periodic profile fetches, etc.) without triggering 429 on normal use.
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // limit each IP to 100 requests per windowMs
+    max: 600,
     message: {
         error: 'Too many requests from this IP, please try again later.'
     },
     standardHeaders: true,
     legacyHeaders: false,
+    // Skip the lightweight locale-version polling endpoint — it's hit every
+    // 30s from each open tab and shouldn't eat the global quota. The full
+    // bundle endpoint is NOT skipped (it transfers real data).
+    skip: (req) => req.path === '/api/locales/version',
 });
 
-// Apply rate limiting to all requests
+// Stricter limit for auth endpoints — guards against credential-stuffing and
+// runaway OAuth callback retries. 30 / 15min is plenty for a legit user (even
+// across multiple tabs and refreshes) but rejects brute-force attempts.
+const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 30,
+    message: {
+        error: 'Too many authentication attempts from this IP, please try again later.'
+    },
+    standardHeaders: true,
+    legacyHeaders: false,
+    // Don't count successful logins toward the limit — only failed/repeated ones
+    skipSuccessfulRequests: true,
+});
+
+// Apply global rate limiting to all requests
 app.use(limiter);
 
 // Security middleware
@@ -117,7 +140,7 @@ app.get('/health', (req, res) => {
 });
 
 // API routes
-app.use('/api/auth', authRoutes);
+app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/files', fileRoutes);
 app.use('/api/templates', templateRoutes);

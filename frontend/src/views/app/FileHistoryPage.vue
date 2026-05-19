@@ -850,23 +850,66 @@ onMounted(async () => {
         flex-direction: column;
     }
 
+    /* Filter bar becomes a grid on mobile so the 3 selects + clear-button
+       sit evenly in 2 columns under the full-width search input, instead of
+       wrapping awkwardly (1-per-line / half-line). */
     .filter-bar {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
         gap: 8px;
+        align-items: stretch;
     }
 
-    .filter-select-comp {
-        width: 160px;
-    }
-
+    /* Search takes the full row on top */
     .search-wrap {
+        grid-column: 1 / -1;
         max-width: 100%;
+        min-width: 0;
     }
 
-    .th-template,
-    .td-template,
-    .th-date,
-    .td-date {
-        display: none;
+    /* Each select fills its grid cell — no fixed 160px which caused
+       inconsistent widths and ugly wrapping. */
+    .filter-select-comp,
+    .filter-select-comp.filter-select-wide {
+        width: 100%;
+    }
+
+    /* Clear button takes full row when present */
+    .clear-btn {
+        grid-column: 1 / -1;
+        justify-content: center;
+    }
+
+    /* Count moves below filters, full width, no auto margin */
+    .filter-count {
+        grid-column: 1 / -1;
+        margin-left: 0;
+        text-align: right;
+    }
+
+    /* Allow the table card to scroll horizontally rather than hiding columns.
+       Keeping all columns visible matches the desktop UX and lets users see
+       template/date which were previously display:none. */
+    .files-card {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .files-table {
+        /* Force a min width so the table actually overflows on narrow screens
+           and the horizontal scroll engages. Without this, the table tries to
+           collapse content into the viewport and breaks layout. */
+        min-width: 720px;
+    }
+
+    /* Tighten cell padding on mobile to fit more in view */
+    .th,
+    .td {
+        padding: 11px 12px;
+    }
+
+    .file-name {
+        max-width: 200px;
     }
 }
 </style>

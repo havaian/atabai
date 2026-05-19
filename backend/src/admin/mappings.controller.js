@@ -1,7 +1,6 @@
 const MappingSet = require('./models/mappingSet.model');
 const RowMapping = require('./models/rowMapping.model');
 const EquityMappingConfig = require('./models/equityMappingConfig.model');
-const UserMappingOverride = require('./models/userMappingOverride.model');
 const User = require('../user/model');
 const { runSeed } = require('./mappingSeed');
 const { invalidateCache: invalidateMappingCache } = require('../services/mappingResolver');
@@ -45,6 +44,10 @@ async function listMappingSets(req, res) {
             .sort({ reportType: 1, version: -1 })
             .populate('publishedBy', 'email name')
             .populate('createdBy', 'email name')
+            // Populate assignedUsers so the admin UI can display "set X is for
+            // bank@example.com and audit@example.com" without a separate fetch.
+            // Project minimal fields to keep payload small.
+            .populate('assignedUsers', 'email name')
             .lean();
 
         const setIds = sets.map(s => s._id);
@@ -130,7 +133,8 @@ async function getSetById(req, res) {
         const { setId } = req.params;
         const set = await MappingSet.findById(setId)
             .populate('publishedBy', 'email name')
-            .populate('createdBy', 'email name');
+            .populate('createdBy', 'email name')
+            .populate('assignedUsers', 'email name');
         if (!set) {
             return res.status(404).json({ error: 'SET_NOT_FOUND', message: 'Mapping set not found' });
         }
@@ -147,70 +151,51 @@ async function getSetById(req, res) {
  * Create a draft set for a report type by forking from the current published set.
  * If a draft already exists, returns 409.
  */
+/**
+ * POST /api/admin/mappings/:reportType/draft
+ * Create a draft set for a report type by forking the current GLOBAL published
+ * set (the one with empty assignedUsers). This is the "standard" path used
+ * when admin wants to change the mapping that applies to all users without
+ * a custom assignment.
+ *
+ * For forking a user-specific set or creating a blank user-specific draft,
+ * see forkSet and createBlankDraft below.
+ */
 async function createDraftFromPublished(req, res) {
     try {
         const { reportType } = req.params;
         if (!validateReportType(reportType, res)) return;
 
-        const existingDraft = await MappingSet.findOne({ reportType, status: 'draft' });
+        // Only one draft of the global set can exist at a time. User-specific
+        // drafts are tracked separately (they have non-empty assignedUsers).
+        const existingDraft = await MappingSet.findOne({
+            reportType,
+            status: 'draft',
+            assignedUsers: { $size: 0 }
+        });
         if (existingDraft) {
             return res.status(409).json({
                 error: 'DRAFT_EXISTS',
-                message: 'A draft already exists for this report type',
+                message: 'A draft of the global set already exists for this report type',
                 draftId: existingDraft._id
             });
         }
 
-        const published = await MappingSet.findOne({ reportType, status: 'published' });
+        // Fork the GLOBAL published set, not a user-specific one. There can be
+        // at most one such set per reportType (enforced at publish time).
+        const published = await MappingSet.findOne({
+            reportType,
+            status: 'published',
+            assignedUsers: { $size: 0 }
+        });
         if (!published) {
             return res.status(404).json({
                 error: 'NO_PUBLISHED_SET',
-                message: 'Cannot create draft: no published set exists. Run seed first.'
+                message: 'Cannot create draft: no published global set exists. Run seed first.'
             });
         }
 
-        // Next version = max existing version + 1
-        const lastSet = await MappingSet.findOne({ reportType }).sort({ version: -1 });
-        const newVersion = (lastSet?.version || 0) + 1;
-
-        const draft = await MappingSet.create({
-            reportType,
-            version: newVersion,
-            status: 'draft',
-            createdBy: req.user._id,
-            notes: `Forked from v${published.version}`
-        });
-
-        if (reportType === 'equity') {
-            const sourceConfig = await EquityMappingConfig.findOne({ mappingSetId: published._id }).lean();
-            if (sourceConfig) {
-                delete sourceConfig._id;
-                delete sourceConfig.createdAt;
-                delete sourceConfig.updatedAt;
-                await EquityMappingConfig.create({
-                    ...sourceConfig,
-                    mappingSetId: draft._id
-                });
-            }
-        } else {
-            const sourceRows = await RowMapping.find({ mappingSetId: published._id }).lean();
-            if (sourceRows.length > 0) {
-                const cloned = sourceRows.map(r => {
-                    const { _id, createdAt, updatedAt, ...rest } = r;
-                    return { ...rest, mappingSetId: draft._id };
-                });
-                await RowMapping.insertMany(cloned, { ordered: false });
-            }
-        }
-
-        global.logger.logInfo(`Draft created for ${reportType} v${newVersion}`, {
-            adminId: req.user._id,
-            draftId: draft._id,
-            forkedFrom: published._id,
-            category: 'admin'
-        });
-
-        res.json({ success: true, draft: draft.toObject() });
+        await cloneSetIntoNewDraft(published, req.user._id, res);
     } catch (error) {
         global.logger.logError(error, { context: 'admin/createDraftFromPublished', reportType: req.params.reportType });
         res.status(500).json({ error: 'INTERNAL_ERROR', message: 'Failed to create draft' });
@@ -218,10 +203,222 @@ async function createDraftFromPublished(req, res) {
 }
 
 /**
+ * POST /api/admin/mappings/sets/:setId/fork
+ * Fork an arbitrary set (published or archived) into a new draft. Used when
+ * admin wants to create a new version of a specific user-specific set, or
+ * to start a new user-specific set from an existing global baseline.
+ *
+ * Body (optional):
+ *   - assignedUsers: [userId] — override the scope of the new draft
+ *   - label: string           — override the human label
+ *
+ * If body fields are omitted, the source set's scope/label are copied.
+ */
+async function forkSet(req, res) {
+    try {
+        const { setId } = req.params;
+        const source = await MappingSet.findById(setId);
+        if (!source) {
+            return res.status(404).json({ error: 'SET_NOT_FOUND', message: 'Source set not found' });
+        }
+        if (source.status === 'draft') {
+            return res.status(400).json({
+                error: 'CANNOT_FORK_DRAFT',
+                message: 'Cannot fork a draft — drafts are edited directly.'
+            });
+        }
+
+        const overrideAssigned = Array.isArray(req.body?.assignedUsers)
+            ? req.body.assignedUsers
+            : null;
+        const overrideLabel = typeof req.body?.label === 'string' ? req.body.label : null;
+
+        await cloneSetIntoNewDraft(source, req.user._id, res, {
+            assignedUsersOverride: overrideAssigned,
+            labelOverride: overrideLabel
+        });
+    } catch (error) {
+        global.logger.logError(error, { context: 'admin/forkSet', setId: req.params.setId });
+        res.status(500).json({ error: 'INTERNAL_ERROR', message: 'Failed to fork set' });
+    }
+}
+
+/**
+ * POST /api/admin/mappings/:reportType/blank-draft
+ * Create an empty draft (no rows / empty equity config) — typically used to
+ * start a fresh user-specific mapping set from scratch instead of forking.
+ *
+ * Body:
+ *   - assignedUsers: [userId] (required, non-empty — blank global drafts make
+ *     no sense; use the seed flow for that)
+ *   - label: string (optional human-readable name)
+ */
+async function createBlankDraft(req, res) {
+    try {
+        const { reportType } = req.params;
+        if (!validateReportType(reportType, res)) return;
+
+        const assignedUsers = Array.isArray(req.body?.assignedUsers) ? req.body.assignedUsers : [];
+        if (assignedUsers.length === 0) {
+            return res.status(400).json({
+                error: 'MISSING_ASSIGNED_USERS',
+                message: 'Blank drafts must be scoped to one or more users. To recreate the global set, use the seed flow.'
+            });
+        }
+
+        const lastSet = await MappingSet.findOne({ reportType }).sort({ version: -1 });
+        const newVersion = (lastSet?.version || 0) + 1;
+
+        const draft = await MappingSet.create({
+            reportType,
+            version: newVersion,
+            status: 'draft',
+            assignedUsers,
+            label: req.body?.label || '',
+            notes: 'Created as blank user-specific draft',
+            createdBy: req.user._id
+        });
+
+        // For equity, also create an empty config doc so the editor has
+        // something to load (avoids "no config" UI state on a fresh draft).
+        if (reportType === 'equity') {
+            await EquityMappingConfig.create({
+                mappingSetId: draft._id,
+                columns: [],
+                bsRowToEquityColumn: {},
+                movementRows: [],
+                rowPatterns: [],
+                columnPatterns: []
+            });
+        }
+
+        global.logger.logInfo(`Blank draft created for ${reportType} v${newVersion}`, {
+            adminId: req.user._id,
+            draftId: draft._id,
+            assignedUsers,
+            category: 'admin'
+        });
+
+        res.json({ success: true, draft: draft.toObject() });
+    } catch (error) {
+        global.logger.logError(error, { context: 'admin/createBlankDraft', reportType: req.params.reportType });
+        res.status(500).json({ error: 'INTERNAL_ERROR', message: 'Failed to create blank draft' });
+    }
+}
+
+/**
+ * PATCH /api/admin/mappings/sets/:setId/scope
+ * Update assignedUsers and/or label on a draft. Only drafts can be modified —
+ * published sets are immutable in this regard (publish a new draft instead).
+ *
+ * Body (any combination):
+ *   - assignedUsers: [userId]
+ *   - label: string
+ */
+async function updateSetScope(req, res) {
+    try {
+        const { setId } = req.params;
+        const set = await MappingSet.findById(setId);
+        if (!set) {
+            return res.status(404).json({ error: 'SET_NOT_FOUND', message: 'Set not found' });
+        }
+        if (set.status !== 'draft') {
+            return res.status(400).json({
+                error: 'NOT_A_DRAFT',
+                message: 'Scope can only be edited on drafts. Publish creates a new immutable snapshot.'
+            });
+        }
+
+        if (Array.isArray(req.body?.assignedUsers)) {
+            set.assignedUsers = req.body.assignedUsers;
+        }
+        if (typeof req.body?.label === 'string') {
+            set.label = req.body.label;
+        }
+        await set.save();
+        res.json({ success: true, set: set.toObject() });
+    } catch (error) {
+        global.logger.logError(error, { context: 'admin/updateSetScope', setId: req.params.setId });
+        res.status(500).json({ error: 'INTERNAL_ERROR', message: 'Failed to update set scope' });
+    }
+}
+
+/**
+ * Helper used by createDraftFromPublished and forkSet. Clones a source set
+ * (its rows or equity config) into a brand-new draft, sends the response.
+ *
+ * Options:
+ *   - assignedUsersOverride: replaces source.assignedUsers in the new draft
+ *   - labelOverride:         replaces source.label
+ */
+async function cloneSetIntoNewDraft(sourceSet, adminId, res, opts = {}) {
+    const reportType = sourceSet.reportType;
+
+    // Next version = max existing version + 1 across ALL sets for this
+    // reportType (regardless of scope). Versions are globally monotonic so
+    // we never reuse a number once it's been used.
+    const lastSet = await MappingSet.findOne({ reportType }).sort({ version: -1 });
+    const newVersion = (lastSet?.version || 0) + 1;
+
+    const draft = await MappingSet.create({
+        reportType,
+        version: newVersion,
+        status: 'draft',
+        assignedUsers: opts.assignedUsersOverride !== null && opts.assignedUsersOverride !== undefined
+            ? opts.assignedUsersOverride
+            : (sourceSet.assignedUsers || []),
+        label: opts.labelOverride !== null && opts.labelOverride !== undefined
+            ? opts.labelOverride
+            : (sourceSet.label || ''),
+        notes: `Forked from v${sourceSet.version}`,
+        createdBy: adminId
+    });
+
+    if (reportType === 'equity') {
+        const sourceConfig = await EquityMappingConfig.findOne({ mappingSetId: sourceSet._id }).lean();
+        if (sourceConfig) {
+            delete sourceConfig._id;
+            delete sourceConfig.createdAt;
+            delete sourceConfig.updatedAt;
+            await EquityMappingConfig.create({
+                ...sourceConfig,
+                mappingSetId: draft._id
+            });
+        }
+    } else {
+        const sourceRows = await RowMapping.find({ mappingSetId: sourceSet._id }).lean();
+        if (sourceRows.length > 0) {
+            const cloned = sourceRows.map(r => {
+                const { _id, createdAt, updatedAt, ...rest } = r;
+                return { ...rest, mappingSetId: draft._id };
+            });
+            await RowMapping.insertMany(cloned, { ordered: false });
+        }
+    }
+
+    global.logger.logInfo(`Draft created for ${reportType} v${newVersion}`, {
+        adminId,
+        draftId: draft._id,
+        forkedFrom: sourceSet._id,
+        assignedUsers: draft.assignedUsers,
+        category: 'admin'
+    });
+
+    res.json({ success: true, draft: draft.toObject() });
+}
+
+/**
  * POST /api/admin/mappings/sets/:setId/publish
- * Publish a draft:
- *   - Current published for this reportType → 'archived'
- *   - This draft → 'published', publishedAt + publishedBy set
+ * Publish a draft.
+ *
+ * Scope-aware archival:
+ *   - GLOBAL draft (assignedUsers empty) — archives the current GLOBAL
+ *     published set for this reportType. User-specific published sets are
+ *     untouched.
+ *   - USER-SPECIFIC draft — archives any USER-SPECIFIC published sets whose
+ *     assignedUsers overlap with the new draft's. This enforces the invariant
+ *     "a user has at most one published user-specific set per reportType at a
+ *     time". The global set is untouched.
  *
  * Sequential (non-transactional) — see comment inside for rationale.
  */
@@ -240,19 +437,42 @@ async function publishDraft(req, res) {
         }
 
         const reportType = draft.reportType;
+        const isUserSpecific = Array.isArray(draft.assignedUsers) && draft.assignedUsers.length > 0;
 
         // Sequential publish — no transaction.
         // Transactions require a MongoDB replica set; on standalone deployments
         // (like the current production VPS) startTransaction throws inside the
-        // first session-bound query. The window between the two saves below is
-        // microseconds; worst case is briefly having zero published sets for
-        // this reportType — much better than a 500 on every publish attempt.
-        // If/when we move to a replica set, this can be wrapped in a transaction
-        // by reverting to the version in git history before the standalone fix.
-        const currentPublished = await MappingSet.findOne({ reportType, status: 'published' });
-        if (currentPublished) {
-            currentPublished.status = 'archived';
-            await currentPublished.save();
+        // first session-bound query. The window between the archive(s) and the
+        // publish below is microseconds; worst case is briefly having zero
+        // published sets for some users — much better than a 500 on every
+        // publish attempt. If/when we move to a replica set, this can be
+        // wrapped in a transaction by reverting to the version in git history
+        // before the standalone fix.
+
+        if (isUserSpecific) {
+            // Find published user-specific sets that overlap with this draft's
+            // assigned users — those are the ones being superseded. The
+            // assignedUsers index speeds up this query.
+            const overlapping = await MappingSet.find({
+                reportType,
+                status: 'published',
+                assignedUsers: { $in: draft.assignedUsers, $ne: [] }
+            });
+            for (const set of overlapping) {
+                set.status = 'archived';
+                await set.save();
+            }
+        } else {
+            // Global draft — archive the current global published set if any.
+            const currentGlobal = await MappingSet.findOne({
+                reportType,
+                status: 'published',
+                assignedUsers: { $size: 0 }
+            });
+            if (currentGlobal) {
+                currentGlobal.status = 'archived';
+                await currentGlobal.save();
+            }
         }
 
         draft.status = 'published';
@@ -266,10 +486,14 @@ async function publishDraft(req, res) {
             adminEmail: req.user.email,
             setId: draft._id,
             reportType,
-            version: draft.version
+            version: draft.version,
+            scope: isUserSpecific ? 'user-specific' : 'global',
+            assignedUsersCount: draft.assignedUsers.length
         }, 'info');
 
-        // Invalidate resolver cache so the new mapping takes effect immediately
+        // Invalidate resolver cache so the new mapping takes effect immediately.
+        // User-specific publishes don't pollute the global cache (resolver
+        // looks up per-user), but invalidating both is safe and simple.
         invalidateMappingCache(reportType);
 
         res.json({ success: true, published: draft.toObject() });
@@ -511,108 +735,6 @@ async function updateEquityConfig(req, res) {
     }
 }
 
-// ─── User overrides ───────────────────────────────────────────────────────────
-
-/**
- * GET /api/admin/users/:userId/overrides
- * List overrides for a user.
- */
-async function listUserOverrides(req, res) {
-    try {
-        const { userId } = req.params;
-        const { reportType } = req.query;
-
-        const filter = { userId };
-        if (reportType) filter.reportType = reportType;
-
-        const overrides = await UserMappingOverride.find(filter)
-            .sort({ reportType: 1, nsbuRowCode: 1 })
-            .lean();
-
-        res.json({ success: true, overrides });
-    } catch (error) {
-        global.logger.logError(error, { context: 'admin/listUserOverrides', userId: req.params.userId });
-        res.status(500).json({ error: 'INTERNAL_ERROR', message: 'Failed to list overrides' });
-    }
-}
-
-/**
- * PUT /api/admin/users/:userId/overrides/:reportType/:nsbuRowCode
- * Upsert an override for a user. Admin manages overrides for users in MVP
- * (no self-service yet).
- */
-async function upsertUserOverride(req, res) {
-    try {
-        const { userId, reportType, nsbuRowCode } = req.params;
-        if (!['balance_sheet', 'cash_flow', 'profit_loss_form2'].includes(reportType)) {
-            return res.status(400).json({
-                error: 'INVALID_REPORT_TYPE',
-                message: 'Overrides are not supported for equity'
-            });
-        }
-
-        const userExists = await User.exists({ _id: userId });
-        if (!userExists) {
-            return res.status(404).json({ error: 'USER_NOT_FOUND', message: 'User not found' });
-        }
-
-        const payload = req.body || {};
-        if (!payload.ifrsClassification) {
-            return res.status(400).json({
-                error: 'MISSING_FIELDS',
-                message: 'ifrsClassification is required'
-            });
-        }
-
-        const override = await UserMappingOverride.findOneAndUpdate(
-            { userId, reportType, nsbuRowCode },
-            {
-                userId,
-                reportType,
-                nsbuRowCode,
-                nsbuCodes: payload.nsbuCodes || [],
-                nsbuDescription: payload.nsbuDescription || '',
-                ifrsClassification: payload.ifrsClassification,
-                section: payload.section || '',
-                subsection: payload.subsection || '',
-                isNegative: !!payload.isNegative,
-                isCalculated: !!payload.isCalculated,
-                formula: payload.formula || null,
-                flowType: payload.flowType || null,
-                directMethod: typeof payload.directMethod === 'boolean' ? payload.directMethod : null,
-                netCalculation: typeof payload.netCalculation === 'boolean' ? payload.netCalculation : null,
-                plSection: payload.plSection || null,
-                label: payload.label || '',
-                accountDetails: payload.accountDetails || null,
-                notes: payload.notes || ''
-            },
-            { new: true, upsert: true }
-        );
-
-        res.json({ success: true, override });
-    } catch (error) {
-        global.logger.logError(error, { context: 'admin/upsertUserOverride' });
-        res.status(500).json({ error: 'INTERNAL_ERROR', message: 'Failed to upsert override' });
-    }
-}
-
-/**
- * DELETE /api/admin/users/:userId/overrides/:reportType/:nsbuRowCode
- */
-async function deleteUserOverride(req, res) {
-    try {
-        const { userId, reportType, nsbuRowCode } = req.params;
-        const result = await UserMappingOverride.findOneAndDelete({ userId, reportType, nsbuRowCode });
-        if (!result) {
-            return res.status(404).json({ error: 'OVERRIDE_NOT_FOUND', message: 'Override not found' });
-        }
-        res.json({ success: true });
-    } catch (error) {
-        global.logger.logError(error, { context: 'admin/deleteUserOverride' });
-        res.status(500).json({ error: 'INTERNAL_ERROR', message: 'Failed to delete override' });
-    }
-}
-
 // ─── Seed endpoint ────────────────────────────────────────────────────────────
 
 /**
@@ -643,14 +765,14 @@ module.exports = {
     getDraftSet,
     getSetById,
     createDraftFromPublished,
+    forkSet,
+    createBlankDraft,
+    updateSetScope,
     publishDraft,
     deleteSet,
     addRow,
     updateRow,
     deleteRow,
     updateEquityConfig,
-    listUserOverrides,
-    upsertUserOverride,
-    deleteUserOverride,
     manualSeed
 };

@@ -384,6 +384,28 @@
 @media (max-width: 768px) {
     .adm-grid-2 { grid-template-columns: 1fr; }
     .adm-page { padding: 16px; }
+
+    /* Tighten card padding so 20px + scrollbar don't overflow narrow viewports */
+    .adm-card { padding: 14px; }
+
+    /* The .adm-bar-row used in Dashboard cards (`Files by template type`,
+       `Users by role`) put a long monospace label and a count side-by-side
+       with space-between. On narrow screens the long camelCase template keys
+       (e.g. `profitAndLossForm2`) don't break, so they push the count off the
+       card and look shifted/cut. Allow the label to shrink with min-width:0
+       and break long words. */
+    .adm-bar-row {
+        gap: 8px;
+    }
+    .adm-bar-label {
+        min-width: 0;
+        flex: 1 1 auto;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+    }
+    .adm-bar-value {
+        flex: 0 0 auto;
+    }
 }
 
 /* ─── Subscription inline editor (AdminUserDetail) ────────────────────── */

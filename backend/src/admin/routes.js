@@ -99,10 +99,17 @@ router.get('/mappings/:reportType/draft', mappingsController.getDraftSet);
 
 // Draft management (super_admin only for mutations)
 router.post('/mappings/:reportType/draft', requireSuperAdmin, mappingsController.createDraftFromPublished);
+// Blank user-specific draft (assignedUsers required in body)
+router.post('/mappings/:reportType/blank-draft', requireSuperAdmin, mappingsController.createBlankDraft);
 
 // Set-level operations
 router.get('/mappings/sets/:setId', mappingsController.getSetById);
 router.post('/mappings/sets/:setId/publish', requireSuperAdmin, mappingsController.publishDraft);
+// Fork an arbitrary set (published/archived) into a new draft. Body may
+// override assignedUsers and label.
+router.post('/mappings/sets/:setId/fork', requireSuperAdmin, mappingsController.forkSet);
+// Update scope (assignedUsers, label) on a draft only.
+router.patch('/mappings/sets/:setId/scope', requireSuperAdmin, mappingsController.updateSetScope);
 router.delete('/mappings/sets/:setId', requireSuperAdmin, mappingsController.deleteSet);
 
 // Row editing within a draft (row-based report types)
@@ -112,19 +119,6 @@ router.delete('/mappings/rows/:rowId', requireSuperAdmin, mappingsController.del
 
 // Equity config (replace-all in a draft)
 router.put('/mappings/sets/:setId/equity', requireSuperAdmin, mappingsController.updateEquityConfig);
-
-// User overrides
-router.get('/users/:userId/overrides', mappingsController.listUserOverrides);
-router.put(
-    '/users/:userId/overrides/:reportType/:nsbuRowCode',
-    requireSuperAdmin,
-    mappingsController.upsertUserOverride
-);
-router.delete(
-    '/users/:userId/overrides/:reportType/:nsbuRowCode',
-    requireSuperAdmin,
-    mappingsController.deleteUserOverride
-);
 
 // --- Locales (i18n editor) ---
 

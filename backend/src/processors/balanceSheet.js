@@ -15,7 +15,9 @@ const { getBalanceSheetMapping } = require('../services/mappingResolver');
  * Process balance sheet from file path, buffer, or ExcelJS Workbook
  * @param {string|Buffer|ExcelJS.Workbook} input - File path, buffer, or ExcelJS Workbook
  * @param {Object} [options]
- * @param {string} [options.userId] - Apply this user's overrides on top of the global mapping
+ * @param {string} [options.userId] - If a user-specific published MappingSet
+ *     exists for this user (see MappingSet.assignedUsers), use it; otherwise
+ *     fall back to the global mapping.
  * @returns {Object} Processing result with workbook and summary
  */
 async function processBalanceSheetTemplate(input, options = {}) {
@@ -32,7 +34,8 @@ async function processBalanceSheetTemplate(input, options = {}) {
     };
 
     try {
-        // Resolve the mapping (DB with file fallback, user overrides applied)
+        // Resolve the mapping (DB with file fallback; per-user MappingSet
+        // assignment applied if any).
         const mapping = await getBalanceSheetMapping(options.userId);
 
         // Step 1: Read Excel file (supports .xlsx, .xls, and ExcelJS Workbook)

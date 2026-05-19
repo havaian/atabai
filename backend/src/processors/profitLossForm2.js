@@ -23,7 +23,9 @@ const { getProfitLossForm2Mapping } = require('../services/mappingResolver');
  *
  * @param {string|Buffer|ExcelJS.Workbook} input
  * @param {Object} [options]
- * @param {string} [options.userId] - Apply this user's overrides on top of the global mapping
+ * @param {string} [options.userId] - If a user-specific published MappingSet
+ *     exists for this user (see MappingSet.assignedUsers), use it; otherwise
+ *     fall back to the global mapping.
  * @returns {Object} { workbook, summary }
  */
 async function processProfitLossForm2Template(input, options = {}) {
@@ -40,7 +42,8 @@ async function processProfitLossForm2Template(input, options = {}) {
     };
 
     try {
-        // Resolve mapping (DB with file fallback, user overrides applied)
+        // Resolve mapping (DB with file fallback; per-user MappingSet
+        // assignment applied if any).
         const mapping = await getProfitLossForm2Mapping(options.userId);
         // Calculated codes are derived from the mapping itself
         const calculatedCodes = new Set(

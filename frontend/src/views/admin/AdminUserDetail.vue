@@ -170,41 +170,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Overrides -->
-            <div class="adm-card">
-                <h3 class="adm-card-title">{{ $t('admin.userDetail.overridesSection') }}</h3>
-                <div v-if="overridesLoading" class="adm-empty">{{ $t('admin.common.loading') }}</div>
-                <div v-else-if="overrides.length === 0" class="adm-empty">
-                    {{ $t('admin.userDetail.overridesNone') }}
-                </div>
-                <div v-else class="adm-table-wrap">
-                    <table class="adm-table">
-                        <thead>
-                            <tr>
-                                <th>{{ $t('admin.userDetail.overrideReportType') }}</th>
-                                <th>{{ $t('admin.userDetail.overrideCode') }}</th>
-                                <th>{{ $t('admin.userDetail.overrideIFRS') }}</th>
-                                <th>{{ $t('admin.userDetail.overrideSection') }}</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-for="o in overrides" :key="o._id">
-                                <td class="adm-text-sm">{{ o.reportType }}</td>
-                                <td class="adm-mono">{{ o.nsbuRowCode }}</td>
-                                <td class="adm-text-sm">{{ o.ifrsClassification }}</td>
-                                <td class="adm-text-sm adm-muted">{{ o.section }}</td>
-                                <td>
-                                    <button v-if="isSuperAdmin"
-                                        class="adm-btn adm-btn--sm adm-btn--danger"
-                                        @click="deleteOverride(o)">{{ $t('admin.common.delete') }}</button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
         </template>
 
         <!-- Role change modal -->
@@ -246,11 +211,9 @@ const user = ref(null)
 const fileStats = ref(null)
 const files = ref([])
 const filesPagination = ref(null)
-const overrides = ref([])
 
 const loading = ref(false)
 const filesLoading = ref(false)
-const overridesLoading = ref(false)
 const error = ref(null)
 
 const showRoleModal = ref(false)
@@ -325,18 +288,6 @@ async function loadFiles(page = 1) {
     }
 }
 
-async function loadOverrides() {
-    overridesLoading.value = true
-    try {
-        const data = await adminStore.listUserOverrides(userId.value)
-        overrides.value = data.overrides
-    } catch (err) {
-        console.error('Failed to load overrides:', err)
-    } finally {
-        overridesLoading.value = false
-    }
-}
-
 async function confirmRoleChange() {
     try {
         await adminStore.updateUserRole(userId.value, newRole.value)
@@ -361,18 +312,13 @@ async function toggleActive() {
     }
 }
 
-async function deleteOverride(o) {
-    if (!confirm(t('admin.userDetail.confirmDeleteOverride', { reportType: o.reportType, code: o.nsbuRowCode }))) return
-    try {
-        await adminStore.deleteUserOverride(userId.value, o.reportType, o.nsbuRowCode)
-        await loadOverrides()
-    } catch (err) {
-        alert(err.response?.data?.message || t('admin.common.error'))
-    }
-}
-
 function openFile(fileId) {
-    router.push(`/admin/files/${fileId}`)
+    // Pass referrer info so the file-detail page knows to send the user back
+    // to this specific user page (not to the generic /admin/files list).
+    router.push({
+        path: `/admin/files/${fileId}`,
+        query: { from: 'user', userId: route.params.userId }
+    })
 }
 
 function formatDate(d) {
@@ -394,6 +340,6 @@ function formatSize(bytes) {
 
 onMounted(async () => {
     await loadUser()
-    await Promise.all([loadFiles(1), loadOverrides()])
+    await loadFiles(1)
 })
 </script>

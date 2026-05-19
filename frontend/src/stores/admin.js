@@ -302,6 +302,34 @@ export const useAdminStore = defineStore('admin', () => {
         return response.data
     }
 
+    // Fork an arbitrary set (published or archived) into a new draft. Optional
+    // body overrides assignedUsers and label.
+    async function forkSet(setId, { assignedUsers, label } = {}) {
+        const body = {}
+        if (Array.isArray(assignedUsers)) body.assignedUsers = assignedUsers
+        if (typeof label === 'string') body.label = label
+        const response = await adminPost(`/admin/mappings/sets/${setId}/fork`, body)
+        return response.data
+    }
+
+    // Create a blank user-specific draft. assignedUsers is required.
+    async function createBlankDraft(reportType, { assignedUsers, label } = {}) {
+        const response = await adminPost(`/admin/mappings/${reportType}/blank-draft`, {
+            assignedUsers: assignedUsers || [],
+            label: label || ''
+        })
+        return response.data
+    }
+
+    // Update assignedUsers and/or label on a draft.
+    async function updateSetScope(setId, { assignedUsers, label } = {}) {
+        const body = {}
+        if (Array.isArray(assignedUsers)) body.assignedUsers = assignedUsers
+        if (typeof label === 'string') body.label = label
+        const response = await adminPatch(`/admin/mappings/sets/${setId}/scope`, body)
+        return response.data
+    }
+
     async function publishDraft(setId, notes) {
         const response = await adminPost(`/admin/mappings/sets/${setId}/publish`, { notes })
         return response.data
@@ -334,28 +362,6 @@ export const useAdminStore = defineStore('admin', () => {
 
     async function runMappingSeed() {
         const response = await adminPost('/admin/mappings/seed', {})
-        return response.data
-    }
-
-    // ─── Overrides ────────────────────────────────────────────────────────────
-    async function listUserOverrides(userId, reportType) {
-        const params = reportType ? { reportType } : {}
-        const response = await adminGet(`/admin/users/${userId}/overrides`, { params })
-        return response.data
-    }
-
-    async function upsertUserOverride(userId, reportType, nsbuRowCode, payload) {
-        const response = await adminPut(
-            `/admin/users/${userId}/overrides/${reportType}/${nsbuRowCode}`,
-            payload
-        )
-        return response.data
-    }
-
-    async function deleteUserOverride(userId, reportType, nsbuRowCode) {
-        const response = await adminDelete(
-            `/admin/users/${userId}/overrides/${reportType}/${nsbuRowCode}`
-        )
         return response.data
     }
 
@@ -444,6 +450,9 @@ export const useAdminStore = defineStore('admin', () => {
         getDraftSet,
         getSetById,
         createDraft,
+        forkSet,
+        createBlankDraft,
+        updateSetScope,
         publishDraft,
         deleteSet,
         addRow,
@@ -451,10 +460,6 @@ export const useAdminStore = defineStore('admin', () => {
         deleteRow,
         updateEquityConfig,
         runMappingSeed,
-        // overrides
-        listUserOverrides,
-        upsertUserOverride,
-        deleteUserOverride,
         // locales
         listLocaleKeys,
         listLocaleNamespaces,

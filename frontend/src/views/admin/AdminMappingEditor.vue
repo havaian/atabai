@@ -60,6 +60,64 @@
                 </div>
             </div>
 
+            <!-- Scope card: shows assignedUsers and label. Editable for drafts
+                 by super_admin. For published/archived, read-only. -->
+            <div class="adm-card adm-meta-card">
+                <div class="adm-row" style="justify-content: space-between; margin-bottom: 8px;">
+                    <div class="adm-meta-label">{{ $t('admin.mappingEditor.scopeTitle') }}</div>
+                    <button v-if="isDraft && isSuperAdmin && !scopeEditMode"
+                        class="adm-btn adm-btn--sm adm-btn--ghost"
+                        @click="openScopeEditor">
+                        {{ $t('admin.common.edit') }}
+                    </button>
+                </div>
+
+                <div v-if="!scopeEditMode">
+                    <div v-if="!isUserSpecificSet" class="adm-text-sm adm-muted">
+                        {{ $t('admin.mappingEditor.scopeGlobalNote') }}
+                    </div>
+                    <div v-else>
+                        <div v-if="set.label" class="adm-meta-value" style="margin-bottom: 6px;">
+                            <strong>{{ set.label }}</strong>
+                        </div>
+                        <div class="adm-text-sm adm-muted">
+                            {{ $t('admin.mappingEditor.scopeAssignedTo') }}:
+                        </div>
+                        <div class="adm-text-sm" style="margin-top: 4px;">
+                            <span v-for="u in set.assignedUsers" :key="u._id || u" class="adm-user-multi-chip"
+                                style="margin: 2px 4px 2px 0;">
+                                <span class="adm-user-multi-chip-email">{{ u.email || u }}</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div v-else>
+                    <div class="adm-field">
+                        <div class="adm-field-label">{{ $t('admin.mappings.scopeLabel') }}</div>
+                        <input v-model="scopeForm.label" type="text" class="adm-input"
+                            :placeholder="$t('admin.mappings.scopeLabelPlaceholder')" />
+                    </div>
+                    <div class="adm-field">
+                        <div class="adm-field-label">{{ $t('admin.mappings.scopeAssignedUsers') }}</div>
+                        <div class="adm-text-sm adm-muted" style="margin-bottom: 6px;">
+                            {{ $t('admin.mappingEditor.scopeAssignedHint') }}
+                        </div>
+                        <UserMultiSelect v-model="scopeForm.assignedUsers" />
+                    </div>
+                    <div class="adm-row" style="gap: 8px; justify-content: flex-end;">
+                        <button class="adm-btn adm-btn--ghost" @click="cancelScopeEdit"
+                            :disabled="scopeSubmitting">
+                            {{ $t('admin.common.cancel') }}
+                        </button>
+                        <button class="adm-btn adm-btn--primary" @click="saveScopeEdit"
+                            :disabled="scopeSubmitting">
+                            {{ scopeSubmitting ? $t('admin.common.saving') : $t('admin.common.save') }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             <!-- View toggle -->
             <div class="adm-card" style="padding: 12px 16px;" v-if="isRowBased">
                 <div class="adm-row" style="gap: 8px;">
@@ -211,8 +269,61 @@
                         </div>
                     </div>
 
-                    <div v-if="isDraft && isSuperAdmin" class="adm-muted adm-text-sm" style="margin-top: 16px;">
-                        {{ $t('admin.mappingEditor.equityEditNote') }}
+                    <!-- Inline JSON editor for the equity config. Available
+                         only on draft sets and only for super admins (same
+                         constraint as the previous "edit via API" note).
+                         A JSON form is the most pragmatic choice here — the
+                         schema has 4 array-shaped sections (columns,
+                         movementRows, rowPatterns, columnPatterns) and
+                         building a structured UI for each would be much
+                         more code without meaningfully reducing error
+                         surface, since the admin still has to know the
+                         field names. Validation happens on save: we parse
+                         JSON locally and the backend validates regex
+                         patterns before persisting. -->
+                    <div v-if="isDraft && isSuperAdmin" class="adm-equity-editor">
+                        <div class="adm-row" style="justify-content: space-between; margin-bottom: 10px;">
+                            <div class="adm-field-label" style="margin: 0;">
+                                {{ $t('admin.mappingEditor.equityJsonEditorTitle') }}
+                            </div>
+                            <div class="adm-row" style="gap: 8px;">
+                                <button v-if="!equityEditMode"
+                                    class="adm-btn adm-btn--ghost"
+                                    @click="openEquityEditor">
+                                    {{ $t('admin.mappingEditor.equityEditBtn') }}
+                                </button>
+                                <template v-else>
+                                    <button class="adm-btn adm-btn--ghost"
+                                        @click="cancelEquityEdit"
+                                        :disabled="equitySaving">
+                                        {{ $t('admin.common.cancel') }}
+                                    </button>
+                                    <button class="adm-btn adm-btn--primary"
+                                        @click="saveEquityConfig"
+                                        :disabled="equitySaving || !!equityJsonError">
+                                        {{ equitySaving ? $t('admin.common.saving') : $t('admin.common.save') }}
+                                    </button>
+                                </template>
+                            </div>
+                        </div>
+
+                        <div v-if="equityEditMode">
+                            <textarea
+                                v-model="equityJsonDraft"
+                                class="adm-equity-json"
+                                spellcheck="false"
+                                @input="validateEquityJson"
+                            />
+                            <div class="adm-muted adm-text-xs" style="margin-top: 6px;">
+                                {{ $t('admin.mappingEditor.equityJsonHint') }}
+                            </div>
+                            <div v-if="equityJsonError" class="adm-text-sm" style="color: #fca5a5; margin-top: 8px;">
+                                {{ equityJsonError }}
+                            </div>
+                            <div v-else-if="equitySaveError" class="adm-text-sm" style="color: #fca5a5; margin-top: 8px;">
+                                {{ equitySaveError }}
+                            </div>
+                        </div>
                     </div>
                 </template>
             </div>
@@ -266,14 +377,22 @@
                         />
                     </div>
                 </div>
-                <div class="adm-row" style="gap: 16px; margin: 12px 0;">
-                    <label class="adm-row" style="gap: 6px;">
+                <!-- Flags: stacked vertically with helper text so the meaning
+                     is explicit instead of a bare "Calculated" checkbox. -->
+                <div class="adm-flag-group">
+                    <label class="adm-flag-row">
                         <input type="checkbox" v-model="rowForm.isNegative" />
-                        <span class="adm-text-sm">{{ $t('admin.mappingEditor.fieldFlagNegative') }}</span>
+                        <span class="adm-flag-body">
+                            <span class="adm-flag-label">{{ $t('admin.mappingEditor.fieldFlagNegative') }}</span>
+                            <span class="adm-flag-hint">{{ $t('admin.mappingEditor.fieldFlagNegativeHint') }}</span>
+                        </span>
                     </label>
-                    <label class="adm-row" style="gap: 6px;">
+                    <label class="adm-flag-row">
                         <input type="checkbox" v-model="rowForm.isCalculated" />
-                        <span class="adm-text-sm">{{ $t('admin.mappingEditor.fieldFlagCalculated') }}</span>
+                        <span class="adm-flag-body">
+                            <span class="adm-flag-label">{{ $t('admin.mappingEditor.fieldFlagCalculated') }}</span>
+                            <span class="adm-flag-hint">{{ $t('admin.mappingEditor.fieldFlagCalculatedHint') }}</span>
+                        </span>
                     </label>
                 </div>
                 <div class="adm-field" v-if="rowForm.isCalculated">
@@ -323,6 +442,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useAdminStore } from '@/stores/admin'
 import AdminCombobox from '@/components/admin/AdminCombobox.vue'
+import UserMultiSelect from '@/components/admin/UserMultiSelect.vue'
 import { VueFlow, MarkerType } from '@vue-flow/core'
 import { Background } from '@vue-flow/background'
 import { MiniMap } from '@vue-flow/minimap'
@@ -340,6 +460,26 @@ const { t, locale } = useI18n()
 const set = ref(null)
 const rows = ref([])
 const equityConfig = ref(null)
+
+// Equity JSON editor state. Activated only when admin clicks "Edit" on a
+// draft equity set. The textarea is bound to equityJsonDraft; on input we
+// re-parse and store any error in equityJsonError so the Save button can
+// stay disabled until the JSON is syntactically valid. Server-side validation
+// errors (e.g. bad regex) come back as equitySaveError.
+const equityEditMode = ref(false)
+const equityJsonDraft = ref('')
+const equityJsonError = ref('')
+const equitySaveError = ref('')
+const equitySaving = ref(false)
+
+// Scope editor state — assigns the draft to specific users (or makes it global
+// by clearing the user list). Editable only on drafts by super_admin.
+const scopeEditMode = ref(false)
+const scopeSubmitting = ref(false)
+const scopeForm = reactive({
+    assignedUsers: [],
+    label: ''
+})
 
 const loading = ref(false)
 const error = ref(null)
@@ -373,6 +513,7 @@ const setId = computed(() => route.params.setId)
 const isDraft = computed(() => set.value?.status === 'draft')
 const isRowBased = computed(() => set.value && ['balance_sheet', 'cash_flow', 'profit_loss_form2'].includes(set.value.reportType))
 const isSuperAdmin = computed(() => adminStore.isSuperAdmin)
+const isUserSpecificSet = computed(() => Array.isArray(set.value?.assignedUsers) && set.value.assignedUsers.length > 0)
 
 const availableSections = computed(() => {
     const s = new Set()
@@ -794,6 +935,127 @@ async function doPublish() {
     }
 }
 
+// ─── Equity JSON editor ──────────────────────────────────────────────────────
+// We serialize only the editable parts of the equity config — internal fields
+// (mappingSetId, _id, timestamps) are stripped to keep the JSON manageable
+// and match exactly the shape the PUT endpoint accepts.
+function buildEquityDraftJson(config) {
+    if (!config) {
+        // Bootstrap an empty skeleton if nothing exists yet.
+        return JSON.stringify({
+            columns: [],
+            movementRows: [],
+            rowPatterns: [],
+            columnPatterns: [],
+            bsRowToEquityColumn: {},
+            notes: ''
+        }, null, 2)
+    }
+    // bsRowToEquityColumn comes back as a plain object from .lean() / JSON
+    // serialization. If it's a Map (unlikely here, but guard anyway), convert.
+    let bsMap = config.bsRowToEquityColumn || {}
+    if (bsMap instanceof Map) {
+        bsMap = Object.fromEntries(bsMap)
+    }
+    return JSON.stringify({
+        columns: config.columns || [],
+        movementRows: config.movementRows || [],
+        rowPatterns: config.rowPatterns || [],
+        columnPatterns: config.columnPatterns || [],
+        bsRowToEquityColumn: bsMap,
+        notes: config.notes || ''
+    }, null, 2)
+}
+
+function openEquityEditor() {
+    equityJsonDraft.value = buildEquityDraftJson(equityConfig.value)
+    equityJsonError.value = ''
+    equitySaveError.value = ''
+    equityEditMode.value = true
+}
+
+function cancelEquityEdit() {
+    equityEditMode.value = false
+    equityJsonDraft.value = ''
+    equityJsonError.value = ''
+    equitySaveError.value = ''
+}
+
+function validateEquityJson() {
+    equitySaveError.value = ''
+    if (!equityJsonDraft.value.trim()) {
+        equityJsonError.value = t('admin.mappingEditor.equityJsonEmpty')
+        return
+    }
+    try {
+        const parsed = JSON.parse(equityJsonDraft.value)
+        if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+            equityJsonError.value = t('admin.mappingEditor.equityJsonNotObject')
+            return
+        }
+        equityJsonError.value = ''
+    } catch (err) {
+        equityJsonError.value = t('admin.mappingEditor.equityJsonInvalid', { message: err.message })
+    }
+}
+
+async function saveEquityConfig() {
+    validateEquityJson()
+    if (equityJsonError.value) return
+    equitySaving.value = true
+    equitySaveError.value = ''
+    try {
+        const payload = JSON.parse(equityJsonDraft.value)
+        const result = await adminStore.updateEquityConfig(setId.value, payload)
+        // Refresh from server response so we see canonical state (server may
+        // have normalized fields, defaults, etc.)
+        if (result?.config) {
+            equityConfig.value = result.config
+        } else {
+            await loadSet()
+        }
+        equityEditMode.value = false
+        equityJsonDraft.value = ''
+    } catch (err) {
+        // Backend returns specific error codes (INVALID_REGEX, WRONG_REPORT_TYPE)
+        // — show whichever message the server provides, falling back to a
+        // generic one.
+        equitySaveError.value = err.response?.data?.message
+            || err.message
+            || t('admin.mappingEditor.equityJsonSaveError')
+    } finally {
+        equitySaving.value = false
+    }
+}
+
+// ─── Scope editor (assignedUsers + label) ────────────────────────────────────
+function openScopeEditor() {
+    scopeForm.assignedUsers = (set.value?.assignedUsers || []).map(u => u._id || u)
+    scopeForm.label = set.value?.label || ''
+    scopeEditMode.value = true
+}
+
+function cancelScopeEdit() {
+    scopeEditMode.value = false
+}
+
+async function saveScopeEdit() {
+    scopeSubmitting.value = true
+    try {
+        await adminStore.updateSetScope(setId.value, {
+            assignedUsers: scopeForm.assignedUsers,
+            label: scopeForm.label
+        })
+        // Re-fetch the set to get the populated assignedUsers (emails) back.
+        await loadSet()
+        scopeEditMode.value = false
+    } catch (err) {
+        alert(err.response?.data?.message || t('admin.common.error'))
+    } finally {
+        scopeSubmitting.value = false
+    }
+}
+
 onMounted(loadSet)
 </script>
 
@@ -887,5 +1149,106 @@ onMounted(loadSet)
     background: rgba(15, 10, 26, 0.5);
     border-radius: 6px;
     flex-wrap: wrap;
+}
+
+/* Stacked, descriptive checkboxes for row flags (isNegative, isCalculated).
+   Replaces the previous bare side-by-side checkboxes — each flag now has
+   an explicit label and a one-line hint so the admin understands what
+   "Calculated" actually means without referring to docs. */
+.adm-flag-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 12px 0;
+}
+
+.adm-flag-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 12px;
+    background: rgba(15, 10, 26, 0.4);
+    border: 1px solid rgba(149, 0, 255, 0.08);
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.adm-flag-row:hover {
+    background: rgba(15, 10, 26, 0.55);
+}
+
+.adm-flag-row input[type="checkbox"] {
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+.adm-flag-body {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+.adm-flag-label {
+    font-size: 13px;
+    color: var(--adm-text, #f0ecf6);
+    font-weight: 500;
+}
+
+.adm-flag-hint {
+    font-size: 12px;
+    color: var(--adm-text-muted);
+    line-height: 1.4;
+}
+
+/* Equity JSON editor — appears only on draft equity sets. The textarea is
+   monospaced and sized generously so admin can comfortably edit nested
+   arrays without constant scrolling. */
+.adm-equity-editor {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(149, 0, 255, 0.1);
+}
+
+.adm-equity-json {
+    width: 100%;
+    min-height: 400px;
+    padding: 12px;
+    font-family: 'SF Mono', 'Monaco', 'Menlo', 'Consolas', monospace;
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: var(--adm-text, #f0ecf6);
+    background: rgba(10, 6, 18, 0.7);
+    border: 1px solid rgba(149, 0, 255, 0.15);
+    border-radius: 8px;
+    resize: vertical;
+    box-sizing: border-box;
+}
+
+.adm-equity-json:focus {
+    outline: none;
+    border-color: rgba(168, 85, 247, 0.5);
+}
+
+/* Local copy of the chip style from UserMultiSelect — needed here because
+   the chip class in UserMultiSelect.vue is scoped and won't apply to chips
+   rendered directly in this template. Display-only (no remove button). */
+.adm-user-multi-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    background: rgba(149, 0, 255, 0.15);
+    border: 1px solid rgba(149, 0, 255, 0.3);
+    border-radius: 12px;
+    font-size: 12px;
+    color: var(--adm-text, #f0ecf6);
+}
+
+.adm-user-multi-chip-email {
+    max-width: 220px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 </style>

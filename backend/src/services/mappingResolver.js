@@ -2,7 +2,7 @@
  * Mapping resolver.
  *
  * Provides DB-backed mappings (with fallback to the original file constants)
- * for transformers and extractors. Optionally layers per-user overrides on top.
+ * for transformers and extractors.
  *
  * Returns objects with the SAME shape as the original file exports so the
  * existing transformer/extractor code keeps working without rewrites:
@@ -14,13 +14,14 @@
  *                                             EQUITY_MOVEMENT_ROWS, FORM4_ROW_PATTERNS,
  *                                             FORM4_COLUMN_PATTERNS }
  *
+ * The userId parameter is currently a placeholder for upcoming per-user
+ * mapping set assignment (see MappingSet.assignedUsers). It is kept in the
+ * signature so call sites don't need to change when that wiring lands.
+ *
  * Caching strategy:
- *   - Global mappings (no user override) are cached per reportType for 60s.
+ *   - Global mappings are cached per reportType for 60s.
  *     Cache key contains the published MappingSet id; if a new draft is
  *     published, the new id invalidates the cache automatically.
- *   - User-override-resolved mappings are computed on demand (no cache).
- *     Overrides change less frequently than they're read, but per-user caching
- *     would need invalidation on PUT/DELETE override and we keep it simple.
  *
  * Failure mode:
  *   - DB read error or no published set → fallback to file constants
@@ -32,7 +33,6 @@
 const MappingSet = require('../admin/models/mappingSet.model');
 const RowMapping = require('../admin/models/rowMapping.model');
 const EquityMappingConfig = require('../admin/models/equityMappingConfig.model');
-const UserMappingOverride = require('../admin/models/userMappingOverride.model');
 
 // File-constant fallbacks (these are the source of truth before Stage 3a seed,
 // and remain the safety net afterward).
@@ -88,15 +88,46 @@ function rowDocToFileShape(doc) {
 /**
  * Load the published row-based mapping for a reportType from DB, with caching.
  * Returns the file-shape object, or null if no published set / DB error.
+ *
+ * Resolution order:
+ *   1. If userId is provided, look for a published USER-SPECIFIC set whose
+ *      assignedUsers contains this user.
+ *   2. Otherwise (or as fallback), look for the published GLOBAL set
+ *      (assignedUsers empty).
+ *
+ * Cache key includes the userId for user-specific resolutions so a user
+ * picking up a custom set doesn't poison the global cache and vice versa.
+ * The cache value also stores the resolved setId — if the underlying set
+ * is republished, the new set has a new _id, which forces a miss on next
+ * read; invalidateMappingCache also wipes entries proactively on publish.
  */
-async function loadRowBasedFromDb(reportType) {
-    const cached = globalCache.get(reportType);
+async function loadRowBasedFromDb(reportType, userId) {
+    const cacheKey = userId ? `${reportType}:${userId}` : reportType;
+    const cached = globalCache.get(cacheKey);
     if (cached && cached.expiresAt > Date.now()) {
         return cached.data;
     }
 
     try {
-        const set = await MappingSet.findOne({ reportType, status: 'published' }).lean();
+        // Step 1: try user-specific set if userId is given.
+        let set = null;
+        if (userId) {
+            set = await MappingSet.findOne({
+                reportType,
+                status: 'published',
+                assignedUsers: userId
+            }).lean();
+        }
+
+        // Step 2: fall back to global published set (assignedUsers empty).
+        if (!set) {
+            set = await MappingSet.findOne({
+                reportType,
+                status: 'published',
+                assignedUsers: { $size: 0 }
+            }).lean();
+        }
+
         if (!set) {
             return null;
         }
@@ -105,65 +136,47 @@ async function loadRowBasedFromDb(reportType) {
         for (const row of rows) {
             out[row.nsbuRowCode] = rowDocToFileShape(row);
         }
-        globalCache.set(reportType, {
+        globalCache.set(cacheKey, {
             setId: String(set._id),
             data: out,
             expiresAt: Date.now() + CACHE_TTL_MS
         });
         return out;
     } catch (err) {
-        global.logger?.logError?.(err, { context: 'mappingResolver.loadRowBasedFromDb', reportType });
+        global.logger?.logError?.(err, { context: 'mappingResolver.loadRowBasedFromDb', reportType, userId });
         return null;
     }
 }
 
-/**
- * Apply per-user overrides on top of a base mapping.
- * Returns a NEW object (does not mutate base). Overrides win.
- */
-async function applyUserOverrides(reportType, baseMap, userId) {
-    if (!userId) return baseMap;
-    try {
-        const overrides = await UserMappingOverride.find({ userId, reportType }).lean();
-        if (overrides.length === 0) return baseMap;
-        const out = { ...baseMap };
-        for (const ov of overrides) {
-            out[ov.nsbuRowCode] = rowDocToFileShape(ov);
-        }
-        return out;
-    } catch (err) {
-        global.logger?.logError?.(err, { context: 'mappingResolver.applyUserOverrides', reportType, userId });
-        return baseMap;
-    }
-}
-
 // ─── Public API: row-based reports ────────────────────────────────────────────
+// userId enables per-user MappingSet resolution: if a published user-specific
+// set exists for this user, it is used; otherwise the global set is.
 
 async function getBalanceSheetMapping(userId) {
-    let base = await loadRowBasedFromDb('balance_sheet');
+    let base = await loadRowBasedFromDb('balance_sheet', userId);
     if (!base) {
         logFallback('balance_sheet', 'no published set in DB');
         base = fileBalanceSheet.BALANCE_SHEET_MAPPING;
     }
-    return applyUserOverrides('balance_sheet', base, userId);
+    return base;
 }
 
 async function getCashFlowMapping(userId) {
-    let base = await loadRowBasedFromDb('cash_flow');
+    let base = await loadRowBasedFromDb('cash_flow', userId);
     if (!base) {
         logFallback('cash_flow', 'no published set in DB');
         base = fileCashFlow.CASH_FLOW_MAPPING;
     }
-    return applyUserOverrides('cash_flow', base, userId);
+    return base;
 }
 
 async function getProfitLossForm2Mapping(userId) {
-    let base = await loadRowBasedFromDb('profit_loss_form2');
+    let base = await loadRowBasedFromDb('profit_loss_form2', userId);
     if (!base) {
         logFallback('profit_loss_form2', 'no published set in DB');
         base = fileProfitLossF2.FORM2_ROW_CODES;
     }
-    return applyUserOverrides('profit_loss_form2', base, userId);
+    return base;
 }
 
 // ─── Public API: equity ───────────────────────────────────────────────────────
@@ -173,17 +186,32 @@ async function getProfitLossForm2Mapping(userId) {
  *   { EQUITY_COLUMNS, BS_ROW_TO_EQUITY_COLUMN, EQUITY_MOVEMENT_ROWS,
  *     FORM4_ROW_PATTERNS, FORM4_COLUMN_PATTERNS }
  *
- * User overrides are NOT supported for equity in MVP (its schema is too
- * different from row mappings). userId param is accepted but ignored.
+ * Resolution order mirrors loadRowBasedFromDb: user-specific published set
+ * first, then global. The same caching strategy applies.
  */
-async function getEquityMapping(/* userId */) {
-    const cached = globalCache.get('equity');
+async function getEquityMapping(userId) {
+    const cacheKey = userId ? `equity:${userId}` : 'equity';
+    const cached = globalCache.get(cacheKey);
     if (cached && cached.expiresAt > Date.now()) {
         return cached.data;
     }
 
     try {
-        const set = await MappingSet.findOne({ reportType: 'equity', status: 'published' }).lean();
+        let set = null;
+        if (userId) {
+            set = await MappingSet.findOne({
+                reportType: 'equity',
+                status: 'published',
+                assignedUsers: userId
+            }).lean();
+        }
+        if (!set) {
+            set = await MappingSet.findOne({
+                reportType: 'equity',
+                status: 'published',
+                assignedUsers: { $size: 0 }
+            }).lean();
+        }
         if (set) {
             const config = await EquityMappingConfig.findOne({ mappingSetId: set._id }).lean();
             if (config) {
@@ -215,7 +243,7 @@ async function getEquityMapping(/* userId */) {
                     FORM4_COLUMN_PATTERNS: (config.columnPatterns || []).map(compilePattern)
                 };
 
-                globalCache.set('equity', {
+                globalCache.set(cacheKey, {
                     setId: String(set._id),
                     data,
                     expiresAt: Date.now() + CACHE_TTL_MS
@@ -225,7 +253,7 @@ async function getEquityMapping(/* userId */) {
         }
         logFallback('equity', 'no published set/config in DB');
     } catch (err) {
-        global.logger?.logError?.(err, { context: 'mappingResolver.getEquityMapping' });
+        global.logger?.logError?.(err, { context: 'mappingResolver.getEquityMapping', userId });
         logFallback('equity', 'DB error: ' + err.message);
     }
 
@@ -243,12 +271,23 @@ async function getEquityMapping(/* userId */) {
 
 /**
  * Manually invalidate cache. Called by mappings.controller after publish/delete.
+ * Wipes both the global cache entry and ALL user-specific entries for the
+ * given reportType, since publishing affects user-specific resolutions too
+ * (a user-specific set being published archives the old user-specific set
+ * for the overlapping users).
  */
 function invalidateCache(reportType) {
-    if (reportType) {
-        globalCache.delete(reportType);
-    } else {
+    if (!reportType) {
         globalCache.clear();
+        return;
+    }
+    // Delete both the global entry and any `reportType:userId` entries.
+    const prefix = `${reportType}:`;
+    globalCache.delete(reportType);
+    for (const key of globalCache.keys()) {
+        if (key.startsWith(prefix)) {
+            globalCache.delete(key);
+        }
     }
 }
 
