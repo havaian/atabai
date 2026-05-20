@@ -297,16 +297,13 @@ const routes = [
             {
                 path: 'upload',
                 redirect: to => `/${to.params.locale || DEFAULT_LOCALE}/app/upload`
-            },
-
-            // Inside-locale catch-all — any unknown path under a valid
-            // locale falls back to that locale's landing page. Keeps URL
-            // 404s from hitting the outer NoLocale handler (which would
-            // strip the carefully-chosen locale prefix).
-            {
-                path: ':pathMatch(.*)*',
-                redirect: to => `/${to.params.locale || DEFAULT_LOCALE}/`
             }
+            // NOTE: previously had an inside-locale catch-all here
+            // (`:pathMatch(.*)*` redirecting to `/<locale>/`). Removed because
+            // it could match before legitimate children under app/admin in
+            // some routing situations, causing valid pages to silently
+            // redirect to landing. Genuine 404s under a locale still fall
+            // through to the outer NoLocale catchall below.
         ]
     },
 
@@ -364,12 +361,18 @@ function updateMetaDescription(description) {
 router.beforeEach((to, from, next) => {
     if (!pathHasLocale(to.path)) {
         const locale = getBootstrapLocale()
-        // Preserve the rest of the path (and query, hash) as-is. If the
-        // user typed bare "/", the result is "/<locale>/".
-        const target = to.fullPath === '/'
-            ? `/${locale}/`
-            : `/${locale}${to.fullPath}`
-        return next({ path: target, replace: true })
+        // Build the prefixed path WITHOUT query/hash, and pass query/hash
+        // through as separate fields. Passing a single string to next()
+        // works for path-only redirects but is fragile when there's a
+        // query string — the parser doesn't always reattach it. Using the
+        // structured form guarantees `?template=balanceSheet` survives.
+        const prefixed = to.path === '/' ? `/${locale}/` : `/${locale}${to.path}`
+        return next({
+            path: prefixed,
+            query: to.query,
+            hash: to.hash,
+            replace: true,
+        })
     }
     next()
 })

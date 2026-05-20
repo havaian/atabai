@@ -25,14 +25,14 @@
 
         <!-- Navigation -->
         <nav class="sidebar-nav">
-            <button class="nav-item" :class="{ active: $route.path === '/app/dashboard', 'icon-only': !isSidebarOpen }"
+            <button class="nav-item" :class="{ active: $route.name === 'Dashboard', 'icon-only': !isSidebarOpen }"
                 @click="navigateTo('/app/dashboard')">
                 <Squares2X2Icon class="nav-icon" />
                 <Transition name="fade-slide">
                     <span v-if="isSidebarOpen" class="nav-label">{{ $t('nav.dashboard') }}</span>
                 </Transition>
             </button>
-            <button class="nav-item" :class="{ active: $route.path === '/app/history', 'icon-only': !isSidebarOpen }"
+            <button class="nav-item" :class="{ active: $route.name === 'FileHistory', 'icon-only': !isSidebarOpen }"
                 @click="navigateTo('/app/history')">
                 <ArchiveBoxIcon class="nav-icon" />
                 <Transition name="fade-slide">
@@ -188,17 +188,18 @@
 
                 <!-- Navigation -->
                 <nav class="sidebar-nav">
-                    <button class="nav-item" :class="{ active: $route.path === '/app/dashboard' }"
+                    <button class="nav-item" :class="{ active: $route.name === 'Dashboard' }"
                         @click="() => { navigateTo('/app/dashboard'); $emit('close') }">
                         <Squares2X2Icon class="nav-icon" />
                         <span class="nav-label">{{ $t('nav.dashboard') }}</span>
                     </button>
-                    <button class="nav-item" :class="{ active: $route.path === '/app/history' }"
+                    <button class="nav-item" :class="{ active: $route.name === 'FileHistory' }"
                         @click="() => { navigateTo('/app/history'); $emit('close') }">
                         <ArchiveBoxIcon class="nav-icon" />
                         <span class="nav-label">{{ $t('nav.history') }}</span>
                     </button>
-                    <button class="nav-item" @click="() => { navigateTo('/app/settings'); $emit('close') }">
+                    <button class="nav-item" :class="{ active: $route.name === 'Settings' }"
+                        @click="() => { navigateTo('/app/settings'); $emit('close') }">
                         <Cog6ToothIcon class="nav-icon" />
                         <span class="nav-label">{{ $t('dashboard.settings') }}</span>
                     </button>

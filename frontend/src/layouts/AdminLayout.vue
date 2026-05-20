@@ -27,8 +27,8 @@
             <nav class="adm-nav">
                 <router-link
                     v-for="item in navItems"
-                    :key="item.path"
-                    :to="item.path"
+                    :key="item.name"
+                    :to="{ name: item.name }"
                     class="adm-nav-item"
                     :active-class="item.exact ? '' : 'adm-nav-item--active'"
                     :exact-active-class="item.exact ? 'adm-nav-item--active' : ''"
@@ -129,8 +129,8 @@
                     <nav class="adm-nav">
                         <router-link
                             v-for="item in navItems"
-                            :key="item.path"
-                            :to="item.path"
+                            :key="item.name"
+                            :to="{ name: item.name }"
                             class="adm-nav-item"
                             :active-class="item.exact ? '' : 'adm-nav-item--active'"
                             :exact-active-class="item.exact ? 'adm-nav-item--active' : ''"
@@ -300,14 +300,18 @@ const sidebarOpen = ref(true)
 // Mobile drawer state (separate from sidebarOpen — see UserLayout.vue for rationale)
 const mobileDrawerOpen = ref(false)
 
+// Named routes here (not raw paths) so the active-class on router-link
+// works correctly regardless of the URL's locale prefix. With raw paths
+// like '/admin/users', router-link would compare the literal string
+// against the actual route '/ru/admin/users' and never match.
 const navItems = computed(() => [
-    { path: '/admin', label: t('admin.nav.dashboard'), icon: LayoutDashboard, exact: true },
-    { path: '/admin/users', label: t('admin.nav.users'), icon: Users },
-    { path: '/admin/files', label: t('admin.nav.files'), icon: FileText },
-    { path: '/admin/mappings', label: t('admin.nav.mappings'), icon: Network },
-    { path: '/admin/locales', label: t('admin.nav.locales'), icon: Languages },
-    { path: '/admin/access', label: t('admin.nav.access'), icon: UserCheck },
-    { path: '/admin/security', label: t('admin.nav.security'), icon: ShieldCheck }
+    { name: 'AdminDashboard', label: t('admin.nav.dashboard'), icon: LayoutDashboard, exact: true },
+    { name: 'AdminUsers', label: t('admin.nav.users'), icon: Users },
+    { name: 'AdminFiles', label: t('admin.nav.files'), icon: FileText },
+    { name: 'AdminMappings', label: t('admin.nav.mappings'), icon: Network },
+    { name: 'AdminLocales', label: t('admin.nav.locales'), icon: Languages },
+    { name: 'AdminAccess', label: t('admin.nav.access'), icon: UserCheck },
+    { name: 'AdminSecuritySettings', label: t('admin.nav.security'), icon: ShieldCheck }
 ])
 
 const roleLabel = computed(() => {
