@@ -367,9 +367,6 @@ router.beforeEach((to, from, next) => {
         // query string — the parser doesn't always reattach it. Using the
         // structured form guarantees `?template=balanceSheet` survives.
         const prefixed = to.path === '/' ? `/${locale}/` : `/${locale}${to.path}`
-        // Debug — remove once URL locale routing is stable.
-        // eslint-disable-next-line no-console
-        console.log('[router/guard1] missing locale, prefixing:', to.fullPath, '→', prefixed, 'query:', to.query)
         return next({
             path: prefixed,
             query: to.query,
@@ -426,10 +423,6 @@ router.beforeEach(async (to, from, next) => {
 router.beforeEach(async (to, from, next) => {
     const authStore = useAuthStore()
     const locale = to.params.locale || getBootstrapLocale()
-
-    // Debug — remove once stable.
-    // eslint-disable-next-line no-console
-    console.log('[router/guard3-auth] to:', to.fullPath, 'name:', to.name, 'requiresAuth:', to.meta?.requiresAuth, 'authed:', authStore.isAuthenticated)
 
     // Bare /<locale>/ → /<locale>/app/dashboard for authenticated users
     if (to.path === `/${locale}` || to.path === `/${locale}/`) {
