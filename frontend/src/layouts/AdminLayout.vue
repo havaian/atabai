@@ -614,7 +614,6 @@ watch(sidebarOpen, (v) => {
 
 /* ─── Sidebar footer ──────────────────────────────────────────────────────── */
 .adm-sidebar-footer {
-    padding: 12px;
     border-top: 1px solid var(--adm-border-soft);
     display: flex;
     flex-direction: column;
@@ -667,7 +666,6 @@ watch(sidebarOpen, (v) => {
    .theme-pill-btn / .theme-icon-btn in components/layout/Sidebar.vue. If you
    change one, change the other. */
 .adm-theme-section {
-    padding: 8px 12px;
     flex-shrink: 0;
     display: flex;
     align-items: center;
@@ -741,7 +739,6 @@ watch(sidebarOpen, (v) => {
    admin and app don't experience a context switch. If you change one,
    change the other. */
 .adm-lang-section {
-    padding: 4px 12px;
     flex-shrink: 0;
     position: relative;
 }

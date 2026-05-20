@@ -55,10 +55,6 @@
     padding: 20px;
 }
 
-.adm-card + .adm-card {
-    margin-top: 16px;
-}
-
 /* Utility: explicit top spacing for a card following any sibling (not just
    another .adm-card). Used on dashboard "Last 7 days" card which follows
    the .adm-grid-2 wrapper, where the .adm-card + .adm-card selector doesn't
