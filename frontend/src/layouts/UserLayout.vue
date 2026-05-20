@@ -17,7 +17,9 @@
                 <button class="ws-mobile-menu-btn" @click="openMobileDrawer" :aria-label="$t('nav.openMenu')">
                     <Bars3Icon class="h-5 w-5" />
                 </button>
-                <LogoComponent class="ws-mobile-logo" />
+                <router-link to="/app/dashboard" class="ws-mobile-logo-link">
+                    <LogoComponent class="ws-mobile-logo" />
+                </router-link>
                 <div class="ws-mobile-spacer"></div>
             </div>
 
@@ -169,6 +171,16 @@ const closeMobileDrawer = () => { isMobileDrawerOpen.value = false }
 .ws-mobile-logo {
     height: 28px;
     width: 100px;
+}
+
+/* Click target wrapping the logo in the mobile top bar — navigates to
+   /app/dashboard. Kept as inline-flex so the existing height/width on
+   .ws-mobile-logo continues to work. */
+.ws-mobile-logo-link {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+    color: inherit;
 }
 
 .ws-mobile-spacer {

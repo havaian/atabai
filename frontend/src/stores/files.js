@@ -392,6 +392,27 @@ export const useFilesStore = defineStore('files', () => {
         }
     }
 
+    /**
+     * Fetch the raw uploaded xlsx parsed into Univer workbook JSON.
+     * Used by TransformationView's "Source" tab — only invoked when the
+     * user clicks that tab (lazy load) to keep the FileDetails page light.
+     *
+     * Errors are normalized the same way fetchTransformation does so the
+     * component can branch on err.code / err.status.
+     */
+    async function fetchSourceWorkbook(fileId) {
+        try {
+            const response = await apiClient.get(`/files/${fileId}/source-workbook`)
+            return response.data.workbook
+        } catch (err) {
+            const code = err.response?.data?.error
+            const e = new Error(err.response?.data?.message || 'Failed to fetch source workbook')
+            e.code = code
+            e.status = err.response?.status
+            throw e
+        }
+    }
+
     return {
         // State
         files,
@@ -425,6 +446,7 @@ export const useFilesStore = defineStore('files', () => {
         updateFileStatus,
         clearState,
         fetchTransformation,
-        regenerateTransformation
+        regenerateTransformation,
+        fetchSourceWorkbook
     }
 })

@@ -51,14 +51,34 @@
 
         <!-- Ready: toggle + Univer host -->
         <template v-else-if="phase === 'ready'">
-            <!-- Sheet toggle -->
+            <!-- Sheet toggle: three tabs — Source (raw xlsx), Extracted (the
+                 reconstructed smart-mapping view), IFRS (the final output).
+                 The Source tab triggers a lazy fetch on first click; while
+                 the fetch is in flight the tab shows a spinner. -->
             <div class="tv-toggle">
-                <button class="tv-toggle-btn" :class="{ active: activeSheet === 'original' }"
-                    @click="switchSheet('original')">
-                    {{ $t('transformation.toggle.original') }}
+                <button class="tv-toggle-btn" :class="{ active: activeSheet === 'source' }"
+                    @click="switchToSource"
+                    :disabled="sourceLoading">
+                    <span v-if="sourceLoading" class="tv-toggle-spinner" aria-hidden="true"></span>
+                    {{ $t('transformation.toggle.source') }}
                 </button>
-                <button class="tv-toggle-btn" :class="{ active: activeSheet === 'ifrs' }" @click="switchSheet('ifrs')">
+                <button class="tv-toggle-btn" :class="{ active: activeSheet === 'extracted' }"
+                    @click="switchSheet('extracted')">
+                    {{ $t('transformation.toggle.extracted') }}
+                </button>
+                <button class="tv-toggle-btn" :class="{ active: activeSheet === 'ifrs' }"
+                    @click="switchSheet('ifrs')">
                     {{ $t('transformation.toggle.ifrs') }}
+                </button>
+            </div>
+
+            <!-- Source-tab fetch error banner (shown only when the Source
+                 fetch failed; doesn't block the Extracted/IFRS tabs). -->
+            <div v-if="sourceError" class="tv-source-error">
+                <ExclamationCircleIcon class="w-4 h-4" />
+                <span>{{ sourceError }}</span>
+                <button class="tv-btn tv-btn-secondary tv-btn-sm" @click="loadSourceWorkbook">
+                    {{ $t('common.retry') }}
                 </button>
             </div>
 
@@ -86,7 +106,29 @@ const filesStore = useFilesStore()
 const phase = ref('loading')
 const errorMessage = ref('')
 const regenerating = ref(false)
-const activeSheet = ref('original')
+
+// Active sheet: 'source' (raw xlsx, lazy-loaded), 'extracted' (the
+// reconstructed mapping view — formerly called "original" in the UI), or
+// 'ifrs' (the final transformed output). Defaults to 'extracted' so the
+// initial view matches what users saw before the Source tab was added.
+const activeSheet = ref('extracted')
+
+// Source-workbook lazy-load state. We cache the parsed workbook the first
+// time the user clicks "Source" so subsequent toggles back-and-forth don't
+// re-hit the backend. Errors are surfaced inline (separate from the main
+// `phase`) because they only affect the Source tab, not Extracted/IFRS.
+const sourceWorkbook = ref(null)
+const sourceLoading = ref(false)
+const sourceError = ref('')
+
+// First sheet id from the parsed source workbook — needed when switching
+// to the Source tab so we activate the right sub-unit. Set after the
+// source fetch completes.
+let sourceFirstSheetId = null
+
+// Cached transformation payload — kept around so we can rebuild the Univer
+// workbook (e.g. when injecting source sheets) without re-fetching.
+let cachedTransformation = null
 
 const rootRef = ref(null)
 const univerHostRef = ref(null)
@@ -113,10 +155,11 @@ async function load() {
 
     try {
         const data = await filesStore.fetchTransformation(props.fileId)
+        cachedTransformation = data
         // Flip phase FIRST so the <div ref="univerHostRef"> gets rendered
         phase.value = 'ready'
         await nextTick()
-        await mountUniver(data)
+        await mountUniver()
     } catch (err) {
         if (err.code === 'TRANSFORMATION_NOT_AVAILABLE') {
             phase.value = 'needs-regenerate'
@@ -144,7 +187,7 @@ async function doRegenerate() {
 }
 
 // ── Univer mount ──────────────────────────────────────────────────────────
-async function mountUniver(transformation) {
+async function mountUniver() {
     if (!univerHostRef.value) {
         console.warn('[TransformationView] host element not mounted yet')
         // Wait one more tick and retry
@@ -153,7 +196,7 @@ async function mountUniver(transformation) {
             throw new Error('Univer host container never mounted')
         }
     }
-    
+
     // Lazy-import Univer and locales. Paths are for 0.20.x plugin mode.
     const [
         core,
@@ -239,21 +282,86 @@ async function mountUniver(transformation) {
     univerInstance.registerPlugin(sheetsFormula.UniverSheetsFormulaPlugin)
     univerInstance.registerPlugin(sheetsFormulaUi.UniverSheetsFormulaUIPlugin)
 
-    const workbookData = buildWorkbookData(transformation)
+    const workbookData = buildWorkbookData(cachedTransformation)
     const workbook = univerInstance.createUnit(UniverInstanceType.UNIVER_SHEET, workbookData)
 
     // Stash for sheet switching — we use Univer's low-level API rather than
     // the facade, which has moved across versions.
     workbookRef = workbook
 
-    switchSheet('original')
+    // Default to the "Extracted" tab on first mount. If activeSheet was
+    // already set to 'source' (e.g. user clicked Source which triggered a
+    // remount), switch there instead.
+    switchSheet(activeSheet.value)
+}
+
+/**
+ * Lazy-fetch the source workbook the first time the user clicks the
+ * "Source" tab. On success, remount Univer so the source sheets become
+ * part of the same workbook unit (Univer 0.20's createUnit can't accept
+ * new sheets after the fact without fragile workarounds). Subsequent
+ * clicks reuse the cached workbook — no re-fetch, no remount.
+ */
+async function loadSourceWorkbook() {
+    if (sourceLoading.value) return
+    sourceLoading.value = true
+    sourceError.value = ''
+    try {
+        const wb = await filesStore.fetchSourceWorkbook(props.fileId)
+        sourceWorkbook.value = wb
+        // Remember the first sheet's id so switchSheet('source') knows where
+        // to activate. Falls back to a placeholder if the parser returned
+        // an empty workbook (shouldn't happen but defensive).
+        sourceFirstSheetId = wb && wb.sheetOrder && wb.sheetOrder[0]
+            ? wb.sheetOrder[0]
+            : null
+
+        // Remount Univer with the combined workbook (extracted + ifrs +
+        // source sheets). Destroy the existing instance first so we don't
+        // leak the old workbook unit.
+        destroyUniver()
+        await nextTick()
+        await mountUniver()
+        // mountUniver already calls switchSheet(activeSheet.value); if the
+        // active sheet is 'source', it'll activate the first source sheet
+        // via switchSheet's mapping below.
+    } catch (err) {
+        sourceError.value = err.message || t('transformation.error.generic')
+    } finally {
+        sourceLoading.value = false
+    }
+}
+
+/**
+ * Click handler for the Source tab. If the source workbook hasn't been
+ * fetched yet, kicks off the fetch + remount; otherwise just switches
+ * sheets. The activeSheet state is set OPTIMISTICALLY (before the fetch
+ * completes) so the tab visually highlights immediately — the spinner on
+ * the tab communicates that data is still loading.
+ */
+async function switchToSource() {
+    activeSheet.value = 'source'
+    if (!sourceWorkbook.value) {
+        await loadSourceWorkbook()
+    } else {
+        switchSheet('source')
+    }
 }
 
 function switchSheet(which) {
     activeSheet.value = which
     if (!univerInstance || !ICommandService || !SetWorksheetActiveOperation) return
     try {
-        const sheetId = which === 'original' ? 'sheet-original' : 'sheet-ifrs'
+        // Map the logical tab name to a concrete sub-unit id. The Source
+        // tab uses whatever the parser emitted as its first sheet id; if
+        // that's not available (source not loaded yet), we skip the
+        // command — the tab will activate on the next remount.
+        let sheetId
+        if (which === 'extracted') sheetId = 'sheet-original'
+        else if (which === 'ifrs') sheetId = 'sheet-ifrs'
+        else if (which === 'source') sheetId = sourceFirstSheetId
+        if (!sheetId) return
+
         const commandService = univerInstance.__getInjector().get(ICommandService)
         commandService.executeCommand(SetWorksheetActiveOperation.id, {
             unitId: 'tv-workbook',
@@ -298,17 +406,36 @@ function buildWorkbookData(tr) {
         ifrsSheet = buildIfrsSheet(tr)
     }
 
+    // Base workbook with extracted + IFRS sheets — what we mount initially
+    // before the user clicks the Source tab.
+    const sheets = {
+        'sheet-original': originalSheet,
+        'sheet-ifrs': ifrsSheet,
+    }
+    // Source sheets are placed FIRST in tab order (so they appear leftmost
+    // matching the toggle button order: Source → Extracted → IFRS).
+    const sheetOrder = ['sheet-original', 'sheet-ifrs']
+
+    // If the source workbook has been fetched, fold its sheets into the
+    // same workbook unit. We prefix the tab order with source sheet ids so
+    // the user sees them on the left when they switch to that tab.
+    if (sourceWorkbook.value && sourceWorkbook.value.sheets) {
+        const sourceSheetIds = sourceWorkbook.value.sheetOrder || Object.keys(sourceWorkbook.value.sheets)
+        for (const sid of sourceSheetIds) {
+            const src = sourceWorkbook.value.sheets[sid]
+            if (src) sheets[sid] = src
+        }
+        sheetOrder.unshift(...sourceSheetIds)
+    }
+
     return {
         id: 'tv-workbook',
-        sheetOrder: ['sheet-original', 'sheet-ifrs'],
+        sheetOrder,
         name: 'transformation',
         appVersion: '0.20.0',
         locale: 'enUS',
         styles: {},
-        sheets: {
-            'sheet-original': originalSheet,
-            'sheet-ifrs': ifrsSheet,
-        },
+        sheets,
     }
 }
 
@@ -1326,6 +1453,52 @@ function totalStyle() {
     background: var(--ws-surface);
     color: var(--ws-text);
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.tv-toggle-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+/* Inline spinner inside the Source tab while its workbook is being fetched.
+   Small so it sits comfortably to the left of the tab label without
+   shifting layout. */
+.tv-toggle-spinner {
+    display: inline-block;
+    width: 11px;
+    height: 11px;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    margin-right: 6px;
+    vertical-align: -1px;
+    animation: tv-spin 0.7s linear infinite;
+    opacity: 0.7;
+}
+
+/* Source-tab fetch error banner — sits between the toggle and the Univer
+   host so the user sees it without scrolling. Distinct from the global
+   `phase = error` state because Extracted/IFRS still work. */
+.tv-source-error {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    background: var(--pill-red-bg);
+    border: 1px solid var(--pill-red-bg);
+    border-radius: 8px;
+    color: var(--pill-red-text);
+    font-size: 13px;
+}
+
+.tv-source-error span {
+    flex: 1;
+    min-width: 0;
+}
+
+.tv-btn-sm {
+    padding: 4px 10px;
+    font-size: 12px;
 }
 
 /* ─── Univer host ────────────────────────────────────────────────────────── */

@@ -14,6 +14,18 @@
     justify-content: space-between;
     gap: 16px;
     margin-bottom: 24px;
+    /* Without flex-wrap, a long title + actions cluster overflow horizontally
+       on mobile (because page-header is a non-wrapping flex row). Wrap so
+       title and buttons stack when there isn't enough horizontal space. */
+    flex-wrap: wrap;
+}
+
+/* Direct flex children of page-header need min-width:0 to let break-word
+   inside the title actually apply. Without this, the child has implicit
+   min-width:auto which prevents shrinking below its content's intrinsic
+   width and the long unbreakable filename overflows. */
+.adm-page-header > * {
+    min-width: 0;
 }
 
 .adm-page-title {
@@ -21,6 +33,12 @@
     font-weight: 600;
     color: var(--ws-text, #f0ecf6);
     margin: 0;
+    /* Long filenames without spaces (e.g. NSBU_Balans_Namuna_MCJ_2023.xlsx)
+       overflow the viewport on mobile because there's nothing to break on.
+       Allow anywhere-break so the title wraps inside the page bounds. */
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    min-width: 0;
 }
 
 .adm-page-subtitle {
@@ -38,6 +56,15 @@
 }
 
 .adm-card + .adm-card {
+    margin-top: 16px;
+}
+
+/* Utility: explicit top spacing for a card following any sibling (not just
+   another .adm-card). Used on dashboard "Last 7 days" card which follows
+   the .adm-grid-2 wrapper, where the .adm-card + .adm-card selector doesn't
+   match. On mobile we bump the gap so it doesn't visually merge with the
+   preceding stacked cards. */
+.adm-card-stacked {
     margin-top: 16px;
 }
 
@@ -382,11 +409,25 @@
 }
 
 @media (max-width: 768px) {
-    .adm-grid-2 { grid-template-columns: 1fr; }
+    .adm-grid-2 {
+        grid-template-columns: 1fr;
+        /* On mobile, cards stack vertically — bump the gap so adjacent cards
+           (e.g. "Files by template" + "Users by role" on dashboard) feel
+           visually separated rather than glued together. */
+        gap: 20px;
+    }
     .adm-page { padding: 16px; }
+
+    /* Tighten page-header bottom margin on mobile — 24px feels excessive when
+       the viewport is narrow and the title + content gap looks like a void. */
+    .adm-page-header { margin-bottom: 14px; }
 
     /* Tighten card padding so 20px + scrollbar don't overflow narrow viewports */
     .adm-card { padding: 14px; }
+
+    /* On mobile, give the stacked-card helper more breathing room above so
+       it doesn't visually merge with the preceding grid/cards. */
+    .adm-card-stacked { margin-top: 20px; }
 
     /* The .adm-bar-row used in Dashboard cards (`Files by template type`,
        `Users by role`) put a long monospace label and a count side-by-side

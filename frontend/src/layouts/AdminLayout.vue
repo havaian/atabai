@@ -5,10 +5,10 @@
             <button class="adm-mobile-menu-btn" @click="openDrawer" :aria-label="$t('nav.openMenu')">
                 <Menu :size="20" />
             </button>
-            <div class="adm-mobile-brand">
-                <span class="adm-mobile-brand-text">{{ $t('admin.layout.brand') }}</span>
-                <span class="adm-mobile-brand-tag">{{ $t('admin.layout.brandTag') }}</span>
-            </div>
+            <router-link to="/admin" class="adm-mobile-brand">
+                <LogoComponent class="adm-mobile-logo" size="small" />
+                <span class="adm-brand-tag">{{ $t('admin.layout.brandTag') }}</span>
+            </router-link>
             <div class="adm-mobile-spacer"></div>
         </div>
 
@@ -16,8 +16,8 @@
         <aside class="adm-sidebar" :class="{ 'adm-sidebar--collapsed': !sidebarOpen }">
             <div class="adm-sidebar-header">
                 <router-link to="/admin" class="adm-brand">
-                    <span class="adm-brand-text">{{ $t('admin.layout.brand') }}</span>
-                    <span class="adm-brand-tag">{{ $t('admin.layout.brandTag') }}</span>
+                    <LogoComponent v-if="sidebarOpen" class="adm-brand-logo" size="small" />
+                    <span v-if="sidebarOpen" class="adm-brand-tag">{{ $t('admin.layout.brandTag') }}</span>
                 </router-link>
                 <button class="adm-sidebar-toggle" @click="sidebarOpen = !sidebarOpen" :title="sidebarOpen ? $t('admin.common.back') : $t('admin.common.open')">
                     <component :is="sidebarOpen ? PanelLeftClose : PanelLeftOpen" :size="18" />
@@ -64,6 +64,31 @@
                         <component :is="isDark ? Sun : Moon" :size="16" />
                     </button>
                 </div>
+
+                <!-- Language picker — same UX as user-side Sidebar.vue.
+                     Expanded: trigger pill (flag + name + chevron) opens an
+                     upward-anchored dropdown. Collapsed: single flag icon.
+                     Wrapped in a ref so onClickOutside can close the menu. -->
+                <div class="adm-lang-section" :class="{ 'adm-lang-section-collapsed': !sidebarOpen }" ref="langRef">
+                    <button v-if="sidebarOpen" class="adm-lang-trigger" @click="toggleLangMenu">
+                        <img class="adm-lang-flag" :src="currentLangFlagSrc" :alt="currentLang.name">
+                        <span class="adm-lang-name">{{ currentLang.name }}</span>
+                        <ChevronDown :size="14" class="adm-lang-chevron" :class="{ 'rotated': isLangMenuOpen }" />
+                    </button>
+                    <button v-else class="adm-lang-icon-btn" @click="toggleLangMenu" :title="currentLang.name">
+                        <img class="adm-lang-flag" :src="currentLangFlagSrc" :alt="currentLang.name">
+                    </button>
+                    <Transition name="adm-menu-pop">
+                        <div v-if="isLangMenuOpen" class="adm-lang-menu">
+                            <button v-for="lang in languages" :key="lang.code" class="adm-lang-option"
+                                :class="{ active: selectedLanguage === lang.code }" @click="selectLanguage(lang.code)">
+                                <img class="adm-lang-flag" :src="langFlagSrc(lang.flag)" :alt="lang.name">
+                                <span>{{ lang.name }}</span>
+                            </button>
+                        </div>
+                    </Transition>
+                </div>
+
                 <button
                     v-if="adminStore.hasValidAdminSession"
                     class="adm-back-link"
@@ -92,10 +117,10 @@
                     :style="drawerTransform"
                 >
                     <div class="adm-mobile-drawer-header">
-                        <div class="adm-brand">
-                            <span class="adm-brand-text">{{ $t('admin.layout.brand') }}</span>
+                        <router-link to="/admin" class="adm-brand" @click="closeDrawer">
+                            <LogoComponent class="adm-brand-logo" size="small" />
                             <span class="adm-brand-tag">{{ $t('admin.layout.brandTag') }}</span>
-                        </div>
+                        </router-link>
                         <button class="adm-sidebar-toggle" @click="closeDrawer" :aria-label="$t('nav.closeMenu')">
                             <X :size="18" />
                         </button>
@@ -136,6 +161,28 @@
                                 </button>
                             </div>
                         </div>
+
+                        <!-- Language picker (mobile drawer) — mirrors the
+                             desktop version using a separate ref so click-
+                             outside detection works while both are mounted. -->
+                        <div class="adm-lang-section" ref="langMobileRef">
+                            <button class="adm-lang-trigger" @click="toggleLangMenu">
+                                <img class="adm-lang-flag" :src="currentLangFlagSrc" :alt="currentLang.name">
+                                <span class="adm-lang-name">{{ currentLang.name }}</span>
+                                <ChevronDown :size="14" class="adm-lang-chevron" :class="{ 'rotated': isLangMenuOpen }" />
+                            </button>
+                            <Transition name="adm-menu-pop">
+                                <div v-if="isLangMenuOpen" class="adm-lang-menu">
+                                    <button v-for="lang in languages" :key="lang.code" class="adm-lang-option"
+                                        :class="{ active: selectedLanguage === lang.code }"
+                                        @click="selectLanguage(lang.code)">
+                                        <img class="adm-lang-flag" :src="langFlagSrc(lang.flag)" :alt="lang.name">
+                                        <span>{{ lang.name }}</span>
+                                    </button>
+                                </div>
+                            </Transition>
+                        </div>
+
                         <button
                             v-if="adminStore.hasValidAdminSession"
                             class="adm-back-link"
@@ -178,8 +225,10 @@
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import { onClickOutside } from '@vueuse/core'
 import { useAdminStore } from '@/stores/admin'
 import AdminTwoFactorGate from '@/views/admin/AdminTwoFactorGate.vue'
+import LogoComponent from '@/components/Logo.vue'
 import {
     LayoutDashboard,
     Users,
@@ -195,20 +244,55 @@ import {
     Menu,
     X,
     Sun,
-    Moon
+    Moon,
+    ChevronDown
 } from 'lucide-vue-next'
 import { useThemeStore } from '@/stores/theme'
+import { changeLocale } from '@/utils/i18n'
 
 const router = useRouter()
 const route = useRoute()
 const adminStore = useAdminStore()
-const { t } = useI18n()
+const { t, locale } = useI18n()
 
 // Theme — admin reuses the user-side theme store (single source of truth).
 // Toggling on either side updates both because data-theme is on <html>.
 const themeStore = useThemeStore()
 const isDark = computed(() => themeStore.resolvedTheme === 'dark')
 function toggleTheme() { themeStore.toggle() }
+
+// ── Language picker (mirrors user-side Sidebar.vue) ────────────────────────
+// Same list, same flag asset path, same UX: expanded view shows trigger
+// pill that opens an upward-anchored menu; collapsed view shows a single
+// icon-only flag button.
+const languages = [
+    { code: 'en', name: 'English', flag: 'gb' },
+    { code: 'ru', name: 'Русский', flag: 'ru' },
+    { code: 'uz', name: "O'zbek", flag: 'uz' },
+]
+const selectedLanguage = ref(locale.value || 'ru')
+const isLangMenuOpen = ref(false)
+const langRef = ref(null)
+const langMobileRef = ref(null)
+
+const currentLang = computed(() => languages.find(l => l.code === selectedLanguage.value) || languages[1])
+const currentLangFlagSrc = computed(() => `/images/country-flags/${currentLang.value.flag}.svg`)
+
+function langFlagSrc(flag) {
+    return `/images/country-flags/${flag}.svg`
+}
+function toggleLangMenu() { isLangMenuOpen.value = !isLangMenuOpen.value }
+function selectLanguage(code) {
+    changeLocale(code)
+    selectedLanguage.value = code
+    isLangMenuOpen.value = false
+}
+
+// Close the dropdown when clicking outside — separate refs for desktop and
+// mobile drawer instances because they coexist (the mobile drawer is in a
+// teleport-like position and onClickOutside on one wouldn't catch the other).
+onClickOutside(langRef, () => { isLangMenuOpen.value = false })
+onClickOutside(langMobileRef, () => { isLangMenuOpen.value = false })
 
 // Desktop sidebar collapse state
 const sidebarOpen = ref(true)
@@ -345,23 +429,22 @@ watch(sidebarOpen, (v) => {
 
 .adm-mobile-brand {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
     line-height: 1.1;
+    text-decoration: none;
+    color: inherit;
+    /* Mobile brand is a router-link to /admin; keep it visually identical to
+       the desktop sidebar brand for consistency. */
+    min-width: 0;
+    overflow: hidden;
 }
 
-.adm-mobile-brand-text {
-    font-weight: 700;
-    font-size: 13px;
-    letter-spacing: 0.05em;
-    color: var(--ws-text, #f0ecf6);
-}
-
-.adm-mobile-brand-tag {
-    font-size: 9px;
-    color: #9333ea;
-    text-transform: uppercase;
-    font-weight: 600;
-    letter-spacing: 0.1em;
+.adm-mobile-logo {
+    height: 22px;
+    width: auto;
+    flex-shrink: 0;
 }
 
 .adm-mobile-spacer {
@@ -434,12 +517,25 @@ watch(sidebarOpen, (v) => {
 
 .adm-brand {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
     text-decoration: none;
     color: inherit;
     line-height: 1.1;
     overflow: hidden;
     white-space: nowrap;
+    min-width: 0;
+}
+
+/* LogoComponent wrapper inside the admin brand. Sized small to fit the
+   compact sidebar/mobile-header height (~32px brand row). The Logo's
+   internal layout (icon + animated text) is preserved; we just constrain
+   the outer height so it doesn't blow up the header. */
+.adm-brand-logo {
+    height: 24px;
+    width: auto;
+    flex-shrink: 0;
 }
 
 .adm-brand-text {
@@ -458,7 +554,8 @@ watch(sidebarOpen, (v) => {
 }
 
 .adm-sidebar--collapsed .adm-brand-text,
-.adm-sidebar--collapsed .adm-brand-tag {
+.adm-sidebar--collapsed .adm-brand-tag,
+.adm-sidebar--collapsed .adm-brand-logo {
     display: none;
 }
 
@@ -566,8 +663,12 @@ watch(sidebarOpen, (v) => {
 }
 
 /* ─── Theme toggle (pill style — mirrors user-side Sidebar.vue) ─────────── */
+/* These rules are kept in 1:1 visual sync with .theme-section / .theme-pill /
+   .theme-pill-btn / .theme-icon-btn in components/layout/Sidebar.vue. If you
+   change one, change the other. */
 .adm-theme-section {
-    padding: 6px 4px;
+    padding: 8px 12px;
+    flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: flex-start;
@@ -575,14 +676,15 @@ watch(sidebarOpen, (v) => {
 
 .adm-theme-section-collapsed {
     justify-content: center;
-    padding: 6px 0;
+    padding: 8px 0;
 }
 
 .adm-theme-pill {
     width: 100%;
-    display: grid;
-    grid-template-columns: 50% 50%;
     align-items: center;
+    grid-template-columns: 50% 50%;
+    display: inline-grid !important;
+    justify-content: space-between;
     background: var(--toggle-bg);
     border-radius: 8px;
     padding: 3px;
@@ -632,6 +734,142 @@ watch(sidebarOpen, (v) => {
 .adm-theme-icon-btn:hover {
     background: var(--adm-nav-bg-hover);
     color: var(--ws-text, #f0ecf6);
+}
+
+/* ─── Language picker (mirrors user-side Sidebar.vue .lang-* styles) ─────── */
+/* Kept in 1:1 visual sync with the user-side picker so users moving between
+   admin and app don't experience a context switch. If you change one,
+   change the other. */
+.adm-lang-section {
+    padding: 4px 12px;
+    flex-shrink: 0;
+    position: relative;
+}
+
+.adm-lang-section-collapsed {
+    padding: 4px 0;
+    display: flex;
+    justify-content: center;
+}
+
+.adm-lang-trigger {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 8px 10px;
+    background: var(--toggle-bg);
+    border: none;
+    border-radius: 9px;
+    color: var(--ws-text, #f0ecf6);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s;
+    font-family: inherit;
+}
+
+.adm-lang-trigger:hover {
+    background: var(--adm-nav-bg-hover);
+}
+
+.adm-lang-flag {
+    width: 20px;
+    line-height: 1;
+    flex-shrink: 0;
+    object-fit: cover;
+}
+
+.adm-lang-name {
+    flex: 1;
+    text-align: left;
+}
+
+.adm-lang-chevron {
+    color: var(--adm-text-muted);
+    transition: transform 0.2s;
+    flex-shrink: 0;
+}
+
+.adm-lang-chevron.rotated {
+    transform: rotate(180deg);
+}
+
+.adm-lang-icon-btn {
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 8px;
+    background: var(--toggle-bg);
+    cursor: pointer;
+    transition: background 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: inherit;
+}
+
+.adm-lang-icon-btn:hover {
+    background: var(--adm-nav-bg-hover);
+}
+
+.adm-lang-menu {
+    position: absolute;
+    bottom: calc(100% + 4px);
+    left: 12px;
+    right: 12px;
+    background: var(--sb-menu-bg, #1A1528);
+    border: 1px solid var(--sb-menu-border, rgba(149, 0, 255, 0.15));
+    border-radius: 10px;
+    padding: 6px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    z-index: 200;
+}
+
+.adm-sidebar--collapsed .adm-lang-menu {
+    position: fixed;
+    bottom: 80px;
+    left: 72px;
+    min-width: 160px;
+    right: unset;
+}
+
+.adm-lang-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 8px 10px;
+    border: none;
+    border-radius: 7px;
+    background: transparent;
+    color: var(--sb-menu-text, rgba(240, 236, 246, 0.75));
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.12s, color 0.12s;
+    text-align: left;
+    font-family: inherit;
+}
+
+.adm-lang-option:hover {
+    background: var(--adm-nav-bg-hover);
+    color: var(--ws-text, #f0ecf6);
+}
+
+.adm-lang-option.active {
+    color: var(--ws-purple, #7C3AED);
+    font-weight: 600;
+}
+
+.adm-menu-pop-enter-active,
+.adm-menu-pop-leave-active {
+    transition: opacity 0.15s, transform 0.15s;
+}
+
+.adm-menu-pop-enter-from,
+.adm-menu-pop-leave-to {
+    opacity: 0;
+    transform: translateY(6px);
 }
 
 /* ─── Main ────────────────────────────────────────────────────────────────── */

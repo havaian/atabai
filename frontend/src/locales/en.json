@@ -1022,7 +1022,8 @@
       "generic": "Something went wrong. Please try again."
     },
     "toggle": {
-      "original": "Original",
+      "source": "Source",
+      "extracted": "Extracted fields",
       "ifrs": "IFRS"
     }
   }

@@ -4,7 +4,7 @@
 
         <!-- Brand header -->
         <div class="sidebar-brand" :class="{ 'sidebar-brand-collapsed': !isSidebarOpen }">
-            <router-link v-if="isSidebarOpen" to="/" class="brand-link">
+            <router-link v-if="isSidebarOpen" to="/app/dashboard" class="brand-link">
                 <LogoComponent class="brand-logo-full" />
             </router-link>
             <button class="collapse-btn" @click="$emit('toggle')" :title="isSidebarOpen ? 'Collapse' : 'Expand'">
@@ -112,6 +112,22 @@
             </Transition>
         </div>
 
+        <!-- Admin entry — only visible for users with admin role. Sits above
+             profile so it's always visible, mirroring the mobile drawer entry.
+             Uses the same .nav-item-admin styling (violet text + right chevron
+             when expanded) for consistency. -->
+        <div v-if="authStore.isAdmin" class="sidebar-admin-section"
+             :class="{ 'sidebar-admin-section-collapsed': !isSidebarOpen }">
+            <button class="nav-item nav-item-admin" :class="{ 'icon-only': !isSidebarOpen }"
+                @click="navigateTo('/admin')">
+                <ShieldCheckIcon class="nav-icon" />
+                <Transition name="fade-slide">
+                    <span v-if="isSidebarOpen" class="nav-label">{{ $t('admin.nav.adminPanel') }}</span>
+                </Transition>
+                <ChevronRightIcon v-if="isSidebarOpen" class="nav-item-admin-chevron" />
+            </button>
+        </div>
+
         <!-- User profile -->
         <div class="sidebar-profile" :class="{ 'icon-only': !isSidebarOpen }" ref="profileRef">
             <div class="profile-avatar" @click="toggleProfileMenu">
@@ -129,10 +145,6 @@
                     <button class="menu-item" @click="navigateTo('/app/settings')">
                         <Cog6ToothIcon class="w-4 h-4" />
                         {{ $t('dashboard.settings') }}
-                    </button>
-                    <button v-if="authStore.isAdmin" class="menu-item" @click="navigateTo('/admin')">
-                        <ShieldCheckIcon class="w-4 h-4" />
-                        {{ $t('admin.nav.adminPanel') }}
                     </button>
                     <div class="menu-divider"></div>
                     <button class="menu-item menu-item-danger" @click="handleSignOut">
@@ -158,7 +170,9 @@
 
                 <!-- Header -->
                 <div class="mobile-header">
-                    <LogoComponent class="mobile-logo" />
+                    <router-link to="/app/dashboard" class="mobile-logo-link" @click="$emit('close')">
+                        <LogoComponent class="mobile-logo" />
+                    </router-link>
                     <button class="mobile-close" @click="$emit('close')">
                         <XMarkIcon class="w-5 h-5" />
                     </button>
@@ -193,10 +207,16 @@
                         @click="() => { navigateTo('/admin'); $emit('close') }">
                         <ShieldCheckIcon class="nav-icon" />
                         <span class="nav-label">{{ $t('admin.nav.adminPanel') }}</span>
+                        <ChevronRightIcon class="nav-item-admin-chevron" />
                     </button>
                 </nav>
 
                 <div class="mobile-divider-line"></div>
+
+                <!-- Spacer — pushes theme/language/profile to the bottom edge
+                     of the drawer, mirroring AdminLayout where these controls
+                     live in the sidebar footer. -->
+                <div style="flex: 1; min-height: 0;"></div>
 
                 <!-- Theme -->
                 <div class="mobile-section-pad">
@@ -227,9 +247,6 @@
                         </button>
                     </div>
                 </div>
-
-                <!-- Spacer -->
-                <div style="flex: 1; min-height: 0;"></div>
 
                 <!-- Profile + Sign out -->
                 <div class="mobile-profile">
@@ -540,17 +557,41 @@ onUnmounted(() => window.removeEventListener('resize', onResize))
     padding: 8px;
 }
 
-/* Admin entry — visually distinct, marked with violet accent border */
+/* Admin entry — visually distinct. Previously used a violet border-left
+   stripe which clashed with the button's border-radius (the stripe got
+   clipped into an ugly rounded edge). Replaced with a right-aligned
+   violet ChevronRightIcon that signals "navigate away" without painting
+   the button's edge. */
 .nav-item-admin {
     margin-top: 4px;
-    border-left: 2px solid var(--ws-primary, #765fc6);
-    padding-left: 8px;
-    color: var(--ws-primary, #765fc6);
+    color: var(--ws-purple);
 }
 
 .nav-item-admin:hover {
     background: rgba(118, 95, 198, 0.1);
-    color: var(--ws-primary, #765fc6);
+    color: var(--ws-purple);
+}
+
+.nav-item-admin-chevron {
+    width: 16px;
+    height: 16px;
+    margin-left: auto;
+    color: var(--ws-purple);
+    flex-shrink: 0;
+}
+
+/* Wrapper for the desktop admin-entry button (lives above .sidebar-profile).
+   Matches .sidebar-nav padding so the button aligns with the rest of the
+   navigation when expanded. */
+.sidebar-admin-section {
+    padding: 0 12px 8px;
+    flex-shrink: 0;
+}
+
+.sidebar-admin-section-collapsed {
+    padding: 0 0 8px;
+    display: flex;
+    justify-content: center;
 }
 
 .nav-icon {
@@ -1067,6 +1108,17 @@ onUnmounted(() => window.removeEventListener('resize', onResize))
 .mobile-logo {
     height: 28px;
     width: auto;
+}
+
+/* Wrapper that makes the mobile drawer's logo clickable (navigates to
+   /app/dashboard). Inline-flex preserves the previous visual layout —
+   the LogoComponent's hover animation still works because the link is
+   transparent and doesn't override pointer events. */
+.mobile-logo-link {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+    color: inherit;
 }
 
 .mobile-close {

@@ -57,6 +57,28 @@ async function listMappingSets(req, res) {
         ]);
         const countMap = new Map(rowCounts.map(c => [String(c._id), c.count]));
 
+        // Equity sets are stored as a single EquityMappingConfig document
+        // (not RowMapping rows), so the aggregate above always returns 0 for
+        // them. Pull the configs for equity sets and derive an item count
+        // from columns + movement rows so the admin UI shows a meaningful
+        // number instead of "0".
+        const equitySetIds = sets
+            .filter(s => s.reportType === 'equity')
+            .map(s => s._id);
+        if (equitySetIds.length > 0) {
+            const equityConfigs = await EquityMappingConfig.find({
+                mappingSetId: { $in: equitySetIds }
+            })
+                .select('mappingSetId columns movementRows')
+                .lean();
+            for (const cfg of equityConfigs) {
+                // Count = columns + movement rows. This matches what the
+                // editor shows the user (both are editable lists in the UI).
+                const count = (cfg.columns?.length || 0) + (cfg.movementRows?.length || 0);
+                countMap.set(String(cfg.mappingSetId), count);
+            }
+        }
+
         const enriched = sets.map(s => ({
             ...s,
             itemCount: countMap.get(String(s._id)) || 0

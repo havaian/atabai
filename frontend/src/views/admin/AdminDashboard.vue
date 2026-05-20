@@ -72,7 +72,7 @@
             </div>
 
             <!-- Last 7 days -->
-            <div class="adm-card" style="margin-top: 16px;">
+            <div class="adm-card adm-card-stacked">
                 <h3 class="adm-card-title">{{ $t('admin.dashboard.filesLast7Days') }}</h3>
                 <div v-if="stats.filesLast7Days.length === 0" class="adm-muted adm-text-sm">
                     {{ $t('admin.dashboard.noFilesThisWeek') }}

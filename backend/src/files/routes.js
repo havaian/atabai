@@ -60,6 +60,17 @@ router.get('/:fileId/download', authenticateJWT, filesController.downloadFile);
 router.get('/:fileId/transformation', authenticateJWT, filesController.getTransformation);
 
 /**
+ * @route   GET /api/files/:fileId/source-workbook
+ * @desc    Get the original uploaded xlsx parsed into Univer workbook JSON.
+ *          Used by the "Source" tab in TransformationView so the user can
+ *          inspect the raw file alongside extracted-fields and IFRS views.
+ *          Lazy-loaded on first tab click (not on mount) to keep the
+ *          FileDetails page light when the user only wants to download.
+ * @access  Private
+ */
+router.get('/:fileId/source-workbook', authenticateJWT, filesController.getSourceWorkbook);
+
+/**
  * @route   POST /api/files/:fileId/transformation/regenerate
  * @desc    Re-run the processor on the original to produce transformation JSON
  *          (used for files processed before this feature existed)

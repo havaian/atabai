@@ -318,7 +318,8 @@ export async function changeLocale(newLocale) {
             i18n.global.setLocaleMessage(validLocale, messages)
         }
 
-        // Set locale
+        // Set locale (also persists to localStorage so cold-start visits to
+        // "/" land here)
         setLocale(validLocale)
 
         // Now overlay DB values for the new locale (best-effort, async).
@@ -326,6 +327,36 @@ export async function changeLocale(newLocale) {
         delete lastSeenVersions.user
         delete lastSeenVersions.admin
         fetchAndMergeFromAPI(validLocale).catch(() => { })
+
+        // URL sync — swap the locale segment in the current URL so the
+        // change is reflected as a normal navigation. This is what makes
+        // the URL the session source of truth: copy/paste a /uz/... URL
+        // and it opens in Uzbek for anyone.
+        //
+        // Lazy-imported to avoid a circular dep with the router (the router
+        // also imports from this file). Skip the swap if we're not in a
+        // browser (SSR safety) or if the router hasn't been created yet.
+        if (typeof window !== 'undefined' && window.__VUE_ROUTER__) {
+            try {
+                const router = window.__VUE_ROUTER__
+                const { stripLocale, SUPPORTED_LOCALES } = await import('@/router')
+                const current = router.currentRoute.value
+                const urlLocale = current.params?.locale
+                // Only push if the URL's locale differs from the target —
+                // otherwise we'd push the same path and noop, or worse
+                // confuse history when changeLocale is called as a side
+                // effect of a route change.
+                if (urlLocale !== validLocale && SUPPORTED_LOCALES.includes(validLocale)) {
+                    const rest = stripLocale(current.fullPath)
+                    const newPath = `/${validLocale}${rest === '/' ? '/' : rest}`
+                    // Use replace not push — otherwise a language toggle
+                    // pollutes the back button with duplicate URLs.
+                    router.replace(newPath).catch(() => { })
+                }
+            } catch (err) {
+                console.warn('changeLocale: URL sync failed:', err)
+            }
+        }
 
         // Update page title for current route when locale changes
         if (typeof window !== 'undefined' && window.__VUE_ROUTER__) {

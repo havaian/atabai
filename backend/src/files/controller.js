@@ -811,6 +811,89 @@ async function getTransformation(req, res) {
 }
 
 /**
+ * Read the original uploaded xlsx file from disk and return it as a Univer-
+ * compatible workbook JSON, for the TransformationView "Source" tab.
+ *
+ * This is a separate endpoint from getTransformation because:
+ *   1. It does heavier work (parses the raw file vs reading a pre-built JSON)
+ *      so we only run it when the user actually clicks the Source tab.
+ *   2. It needs no transformation/IFRS context — works even for files where
+ *      the transformation JSON is missing or corrupt.
+ *
+ * Authorization: same as getTransformation — only the file's owner can read.
+ */
+async function getSourceWorkbook(req, res) {
+    try {
+        const { fileId } = req.params;
+
+        const file = await File.findOne({
+            _id: fileId,
+            userId: req.user._id
+        }).lean();
+
+        if (!file) {
+            return res.status(404).json({
+                success: false,
+                error: 'FILE_NOT_FOUND',
+                message: 'File not found'
+            });
+        }
+
+        if (!file.filePath) {
+            return res.status(400).json({
+                success: false,
+                error: 'NO_SOURCE_FILE',
+                message: 'No source file recorded for this entry'
+            });
+        }
+
+        const sourcePath = `/uploads/${file.filePath}`;
+
+        // Check that the file is actually still on disk (uploads can be
+        // cleaned up by retention jobs). Without this we'd surface a noisy
+        // ExcelJS read error instead of a clean 404.
+        try {
+            await fs.access(sourcePath);
+        } catch (err) {
+            return res.status(404).json({
+                success: false,
+                error: 'SOURCE_NOT_ACCESSIBLE',
+                message: 'Source file not found on server'
+            });
+        }
+
+        // Lazy require so the parser module isn't loaded unless this
+        // endpoint is hit — keeps startup memory lower.
+        const { parseSourceWorkbook } = require('./sourceWorkbookParser');
+
+        let workbook;
+        try {
+            workbook = await parseSourceWorkbook(sourcePath);
+        } catch (err) {
+            global.logger.logError(`Source workbook parse failed for ${file.filePath}:`, err);
+            return res.status(500).json({
+                success: false,
+                error: 'PARSE_FAILED',
+                message: 'Could not parse source workbook'
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            workbook
+        });
+
+    } catch (error) {
+        global.logger.logError('Get source workbook error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'FETCH_ERROR',
+            message: 'Failed to get source workbook'
+        });
+    }
+}
+
+/**
  * Regenerate the transformation JSON for a completed file by re-running the
  * processor on the stored original. Used for files that predate the
  * transformation feature, or to recover from a corrupt JSON.
@@ -943,5 +1026,6 @@ module.exports = {
     retryProcessing,
     extractWorksheetPreview,
     getTransformation,
+    getSourceWorkbook,
     regenerateTransformation
 };

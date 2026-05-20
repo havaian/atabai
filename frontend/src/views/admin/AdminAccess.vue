@@ -245,6 +245,9 @@ onMounted(load)
     padding: 14px 16px;
     border: 1px solid var(--adm-border);
     background: var(--ws-bg-elevated, rgba(20, 14, 32, 0.5));
+    /* Banner sits directly above the stats grid; without bottom margin they
+       touch each other on mobile. Stats grid only has margin-bottom, no top. */
+    margin-bottom: 16px;
 }
 
 .aa-banner--on {
@@ -270,6 +273,11 @@ onMounted(load)
 }
 
 .aa-bulk {
+    /* The card is a plain block by default; previous `gap: 10px` did nothing
+       because there was no flex/grid container. Make it a flex column so the
+       textarea, note input, and actions row are evenly spaced. */
+    display: flex;
+    flex-direction: column;
     gap: 10px;
 }
 
@@ -321,5 +329,13 @@ onMounted(load)
 .aa-btn-remove:hover {
     background: rgba(248, 113, 113, 0.1);
     color: #ef4444;
+}
+
+@media (max-width: 767px) {
+    /* On narrow viewports the stacked banner→stats→bulk-card layout looks
+       cramped. Bump the banner gap and the bulk card's internal gap so the
+       "Add all" button visually detaches from the note input above it. */
+    .aa-banner { margin-bottom: 20px; }
+    .aa-bulk { gap: 14px; }
 }
 </style>

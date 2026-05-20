@@ -90,6 +90,13 @@ async function initializeApp() {
         app.use(axiosPlugin)
         const storedLocale = getStoredLocale()
         setLocale(storedLocale)
+        // Expose router globally so utils/i18n.js's changeLocale() can swap
+        // the URL's locale segment when the user picks a new language.
+        // The router can't be imported there because that would create a
+        // circular dependency (router → utils/i18n → router).
+        if (typeof window !== 'undefined') {
+            window.__VUE_ROUTER__ = router
+        }
         app.config.errorHandler = (err, instance, info) => { console.error('[Vue]', info, err) }
         app.mount('#app')
     } catch (error) {
@@ -100,6 +107,9 @@ async function initializeApp() {
         app.use(router)
         app.use(i18n)
         app.use(axiosPlugin)
+        if (typeof window !== 'undefined') {
+            window.__VUE_ROUTER__ = router
+        }
         app.mount('#app')
     }
 }

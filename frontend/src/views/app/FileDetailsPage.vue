@@ -402,6 +402,11 @@ watch(fileId, (newId, oldId) => {
 
 .banner-text {
     flex: 1;
+    /* min-width:0 lets the .banner-sub text-overflow ellipsis actually fire
+       when the file name is longer than the available space inside the
+       flexible banner. Without it the flex child's intrinsic min content
+       width prevents shrinking. */
+    min-width: 0;
 }
 
 .banner-title {
@@ -409,6 +414,8 @@ watch(fileId, (newId, oldId) => {
     font-weight: 700;
     color: var(--ws-text);
     margin-bottom: 3px;
+    overflow-wrap: anywhere;
+    word-break: break-word;
 }
 
 .banner-sub {
@@ -689,8 +696,17 @@ watch(fileId, (newId, oldId) => {
 }
 
 .transformation-body {
-    padding: 0 20px 20px;
+    padding: 16px 20px 20px;
     border-top: 1px solid var(--ws-border-2);
+}
+
+@media (max-width: 767px) {
+    .transformation-body {
+        /* On mobile, the loading/error state inside .tv-state needs visible
+           breathing room from all four edges of the parent (otherwise it sits
+           flush against the toggle button border and looks broken). */
+        padding: 16px;
+    }
 }
 
 @media (max-width: 767px) {
@@ -705,6 +721,13 @@ watch(fileId, (newId, oldId) => {
     .download-btn {
         width: 100%;
         justify-content: center;
+    }
+
+    /* On narrow viewports the fixed 320px max-width can exceed available
+       space (after icon + padding). Drop it so ellipsis kicks in based on
+       actual remaining width inside .banner-text. */
+    .banner-sub {
+        max-width: 100%;
     }
 }
 </style>
