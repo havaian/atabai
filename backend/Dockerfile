@@ -7,9 +7,13 @@ COPY tsconfig*.json ./
 COPY nest-cli.json ./
 RUN npm ci
 
+# Source. The Express-era top-level `templates/` folder is gone; the
+# templates HTTP module now lives at src/templates/ (copied as part of src),
+# and seed JSON for locales / mappings lives under src/admin/seedLocales/ +
+# src/mappings/ — also copied with src.
 COPY src ./src
-COPY templates ./templates
 COPY public ./public
+COPY scripts ./scripts
 
 RUN npm run build && npm prune --production
 
@@ -22,7 +26,6 @@ ENV NODE_ENV=production
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/package.json ./package.json
-COPY --from=builder /app/templates ./templates
 COPY --from=builder /app/public ./public
 
 EXPOSE 3000

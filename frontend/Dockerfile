@@ -10,8 +10,12 @@ RUN apk add --no-cache git
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
-RUN npm ci && npm cache clean --force
+# Install dependencies.
+# --legacy-peer-deps is required: Univer 0.20 declares React as a peer (it's
+# headless-ui-style React-free in usage, but the peer-range declaration trips
+# strict resolution). We install react/react-dom as regular deps to satisfy
+# the peer, and use --legacy-peer-deps to allow npm to resolve.
+RUN npm ci --legacy-peer-deps && npm cache clean --force
 
 # Copy source code
 COPY . .

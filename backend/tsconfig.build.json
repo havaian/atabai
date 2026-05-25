@@ -2,7 +2,12 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "rootDir": "./src",
-    "outDir": "./dist"
+    "outDir": "./dist",
+    // Disable incremental build so `npm run build` always emits a fresh
+    // dist/. With incremental on, a stale tsconfig.build.tsbuildinfo can make
+    // tsc skip emit entirely when source hasn't changed, leaving CI with an
+    // empty dist/ from the prior `rm -rf dist` step.
+    "incremental": false
   },
   "include": ["src/**/*"],
   "exclude": [
