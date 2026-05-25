@@ -14,29 +14,64 @@ export const REDIS_CLIENT = Symbol('REDIS_CLIENT');
 /**
  * Centralized Redis client + cache helpers.
  *
- * Ports the legacy `config/redis.js` connect/disconnect/healthCheck/cache surface
- * onto Nest lifecycle hooks. Failures in `connect` are non-fatal — the legacy
- * backend boots even when Redis is unreachable (cache is treated as optional).
+ * Behavior parity with the legacy `config/redis.js`: Redis is OPTIONAL. The
+ * legacy backend had `await connectRedis()` commented out in src/index.js,
+ * so production was running without Redis. Cache helpers fail-soft (return
+ * null/0/false), so nothing breaks.
+ *
+ * Connection policy:
+ *   - Skipped entirely when REDIS_ENABLED=false (or unset). No client created,
+ *     no log noise.
+ *   - When enabled, we attempt one connect with a short retry budget. If the
+ *     server is unreachable we mark Redis disabled for the rest of the process
+ *     lifetime — no infinite reconnect spam. To re-enable, restart the app
+ *     after starting Redis.
  */
 @Injectable()
 export class RedisService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(RedisService.name);
   private client: RedisClientType | null = null;
   private connected = false;
+  private enabled = false;
 
   constructor(@Inject(ConfigService) private readonly configService: ConfigService<AppConfig, true>) {}
 
   async onModuleInit(): Promise<void> {
+    const features = this.configService.get('features', { infer: true });
+    // `features.redis` doesn't exist on AppConfig today — we read REDIS_ENABLED
+    // directly from process.env so the toggle works without a config-schema
+    // change. Default: disabled, matching legacy production behavior.
+    const explicitly = String(process.env.REDIS_ENABLED ?? '').toLowerCase();
+    this.enabled = explicitly === 'true';
+
+    if (!this.enabled) {
+      this.logger.log('Redis disabled (REDIS_ENABLED != true) — cache helpers will fail-soft');
+      void features; // silence unused
+      return;
+    }
+
     const redis = this.configService.get('redis', { infer: true });
-    const url = (() => {
-      const auth = redis.password ? `:${encodeURIComponent(redis.password)}@` : '';
-      const db = redis.database !== undefined ? `/${redis.database}` : '';
-      return `redis://${auth}${redis.host}:${redis.port}${db}`;
-    })();
 
     this.client = createClient({
-      url,
-      socket: { connectTimeout: 10_000, keepAlive: true },
+      // `redis.uri` honors REDIS_URI when set, otherwise it's assembled from the
+      // REDIS_HOST/REDIS_PORT/REDIS_PASSWORD/REDIS_DATABASE parts. Building it
+      // in one place (config) means the resolver doesn't have two code paths.
+      url: redis.uri,
+      socket: {
+        connectTimeout: 10_000,
+        keepAlive: true,
+        // Bounded reconnect: try up to 5 times with linear backoff (100ms, 200ms,
+        // …, 500ms), then give up. Without a cap, the client retries forever and
+        // floods logs. Returning Error stops the loop and surfaces a single
+        // 'error' event we already log.
+        reconnectStrategy: (retries) => {
+          if (retries >= 5) {
+            this.logger.warn('Redis: max reconnect attempts reached; giving up');
+            return new Error('Redis unreachable — gave up after 5 retries');
+          }
+          return Math.min(100 * (retries + 1), 500);
+        },
+      },
     }) as RedisClientType;
 
     this.client.on('connect', () => this.logger.debug('Redis connecting...'));
@@ -44,19 +79,34 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
       this.connected = true;
       this.logger.log(`Redis ready (${redis.host}:${redis.port})`);
     });
-    this.client.on('error', (err: Error) => this.logger.error(`Redis error: ${err.message}`));
+    // Only log the *first* error; subsequent errors during the bounded retry
+    // window are noise.
+    let errorLogged = false;
+    this.client.on('error', (err: Error) => {
+      if (!errorLogged) {
+        this.logger.error(`Redis error: ${err.message}`);
+        errorLogged = true;
+      }
+    });
     this.client.on('end', () => {
       this.connected = false;
       this.logger.warn('Redis connection ended');
     });
-    this.client.on('reconnecting', () => this.logger.log('Redis reconnecting...'));
+    this.client.on('reconnecting', () => this.logger.debug('Redis reconnecting...'));
 
     try {
       await this.client.connect();
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
-      // Non-fatal — match legacy behavior where Redis is optional at boot
-      this.logger.warn(`Redis connection failed at startup (will retry on first use): ${message}`);
+      this.logger.warn(`Redis connection failed at startup: ${message}. Continuing without cache.`);
+      // Discard the client so cache helpers cleanly fail-soft instead of
+      // queuing operations against a perpetually-disconnected client.
+      try {
+        await this.client?.disconnect();
+      } catch {
+        /* ignore */
+      }
+      this.client = null;
     }
   }
 
@@ -93,7 +143,9 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
   }
 
   // ---------------------------------------------------------------------------
-  // Cache helpers — fail-soft on read, throw on write so callers can choose.
+  // Cache helpers — fail-soft on every operation so callers don't need to
+  // branch on Redis availability. When Redis is disabled or unreachable, gets
+  // return null, dels/incrs return 0, sets are no-ops.
   // ---------------------------------------------------------------------------
 
   async cacheSet(key: string, value: unknown, ttlSeconds = 3600): Promise<void> {

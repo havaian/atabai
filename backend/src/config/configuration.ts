@@ -53,7 +53,10 @@ export const envSchema = z.object({
   MONGO_PASSWORD: z.string().optional(),
   MONGO_AUTH_SOURCE: z.string().default('admin'),
 
-  // --- Redis
+  // --- Redis (URI takes precedence; otherwise built from parts).
+  // URI form: redis://:password@host:port/db  or  redis://host:port
+  // Parts form: REDIS_HOST + REDIS_PORT + REDIS_PASSWORD + REDIS_DATABASE
+  REDIS_URI: z.string().optional(),
   REDIS_HOST: z.string().default('localhost'),
   REDIS_PORT: integerString.default('6379'),
   REDIS_PASSWORD: z.string().optional(),
@@ -133,6 +136,8 @@ export interface AppConfig {
   };
 
   redis: {
+    /** Fully-formed connection URI, either from REDIS_URI or built from the parts below. */
+    uri: string;
     host: string;
     port: number;
     password?: string;
@@ -216,6 +221,16 @@ function buildMongoUri(env: EnvVars): string {
   return `mongodb://${auth}${env.MONGO_HOST}:${env.MONGO_PORT}/${env.MONGO_DATABASE}${tail}`;
 }
 
+function buildRedisUri(env: EnvVars): string {
+  if (env.REDIS_URI) return env.REDIS_URI;
+  // Redis URLs use the password-only form (`:password@`) — no username before
+  // the colon, unlike MongoDB. ACL usernames go after `redis://` only when ACLs
+  // are configured, which we don't use here.
+  const auth = env.REDIS_PASSWORD ? `:${encodeURIComponent(env.REDIS_PASSWORD)}@` : '';
+  const db = env.REDIS_DATABASE !== undefined ? `/${env.REDIS_DATABASE}` : '';
+  return `redis://${auth}${env.REDIS_HOST}:${env.REDIS_PORT}${db}`;
+}
+
 export function configuration(): AppConfig {
   // ConfigModule already validated process.env via `validateEnv` below, so it's safe to re-parse.
   const env = envSchema.parse(process.env);
@@ -233,6 +248,7 @@ export function configuration(): AppConfig {
     },
 
     redis: {
+      uri: buildRedisUri(env),
       host: env.REDIS_HOST,
       port: env.REDIS_PORT,
       password: env.REDIS_PASSWORD,
