@@ -12,12 +12,19 @@ import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import type { AppConfig } from './config/configuration';
 
 async function bootstrap(): Promise<void> {
+  // bufferLogs intentionally disabled — with it on, bootstrap logs are held in
+  // memory until `app.useLogger(...)` is called below. If anything goes wrong
+  // during NestFactory.create (a DI error, a misconfigured module) those logs
+  // never flush and you get a silent crash in docker. Cheap to lose Winston
+  // formatting during the first ~500ms of boot in exchange for guaranteed
+  // visible failure logs.
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
-    bufferLogs: true,
+    bufferLogs: false,
     bodyParser: false,
   });
 
-  // Use Winston as the application logger (set in AppModule via nest-winston)
+  // Swap to Winston for the rest of the lifetime so file rotation, levels,
+  // and the structured category helpers all work for steady-state logs.
   app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
 
   const configService = app.get(ConfigService<AppConfig, true>);

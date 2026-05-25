@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # # MongoDB Database
   # mongodb:
@@ -71,7 +69,12 @@ services:
     networks:
       - atabai-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      # Hit the same port the app actually listens on — BACKEND_PORT from .env.
+      # The previous value (3000) was hard-coded and didn't match the .env's
+      # 7770, which is why this container kept reporting "unhealthy" even when
+      # it was serving fine. Using wget because curl isn't in the node:alpine
+      # base image; CMD-SHELL so the env var expands.
+      test: ["CMD-SHELL", "wget -qO- http://localhost:${BACKEND_PORT}/health > /dev/null || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
