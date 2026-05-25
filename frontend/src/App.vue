@@ -37,7 +37,8 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
+// @ts-nocheck
 import { onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { XMarkIcon } from '@heroicons/vue/24/outline'

@@ -1,20 +1,30 @@
-FROM node:24-alpine
+FROM node:24-alpine AS builder
 
-# Create app directory
 WORKDIR /app
 
-# Install app dependencies
 COPY package*.json ./
-RUN npm ci --only=production
+COPY tsconfig*.json ./
+COPY nest-cli.json ./
+RUN npm ci
 
-# Bundle app source
-COPY . .
+COPY src ./src
+COPY templates ./templates
+COPY public ./public
 
-# Expose API port
-EXPOSE 3000
+RUN npm run build && npm prune --production
 
-# Environment variables
+FROM node:24-alpine AS runner
+
+WORKDIR /app
+
 ENV NODE_ENV=production
 
-# Command to run the application
-CMD ["node", "index.js"]
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/templates ./templates
+COPY --from=builder /app/public ./public
+
+EXPOSE 3000
+
+CMD ["node", "dist/main.js"]

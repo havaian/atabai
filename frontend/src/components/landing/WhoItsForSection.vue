@@ -24,7 +24,8 @@
     </section>
 </template>
 
-<script setup>
+<script setup lang="ts">
+// @ts-nocheck
 import {
     BuildingOfficeIcon,
     ChartBarSquareIcon,

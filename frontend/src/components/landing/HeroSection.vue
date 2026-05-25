@@ -32,7 +32,8 @@
     </section>
 </template>
 
-<script setup>
+<script setup lang="ts">
+// @ts-nocheck
 import { useI18n } from 'vue-i18n'
 import { ArrowRightIcon } from '@heroicons/vue/24/outline'
 

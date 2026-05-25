@@ -1,0 +1,567 @@
+// @ts-nocheck
+/* eslint-disable */
+/**
+ * Auto-converted from src/stores/templates.js.
+ * Behavior preserved 1:1; types tightened later.
+ */
+
+import { defineStore } from 'pinia'
+import { ref, computed } from 'vue'
+import { apiClient } from '@/plugins/axios'
+import {
+    BanknotesIcon,
+    CalculatorIcon,
+    ChartBarIcon,
+    CurrencyDollarIcon,
+    DocumentTextIcon,
+    WalletIcon
+} from '@heroicons/vue/24/outline'
+
+export const useTemplatesStore = defineStore('templates', () => {
+    // State
+    const templates = ref([])
+    const currentTemplate = ref(null)
+    const isLoading = ref(false)
+    const error = ref(null)
+
+    // Getters
+    const availableTemplates = computed(() => {
+        // Return mock data with icons and stats for now
+        const mockTemplates = [
+            // {
+            //     id: 'depreciation',
+            //     key: 'depreciation',
+            //     name: 'Fixed Asset Depreciation',
+            //     standard: 'IAS 16',
+            //     category: 'Asset Management',
+            //     icon: CalculatorIcon,
+            //     description: 'Automate depreciation calculations according to IAS 16 standards',
+            //     subscriptionRequired: 'basic'
+            // },
+            // {
+            //     id: 'discounts',
+            //     key: 'discounts',
+            //     name: 'Discount Calculations',
+            //     standard: 'IFRS 15',
+            //     category: 'Revenue Recognition',
+            //     icon: CurrencyDollarIcon,
+            //     description: 'Calculate revenue discounts and adjustments per IFRS 15',
+            //     subscriptionRequired: 'basic'
+            // },
+            // {
+            //     id: 'impairment',
+            //     key: 'impairment',
+            //     name: 'Asset Impairment',
+            //     standard: 'IAS 36',
+            //     category: 'Asset Testing',
+            //     icon: ChartBarIcon,
+            //     description: 'Perform impairment testing and calculations according to IAS 36',
+            //     subscriptionRequired: 'basic'
+            // },
+            // {
+            //     id: 'reports',
+            //     key: 'reports',
+            //     name: 'Financial Reports',
+            //     standard: 'IFRS',
+            //     category: 'Reporting',
+            //     icon: DocumentTextIcon,
+            //     description: 'Generate comprehensive IFRS-compliant financial reports',
+            //     subscriptionRequired: 'premium'
+            // },
+            {
+                id: 'balanceSheet',
+                key: 'balanceSheet',
+                name: 'Balance Sheet Transformation',
+                standard: 'IAS 1',
+                category: 'Financial Statements',
+                icon: WalletIcon,
+                description: 'Transform NSBU balance sheet to IFRS format according to IAS 1 standards',
+                subscriptionRequired: 'basic'
+            },
+            {
+                id: 'cashFlow',
+                key: 'cashFlow',
+                name: 'Cash Flow Transformation',
+                standard: 'IAS 7',
+                category: 'Financial Statements',
+                icon: BanknotesIcon,
+                description: 'Transform NSBU cash flow statement to IFRS format according to IAS 7 standards',
+                subscriptionRequired: 'basic'
+            },
+            {
+                id: 'profitLoss',
+                key: 'profitLoss',
+                name: 'Profit & Loss Transformation',
+                standard: 'IFRS',
+                category: 'Financial Statements',
+                icon: DocumentTextIcon,
+                description: 'Transform NSBU profit & loss (PnL budget) report to IFRS format',
+                subscriptionRequired: 'basic'
+            },
+            {
+                id: 'profitLossForm2',
+                key: 'profitLossForm2',
+                name: 'P&L Form 2 Transformation',
+                standard: 'IAS 1',
+                category: 'Financial Statements',
+                icon: DocumentTextIcon,
+                description: 'Transform standard NSBU Form 2 (ОКУД 0710002) profit & loss statement to IFRS format',
+                subscriptionRequired: 'basic'
+            },
+            {
+                id: 'equity',
+                key: 'equity',
+                name: 'Statement of Changes in Equity',
+                standard: 'IAS 1',
+                category: 'Financial Statements',
+                icon: ChartBarIcon,
+                description: 'Generate IFRS Statement of Changes in Equity from a balance sheet or dedicated Form 4 file',
+                subscriptionRequired: 'basic'
+            }
+        ]
+
+        // Merge with actual templates from API if available
+        if (templates.value.length > 0) {
+            return templates.value.map(template => {
+                const mockTemplate = mockTemplates.find(mock => mock.id === template.id)
+                if (!mockTemplate) {
+                    // Skip templates that don't have mock data (prevents undefined key errors)
+                    return null
+                }
+                return {
+                    ...template,
+                    ...mockTemplate,
+                    icon: mockTemplate.icon
+                }
+            }).filter(Boolean) // Remove null entries
+        }
+
+        return mockTemplates
+    })
+
+    const basicTemplates = computed(() =>
+        availableTemplates.value.filter(template =>
+            template.subscriptionRequired === 'basic'
+        )
+    )
+
+    const premiumTemplates = computed(() =>
+        availableTemplates.value.filter(template =>
+            template.subscriptionRequired === 'premium'
+        )
+    )
+
+    // Actions
+    async function fetchTemplates() {
+        try {
+            isLoading.value = true
+            error.value = null
+
+            // For now, we'll ignore the API response since it's not properly structured
+            // The availableTemplates computed will return our mock data
+
+            // Uncomment this when the backend API is properly implemented:
+            // const response = await apiClient.get('/templates')
+            // templates.value = response.data.templates || []
+
+            // Keep templates empty so we use mock data
+            templates.value = []
+
+            return templates.value
+        } catch (err) {
+            error.value = err.response?.data?.message || 'Failed to fetch templates'
+            console.error('Fetch templates error:', err)
+
+            // Keep mock data on error for development
+            templates.value = []
+        } finally {
+            isLoading.value = false
+        }
+    }
+
+    async function getTemplate(templateId) {
+        try {
+            isLoading.value = true
+            error.value = null
+
+            const response = await apiClient.get(`/templates/${templateId}`)
+            currentTemplate.value = response.data.template
+
+            return currentTemplate.value
+        } catch (err) {
+            error.value = err.response?.data?.message || 'Failed to fetch template details'
+            console.error('Get template error:', err)
+
+            // Return mock data for development
+            const mockTemplate = availableTemplates.value.find(t => t.id === templateId)
+            if (mockTemplate) {
+                currentTemplate.value = {
+                    ...mockTemplate,
+                    fields: getMockTemplateFields(templateId),
+                    instructions: getMockTemplateInstructions(templateId),
+                    examples: getMockTemplateExamples(templateId)
+                }
+                return currentTemplate.value
+            }
+
+            return null
+        } finally {
+            isLoading.value = false
+        }
+    }
+
+    async function validateTemplate(templateId, data) {
+        try {
+            isLoading.value = true
+            error.value = null
+
+            const response = await apiClient.post(`/templates/${templateId}/validate`, { data })
+            return response.data.validation
+
+        } catch (err) {
+            error.value = err.response?.data?.message || 'Template validation failed'
+            console.error('Template validation error:', err)
+            throw err
+        } finally {
+            isLoading.value = false
+        }
+    }
+
+    function getMockTemplateFields(templateId) {
+        const fields = {
+            depreciation: [
+                {
+                    name: 'assetName',
+                    type: 'text',
+                    required: true,
+                    label: 'Asset Name',
+                    placeholder: 'e.g., Office Building'
+                },
+                {
+                    name: 'assetCost',
+                    type: 'number',
+                    required: true,
+                    label: 'Asset Cost',
+                    placeholder: 'Original cost in USD'
+                },
+                {
+                    name: 'usefulLife',
+                    type: 'number',
+                    required: true,
+                    label: 'Useful Life (years)',
+                    placeholder: 'Expected useful life'
+                },
+                {
+                    name: 'depreciationMethod',
+                    type: 'select',
+                    required: true,
+                    label: 'Depreciation Method',
+                    options: [
+                        { value: 'straight-line', label: 'Straight Line' },
+                        { value: 'declining-balance', label: 'Declining Balance' },
+                        { value: 'units-of-production', label: 'Units of Production' }
+                    ]
+                }
+            ],
+            discounts: [
+                {
+                    name: 'revenueAmount',
+                    type: 'number',
+                    required: true,
+                    label: 'Revenue Amount',
+                    placeholder: 'Total revenue amount'
+                },
+                {
+                    name: 'discountType',
+                    type: 'select',
+                    required: true,
+                    label: 'Discount Type',
+                    options: [
+                        { value: 'percentage', label: 'Percentage' },
+                        { value: 'fixed', label: 'Fixed Amount' },
+                        { value: 'tiered', label: 'Tiered Discount' }
+                    ]
+                },
+                {
+                    name: 'discountValue',
+                    type: 'number',
+                    required: true,
+                    label: 'Discount Value',
+                    placeholder: 'Discount percentage or amount'
+                }
+            ],
+            impairment: [
+                {
+                    name: 'assetCarryingValue',
+                    type: 'number',
+                    required: true,
+                    label: 'Carrying Value',
+                    placeholder: 'Current carrying value'
+                },
+                {
+                    name: 'recoverableAmount',
+                    type: 'number',
+                    required: true,
+                    label: 'Recoverable Amount',
+                    placeholder: 'Estimated recoverable amount'
+                },
+                {
+                    name: 'testingDate',
+                    type: 'date',
+                    required: true,
+                    label: 'Testing Date',
+                    placeholder: 'Date of impairment test'
+                }
+            ],
+            'balanceSheet': [
+                {
+                    name: 'rowCode',
+                    type: 'text',
+                    required: true,
+                    label: 'Row Code',
+                    placeholder: 'e.g., 010, 220'
+                },
+                {
+                    name: 'description',
+                    type: 'text',
+                    required: true,
+                    label: 'Line Description',
+                    placeholder: 'Asset or liability description'
+                },
+                {
+                    name: 'beginningBalance',
+                    type: 'number',
+                    required: true,
+                    label: 'Beginning Balance',
+                    placeholder: 'Amount at period start'
+                },
+                {
+                    name: 'endingBalance',
+                    type: 'number',
+                    required: true,
+                    label: 'Ending Balance',
+                    placeholder: 'Amount at period end'
+                }
+            ],
+            'cashFlow': [
+                {
+                    name: 'lineName',
+                    type: 'text',
+                    required: true,
+                    label: 'Line Item',
+                    placeholder: 'Cash flow activity description'
+                },
+                {
+                    name: 'inflow',
+                    type: 'number',
+                    required: false,
+                    label: 'Inflow Amount',
+                    placeholder: 'Cash receipts'
+                },
+                {
+                    name: 'outflow',
+                    type: 'number',
+                    required: false,
+                    label: 'Outflow Amount',
+                    placeholder: 'Cash payments'
+                }
+            ],
+            'profitLoss': [
+                {
+                    name: 'period',
+                    type: 'text',
+                    required: true,
+                    label: 'Report Period',
+                    placeholder: 'e.g., Q1 2025'
+                },
+                {
+                    name: 'revenue',
+                    type: 'number',
+                    required: true,
+                    label: 'Total Revenue',
+                    placeholder: 'Total revenue amount'
+                },
+                {
+                    name: 'directCosts',
+                    type: 'number',
+                    required: true,
+                    label: 'Direct Costs',
+                    placeholder: 'Total direct/subcontractor costs'
+                },
+                {
+                    name: 'overheadExpenses',
+                    type: 'number',
+                    required: false,
+                    label: 'Overhead Expenses',
+                    placeholder: 'Project overhead costs'
+                },
+                {
+                    name: 'adminExpenses',
+                    type: 'number',
+                    required: false,
+                    label: 'Admin Expenses',
+                    placeholder: 'Administrative and general expenses'
+                }
+            ]
+        }
+
+        return fields[templateId] || []
+    }
+
+    function getMockTemplateInstructions(templateId) {
+        const instructions = {
+            depreciation: {
+                en: 'Upload your asset schedule with columns for asset name, cost, useful life, and depreciation method. The template will automatically calculate depreciation according to IAS 16.',
+                ru: 'Загрузите график активов с колонками для названия актива, стоимости, срока службы и метода амортизации. Шаблон автоматически рассчитает амортизацию согласно IAS 16.',
+                uz: 'Aktiv jadvalini aktiv nomi, qiymati, foydali muddati va amortizatsiya usuli ustunlari bilan yuklang. Shablon IAS 16 ga muvofiq amortizatsiyani avtomatik hisoblab beradi.'
+            },
+            discounts: {
+                en: 'Upload your revenue data with discount information. The template will apply IFRS 15 revenue recognition principles.',
+                ru: 'Загрузите данные о доходах с информацией о скидках. Шаблон применит принципы признания доходов IFRS 15.',
+                uz: 'Chegirma ma\'lumotlari bilan daromad ma\'lumotlarini yuklang. Shablon IFRS 15 daromadlarni tan olish tamoyillarini qo\'llaydi.'
+            },
+            impairment: {
+                en: 'Upload asset data for impairment testing. The template will perform IAS 36 compliant impairment calculations.',
+                ru: 'Загрузите данные об активах для тестирования на обесценение. Шаблон выполнит расчеты обесценения в соответствии с IAS 36.',
+                uz: 'Qadrsizlanishni sinash uchun aktiv ma\'lumotlarini yuklang. Shablon IAS 36 ga muvofiq qadrsizlanish hisob-kitoblarini amalga oshiradi.'
+            },
+            'balanceSheet': {
+                en: 'Upload your NSBU balance sheet (Form № 1). The template will map all line items to IFRS classifications according to IAS 1.',
+                ru: 'Загрузите баланс в формате НСБУ (Форма № 1). Шаблон сопоставит все статьи с классификацией МСФО согласно IAS 1.',
+                uz: 'NSBU balansini yuklang (Forma № 1). Shablon barcha qatorlarni IAS 1 ga muvofiq IFRS klassifikatsiyasiga moslaydi.'
+            },
+            'cashFlow': {
+                en: 'Upload your NSBU cash flow statement with inflow and outflow columns. The template will map all activities to IFRS cash flow format according to IAS 7.',
+                ru: 'Загрузите отчет о движении денежных средств НСБУ с колонками притока и оттока. Шаблон сопоставит все операции с форматом движения денежных средств МСФО согласно IAS 7.',
+                uz: 'Pul oqimlarining NSBU hisobotini kirish va chiqish ustunlari bilan yuklang. Shablon barcha faoliyatni IAS 7 ga muvofiq IFRS pul oqimlari formatiga moslaydi.'
+            },
+            'profitLoss': {
+                en: 'Upload your NSBU profit & loss (PnL budget) report. The system detects revenue and expense sections automatically and restructures the data into IFRS P&L format.',
+                ru: 'Загрузите отчёт о прибылях и убытках в формате НСБУ (бюджет ПиУ). Система автоматически определит разделы доходов и расходов и преобразует данные в формат МСФО.',
+                uz: 'NSBU formatidagi foyda va zararlar hisobotini (PnL byudjeti) yuklang. Tizim daromad va xarajat bo\'limlarini avtomatik aniqlaydi va ma\'lumotlarni IFRS P&L formatiga o\'zgartiradi.'
+            },
+            'profitLossForm2': {
+                en: 'Upload your standard NSBU Form 2 (ОКУД 0710002) P&L statement. The system detects row codes (010, 020, ...) automatically and maps them to the corresponding IFRS P&L line items.',
+                ru: 'Загрузите стандартный отчёт о прибылях и убытках НСБУ (Форма № 2 — ОКУД 0710002). Система автоматически определяет коды строк (010, 020, ...) и сопоставляет их с соответствующими статьями МСФО.',
+                uz: 'Standart NSBU 2-shakl (ОКУД 0710002) foyda va zararlar hisobotini yuklang. Tizim qator kodlarini (010, 020, ...) avtomatik aniqlaydi va ularni IFRS bo\'yicha tegishli moddalarga moslashtiradi.'
+            },
+            'equity': {
+                en: 'Upload either your NSBU balance sheet (Form 1) for a simplified equity statement, or a dedicated Form 4 (Statement of Changes in Equity) for a full movement breakdown. The system detects the file type automatically.',
+                ru: 'Загрузите баланс НСБУ (Форма № 1) для упрощённого отчёта об изменениях в капитале, либо отдельный отчёт об изменениях в капитале (Форма № 4) для полной разбивки движений. Система определяет тип файла автоматически.',
+                uz: 'Kapital o\'zgarishlari to\'g\'risidagi soddalashtirilgan hisobot uchun NSBU balansi (1-shakl) yoki to\'liq harakat tafsilotlari uchun alohida kapital o\'zgarishlari to\'g\'risidagi hisobot (4-shakl) yuklang. Tizim fayl turini avtomatik aniqlaydi.'
+            }
+        }
+
+        return instructions[templateId] || { en: '', ru: '', uz: '' }
+    }
+
+    function getMockTemplateExamples(templateId) {
+        const examples = {
+            depreciation: [
+                {
+                    name: 'Office Building Depreciation',
+                    description: 'Example calculation for a $1M office building with 40-year useful life'
+                },
+                {
+                    name: 'Equipment Depreciation',
+                    description: 'Manufacturing equipment depreciation using declining balance method'
+                }
+            ],
+            discounts: [
+                {
+                    name: 'Volume Discount Recognition',
+                    description: 'Revenue recognition with tiered volume discounts'
+                },
+                {
+                    name: 'Early Payment Discounts',
+                    description: 'Handling of early payment discount arrangements'
+                }
+            ],
+            impairment: [
+                {
+                    name: 'Property Impairment Test',
+                    description: 'Impairment testing for commercial property assets'
+                },
+                {
+                    name: 'CGU Impairment Analysis',
+                    description: 'Cash-generating unit impairment assessment'
+                }
+            ],
+            'balanceSheet': [
+                {
+                    name: 'Standard Balance Sheet Mapping',
+                    description: 'Complete NSBU to IFRS transformation for standard Uzbek balance sheet'
+                },
+                {
+                    name: 'Comparative Balance Sheet',
+                    description: 'Side-by-side comparison of NSBU and IFRS presentations'
+                }
+            ],
+            'cashFlow': [
+                {
+                    name: 'Standard Cash Flow Mapping',
+                    description: 'Complete NSBU to IFRS cash flow transformation'
+                },
+                {
+                    name: 'Comparative Cash Flow',
+                    description: 'Multi-period cash flow analysis with IFRS classification'
+                }
+            ],
+            'profitLoss': [
+                {
+                    name: 'Standard P&L Mapping',
+                    description: 'Complete NSBU to IFRS P&L transformation for a quarterly budget report'
+                },
+                {
+                    name: 'Multi-project P&L',
+                    description: 'Monthly P&L with multiple construction projects mapped to IFRS sections'
+                }
+            ],
+            'profitLossForm2': [
+                {
+                    name: 'Standard Form 2 Mapping',
+                    description: 'Complete NSBU Form 2 (row codes 010–150) to IFRS P&L transformation'
+                },
+                {
+                    name: 'Comparative P&L',
+                    description: 'Two-period comparison (current year vs prior year) in IFRS format'
+                }
+            ],
+            'equity': [
+                {
+                    name: 'From Balance Sheet',
+                    description: 'Equity statement showing opening/closing balances derived from Form 1'
+                },
+                {
+                    name: 'From Form 4',
+                    description: 'Full statement of changes in equity with all movement categories'
+                }
+            ]
+        }
+
+        return examples[templateId] || []
+    }
+
+    function clearError() {
+        error.value = null
+    }
+
+    return {
+        // State
+        templates,
+        currentTemplate,
+        isLoading,
+        error,
+
+        // Getters
+        availableTemplates,
+        basicTemplates,
+        premiumTemplates,
+
+        // Actions
+        fetchTemplates,
+        getTemplate,
+        validateTemplate,
+        clearError
+    }
+})

@@ -45,7 +45,8 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
+// @ts-nocheck
 import LogoComponent from '@/components/Logo.vue'
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'

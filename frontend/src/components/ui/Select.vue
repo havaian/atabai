@@ -25,7 +25,8 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
+// @ts-nocheck
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { onClickOutside } from '@vueuse/core'
 import { ChevronDownIcon, CheckIcon } from '@heroicons/vue/24/outline'

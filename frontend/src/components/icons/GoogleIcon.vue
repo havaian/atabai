@@ -15,7 +15,8 @@
     </svg>
 </template>
 
-<script setup>
+<script setup lang="ts">
+// @ts-nocheck
 // Props with default values
 defineProps({
     size: {

@@ -24,7 +24,8 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
+// @ts-nocheck
 import { onMounted } from 'vue'
 
 // Landing section components

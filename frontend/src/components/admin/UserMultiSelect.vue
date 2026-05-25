@@ -40,7 +40,8 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
+// @ts-nocheck
 /**
  * UserMultiSelect — pick one or more users by email.
  *

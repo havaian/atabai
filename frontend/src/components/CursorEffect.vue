@@ -15,7 +15,8 @@
     </Teleport>
 </template>
 
-<script setup>
+<script setup lang="ts">
+// @ts-nocheck
 import { ref, onMounted, onUnmounted, watch } from 'vue'
 import { useThemeStore } from '@/stores/theme'
 

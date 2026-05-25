@@ -16,7 +16,8 @@
     </section>
 </template>
 
-<script setup>
+<script setup lang="ts">
+// @ts-nocheck
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { ArrowRightIcon } from '@heroicons/vue/24/outline'
 import { useThemeStore } from '@/stores/theme'

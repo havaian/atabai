@@ -1,1 +1,0 @@
-module.exports = ['balanceSheet', 'cashFlow', 'profitLoss', 'profitLossForm2', 'equity'];

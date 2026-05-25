@@ -19,7 +19,8 @@
     </footer>
 </template>
 
-<script setup>
+<script setup lang="ts">
+// @ts-nocheck
 import LogoComponent from '@/components/Logo.vue'
 import TelegramIcon from '@/components/icons/TelegramIcon.vue'
 import MailIcon from '@/components/icons/MailIcon.vue'

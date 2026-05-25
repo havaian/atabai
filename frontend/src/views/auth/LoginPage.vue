@@ -29,7 +29,8 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
+// @ts-nocheck
 import { ref, onMounted } from 'vue'
 import { ArrowLeftIcon } from '@heroicons/vue/24/outline'
 import LogoComponent from '@/components/Logo.vue'

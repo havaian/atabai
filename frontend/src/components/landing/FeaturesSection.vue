@@ -95,7 +95,8 @@
     </section>
 </template>
 
-<script setup>
+<script setup lang="ts">
+// @ts-nocheck
 import {
     DocumentCheckIcon, ShieldCheckIcon, ClockIcon,
     CogIcon, GlobeAltIcon, CloudArrowUpIcon

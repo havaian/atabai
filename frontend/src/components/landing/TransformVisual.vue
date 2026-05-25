@@ -70,7 +70,8 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
+// @ts-nocheck
 import { ArrowRightIcon } from '@heroicons/vue/24/outline'
 </script>
 

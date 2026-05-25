@@ -44,7 +44,8 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
+// @ts-nocheck
 import { ref, computed, nextTick } from 'vue'
 import { XMarkIcon } from '@heroicons/vue/24/outline'
 

@@ -144,7 +144,8 @@
     </section>
 </template>
 
-<script setup>
+<script setup lang="ts">
+// @ts-nocheck
 import { ref } from 'vue'
 import {
     CloudArrowUpIcon,

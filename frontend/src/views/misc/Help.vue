@@ -65,7 +65,8 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
+// @ts-nocheck
 import LogoComponent from '@/components/Logo.vue'
 import { computed } from 'vue'
 import { ArrowLeftIcon, ArrowRightIcon, EnvelopeIcon } from '@heroicons/vue/24/outline'

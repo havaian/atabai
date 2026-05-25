@@ -17,7 +17,8 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
+// @ts-nocheck
 // Translation keys live under stats.* in the locale files.
 // Numeric values stay hardcoded — they're locale-agnostic.
 const stats = [
