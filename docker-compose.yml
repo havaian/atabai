@@ -60,11 +60,11 @@ services:
       - ./logs:/app/logs
     ports:
       - "${BACKEND_EXPOSE:-127.0.0.1:3000}:${BACKEND_PORT}"
-    # depends_on:
+    depends_on:
     #   mongodb:
     #     condition: service_healthy
-    #   redis:
-    #     condition: service_healthy
+      redis:
+        condition: service_healthy
     #   rabbitmq:
     #     condition: service_healthy
     networks:
