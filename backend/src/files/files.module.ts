@@ -11,6 +11,7 @@ import {
 } from '../jobs/schemas/processing-job.schema';
 import { ProcessorsModule } from '../processors/processors.module';
 import { User, UserSchema } from '../users/schemas/user.schema';
+import { UsersModule } from '../users/users.module';
 import { FilesController } from './files.controller';
 import { FilesService } from './files.service';
 import { File, FileSchema } from './schemas/file.schema';
@@ -22,6 +23,9 @@ import { TransformationLockService } from './utils/transformation-lock';
 @Module({
   imports: [
     AuthModule,
+    // UsersModule is required because JwtAuthGuard / FileProcessingLimitGuard
+    // (re-exported by AuthModule) depend on UsersService, which lives here.
+    UsersModule,
     ProcessorsModule,
     MulterModule.registerAsync({
       imports: [ConfigModule],
