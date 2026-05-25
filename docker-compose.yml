@@ -49,6 +49,7 @@ services:
     environment:
       - JWT_SECRET=${JWT_SECRET}
       - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+      - REDIS_ENABLED=true
     container_name: ${PROJECT_NAME:-atabai}-backend
     restart: unless-stopped
     env_file: 
@@ -178,11 +179,11 @@ services:
   #     - atabai-network
   #   profiles: ["monitoring"]
 
-# volumes:
+volumes:
 #   mongodb_data:
 #     driver: local
-#   redis_data:
-#     driver: local
+  redis_data:
+    driver: local
 #   rabbitmq_data:
 #     driver: local
 #   prometheus_data:
