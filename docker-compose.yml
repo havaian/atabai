@@ -28,29 +28,29 @@ services:
     image: redis:7.2-alpine
     container_name: ${PROJECT_NAME:-atabai}-redis
     restart: unless-stopped
+    # Expose REDIS_PASSWORD to the container shell so the healthcheck below
+    # can reach it via $$REDIS_PASSWORD (single $ in container, $$ to escape
+    # compose's own interpolation). Without this, the healthcheck would run
+    # `redis-cli -a "" ping`, get NOAUTH, exit non-zero, and the container
+    # would be flagged unhealthy even though redis itself is fully up.
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-password}
     # No --port: redis listens on its default 6379 inside the container, which
     # is what the backend reaches via `redis:6379` over the docker network.
-    # The previous `--port ${REDIS_EXPOSE}` was wrong — REDIS_EXPOSE is a
-    # `host:port` pair (e.g. 127.0.0.1:7779), not a bare port number, so the
-    # redis-server CLI rejected it on startup and the container never got past
-    # the first healthcheck window.
     command: redis-server --requirepass ${REDIS_PASSWORD:-password} --appendonly yes
     volumes:
       - redis_data:/data
     # No `ports:` — redis is only reachable from inside the compose network.
-    # The backend resolves it via the service name `redis` (docker DNS) on the
-    # default port 6379. To connect from the host for debugging, run a
-    # one-shot client in the same network:
+    # To connect from the host for debugging, run a one-shot client in the
+    # same network:
     #   docker compose exec redis redis-cli -a "$REDIS_PASSWORD"
     networks:
       - atabai-network
     healthcheck:
-      # Healthcheck needs the password since we set --requirepass above —
-      # otherwise redis-cli gets NOAUTH and exits non-zero, which is what
-      # made every previous deploy fail with "atabai-redis is unhealthy".
-      # --no-auth-warning silences the "using -a is insecure" stderr that
-      # would otherwise pollute logs every 30s.
-      test: ["CMD-SHELL", "redis-cli -a $${REDIS_PASSWORD:-password} --no-auth-warning ping | grep -q PONG"]
+      # $$REDIS_PASSWORD → compose passes it through as $REDIS_PASSWORD →
+      # container shell expands it from the `environment:` block above.
+      # --no-auth-warning silences "using -a is insecure" stderr noise.
+      test: ["CMD-SHELL", "redis-cli -a \"$$REDIS_PASSWORD\" --no-auth-warning ping | grep -q PONG"]
       interval: 10s
       timeout: 5s
       retries: 5
