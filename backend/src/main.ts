@@ -1,4 +1,4 @@
-import { ValidationPipe, VersioningType } from '@nestjs/common';
+import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
@@ -77,10 +77,13 @@ async function bootstrap(): Promise<void> {
     optionsSuccessStatus: 200,
   });
 
-  // Global API prefix matches legacy /api/* routes
+  // Global API prefix matches legacy /api/* routes. Versioning is intentionally
+  // NOT enabled — the legacy backend exposed routes at `/api/...` directly and
+  // the frontend hard-codes those paths. Enabling URI versioning would force
+  // every URL to include a version segment, which produced 404s for every
+  // request the frontend made (every controller was Mapped as "version: 1"
+  // in the boot logs, so the routes existed but only at `/v1/api/...`).
   app.setGlobalPrefix('api', { exclude: ['health', '/'] });
-
-  app.enableVersioning({ type: VersioningType.URI, defaultVersion: '1', prefix: false });
 
   // Class-validator/transformer pipeline — DTOs are validated on every request
   app.useGlobalPipes(
