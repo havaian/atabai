@@ -7,6 +7,7 @@ import { AuthModule } from '../auth/auth.module';
 import type { AppConfig } from '../config/configuration';
 import { buildMulterOptions } from '../files/utils/multer-config';
 import { OrganizationsModule } from '../organizations/organizations.module';
+import { UsersModule } from '../users/users.module';
 import { AdjustmentsController } from './adjustments/adjustments.controller';
 import { AdjustmentsService } from './adjustments/adjustments.service';
 import { BalancesController } from './balances/balances.controller';
@@ -87,6 +88,11 @@ import { PeriodsService } from './services/periods.service';
     ]),
     OrganizationsModule,
     AuthModule,
+    // UsersModule is required because JwtAuthGuard (re-exported by AuthModule)
+    // injects UsersService at construction time. AuthModule itself uses
+    // forwardRef(UsersModule), so re-importing it here is the documented
+    // NestJS pattern — same shape as FilesModule.
+    UsersModule,
     MulterModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
