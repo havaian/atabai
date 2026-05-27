@@ -2,6 +2,7 @@ import { forwardRef, Module, OnApplicationBootstrap } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { PassportModule } from '@nestjs/passport';
 
+import { OrganizationsModule } from '../organizations/organizations.module';
 import { UsersModule } from '../users/users.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
@@ -21,6 +22,7 @@ import { WhitelistService } from './whitelist.service';
 @Module({
   imports: [
     forwardRef(() => UsersModule),
+    forwardRef(() => OrganizationsModule),
     PassportModule.register({ session: false }),
     MongooseModule.forFeature([
       { name: AdminSession.name, schema: AdminSessionSchema },

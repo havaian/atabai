@@ -15,7 +15,9 @@ import { UsersModule } from './users/users.module';
 import { AdminModule } from './admin/admin.module';
 import { FilesModule } from './files/files.module';
 import { JobsModule } from './jobs/jobs.module';
+import { LedgerModule } from './ledger/ledger.module';
 import { MappingsModule } from './mappings/mappings.module';
+import { OrganizationsModule } from './organizations/organizations.module';
 import { ProcessorsModule } from './processors/processors.module';
 import { TemplatesModule } from './templates/templates.module';
 
@@ -52,6 +54,8 @@ import { TemplatesModule } from './templates/templates.module';
     RedisModule,
     UsersModule,
     AuthModule,
+    OrganizationsModule,
+    LedgerModule,
     MappingsModule,
     AdminModule,
     ProcessorsModule,

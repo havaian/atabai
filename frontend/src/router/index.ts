@@ -7,6 +7,7 @@
 
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { useOrganizationsStore } from '@/stores/organizations'
 import i18n from '@/utils/i18n'
 
 // Import layouts
@@ -31,6 +32,17 @@ import UploadPage from '@/views/app/UploadPage.vue'
 import ProcessingPage from '@/views/app/ProcessingPage.vue'
 import FileDetailsPage from '@/views/app/FileDetailsPage.vue'
 import FileHistoryPage from '@/views/app/FileHistoryPage.vue'
+import OnboardingView from '@/views/app/OnboardingView.vue'
+import OrganizationsListView from '@/views/app/OrganizationsListView.vue'
+import OrganizationMembersView from '@/views/app/OrganizationMembersView.vue'
+import OsvUploadView from '@/views/app/OsvUploadView.vue'
+import BankUploadView from '@/views/app/BankUploadView.vue'
+import BankPreviewView from '@/views/app/BankPreviewView.vue'
+import AdjustmentsListView from '@/views/app/AdjustmentsListView.vue'
+import AdjustmentEditorView from '@/views/app/AdjustmentEditorView.vue'
+import PeriodsView from '@/views/app/PeriodsView.vue'
+import ChartOfAccountsView from '@/views/app/ChartOfAccountsView.vue'
+import LedgerMatrixView from '@/views/app/LedgerMatrixView.vue'
 
 // ─── Admin ────────────────────────────────────────────────────────────────────
 import AdminLayout from '@/layouts/AdminLayout.vue'
@@ -159,6 +171,83 @@ const appChildren = [
             titleKey: 'pageTitles./settings',
             descriptionKey: 'pageDescriptions./settings'
         }
+    },
+
+    // ─── Organizations (access spine + bootstrap) ──────────────────────────
+    {
+        path: 'organizations',
+        name: 'Organizations',
+        component: OrganizationsListView,
+        meta: { titleKey: 'pageTitles./organizations' }
+    },
+    {
+        path: 'organizations/onboarding',
+        name: 'Onboarding',
+        component: OnboardingView,
+        meta: { titleKey: 'pageTitles./onboarding', showNavbar: false }
+    },
+    {
+        path: 'organizations/members',
+        name: 'OrganizationMembers',
+        component: OrganizationMembersView,
+        meta: { titleKey: 'pageTitles./members', requiresOrg: true }
+    },
+
+    // ─── Ledger (per org / period) ─────────────────────────────────────────
+    // All org-scoped — guarded by requiresOrg below.
+    {
+        path: 'ledger/periods',
+        name: 'Periods',
+        component: PeriodsView,
+        meta: { titleKey: 'pageTitles./periods', requiresOrg: true }
+    },
+    {
+        path: 'ledger/chart',
+        name: 'ChartOfAccounts',
+        component: ChartOfAccountsView,
+        meta: { titleKey: 'pageTitles./chart', requiresOrg: true }
+    },
+    {
+        path: 'ledger/matrix',
+        name: 'LedgerMatrix',
+        component: LedgerMatrixView,
+        meta: { titleKey: 'pageTitles./matrix', requiresOrg: true }
+    },
+    {
+        path: 'ledger/periods/:periodId/osv-import',
+        name: 'OsvUpload',
+        component: OsvUploadView,
+        meta: { titleKey: 'pageTitles./osvImport', requiresOrg: true }
+    },
+    {
+        path: 'ledger/periods/:periodId/bank-statements',
+        name: 'BankUpload',
+        component: BankUploadView,
+        meta: { titleKey: 'pageTitles./bankUpload', requiresOrg: true }
+    },
+    {
+        path: 'ledger/periods/:periodId/bank-statements/:uploadId',
+        name: 'BankPreview',
+        component: BankPreviewView,
+        meta: { titleKey: 'pageTitles./bankPreview', requiresOrg: true }
+    },
+    {
+        path: 'ledger/adjustments',
+        name: 'AdjustmentsList',
+        component: AdjustmentsListView,
+        meta: { titleKey: 'pageTitles./adjustments', requiresOrg: true }
+    },
+    {
+        path: 'ledger/periods/:periodId/adjustments/new',
+        name: 'AdjustmentNew',
+        component: AdjustmentEditorView,
+        meta: { titleKey: 'pageTitles./adjustmentNew', requiresOrg: true }
+    },
+    {
+        path: 'ledger/adjustments/:entryId',
+        name: 'AdjustmentDetail',
+        component: AdjustmentEditorView,
+        meta: { titleKey: 'pageTitles./adjustmentDetail', requiresOrg: true }
     }
 ]
 
@@ -445,6 +534,53 @@ router.beforeEach(async (to, from, next) => {
 
     if (to.meta?.requiresGuest && authStore.isAuthenticated) {
         return next(`/${locale}/app/dashboard`)
+    }
+
+    next()
+})
+
+/**
+ * Guard pass 4: org-aware redirects.
+ *
+ *   - Just-logged-in users with no orgs and no pending invites are funneled
+ *     into the onboarding wizard. Architecture doc §8.3: "IA shifts from
+ *     file-centric to org+period-centric" — an empty workspace IS the
+ *     onboarding workspace.
+ *   - Routes marked `requiresOrg: true` redirect to /app/organizations when
+ *     the user has no active org selected.
+ *   - Skip both checks on the onboarding/organizations pages themselves
+ *     (otherwise we'd loop) and on non-app routes (auth, landing, admin).
+ */
+router.beforeEach(async (to, from, next) => {
+    const authStore = useAuthStore()
+    const locale = to.params.locale || getBootstrapLocale()
+
+    // Only relevant inside the authenticated /app/ tree.
+    if (!authStore.isAuthenticated) return next()
+    if (!to.path.includes('/app/')) return next()
+
+    const orgsStore = useOrganizationsStore()
+    // Best-effort init — failures (network, 401 during refresh) shouldn't
+    // block routing entirely. The store surfaces the error; the user sees it.
+    try {
+        await orgsStore.ensureInitialized()
+    } catch (_) {
+        return next()
+    }
+
+    const onOnboarding = to.name === 'Onboarding'
+    const onOrgsList = to.name === 'Organizations'
+
+    // Funnel empty workspaces to the wizard. Settings is the only org-less
+    // page worth keeping accessible (user can edit their profile / sign out).
+    if (orgsStore.needsOnboarding && !onOnboarding && to.name !== 'Settings') {
+        return next(`/${locale}/app/organizations/onboarding`)
+    }
+
+    // requiresOrg routes need an active org. List + onboarding are exempt by
+    // design — they're how the user GETS an active org in the first place.
+    if (to.meta?.requiresOrg && !orgsStore.currentOrgId && !onOnboarding && !onOrgsList) {
+        return next(`/${locale}/app/organizations`)
     }
 
     next()

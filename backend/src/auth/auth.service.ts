@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
 
@@ -6,6 +6,7 @@ import { getFileLimit } from '../common/constants/subscription';
 import { AppError } from '../common/errors/app.error';
 import { AppLoggerService } from '../common/logger/app-logger.service';
 import type { AppConfig } from '../config/configuration';
+import { OrganizationsService } from '../organizations/organizations.service';
 import type { GoogleProfileInput, IUserMethods, UserDocument, UserModel } from '../users/schemas/user.schema';
 import { UsersService } from '../users/users.service';
 import { JwtTokenService } from './jwt-token.service';
@@ -42,6 +43,8 @@ export class AuthService {
     private readonly whitelist: WhitelistService,
     private readonly configService: ConfigService<AppConfig, true>,
     private readonly logger: AppLoggerService,
+    @Inject(forwardRef(() => OrganizationsService))
+    private readonly organizations: OrganizationsService,
   ) {
     const google = configService.get('google', { infer: true });
     this.googleClientId = google.clientId ?? '';
@@ -100,6 +103,7 @@ export class AuthService {
 
       const user = await this.findOrCreateFromGoogle(profile);
       await (user as unknown as IUserMethods).updateLastLogin();
+      await this.resolvePendingInvitesQuietly(user);
 
       const { accessToken, refreshToken } = await this.tokens.generateTokenPair(user);
       const session = this.createSessionPayload(user, accessToken, refreshToken);
@@ -144,6 +148,7 @@ export class AuthService {
   }> {
     const user = await this.findOrCreateFromGoogle(profile);
     await (user as unknown as IUserMethods).updateLastLogin();
+    await this.resolvePendingInvitesQuietly(user);
     const { accessToken, refreshToken } = await this.tokens.generateTokenPair(user);
     this.logger.logAuth('User logged in (passport redirect)', { email: user.email });
     return { user, accessToken, refreshToken };
@@ -341,5 +346,22 @@ export class AuthService {
       whitelistEnabled: this.whitelist.isEnabled(),
       isEmailAllowed: (email) => this.whitelist.isEmailAllowed(email),
     });
+  }
+
+  /**
+   * Stamp the userId onto any Memberships pending against this user's email
+   * (architecture doc §7.6 invite-accept). Failures are logged but never block
+   * login — the user can still resolve invites later from the dashboard.
+   */
+  private async resolvePendingInvitesQuietly(user: UserDocument): Promise<void> {
+    try {
+      await this.organizations.resolvePendingInvitesForUser(user);
+    } catch (err) {
+      this.logger.error(err, {
+        context: 'auth.resolvePendingInvitesQuietly',
+        userId: user._id.toString(),
+        email: user.email,
+      });
+    }
   }
 }

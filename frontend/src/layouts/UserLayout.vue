@@ -6,14 +6,17 @@
 <template>
     <AppLayout :home-link="'/app/dashboard'" :nav-items="navItems"
         :storage-key="'atabai-sidebar-open'">
-        <!-- New project CTA, top of sidebar -->
+        <!-- Top of sidebar: org switcher + new project CTA -->
         <template #header-cta="{ collapsed, isMobile, closeDrawer }">
-            <button class="user-new-file-btn"
-                :class="{ 'user-new-file-btn--icon-only': collapsed && !isMobile }"
-                @click="goToDashboard(closeDrawer)">
-                <Plus :size="16" class="user-new-file-icon" />
-                <span v-if="!collapsed || isMobile">{{ $t('dashboard.newProject') }}</span>
-            </button>
+            <div class="user-header-stack">
+                <OrgSwitcher :collapsed="collapsed && !isMobile" />
+                <button class="user-new-file-btn"
+                    :class="{ 'user-new-file-btn--icon-only': collapsed && !isMobile }"
+                    @click="goToDashboard(closeDrawer)">
+                    <Plus :size="16" class="user-new-file-icon" />
+                    <span v-if="!collapsed || isMobile">{{ $t('dashboard.newProject') }}</span>
+                </button>
+            </div>
         </template>
 
         <!-- Body: divider + recent files -->
@@ -114,6 +117,7 @@ import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { onClickOutside } from '@vueuse/core'
 import AppLayout from '@/components/layout/AppLayout.vue'
+import OrgSwitcher from '@/components/layout/OrgSwitcher.vue'
 import { useAuthStore } from '@/stores/auth'
 import { useFilesStore } from '@/stores/files'
 import {
@@ -199,6 +203,13 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+/* ─── Top-of-sidebar stack ─── */
+.user-header-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
 /* ─── New file CTA ───────────────────────────────────────────────────────── */
 .user-new-file-btn {
     display: flex;

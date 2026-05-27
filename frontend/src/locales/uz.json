@@ -1,1041 +1,1355 @@
 {
-  "landing": {
-    "hero": {
-      "badge": "NSBU → IFRS Automation Platform",
-      "titlePre": "XMHS",
-      "titleHighlight": "avtomatlashtirish",
-      "titlePost": "Su'niy intellekt yordamida",
-      "subtitle": "Moliyaviy ma'lumotlarni aniq, audit uchun tayyor XMHS hisobotlariga aylantiring — tezroq, arzonroq va to'liq shaffoflik bilan.",
-      "bookDemo": "Demo buyurtma qilish",
-      "howItWorks": "Bu qanday ishlaydi"
-    },
-    "trust": {
-      "builtFor": "O'zbekiston uchun yaratilgan"
-    },
-    "hiw": {
-      "label": "Jarayon",
-      "subtitle": "Faylni yuklashdan tayyor XMHS hisobotiga qadar to'rtta oddiy qadam",
-      "proc": {
-        "read": "Fayl o'qildi · 247 qator",
-        "structure": "Struktura aniqlandi · NSBH",
-        "mapping": "XMHS kodlarini moslashtirish · 34 ta modda",
-        "formulas": "XAS 16 formulalarini qo'llash..."
-      },
-      "resultBadge": "12 o'zgarish · 8 formula · IAS 16 compliant"
-    },
-    "wif": {
-      "label": "Kim uchun",
-      "title": "ATABAI kimga mos",
-      "subtitle": "XMHS hisobotiga ortiqcha xarajatlarsiz ehtiyoj sezadigan kompaniyalar uchun",
-      "sme": {
-        "title": "O'zbekiston KO'B",
-        "desc": "Xalqaro bozorga chiqayotgan va hamkorlar va investorlar uchun XMHS hisobotiga muhtoj kichik va o'rta korxonalar.",
-        "tag1": "Eksport",
-        "tag2": "Investorlar",
-        "tag3": "Kreditlar"
-      },
-      "accounting": {
-        "title": "Buxgalteriya firmalari",
-        "desc": "Xalqaro hisobot talablariga ega mijozlarga xizmat ko'rsatuvchi audit va konsalting kompaniyalari. Odatiy ishlarni avtomatlashtirish.",
-        "tag1": "Audit",
-        "tag2": "Konsalting",
-        "tag3": "Masshtab"
-      },
-      "international": {
-        "title": "Xalqaro kompaniyalar",
-        "desc": "O'zbekistonda filiallari bo'lgan va bosh ofis uchun yagona XMHS formatida konsolidatsiyalashgan hisobotga muhtoj kompaniyalar.",
-        "tag1": "Konsolidatsiya",
-        "tag2": "Filiallar",
-        "tag3": "HQ"
-      }
-    },
-    "feat": {
-      "label": "Imkoniyatlar",
-      "title": "Nega ATABAI",
-      "accuracyDesc": "Barcha hisob-kitoblar Excel formulalari orqali, qattiq kodlangan qiymatlar emas. Auditorlar har bir katakchani tekshirishi mumkin. 99.9% aniqlik.",
-      "hardcode": "Qattiq kod",
-      "formulas": "Formulalar",
-      "auditReady": "Auditga tayyor",
-      "cloud": {
-        "title": "24/7 kirish",
-        "desc": "Bulutli platforma — qulay vaqtda, istalgan joydan, o'rnatmasdan ishlang."
-      }
-    }
-  },
-  "auth": {
-    "signInWithGoogle": "Google orqali kirish",
-    "signOut": "Chiqish",
-    "welcome": "Xush kelibsiz",
-    "processingLogin": "Tizimga kirish jarayonida...",
-    "pleaseWait": "Sizni tizimga kiritish paytida biroz kuting",
-    "loginFailed": "Tizimga kirish xatosi",
-    "loginSuccessful": "Muvaffaqiyatli kirdingiz",
-    "redirectingToDashboard": "Boshqaruv paneliga yo'naltirilmoqda...",
-    "oauthCancelled": "Tizimga kirish bekor qilindi",
-    "invalidOauthResponse": "Noto'g'ri OAuth javobi",
-    "unexpectedError": "Kutilmagan xatolik yuz berdi",
-    "completingLogin": "Tizimga kirishni yakunlash...",
-    "authenticationFailed": "Autentifikatsiya xatosi. Iltimos, qaytadan urinib ko'ring.",
-    "invalidAuthParams": "Autentifikatsiya parametrlari noto'g'ri.",
-    "tryAgain": "Qaytadan urinish",
-    "signInTitle": "ATABAI tizimiga kirish",
-    "signInSubtitle": "Davom etish uchun Google hisobingiz orqali kiring.",
-    "signInRequiredTitle": "Kirish talab qilinadi",
-    "signInRequiredSubtitle": "Bu sahifaga kirish uchun tizimga kirishingiz kerak. Kirgandan so'ng sizni qaytaramiz.",
-    "backToHome": "Bosh sahifaga"
-  },
-  "pageTitles": {
-    "/": "Bosh sahifa",
-    "/dashboard": "Boshqaruv paneli",
-    "/templates": "Shablonlar",
-    "/profile": "Profil",
-    "/history": "Fayllar tarixi",
-    "/processing": "Faylni qayta ishlash",
-    "/results": "Qayta ishlash natijalari",
-    "/coming-soon": "Tez orada",
-    "/auth/callback": "Tizimga kirilmoqda...",
-    "/auth/success": "Muvaffaqiyatli kirish",
-    "/settings": "Sozlamalar",
-    "/help": "Yordam",
-    "/upload": "Fayl yuklash",
-    "/login": "Kirish"
-  },
-  "pageDescriptions": {
-    "/": "XMHS ni avtomatlashtiring. Su'niy Intellekt bilan.. Murakkab moliyaviy ma'lumotlarni aniq, auditga tayyor XMHS hisobotlariga aylantiring — tezroq, arzonroq va to'liq shaffoflik bilan..",
-    "/dashboard": "ATABAI boshqaruv paneli - fayllar, XMHS shablonlari va moliyaviy hujjatlar qayta ishlashini boshqaring.",
-    "/templates": "Amortizatsiya, chegirmalar, aktivlar qadrsizlanishi va moliyaviy hisobotlar hisob-kitoblarini avtomatlashtirish uchun XMHS shablonlari.",
-    "/profile": "ATABAI foydalanuvchi profili sozlamalari - obuna, afzalliklar va shaxsiy ma'lumotlarni boshqaring.",
-    "/history": "ATABAI-da fayllar qayta ishlash tarixi - natijalarni ko'ring, qayta ishlangan hujjatlar va statistikalarni yuklab oling.",
-    "/processing": "XMHS standartlari bo'yicha Excel fayllarni qayta ishlash - avtomatlashtirish formulalarini qo'llash va hisobotlar yaratish.",
-    "/results": "ATABAI fayl qayta ishlash natijalari - o'zgarishlarni solishtiring, batafsil hisobotlar va tayyor hujjatlarni eksport qiling.",
-    "/coming-soon": "ATABAI tez orada mavjud bo'ladi. XMHS uchun Excel hisob-kitoblar avtomatlashtirish platformasi ishlab chiqilmoqda.",
-    "/auth/callback": "Tizimga kirishingiz qayta ishlanmoqda...",
-    "/auth/success": "ATABAI platformasida autentifikatsiyangiz yakunlanmoqda",
-    "/settings": "ATABAI foydalanuvchi sozlamalari - afzalliklar, obuna va hisob ma'lumotlarini boshqaring",
-    "/help": "ATABAI uchun yordam va qo'llab-quvvatlash - XMHS avtomatlashtiruvi haqida savollarda biz bilan bog'laning",
-    "/upload": "NZBH formatidan XMHS ga avtomatlashtirilgan hisob-kitoblar bilan aylantirish uchun Excel faylingizni yuklang",
-    "/login": "XMHS avtomatlashtirish platformasiga kirish uchun ATABAI-ga Google hisobingiz orqali kiring."
-  },
-  "nav": {
-    "home": "Bosh sahifa",
-    "dashboard": "Boshqaruv paneli",
-    "templates": "Shablonlar",
-    "profile": "Profil",
-    "history": "Fayllar tarixi",
-    "logout": "Chiqish",
-    "features": "Imkoniyatlar",
-    "howItWorks": "Qanday ishlaydi",
-    "pricing": "Narxlar",
-    "language": "Til",
-    "signIn": "Kirish",
-    "themeToDark": "Tungi mavzuga o'tish",
-    "themeToLight": "Yorug' mavzuga o'tish",
-    "openMenu": "Menyuni ochish",
-    "closeMenu": "Menyuni yopish"
-  },
-  "dashboard": {
-    "welcome": "Xush kelibsiz, {name}!",
-    "subtitle": "Moliyaviy hujjatlaringizni qayta ishlashni boshlash uchun shablonni tanlang",
-    "newProject": "Yangi loyiha",
-    "recentFiles": "Oxirgi fayllar",
-    "noFiles": "Hali hech qanday fayl qayta ishlanmagan",
-    "settings": "Sozlamalar",
-    "help": "Yordam olish",
-    "today": "Bugun",
-    "yesterday": "Kecha",
-    "usageStats": "Foydalanish statistikasi",
-    "filesThisMonth": "Bu oydagi fayllar",
-    "limit": "{current} dan {total}",
-    "subscription": "Joriy reja",
-    "upgrade": "Rejani yangilash",
-    "totalCompleted": "Tugatilgan",
-    "accuracy": "Aniqlik",
-    "avgTime": "O'rtacha vaqt",
-    "usage": "Foydalanish",
-    "emptyState": "Bu yerda sizning fayllaringiz ko'rinadi",
-    "chooseTemplate": "Hisobotni o'zgartirish",
-    "viewAll": "Hammasini ko'rish",
-    "noFilesYet": "Hali hech qanday fayl qayta ishlanmagan",
-    "emptyDesc": "IFRS transformatsiyasini boshlash uchun birinchi NSBU hisobotingizni yuklang.",
-    "welcomeBack": "Xush kelibsiz!",
-    "noFilesYetSidebar": "Hali fayllar yo'q"
-  },
-  "hero": {
-    "title": "XMHS ni avtomatlashtiring. Su'niy Intellekt bilan.",
-    "subtitle": "Murakkab moliyaviy ma'lumotlarni aniq, auditga tayyor XMHS hisobotlariga aylantiring — tezroq, arzonroq va to'liq shaffoflik bilan.",
-    "tryFree": "Bepul sinab ko'ring",
-    "bookDemo": "Demo bron qilish",
-    "loginGoogle": "Google orqali kirish"
-  },
-  "transformVisual": {
-    "nsbuLabel": "BHMS",
-    "ifrsLabel": "XHMS / IFRS",
-    "arrowLabel": "~ 15 son.",
-    "nsbu": {
-      "colItem": "Modda",
-      "colAmount": "Summa (soʻm)",
-      "row1": "010 — Asosiy vositalar",
-      "row2": "020 — Amortizatsiya",
-      "errorRow": "Qoʻlda hisoblash",
-      "errorValue": "±12% xato"
-    },
-    "ifrs": {
-      "colItem": "Modda",
-      "colAmount": "Summa (UZS)",
-      "row1": "AV — Tannarx",
-      "row2": "Toʻplangan amort.",
-      "successRow": "IAS 16 ga muvofiq",
-      "successValue": "Tasdiqlangan"
-    }
-  },
-  "stats": {
-    "seconds": "son.",
-    "minute": "daq.",
-    "percent": "%",
-    "slashSeven": "/7",
-    "analysisTime": "Tahlil vaqti",
-    "accuracy": "Hisob-kitob aniqligi",
-    "availability": "Mavjudlik",
-    "timeSaving": "Vaqt tejash",
-    "timeOld": "2-3 soat",
-    "timeNew": "15 son.",
-    "accuracyOld": "±12% xato",
-    "accuracyNew": "aniq",
-    "availabilityNote": "dam olishsiz",
-    "efficiencyNote": "vaqt tejash"
-  },
-  "howItWorks": {
-    "title": "Qanday ishlaydi",
-    "step1": {
-      "title": "Excel fayllarni yuklang",
-      "description": "XMHS talablariga muvofiq qayta ishlash uchun moliyaviy Excel fayllaringizni yuklang",
-      "uploadText": "Fayllarni bu yerga sudrab oling yoki tanlash uchun bosing",
-      "supportedFormats": "Qo'llab-quvvatlanadigan formatlar: .xlsx, .xls, .csv"
-    },
-    "step2": {
-      "title": "XMHS shablonini tanlang",
-      "description": "XMHS ga muvofiq tegishli hisob-kitob shablonini tanlang"
-    },
-    "step3": {
-      "title": "Tayyor natijalarni oling",
-      "description": "XMHS formulalari qo'llanilgan va batafsil o'zgarishlar hisobotlari bilan qayta ishlangan fayllarni yuklab oling",
-      "processed": "Fayl qayta ishlandi",
-      "changes": "O'zgarishlar",
-      "formulas": "Formulalar qo'llanildi"
-    },
-    "step4": {
-      "title": "4. Transformatsiyani ko'ring",
-      "description": "Mahalliy formatingiz XMHS xalqaro standartlariga qanday aylanayotganini ko'ring",
-      "before": "Oldin (NSBH Format)",
-      "after": "Keyin (XMHS Format)",
-      "transformation": "Transformatsiya",
-      "compliant": "XMHS ga mos",
-      "keyChanges": "✨ Asosiy transformatsiyalar qo'llanildi:",
-      "changes": {
-        "depreciation": "XAS 16 amortizatsiya usullari",
-        "discounts": "XMHS 15 daromadni e'tirof etish",
-        "impairment": "XAS 36 qadrsizlanish testlari",
-        "translation": "Ingliz tiliga tarjimalar",
-        "standards": "Standart havolalar"
-      },
-      "spreadsheet": {
-        "depreciation": {
-          "before": {
-            "headers": {
-              "code": "Hisob kodi",
-              "item": "Nomi",
-              "amount": "Miqdor"
-            },
-            "data": {
-              "ppe": "Asosiy vositalar",
-              "depreciation": "AV amortizatsiyasi",
-              "manual": "Qo'lda hisoblash",
-              "calculation": "Qo'lda hisoblash",
-              "error": "Xatolar bor"
-            }
-          },
-          "after": {
-            "headers": {
-              "assets": "Aktivlar",
-              "standard": "Standart",
-              "amount": "Miqdor"
-            },
-            "data": {
-              "ppe": "Mulk, zavod va jihozlar",
-              "accumulated": "To'plangan amortizatsiya",
-              "automated": "Avtomatlashtirilgan",
-              "compliant": "XAS 16 ga mos",
-              "accurate": "✓ Aniq"
-            }
-          }
+    "landing": {
+        "hero": {
+            "badge": "NSBU → IFRS Automation Platform",
+            "titlePre": "XMHS",
+            "titleHighlight": "avtomatlashtirish",
+            "titlePost": "Su'niy intellekt yordamida",
+            "subtitle": "Moliyaviy ma'lumotlarni aniq, audit uchun tayyor XMHS hisobotlariga aylantiring — tezroq, arzonroq va to'liq shaffoflik bilan.",
+            "bookDemo": "Demo buyurtma qilish",
+            "howItWorks": "Bu qanday ishlaydi"
         },
-        "discounts": {
-          "before": {
-            "headers": {
-              "code": "Kod",
-              "revenue": "Daromad",
-              "amount": "Miqdor"
-            },
-            "data": {
-              "sales": "Sotuv daromadi",
-              "returns": "Qaytarib berish va chegirmalar",
-              "simple": "Oddiy",
-              "basic": "Asosiy chegirmalar",
-              "nonifrs": "XMHS emas"
-            }
-          },
-          "after": {
-            "headers": {
-              "revenue": "Daromad",
-              "standard": "Standart",
-              "amount": "Miqdor"
-            },
-            "data": {
-              "contracts": "Shartnomalardan daromad",
-              "liabilities": "Shartnoma majburiyatlari",
-              "performance": "Bajarish majburiyatlari",
-              "method": "XMHS 15 usuli",
-              "compliant": "✓ Mos keladi"
-            }
-          }
+        "trust": {
+            "builtFor": "O'zbekiston uchun yaratilgan"
         },
-        "impairment": {
-          "before": {
-            "headers": {
-              "asset": "Aktiv",
-              "carrying": "Balans qiymati",
-              "status": "Status"
+        "hiw": {
+            "label": "Jarayon",
+            "subtitle": "Faylni yuklashdan tayyor XMHS hisobotiga qadar to'rtta oddiy qadam",
+            "proc": {
+                "read": "Fayl o'qildi · 247 qator",
+                "structure": "Struktura aniqlandi · NSBH",
+                "mapping": "XMHS kodlarini moslashtirish · 34 ta modda",
+                "formulas": "XAS 16 formulalarini qo'llash..."
             },
-            "data": {
-              "equipment": "Jihozlar",
-              "buildings": "Binolar",
-              "untested": "Sinovdan o'tmagan",
-              "notesting": "Sinov yo'q",
-              "noias36": "XAS 36 testlari yo'q",
-              "risk": "Xavf"
-            }
-          },
-          "after": {
-            "headers": {
-              "asset": "Aktiv",
-              "carrying": "Balans qiymati",
-              "status": "Status"
+            "resultBadge": "12 o'zgarish · 8 formula · IAS 16 compliant"
+        },
+        "wif": {
+            "label": "Kim uchun",
+            "title": "ATABAI kimga mos",
+            "subtitle": "XMHS hisobotiga ortiqcha xarajatlarsiz ehtiyoj sezadigan kompaniyalar uchun",
+            "sme": {
+                "title": "O'zbekiston KO'B",
+                "desc": "Xalqaro bozorga chiqayotgan va hamkorlar va investorlar uchun XMHS hisobotiga muhtoj kichik va o'rta korxonalar.",
+                "tag1": "Eksport",
+                "tag2": "Investorlar",
+                "tag3": "Kreditlar"
             },
-            "data": {
-              "equipment": "Jihozlar (NPB 1)",
-              "buildings": "Binolar (NPB 2)",
-              "impaired": "Qadrsizlangan",
-              "noimpairment": "Qadrsizlanish yo'q",
-              "tested": "XAS 36 sinovdan o'tgan",
-              "recoverable": "Qaytarib olinadigan qiymat",
-              "validated": "✓ Tasdiqlangan"
+            "accounting": {
+                "title": "Buxgalteriya firmalari",
+                "desc": "Xalqaro hisobot talablariga ega mijozlarga xizmat ko'rsatuvchi audit va konsalting kompaniyalari. Odatiy ishlarni avtomatlashtirish.",
+                "tag1": "Audit",
+                "tag2": "Konsalting",
+                "tag3": "Masshtab"
+            },
+            "international": {
+                "title": "Xalqaro kompaniyalar",
+                "desc": "O'zbekistonda filiallari bo'lgan va bosh ofis uchun yagona XMHS formatida konsolidatsiyalashgan hisobotga muhtoj kompaniyalar.",
+                "tag1": "Konsolidatsiya",
+                "tag2": "Filiallar",
+                "tag3": "HQ"
             }
-          }
+        },
+        "feat": {
+            "label": "Imkoniyatlar",
+            "title": "Nega ATABAI",
+            "accuracyDesc": "Barcha hisob-kitoblar Excel formulalari orqali, qattiq kodlangan qiymatlar emas. Auditorlar har bir katakchani tekshirishi mumkin. 99.9% aniqlik.",
+            "hardcode": "Qattiq kod",
+            "formulas": "Formulalar",
+            "auditReady": "Auditga tayyor",
+            "cloud": {
+                "title": "24/7 kirish",
+                "desc": "Bulutli platforma — qulay vaqtda, istalgan joydan, o'rnatmasdan ishlang."
+            }
         }
-      }
+    },
+    "auth": {
+        "signInWithGoogle": "Google orqali kirish",
+        "signOut": "Chiqish",
+        "welcome": "Xush kelibsiz",
+        "processingLogin": "Tizimga kirish jarayonida...",
+        "pleaseWait": "Sizni tizimga kiritish paytida biroz kuting",
+        "loginFailed": "Tizimga kirish xatosi",
+        "loginSuccessful": "Muvaffaqiyatli kirdingiz",
+        "redirectingToDashboard": "Boshqaruv paneliga yo'naltirilmoqda...",
+        "oauthCancelled": "Tizimga kirish bekor qilindi",
+        "invalidOauthResponse": "Noto'g'ri OAuth javobi",
+        "unexpectedError": "Kutilmagan xatolik yuz berdi",
+        "completingLogin": "Tizimga kirishni yakunlash...",
+        "authenticationFailed": "Autentifikatsiya xatosi. Iltimos, qaytadan urinib ko'ring.",
+        "invalidAuthParams": "Autentifikatsiya parametrlari noto'g'ri.",
+        "tryAgain": "Qaytadan urinish",
+        "signInTitle": "ATABAI tizimiga kirish",
+        "signInSubtitle": "Davom etish uchun Google hisobingiz orqali kiring.",
+        "signInRequiredTitle": "Kirish talab qilinadi",
+        "signInRequiredSubtitle": "Bu sahifaga kirish uchun tizimga kirishingiz kerak. Kirgandan so'ng sizni qaytaramiz.",
+        "backToHome": "Bosh sahifaga"
+    },
+    "pageTitles": {
+        "/": "Bosh sahifa",
+        "/dashboard": "Boshqaruv paneli",
+        "/templates": "Shablonlar",
+        "/profile": "Profil",
+        "/history": "Fayllar tarixi",
+        "/processing": "Faylni qayta ishlash",
+        "/results": "Qayta ishlash natijalari",
+        "/coming-soon": "Tez orada",
+        "/auth/callback": "Tizimga kirilmoqda...",
+        "/auth/success": "Muvaffaqiyatli kirish",
+        "/settings": "Sozlamalar",
+        "/help": "Yordam",
+        "/upload": "Fayl yuklash",
+        "/login": "Kirish",
+        "/organizations": "Tashkilotlar",
+        "/onboarding": "Tashkilot yaratish",
+        "/periods": "Hisobot davrlari",
+        "/chart": "Hisoblar reja",
+        "/matrix": "Transformatsiya matritsasi",
+        "/osvImport": "OSV importi",
+        "/bankUpload": "Bank koʻchirmasi",
+        "/bankPreview": "Koʻchirma koʻrish",
+        "/adjustments": "Tuzatishlar",
+        "/adjustmentNew": "Yangi tuzatish",
+        "/adjustmentDetail": "Tuzatish",
+        "/members": "Aʼzolar"
+    },
+    "pageDescriptions": {
+        "/": "XMHS ni avtomatlashtiring. Su'niy Intellekt bilan.. Murakkab moliyaviy ma'lumotlarni aniq, auditga tayyor XMHS hisobotlariga aylantiring — tezroq, arzonroq va to'liq shaffoflik bilan..",
+        "/dashboard": "ATABAI boshqaruv paneli - fayllar, XMHS shablonlari va moliyaviy hujjatlar qayta ishlashini boshqaring.",
+        "/templates": "Amortizatsiya, chegirmalar, aktivlar qadrsizlanishi va moliyaviy hisobotlar hisob-kitoblarini avtomatlashtirish uchun XMHS shablonlari.",
+        "/profile": "ATABAI foydalanuvchi profili sozlamalari - obuna, afzalliklar va shaxsiy ma'lumotlarni boshqaring.",
+        "/history": "ATABAI-da fayllar qayta ishlash tarixi - natijalarni ko'ring, qayta ishlangan hujjatlar va statistikalarni yuklab oling.",
+        "/processing": "XMHS standartlari bo'yicha Excel fayllarni qayta ishlash - avtomatlashtirish formulalarini qo'llash va hisobotlar yaratish.",
+        "/results": "ATABAI fayl qayta ishlash natijalari - o'zgarishlarni solishtiring, batafsil hisobotlar va tayyor hujjatlarni eksport qiling.",
+        "/coming-soon": "ATABAI tez orada mavjud bo'ladi. XMHS uchun Excel hisob-kitoblar avtomatlashtirish platformasi ishlab chiqilmoqda.",
+        "/auth/callback": "Tizimga kirishingiz qayta ishlanmoqda...",
+        "/auth/success": "ATABAI platformasida autentifikatsiyangiz yakunlanmoqda",
+        "/settings": "ATABAI foydalanuvchi sozlamalari - afzalliklar, obuna va hisob ma'lumotlarini boshqaring",
+        "/help": "ATABAI uchun yordam va qo'llab-quvvatlash - XMHS avtomatlashtiruvi haqida savollarda biz bilan bog'laning",
+        "/upload": "NZBH formatidan XMHS ga avtomatlashtirilgan hisob-kitoblar bilan aylantirish uchun Excel faylingizni yuklang",
+        "/login": "XMHS avtomatlashtirish platformasiga kirish uchun ATABAI-ga Google hisobingiz orqali kiring."
+    },
+    "nav": {
+        "home": "Bosh sahifa",
+        "dashboard": "Boshqaruv paneli",
+        "templates": "Shablonlar",
+        "profile": "Profil",
+        "history": "Fayllar tarixi",
+        "logout": "Chiqish",
+        "features": "Imkoniyatlar",
+        "howItWorks": "Qanday ishlaydi",
+        "pricing": "Narxlar",
+        "language": "Til",
+        "signIn": "Kirish",
+        "themeToDark": "Tungi mavzuga o'tish",
+        "themeToLight": "Yorug' mavzuga o'tish",
+        "openMenu": "Menyuni ochish",
+        "closeMenu": "Menyuni yopish"
+    },
+    "dashboard": {
+        "welcome": "Xush kelibsiz, {name}!",
+        "subtitle": "Moliyaviy hujjatlaringizni qayta ishlashni boshlash uchun shablonni tanlang",
+        "newProject": "Yangi loyiha",
+        "recentFiles": "Oxirgi fayllar",
+        "noFiles": "Hali hech qanday fayl qayta ishlanmagan",
+        "settings": "Sozlamalar",
+        "help": "Yordam olish",
+        "today": "Bugun",
+        "yesterday": "Kecha",
+        "usageStats": "Foydalanish statistikasi",
+        "filesThisMonth": "Bu oydagi fayllar",
+        "limit": "{current} dan {total}",
+        "subscription": "Joriy reja",
+        "upgrade": "Rejani yangilash",
+        "totalCompleted": "Tugatilgan",
+        "accuracy": "Aniqlik",
+        "avgTime": "O'rtacha vaqt",
+        "usage": "Foydalanish",
+        "emptyState": "Bu yerda sizning fayllaringiz ko'rinadi",
+        "chooseTemplate": "Hisobotni o'zgartirish",
+        "viewAll": "Hammasini ko'rish",
+        "noFilesYet": "Hali hech qanday fayl qayta ishlanmagan",
+        "emptyDesc": "IFRS transformatsiyasini boshlash uchun birinchi NSBU hisobotingizni yuklang.",
+        "welcomeBack": "Xush kelibsiz!",
+        "noFilesYetSidebar": "Hali fayllar yo'q"
+    },
+    "hero": {
+        "title": "XMHS ni avtomatlashtiring. Su'niy Intellekt bilan.",
+        "subtitle": "Murakkab moliyaviy ma'lumotlarni aniq, auditga tayyor XMHS hisobotlariga aylantiring — tezroq, arzonroq va to'liq shaffoflik bilan.",
+        "tryFree": "Bepul sinab ko'ring",
+        "bookDemo": "Demo bron qilish",
+        "loginGoogle": "Google orqali kirish"
+    },
+    "transformVisual": {
+        "nsbuLabel": "BHMS",
+        "ifrsLabel": "XHMS / IFRS",
+        "arrowLabel": "~ 15 son.",
+        "nsbu": {
+            "colItem": "Modda",
+            "colAmount": "Summa (soʻm)",
+            "row1": "010 — Asosiy vositalar",
+            "row2": "020 — Amortizatsiya",
+            "errorRow": "Qoʻlda hisoblash",
+            "errorValue": "±12% xato"
+        },
+        "ifrs": {
+            "colItem": "Modda",
+            "colAmount": "Summa (UZS)",
+            "row1": "AV — Tannarx",
+            "row2": "Toʻplangan amort.",
+            "successRow": "IAS 16 ga muvofiq",
+            "successValue": "Tasdiqlangan"
+        }
+    },
+    "stats": {
+        "seconds": "son.",
+        "minute": "daq.",
+        "percent": "%",
+        "slashSeven": "/7",
+        "analysisTime": "Tahlil vaqti",
+        "accuracy": "Hisob-kitob aniqligi",
+        "availability": "Mavjudlik",
+        "timeSaving": "Vaqt tejash",
+        "timeOld": "2-3 soat",
+        "timeNew": "15 son.",
+        "accuracyOld": "±12% xato",
+        "accuracyNew": "aniq",
+        "availabilityNote": "dam olishsiz",
+        "efficiencyNote": "vaqt tejash"
+    },
+    "howItWorks": {
+        "title": "Qanday ishlaydi",
+        "step1": {
+            "title": "Excel fayllarni yuklang",
+            "description": "XMHS talablariga muvofiq qayta ishlash uchun moliyaviy Excel fayllaringizni yuklang",
+            "uploadText": "Fayllarni bu yerga sudrab oling yoki tanlash uchun bosing",
+            "supportedFormats": "Qo'llab-quvvatlanadigan formatlar: .xlsx, .xls, .csv"
+        },
+        "step2": {
+            "title": "XMHS shablonini tanlang",
+            "description": "XMHS ga muvofiq tegishli hisob-kitob shablonini tanlang"
+        },
+        "step3": {
+            "title": "Tayyor natijalarni oling",
+            "description": "XMHS formulalari qo'llanilgan va batafsil o'zgarishlar hisobotlari bilan qayta ishlangan fayllarni yuklab oling",
+            "processed": "Fayl qayta ishlandi",
+            "changes": "O'zgarishlar",
+            "formulas": "Formulalar qo'llanildi"
+        },
+        "step4": {
+            "title": "4. Transformatsiyani ko'ring",
+            "description": "Mahalliy formatingiz XMHS xalqaro standartlariga qanday aylanayotganini ko'ring",
+            "before": "Oldin (NSBH Format)",
+            "after": "Keyin (XMHS Format)",
+            "transformation": "Transformatsiya",
+            "compliant": "XMHS ga mos",
+            "keyChanges": "✨ Asosiy transformatsiyalar qo'llanildi:",
+            "changes": {
+                "depreciation": "XAS 16 amortizatsiya usullari",
+                "discounts": "XMHS 15 daromadni e'tirof etish",
+                "impairment": "XAS 36 qadrsizlanish testlari",
+                "translation": "Ingliz tiliga tarjimalar",
+                "standards": "Standart havolalar"
+            },
+            "spreadsheet": {
+                "depreciation": {
+                    "before": {
+                        "headers": {
+                            "code": "Hisob kodi",
+                            "item": "Nomi",
+                            "amount": "Miqdor"
+                        },
+                        "data": {
+                            "ppe": "Asosiy vositalar",
+                            "depreciation": "AV amortizatsiyasi",
+                            "manual": "Qo'lda hisoblash",
+                            "calculation": "Qo'lda hisoblash",
+                            "error": "Xatolar bor"
+                        }
+                    },
+                    "after": {
+                        "headers": {
+                            "assets": "Aktivlar",
+                            "standard": "Standart",
+                            "amount": "Miqdor"
+                        },
+                        "data": {
+                            "ppe": "Mulk, zavod va jihozlar",
+                            "accumulated": "To'plangan amortizatsiya",
+                            "automated": "Avtomatlashtirilgan",
+                            "compliant": "XAS 16 ga mos",
+                            "accurate": "✓ Aniq"
+                        }
+                    }
+                },
+                "discounts": {
+                    "before": {
+                        "headers": {
+                            "code": "Kod",
+                            "revenue": "Daromad",
+                            "amount": "Miqdor"
+                        },
+                        "data": {
+                            "sales": "Sotuv daromadi",
+                            "returns": "Qaytarib berish va chegirmalar",
+                            "simple": "Oddiy",
+                            "basic": "Asosiy chegirmalar",
+                            "nonifrs": "XMHS emas"
+                        }
+                    },
+                    "after": {
+                        "headers": {
+                            "revenue": "Daromad",
+                            "standard": "Standart",
+                            "amount": "Miqdor"
+                        },
+                        "data": {
+                            "contracts": "Shartnomalardan daromad",
+                            "liabilities": "Shartnoma majburiyatlari",
+                            "performance": "Bajarish majburiyatlari",
+                            "method": "XMHS 15 usuli",
+                            "compliant": "✓ Mos keladi"
+                        }
+                    }
+                },
+                "impairment": {
+                    "before": {
+                        "headers": {
+                            "asset": "Aktiv",
+                            "carrying": "Balans qiymati",
+                            "status": "Status"
+                        },
+                        "data": {
+                            "equipment": "Jihozlar",
+                            "buildings": "Binolar",
+                            "untested": "Sinovdan o'tmagan",
+                            "notesting": "Sinov yo'q",
+                            "noias36": "XAS 36 testlari yo'q",
+                            "risk": "Xavf"
+                        }
+                    },
+                    "after": {
+                        "headers": {
+                            "asset": "Aktiv",
+                            "carrying": "Balans qiymati",
+                            "status": "Status"
+                        },
+                        "data": {
+                            "equipment": "Jihozlar (NPB 1)",
+                            "buildings": "Binolar (NPB 2)",
+                            "impaired": "Qadrsizlangan",
+                            "noimpairment": "Qadrsizlanish yo'q",
+                            "tested": "XAS 36 sinovdan o'tgan",
+                            "recoverable": "Qaytarib olinadigan qiymat",
+                            "validated": "✓ Tasdiqlangan"
+                        }
+                    }
+                }
+            }
+        },
+        "templates": {
+            "depreciation": {
+                "processed": "Aktiv jadvallari qayta ishlandi",
+                "changesLabel": "Amortizatsiya yozuvlari",
+                "changes": "156",
+                "formulasLabel": "Aktiv hisob-kitoblari",
+                "formulas": "42"
+            },
+            "discounts": {
+                "processed": "Daromad tahlil qilindi",
+                "changesLabel": "Chegirma tuzatishlari",
+                "changes": "293",
+                "formulasLabel": "Daromad formulalari",
+                "formulas": "67"
+            },
+            "impairment": {
+                "processed": "Qadrsizlanish testlari yakunlandi",
+                "changesLabel": "Qiymat tuzatishlari",
+                "changes": "84",
+                "formulasLabel": "Qadrsizlanish hisob-kitoblari",
+                "formulas": "28"
+            }
+        }
     },
     "templates": {
-      "depreciation": {
-        "processed": "Aktiv jadvallari qayta ishlandi",
-        "changesLabel": "Amortizatsiya yozuvlari",
-        "changes": "156",
-        "formulasLabel": "Aktiv hisob-kitoblari",
-        "formulas": "42"
-      },
-      "discounts": {
-        "processed": "Daromad tahlil qilindi",
-        "changesLabel": "Chegirma tuzatishlari",
-        "changes": "293",
-        "formulasLabel": "Daromad formulalari",
-        "formulas": "67"
-      },
-      "impairment": {
-        "processed": "Qadrsizlanish testlari yakunlandi",
-        "changesLabel": "Qiymat tuzatishlari",
-        "changes": "84",
-        "formulasLabel": "Qadrsizlanish hisob-kitoblari",
-        "formulas": "28"
-      }
-    }
-  },
-  "templates": {
-    "depreciation": "Asosiy vositalar amortizatsiyasi",
-    "depreciationDescription": "IAS 16 standartlariga muvofiq yuqori aniqlik va talablar bajarilishi bilan amortizatsiya hisob-kitoblarini avtomatlashtirish",
-    "discounts": "Chegirma hisob-kitoblari",
-    "discountsDescription": "IFRS 15 bo'yicha avtomatik tan etish qoidalari bilan daromad chegirmalari va tuzatishlarini hisoblash",
-    "impairment": "Aktivlar qadrsizlanishi",
-    "impairmentDescription": "IAS 36 talablariga muvofiq kompleks qadrsizlanish testlari va hisob-kitoblarini o'tkazish",
-    "reports": "Moliyaviy hisobotlar",
-    "reportsDescription": "Avtomatik muvofiqlik tekshiruvlari bilan XMHS ga mos kompleks moliyaviy hisobotlarni yaratish",
-    "balanceSheet": "Balans hisoboti",
-    "balanceSheetDescription": "NSBUdan IFRS formatiga balans hisoboti transformatsiyasi IAS 1 standartiga muvofiq",
-    "cashFlow": "Pul oqimlari hisoboti",
-    "cashFlowDescription": "NSBU pul oqimlari hisobotini IAS 7 standartlariga muvofiq IFRS formatiga o'zgartirish",
-    "profitLoss": "Foyda va zararlar hisoboti",
-    "profitLossDescription": "NSBU PnL byudjeti hisobotini daromad va xarajatlar tasnifi bilan IFRS formatiga o'zgartirish",
-    "profitLossForm2": "Foyda va zararlar (F.2)",
-    "profitLossForm2Description": "Standart NSBU 2-shakl (ОКУД 0710002) foyda va zararlar hisobotini IFRS formatiga aylantirish",
-    "equity": "Kapital o'zgarishlari hisoboti",
-    "equityDescription": "Balans yoki alohida 4-shakl faylidan IFRS kapital o'zgarishlari to'g'risidagi hisobotini shakllantirish",
-    "category": {
-      "balanceSheet": "Moliyaviy hisobotlar",
-      "cashFlow": "Moliyaviy hisobotlar",
-      "profitLoss": "Moliyaviy hisobotlar",
-      "profitLossForm2": "Moliyaviy hisobotlar",
-      "equity": "Moliyaviy hisobotlar"
-    }
-  },
-  "features": {
-    "title": "ATABAI nima uchun ajoyib",
-    "automation": {
-      "title": "To'liq avtomatlashtirish",
-      "description": "Excel fayllaringizga XMHS formulalarini avtomatik qo'llash"
+        "depreciation": "Asosiy vositalar amortizatsiyasi",
+        "depreciationDescription": "IAS 16 standartlariga muvofiq yuqori aniqlik va talablar bajarilishi bilan amortizatsiya hisob-kitoblarini avtomatlashtirish",
+        "discounts": "Chegirma hisob-kitoblari",
+        "discountsDescription": "IFRS 15 bo'yicha avtomatik tan etish qoidalari bilan daromad chegirmalari va tuzatishlarini hisoblash",
+        "impairment": "Aktivlar qadrsizlanishi",
+        "impairmentDescription": "IAS 36 talablariga muvofiq kompleks qadrsizlanish testlari va hisob-kitoblarini o'tkazish",
+        "reports": "Moliyaviy hisobotlar",
+        "reportsDescription": "Avtomatik muvofiqlik tekshiruvlari bilan XMHS ga mos kompleks moliyaviy hisobotlarni yaratish",
+        "balanceSheet": "Balans hisoboti",
+        "balanceSheetDescription": "NSBUdan IFRS formatiga balans hisoboti transformatsiyasi IAS 1 standartiga muvofiq",
+        "cashFlow": "Pul oqimlari hisoboti",
+        "cashFlowDescription": "NSBU pul oqimlari hisobotini IAS 7 standartlariga muvofiq IFRS formatiga o'zgartirish",
+        "profitLoss": "Foyda va zararlar hisoboti",
+        "profitLossDescription": "NSBU PnL byudjeti hisobotini daromad va xarajatlar tasnifi bilan IFRS formatiga o'zgartirish",
+        "profitLossForm2": "Foyda va zararlar (F.2)",
+        "profitLossForm2Description": "Standart NSBU 2-shakl (ОКУД 0710002) foyda va zararlar hisobotini IFRS formatiga aylantirish",
+        "equity": "Kapital o'zgarishlari hisoboti",
+        "equityDescription": "Balans yoki alohida 4-shakl faylidan IFRS kapital o'zgarishlari to'g'risidagi hisobotini shakllantirish",
+        "category": {
+            "balanceSheet": "Moliyaviy hisobotlar",
+            "cashFlow": "Moliyaviy hisobotlar",
+            "profitLoss": "Moliyaviy hisobotlar",
+            "profitLossForm2": "Moliyaviy hisobotlar",
+            "equity": "Moliyaviy hisobotlar"
+        }
     },
-    "compliance": {
-      "title": "XMHS ga muvofiqlik",
-      "description": "Xalqaro moliyaviy hisobot standartlariga muvofiqlik"
+    "features": {
+        "title": "ATABAI nima uchun ajoyib",
+        "automation": {
+            "title": "To'liq avtomatlashtirish",
+            "description": "Excel fayllaringizga XMHS formulalarini avtomatik qo'llash"
+        },
+        "compliance": {
+            "title": "XMHS ga muvofiqlik",
+            "description": "Xalqaro moliyaviy hisobot standartlariga muvofiqlik"
+        },
+        "accuracy": {
+            "title": "Yuqori aniqlik",
+            "description": "Moliyaviy hisob-kitoblardagi xatolarni minimallashtirish"
+        },
+        "speed": {
+            "title": "Tez qayta ishlash",
+            "description": "Katta fayllarni daqiqalar ichida qayta ishlash"
+        },
+        "easy": {
+            "title": "Foydalanish oson",
+            "description": "Intuitiv interfeys maxsus o'qitishni talab qilmaydi"
+        },
+        "universal": {
+            "title": "Universal",
+            "description": "Har qanday turdagi hisob-kitob va hisobot uchun mos"
+        }
     },
-    "accuracy": {
-      "title": "Yuqori aniqlik",
-      "description": "Moliyaviy hisob-kitoblardagi xatolarni minimallashtirish"
+    "pricing": {
+        "title": "ATABAI vaqt va pulni tejashga yordam beradi",
+        "popular": "Mashhur",
+        "getStarted": "Boshlash",
+        "contactUs": "Biz bilan bog'laning",
+        "basic": {
+            "title": "Asosiy",
+            "price": "Bepul",
+            "files": "Oyiga 4ta fayl",
+            "templates": "Asosiy XMHS shablonlari",
+            "history": "Oxirgi 10 ta fayl tarixi",
+            "export": "Qayta ishlangan fayllarni eksport qilish"
+        },
+        "premium": {
+            "title": "Premium",
+            "price": "So'rov bo'yicha",
+            "perMonth": "Shaxsiy narxlash",
+            "files": "Cheksiz fayllar",
+            "templates": "Barcha XMHS shablonlari",
+            "priority": "Ustuvor qayta ishlash",
+            "history": "To'liq qayta ishlash tarixi",
+            "support": "Texnik yordam",
+            "api": "API ga kirish"
+        },
+        "enterprise": {
+            "title": "Korporativ",
+            "price": "Shaxsiy",
+            "custom": "Ehtiyojlaringizga moslash",
+            "dedicated": "Ajratilgan server",
+            "sla": "SLA kelishuvi",
+            "training": "Jamoani o'qitish"
+        }
     },
-    "speed": {
-      "title": "Tez qayta ishlash",
-      "description": "Katta fayllarni daqiqalar ichida qayta ishlash"
+    "cta": {
+        "title": "Amalda ko'rishga tayyormisiz?",
+        "subtitle": "Shaxsiy demo bron qiling va ATABAI XMHS jarayonini qanday o'zgartirishini ko'ring",
+        "button": "Demo bron qilish"
     },
-    "easy": {
-      "title": "Foydalanish oson",
-      "description": "Intuitiv interfeys maxsus o'qitishni talab qilmaydi"
+    "finalCta": {
+        "title": "NSBU bilan ovora bo'lishni bas qiling.",
+        "subtitle": "30 daqiqalik demoga yoziling va XMHS hisobotlari o'zi qanday tuzilishini ko'ring.",
+        "button": "Demo bron qilish"
     },
-    "universal": {
-      "title": "Universal",
-      "description": "Har qanday turdagi hisob-kitob va hisobot uchun mos"
-    }
-  },
-  "pricing": {
-    "title": "ATABAI vaqt va pulni tejashga yordam beradi",
-    "popular": "Mashhur",
-    "getStarted": "Boshlash",
-    "contactUs": "Biz bilan bog'laning",
-    "basic": {
-      "title": "Asosiy",
-      "price": "Bepul",
-      "files": "Oyiga 4ta fayl",
-      "templates": "Asosiy XMHS shablonlari",
-      "history": "Oxirgi 10 ta fayl tarixi",
-      "export": "Qayta ishlangan fayllarni eksport qilish"
+    "comingSoon": {
+        "pageTitle": "Tez orada",
+        "title": "Tez orada ishga tushadi!",
+        "description": "Biz XMHS hisob-kitoblarini avtomatlashtirish uchun eng yaxshi platformani yaratish ustida qattiq ishlamoqdamiz. Jamoamiz sizga ajoyib tajriba taqdim etish uchun barcha funksiyalarni yakunlayapti.",
+        "featuresTitle": "Nimalar tayyorlanmoqda:",
+        "feature1": "Avtomatlashtirilgan amortizatsiya va qadrsizlanish hisob-kitoblari",
+        "feature2": "XMHS standartlariga to'liq muvofiqlik",
+        "feature3": "Intuitiv interfeys va tez qayta ishlash",
+        "feature4": "Batafsil hisobotlar va natijalarni eksport qilish",
+        "contactTitle": "Savollaringiz bormi?",
+        "contactDescription": "Qo'shimcha ma'lumot olish yoki ishga tushirish haqida xabarnoma olish uchun biz bilan bog'laning.",
+        "telegram": "Telegram",
+        "email": "Email",
+        "instagram": "Instagram",
+        "backToDashboard": "Bosh sahifaga qaytish"
     },
-    "premium": {
-      "title": "Premium",
-      "price": "So'rov bo'yicha",
-      "perMonth": "Shaxsiy narxlash",
-      "files": "Cheksiz fayllar",
-      "templates": "Barcha XMHS shablonlari",
-      "priority": "Ustuvor qayta ishlash",
-      "history": "To'liq qayta ishlash tarixi",
-      "support": "Texnik yordam",
-      "api": "API ga kirish"
+    "settings": {
+        "subtitle": "Hisob sozlamalarini boshqarish",
+        "soon": "Tez orada",
+        "account": "Hisob",
+        "accountDesc": "Google hisob ma'lumotlaringiz",
+        "plan": "Tarif",
+        "planDesc": "Joriy obunangiz",
+        "tabs": {
+            "personal": "Shaxsiy",
+            "usage": "Foydalanish va reja",
+            "billing": "To'lovlar",
+            "privacy": "Maxfiylik"
+        },
+        "personal": {
+            "title": "Shaxsiy sozlamalar",
+            "description": "Hisob afzalliklaringiz va ko'rsatish sozlamalarini boshqaring",
+            "language": "Til",
+            "languageDescription": "Interfeys uchun afzal ko'rgan tilingizni tanlang",
+            "theme": "Mavzu",
+            "themeDescription": "ATABAI sizga qanday ko'rinishini tanlang",
+            "themeLight": "Yorug'",
+            "themeDark": "Qorong'u",
+            "themeSystem": "Tizim"
+        },
+        "saved": "Sozlamalar muvaffaqiyatli saqlandi",
+        "comingSoon": "Tez orada",
+        "usageTabDescription": "Foydalanish statistikangizni ko'ring va obuna rejangizni boshqaring",
+        "billingTabDescription": "To'lov ma'lumotlari va to'lov usullarini boshqaring",
+        "privacyTabDescription": "Maxfiylik sozlamalaringizni va ma'lumotlar afzalliklaringizni nazorat qiling"
     },
-    "enterprise": {
-      "title": "Korporativ",
-      "price": "Shaxsiy",
-      "custom": "Ehtiyojlaringizga moslash",
-      "dedicated": "Ajratilgan server",
-      "sla": "SLA kelishuvi",
-      "training": "Jamoani o'qitish"
-    }
-  },
-  "cta": {
-    "title": "Amalda ko'rishga tayyormisiz?",
-    "subtitle": "Shaxsiy demo bron qiling va ATABAI XMHS jarayonini qanday o'zgartirishini ko'ring",
-    "button": "Demo bron qilish"
-  },
-  "finalCta": {
-    "title": "NSBU bilan ovora bo'lishni bas qiling.",
-    "subtitle": "30 daqiqalik demoga yoziling va XMHS hisobotlari o'zi qanday tuzilishini ko'ring.",
-    "button": "Demo bron qilish"
-  },
-  "comingSoon": {
-    "pageTitle": "Tez orada",
-    "title": "Tez orada ishga tushadi!",
-    "description": "Biz XMHS hisob-kitoblarini avtomatlashtirish uchun eng yaxshi platformani yaratish ustida qattiq ishlamoqdamiz. Jamoamiz sizga ajoyib tajriba taqdim etish uchun barcha funksiyalarni yakunlayapti.",
-    "featuresTitle": "Nimalar tayyorlanmoqda:",
-    "feature1": "Avtomatlashtirilgan amortizatsiya va qadrsizlanish hisob-kitoblari",
-    "feature2": "XMHS standartlariga to'liq muvofiqlik",
-    "feature3": "Intuitiv interfeys va tez qayta ishlash",
-    "feature4": "Batafsil hisobotlar va natijalarni eksport qilish",
-    "contactTitle": "Savollaringiz bormi?",
-    "contactDescription": "Qo'shimcha ma'lumot olish yoki ishga tushirish haqida xabarnoma olish uchun biz bilan bog'laning.",
-    "telegram": "Telegram",
-    "email": "Email",
-    "instagram": "Instagram",
-    "backToDashboard": "Bosh sahifaga qaytish"
-  },
-  "settings": {
-    "subtitle": "Hisob sozlamalarini boshqarish",
-    "soon": "Tez orada",
-    "account": "Hisob",
-    "accountDesc": "Google hisob ma'lumotlaringiz",
-    "plan": "Tarif",
-    "planDesc": "Joriy obunangiz",
-    "tabs": {
-      "personal": "Shaxsiy",
-      "usage": "Foydalanish va reja",
-      "billing": "To'lovlar",
-      "privacy": "Maxfiylik"
+    "help": {
+        "title": "Yordam kerakmi?",
+        "description": "ATABAI va XMHS avtomatlashtiruvi haqidagi savollaringizda sizga yordam berishga tayyormiz",
+        "telegram": "Telegram",
+        "email": "Email",
+        "instagram": "Instagram",
+        "backToDashboard": "Bosh sahifaga qaytish"
     },
-    "personal": {
-      "title": "Shaxsiy sozlamalar",
-      "description": "Hisob afzalliklaringiz va ko'rsatish sozlamalarini boshqaring",
-      "language": "Til",
-      "languageDescription": "Interfeys uchun afzal ko'rgan tilingizni tanlang",
-      "theme": "Mavzu",
-      "themeDescription": "ATABAI sizga qanday ko'rinishini tanlang",
-      "themeLight": "Yorug'",
-      "themeDark": "Qorong'u",
-      "themeSystem": "Tizim"
+    "upload": {
+        "noTemplate": "Shablon tanlanmagan.",
+        "dropTitle": "Excel faylini shu yerga tashlang",
+        "dropSub": "yoki ko'rish uchun bosing · .xlsx, .xls 10 MB gacha",
+        "processing": "Qayta ishlanmoqda…",
+        "transformBtn": "IFRS ga aylantirish",
+        "errorFileType": "Faqat .xlsx va .xls fayllar qo'llab-quvvatlanadi.",
+        "errorFileSize": "Fayl 10 MB dan kichik bo'lishi kerak.",
+        "errorUploadFailed": "Yuklash muvaffaqiyatsiz. Qayta urinib ko'ring.",
+        "previousFiles": "Oldingi fayllar",
+        "title": "Qayta ishlash uchun fayl yuklash",
+        "backToDashboard": "Boshqaruv paneliga qaytish",
+        "uploadSection": "Faylingizni yuklang",
+        "expectedFormat": "Kutilayotgan fayl formati:",
+        "instructions": {
+            "depreciation": [
+                "NZBH formatidagi aktivlar ma'lumotlari bilan Excel fayl",
+                "Ustunlar: Aktiv nomi, Dastlabki narx, Sotib olish sanasi, Xizmat muddati",
+                "Ixtiyoriy: Amortizatsiya usuli, Qoldiq qiymat",
+                "Har bir qator bitta aktivni ifodalashi kerak"
+            ],
+            "discounts": [
+                "NZBH formatidagi daromad/chegirma ma'lumotlari bilan Excel fayl",
+                "Ustunlar: Tranzaksiya ID, Daromad summasi, Chegirma turi, Chegirma qiymati",
+                "Ixtiyoriy: Mijoz, Sana, Mahsulot kategoriyasi"
+            ],
+            "impairment": [
+                "NZBH formatidagi aktivlarning balans qiymati bilan Excel fayl",
+                "Ustunlar: Aktiv nomi, Balans qiymati, Adolatli qiymat, Pul oqimi ma'lumotlari",
+                "Ixtiyoriy: Test sanasi, Bozor ko'rsatkichlari"
+            ],
+            "balanceSheet": [
+                "milliy standartlar formatidagi balans bilan Excel fayl (Forma № 1 - ОКUD 0710001)",
+                "Standart o'zbek balans tuzilishi kutilmoqda",
+                "Ustunlar: Qator kodi, Tavsif, Boshlang'ich balans, Yakuniy balans",
+                "Tizim NSBU kodlarini IFRS klassifikatsiyasiga moslaydi"
+            ],
+            "cashFlow": {
+                "1": "Pul oqimlari hisoboti milliy standartlar formatidan IAS 7 - Pul oqimlari hisoboti bo'yicha IFRS formatiga o'zgartirildi",
+                "2": "Faoliyat operatsion, investitsion va moliyaviy toifalarga ajratiladi",
+                "3": "Operatsion pul oqimlarini taqdim etishda to'g'ridan-to'g'ri usul qo'llaniladi",
+                "4": "Kirish va chiqishga ega qatorlar uchun sof summalar avtomatik hisoblanadi"
+            },
+            "profitLoss": {
+                "1": "NSBU formatidagi foyda va zararlar hisobotini (PnL byudjeti) yuklang",
+                "2": "Kutilayotgan bo'limlar: ДОХОДЫ (Daromad), РАСХОДЫ / ПРЯМЫЕ РАСХОДЫ (Xarajatlar), loyiha qatorlari",
+                "3": "Oylik ustunlar (yan–dek) avtomatik aniqlanadi — choraklik va yillik formatlar qo'llab-quvvatlanadi",
+                "4": "Sodda tuzilmalar ham, murakkab loyiha ierarxiyalari ham avtomatik ishlaydi"
+            },
+            "profitLossForm2": [
+                "Standart NSBU 2-shakl (ОКУД 0710002) Excel fayli",
+                "A ustunida qator kodlari: 010, 020, 040, 050, 060, 070, 090, 100, 140",
+                "Qiymat ustunlari: joriy davr va o'tgan yil taqqoslash",
+                "Tizim kod ustuni va davr sarlavhalarini avtomatik aniqlaydi"
+            ],
+            "equity": [
+                "A varianti — Balans (1-shakl): kapitalning ochilish va yopilish qoldig'i",
+                "B varianti — 4-shakl: kapital harakatlarining to'liq tafsiloti",
+                "Ustun sarlavhalari: Ustav kapitali, Taqsimlanmagan foyda, Jami",
+                "Tizim yuklangan fayl turini avtomatik aniqlaydi"
+            ]
+        },
+        "dropZone": {
+            "title": "Excel faylingizni bu yerga tashlang",
+            "subtitle": "yoki fayllarni tanlash uchun bosing",
+            "chooseFile": "Fayl tanlash",
+            "supportedFormats": "10MB gacha .xlsx va .xls fayllarini qo'llab-quvvatlaydi"
+        },
+        "selectedFile": {
+            "processFile": "Faylni qayta ishlash",
+            "processing": "Qayta ishlanmoqda...",
+            "chooseDifferent": "Boshqa fayl tanlash"
+        },
+        "sampleFormat": {
+            "title": "Namuna Excel formati",
+            "description": "Sizning Excel faylingiz shunga o'xshash ustun tuzilishiga ega bo'lishi kerak. Tizim avtomatik ravishda ustunlarni aniqlaydi va XMHS transformatsiyalarini qo'llaydi."
+        },
+        "sampleHeaders": {
+            "depreciation": [
+                "Aktiv nomi",
+                "Dastlabki qiymat (so'm)",
+                "Sotib olish sanasi",
+                "Xizmat muddati (yil)",
+                "Usul"
+            ],
+            "discounts": [
+                "Tranzaksiya ID",
+                "Daromad (so'm)",
+                "Chegirma turi",
+                "Chegirma %",
+                "Mijoz"
+            ],
+            "impairment": [
+                "Aktiv nomi",
+                "Balans qiymati (so'm)",
+                "Adolatli qiymat (so'm)",
+                "Test sanasi",
+                "Holat"
+            ],
+            "balanceSheet": [
+                "Qator kodi",
+                "Nomi",
+                "Davr boshida (so'm)",
+                "Davr oxirida (so'm)"
+            ],
+            "cashFlow": [
+                "Qator nomi",
+                "Kirish (so'm)",
+                "Chiqish (so'm)",
+                "Davr"
+            ],
+            "profitLoss": [
+                "Qator nomi",
+                "Yan",
+                "Fev",
+                "Mar",
+                "Q1 Jami"
+            ]
+        },
+        "sampleData": {
+            "depreciation": [
+                [
+                    "Ofis binosi",
+                    "1,000,000,000",
+                    "2020-01-15",
+                    "40",
+                    "To'g'ri chiziqli"
+                ],
+                [
+                    "Ishlab chiqarish jihozi",
+                    "500,000,000",
+                    "2021-06-01",
+                    "10",
+                    "Kamayuvchi qoldiq"
+                ],
+                [
+                    "Transport vositalari",
+                    "150,000,000",
+                    "2022-03-10",
+                    "5",
+                    "To'g'ri chiziqli"
+                ]
+            ],
+            "discounts": [
+                [
+                    "TXN001",
+                    "50,000,000",
+                    "Hajmiy",
+                    "5",
+                    "Mijoz A"
+                ],
+                [
+                    "TXN002",
+                    "25,000,000",
+                    "Erta to'lov",
+                    "2",
+                    "Mijoz B"
+                ],
+                [
+                    "TXN003",
+                    "75,000,000",
+                    "Mavsumiy",
+                    "10",
+                    "Mijoz C"
+                ]
+            ],
+            "impairment": [
+                [
+                    "Ombor",
+                    "800,000,000",
+                    "750,000,000",
+                    "2024-12-01",
+                    "Test talab qilinadi"
+                ],
+                [
+                    "Savdo do'koni",
+                    "300,000,000",
+                    "320,000,000",
+                    "2024-12-01",
+                    "Qadrsizlanish yo'q"
+                ],
+                [
+                    "Ishlab chiqarish liniyasi",
+                    "600,000,000",
+                    "550,000,000",
+                    "2024-12-01",
+                    "Qadrsizlangan"
+                ]
+            ],
+            "balanceSheet": [
+                [
+                    "010",
+                    "Asosiy vositalar - dastlabki qiymati",
+                    "379,046,345",
+                    "364,903,106"
+                ],
+                [
+                    "011",
+                    "To'plangan amortizatsiya",
+                    "141,246,647",
+                    "147,353,112"
+                ],
+                [
+                    "220",
+                    "Debitorlik qarzlari",
+                    "411,581,488",
+                    "403,315,404"
+                ]
+            ],
+            "cashFlow": [
+                [
+                    "Xaridorlardan tushgan pul",
+                    "1,340,638,713,954",
+                    "",
+                    "2024"
+                ],
+                [
+                    "Yetkazib beruvchilarga to'langan",
+                    "",
+                    "1,014,597,002,120",
+                    "2024"
+                ],
+                [
+                    "To'langan soliqlar",
+                    "44,790,796,191",
+                    "111,219,623,676",
+                    "2024"
+                ]
+            ],
+            "profitLoss": [
+                [
+                    "ДОХОДЫ",
+                    "13,401,292,006",
+                    "16,267,193,950",
+                    "24,940,189,708",
+                    "54,608,675,664"
+                ],
+                [
+                    "  Loyiha A",
+                    "3,984,766,273",
+                    "6,556,622,772",
+                    "14,583,296,586",
+                    "25,124,685,631"
+                ],
+                [
+                    "ПРЯМЫЕ РАСХОДЫ",
+                    "-10,231,003,458",
+                    "-12,765,430,110",
+                    "-19,382,540,020",
+                    "-42,378,973,588"
+                ],
+                [
+                    "Loyiha sarflari",
+                    "-1,284,505,663",
+                    "-1,284,505,663",
+                    "-1,284,505,663",
+                    "-3,853,516,989"
+                ]
+            ]
+        },
+        "recentFiles": {
+            "title": "Oxirgi {template} fayllari",
+            "description": "Ushbu shablon uchun yaqinda qayta ishlangan fayllaringiz",
+            "viewAll": "Barchasini ko'rish →",
+            "loading": "Oxirgi fayllar yuklanmoqda...",
+            "empty": "Hali fayllar qayta ishlanmagan",
+            "emptyAction": "Yuqorida birinchi {template} faylini qayta ishlang"
+        },
+        "supportedFormats": "50MB gacha .xlsx va .xls fayllarini qo'llab-quvvatlaydi"
     },
-    "saved": "Sozlamalar muvaffaqiyatli saqlandi",
-    "comingSoon": "Tez orada",
-    "usageTabDescription": "Foydalanish statistikangizni ko'ring va obuna rejangizni boshqaring",
-    "billingTabDescription": "To'lov ma'lumotlari va to'lov usullarini boshqaring",
-    "privacyTabDescription": "Maxfiylik sozlamalaringizni va ma'lumotlar afzalliklaringizni nazorat qiling"
-  },
-  "help": {
-    "title": "Yordam kerakmi?",
-    "description": "ATABAI va XMHS avtomatlashtiruvi haqidagi savollaringizda sizga yordam berishga tayyormiz",
-    "telegram": "Telegram",
-    "email": "Email",
-    "instagram": "Instagram",
-    "backToDashboard": "Bosh sahifaga qaytish"
-  },
-  "upload": {
-    "noTemplate": "Shablon tanlanmagan.",
-    "dropTitle": "Excel faylini shu yerga tashlang",
-    "dropSub": "yoki ko'rish uchun bosing · .xlsx, .xls 10 MB gacha",
-    "processing": "Qayta ishlanmoqda…",
-    "transformBtn": "IFRS ga aylantirish",
-    "errorFileType": "Faqat .xlsx va .xls fayllar qo'llab-quvvatlanadi.",
-    "errorFileSize": "Fayl 10 MB dan kichik bo'lishi kerak.",
-    "errorUploadFailed": "Yuklash muvaffaqiyatsiz. Qayta urinib ko'ring.",
-    "previousFiles": "Oldingi fayllar",
-    "title": "Qayta ishlash uchun fayl yuklash",
-    "backToDashboard": "Boshqaruv paneliga qaytish",
-    "uploadSection": "Faylingizni yuklang",
-    "expectedFormat": "Kutilayotgan fayl formati:",
-    "instructions": {
-      "depreciation": [
-        "NZBH formatidagi aktivlar ma'lumotlari bilan Excel fayl",
-        "Ustunlar: Aktiv nomi, Dastlabki narx, Sotib olish sanasi, Xizmat muddati",
-        "Ixtiyoriy: Amortizatsiya usuli, Qoldiq qiymat",
-        "Har bir qator bitta aktivni ifodalashi kerak"
-      ],
-      "discounts": [
-        "NZBH formatidagi daromad/chegirma ma'lumotlari bilan Excel fayl",
-        "Ustunlar: Tranzaksiya ID, Daromad summasi, Chegirma turi, Chegirma qiymati",
-        "Ixtiyoriy: Mijoz, Sana, Mahsulot kategoriyasi"
-      ],
-      "impairment": [
-        "NZBH formatidagi aktivlarning balans qiymati bilan Excel fayl",
-        "Ustunlar: Aktiv nomi, Balans qiymati, Adolatli qiymat, Pul oqimi ma'lumotlari",
-        "Ixtiyoriy: Test sanasi, Bozor ko'rsatkichlari"
-      ],
-      "balanceSheet": [
-        "milliy standartlar formatidagi balans bilan Excel fayl (Forma № 1 - ОКUD 0710001)",
-        "Standart o'zbek balans tuzilishi kutilmoqda",
-        "Ustunlar: Qator kodi, Tavsif, Boshlang'ich balans, Yakuniy balans",
-        "Tizim NSBU kodlarini IFRS klassifikatsiyasiga moslaydi"
-      ],
-      "cashFlow": {
-        "1": "Pul oqimlari hisoboti milliy standartlar formatidan IAS 7 - Pul oqimlari hisoboti bo'yicha IFRS formatiga o'zgartirildi",
-        "2": "Faoliyat operatsion, investitsion va moliyaviy toifalarga ajratiladi",
-        "3": "Operatsion pul oqimlarini taqdim etishda to'g'ridan-to'g'ri usul qo'llaniladi",
-        "4": "Kirish va chiqishga ega qatorlar uchun sof summalar avtomatik hisoblanadi"
-      },
-      "profitLoss": {
-        "1": "NSBU formatidagi foyda va zararlar hisobotini (PnL byudjeti) yuklang",
-        "2": "Kutilayotgan bo'limlar: ДОХОДЫ (Daromad), РАСХОДЫ / ПРЯМЫЕ РАСХОДЫ (Xarajatlar), loyiha qatorlari",
-        "3": "Oylik ustunlar (yan–dek) avtomatik aniqlanadi — choraklik va yillik formatlar qo'llab-quvvatlanadi",
-        "4": "Sodda tuzilmalar ham, murakkab loyiha ierarxiyalari ham avtomatik ishlaydi"
-      },
-      "profitLossForm2": [
-        "Standart NSBU 2-shakl (ОКУД 0710002) Excel fayli",
-        "A ustunida qator kodlari: 010, 020, 040, 050, 060, 070, 090, 100, 140",
-        "Qiymat ustunlari: joriy davr va o'tgan yil taqqoslash",
-        "Tizim kod ustuni va davr sarlavhalarini avtomatik aniqlaydi"
-      ],
-      "equity": [
-        "A varianti — Balans (1-shakl): kapitalning ochilish va yopilish qoldig'i",
-        "B varianti — 4-shakl: kapital harakatlarining to'liq tafsiloti",
-        "Ustun sarlavhalari: Ustav kapitali, Taqsimlanmagan foyda, Jami",
-        "Tizim yuklangan fayl turini avtomatik aniqlaydi"
-      ]
-    },
-    "dropZone": {
-      "title": "Excel faylingizni bu yerga tashlang",
-      "subtitle": "yoki fayllarni tanlash uchun bosing",
-      "chooseFile": "Fayl tanlash",
-      "supportedFormats": "10MB gacha .xlsx va .xls fayllarini qo'llab-quvvatlaydi"
-    },
-    "selectedFile": {
-      "processFile": "Faylni qayta ishlash",
-      "processing": "Qayta ishlanmoqda...",
-      "chooseDifferent": "Boshqa fayl tanlash"
-    },
-    "sampleFormat": {
-      "title": "Namuna Excel formati",
-      "description": "Sizning Excel faylingiz shunga o'xshash ustun tuzilishiga ega bo'lishi kerak. Tizim avtomatik ravishda ustunlarni aniqlaydi va XMHS transformatsiyalarini qo'llaydi."
-    },
-    "sampleHeaders": {
-      "depreciation": [
-        "Aktiv nomi",
-        "Dastlabki qiymat (so'm)",
-        "Sotib olish sanasi",
-        "Xizmat muddati (yil)",
-        "Usul"
-      ],
-      "discounts": [
-        "Tranzaksiya ID",
-        "Daromad (so'm)",
-        "Chegirma turi",
-        "Chegirma %",
-        "Mijoz"
-      ],
-      "impairment": [
-        "Aktiv nomi",
-        "Balans qiymati (so'm)",
-        "Adolatli qiymat (so'm)",
-        "Test sanasi",
-        "Holat"
-      ],
-      "balanceSheet": [
-        "Qator kodi",
-        "Nomi",
-        "Davr boshida (so'm)",
-        "Davr oxirida (so'm)"
-      ],
-      "cashFlow": ["Qator nomi", "Kirish (so'm)", "Chiqish (so'm)", "Davr"],
-      "profitLoss": ["Qator nomi", "Yan", "Fev", "Mar", "Q1 Jami"]
-    },
-    "sampleData": {
-      "depreciation": [
-        [
-          "Ofis binosi",
-          "1,000,000,000",
-          "2020-01-15",
-          "40",
-          "To'g'ri chiziqli"
-        ],
-        [
-          "Ishlab chiqarish jihozi",
-          "500,000,000",
-          "2021-06-01",
-          "10",
-          "Kamayuvchi qoldiq"
-        ],
-        [
-          "Transport vositalari",
-          "150,000,000",
-          "2022-03-10",
-          "5",
-          "To'g'ri chiziqli"
-        ]
-      ],
-      "discounts": [
-        ["TXN001", "50,000,000", "Hajmiy", "5", "Mijoz A"],
-        ["TXN002", "25,000,000", "Erta to'lov", "2", "Mijoz B"],
-        ["TXN003", "75,000,000", "Mavsumiy", "10", "Mijoz C"]
-      ],
-      "impairment": [
-        [
-          "Ombor",
-          "800,000,000",
-          "750,000,000",
-          "2024-12-01",
-          "Test talab qilinadi"
-        ],
-        [
-          "Savdo do'koni",
-          "300,000,000",
-          "320,000,000",
-          "2024-12-01",
-          "Qadrsizlanish yo'q"
-        ],
-        [
-          "Ishlab chiqarish liniyasi",
-          "600,000,000",
-          "550,000,000",
-          "2024-12-01",
-          "Qadrsizlangan"
-        ]
-      ],
-      "balanceSheet": [
-        [
-          "010",
-          "Asosiy vositalar - dastlabki qiymati",
-          "379,046,345",
-          "364,903,106"
-        ],
-        ["011", "To'plangan amortizatsiya", "141,246,647", "147,353,112"],
-        ["220", "Debitorlik qarzlari", "411,581,488", "403,315,404"]
-      ],
-      "cashFlow": [
-        ["Xaridorlardan tushgan pul", "1,340,638,713,954", "", "2024"],
-        ["Yetkazib beruvchilarga to'langan", "", "1,014,597,002,120", "2024"],
-        ["To'langan soliqlar", "44,790,796,191", "111,219,623,676", "2024"]
-      ],
-      "profitLoss": [
-        [
-          "ДОХОДЫ",
-          "13,401,292,006",
-          "16,267,193,950",
-          "24,940,189,708",
-          "54,608,675,664"
-        ],
-        [
-          "  Loyiha A",
-          "3,984,766,273",
-          "6,556,622,772",
-          "14,583,296,586",
-          "25,124,685,631"
-        ],
-        [
-          "ПРЯМЫЕ РАСХОДЫ",
-          "-10,231,003,458",
-          "-12,765,430,110",
-          "-19,382,540,020",
-          "-42,378,973,588"
-        ],
-        [
-          "Loyiha sarflari",
-          "-1,284,505,663",
-          "-1,284,505,663",
-          "-1,284,505,663",
-          "-3,853,516,989"
-        ]
-      ]
-    },
-    "recentFiles": {
-      "title": "Oxirgi {template} fayllari",
-      "description": "Ushbu shablon uchun yaqinda qayta ishlangan fayllaringiz",
-      "viewAll": "Barchasini ko'rish →",
-      "loading": "Oxirgi fayllar yuklanmoqda...",
-      "empty": "Hali fayllar qayta ishlanmagan",
-      "emptyAction": "Yuqorida birinchi {template} faylini qayta ishlang"
-    },
-    "supportedFormats": "50MB gacha .xlsx va .xls fayllarini qo'llab-quvvatlaydi"
-  },
-  "processing": {
-    "subtitle": "NSBU hisoblarini moslashtirish va strukturalashtirilgan hisobot yaratish…",
-    "doneSubtitle": "Sizning IFRS hisobotingiz yuklab olishga tayyor.",
-    "failedSubtitle": "Faylni transformatsiya qilishda xatolik yuz berdi.",
-    "rowsTransformed": "Qatorlar o'zgartirildi",
-    "lineItemsMapped": "Moddalar moslashtirildi",
-    "processingTime": "Qayta ishlash vaqti",
-    "title": "Faylingizni qayta ishlash",
-    "status": {
-      "pending": "Kutilmoqda",
-      "uploaded": "Tizimga yuklangan",
-      "processing": "Qayta ishlanmoqda",
-      "completed": "Yakunlandi",
-      "failed": "Xato"
-    },
-    "statusDescription": {
-      "pending": "Sizning faylingiz qayta ishlash navbatida",
-      "processing": "Ma'lumotlaringizga XMHS transformatsiyalarini qo'llayapmiz",
-      "completed": "Fayl muvaffaqiyatli qayta ishland va yuklab olishga tayyor",
-      "failed": "Faylni qayta ishlashda xato yuz berdi"
-    },
-    "steps": {
-      "upload": "Fayl muvaffaqiyatli yuklandi",
-      "validation": "Fayl formatini tekshirish",
-      "transformation": "XMHS transformatsiyalarini qo'llash",
-      "completion": "Natijalarni yaratish"
+    "processing": {
+        "subtitle": "NSBU hisoblarini moslashtirish va strukturalashtirilgan hisobot yaratish…",
+        "doneSubtitle": "Sizning IFRS hisobotingiz yuklab olishga tayyor.",
+        "failedSubtitle": "Faylni transformatsiya qilishda xatolik yuz berdi.",
+        "rowsTransformed": "Qatorlar o'zgartirildi",
+        "lineItemsMapped": "Moddalar moslashtirildi",
+        "processingTime": "Qayta ishlash vaqti",
+        "title": "Faylingizni qayta ishlash",
+        "status": {
+            "pending": "Kutilmoqda",
+            "uploaded": "Tizimga yuklangan",
+            "processing": "Qayta ishlanmoqda",
+            "completed": "Yakunlandi",
+            "failed": "Xato"
+        },
+        "statusDescription": {
+            "pending": "Sizning faylingiz qayta ishlash navbatida",
+            "processing": "Ma'lumotlaringizga XMHS transformatsiyalarini qo'llayapmiz",
+            "completed": "Fayl muvaffaqiyatli qayta ishland va yuklab olishga tayyor",
+            "failed": "Faylni qayta ishlashda xato yuz berdi"
+        },
+        "steps": {
+            "upload": "Fayl muvaffaqiyatli yuklandi",
+            "validation": "Fayl formatini tekshirish",
+            "transformation": "XMHS transformatsiyalarini qo'llash",
+            "completion": "Natijalarni yaratish"
+        },
+        "results": {
+            "title": "Qayta ishlash natijalari",
+            "transformations": "Transformatsiyalar",
+            "changes": "O'zgarishlar",
+            "rows": "Qayta ishlangan qatorlar"
+        },
+        "actions": {
+            "download": "Natijani yuklab olish",
+            "downloading": "Yuklab olinmoqda...",
+            "retry": "Qaytarish",
+            "retrying": "Qaytarilmoqda...",
+            "backToDashboard": "Panelga qaytish",
+            "uploadNew": "Yangi fayl yuklash",
+            "viewResults": "Natijalarni ko'rish",
+            "retryUpload": "Yana yuklash",
+            "viewDetails": "Tafsilotlarni ko'rish"
+        },
+        "duration": "Qayta ishlash vaqti: {duration}",
+        "timeFormat": {
+            "seconds": "{count} son",
+            "minutes": "{count} daq"
+        },
+        "stuck": {
+            "statusTitle": "Qayta ishlash to'xtab qoldi",
+            "statusDescription": "Fayl qayta ishlash to'xtab qolganga o'xshaydi yoki kutilganidan ko'proq vaqt olmoqda.",
+            "title": "Qayta ishlash to'xtab qoldi",
+            "description": "Sizning faylingiz g'ayrioddiy uzoq vaqt qayta ishlanmoqda. Bu ba'zida juda katta fayllar yoki vaqtinchalik server muammolari bilan sodir bo'ladi.",
+            "suggestions": "Faylni yana yuklashga urinib ko'rishingiz yoki agar muammo davom etsa, qo'llab-quvvatlash bilan bog'lanishingiz mumkin.",
+            "pollingInfo": "{duration} daqiqa ichida {attempts} marta tekshirildi",
+            "troubleshooting": {
+                "title": "Muammolarni hal qilish bo'yicha maslahatlar:",
+                "tip1": "Katta fayllar (>10MB) bir necha daqiqa qayta ishlanishi mumkin",
+                "tip2": "Murakkab hisob-kitoblar ko'proq qayta ishlash vaqtini talab qiladi",
+                "tip3": "Server texnik xizmati vaqtincha qayta ishlashni sekinlashtirishi mumkin"
+            }
+        },
+        "progress": "Jarayon",
+        "error": "Qayta ishlash xatosi"
     },
     "results": {
-      "title": "Qayta ishlash natijalari",
-      "transformations": "Transformatsiyalar",
-      "changes": "O'zgarishlar",
-      "rows": "Qayta ishlangan qatorlar"
+        "loadFailed": "Fayl tafsilotlarini yuklab bo'lib bo'lmadi.",
+        "deleteFailed": "Faylni o'chirib bo'lmadi.",
+        "templateUsed": "Foydalanilgan shablon",
+        "processed": "Qayta ishlandi",
+        "fileDetails": "Fayl tafsilotlari",
+        "originalFile": "Asl fayl",
+        "template": "Shablon",
+        "status": "Holat",
+        "uploaded": "Yuklandi",
+        "completed": "Tugallandi",
+        "fileSize": "Fayl hajmi",
+        "notes": "Izohlar",
+        "processAnother": "Boshqa faylni qayta ishlash",
+        "confirmDelete": "Bu faylni o'chirishni istaysizmi? Bu amalni bekor qilib bo'lmaydi.",
+        "title": "Fayl natijalari",
+        "error": {
+            "title": "Faylni yuklashda xatolik",
+            "fetchFailed": "Fayl tafsilotlarini yuklashda xatolik. Iltimos, qaytadan urinib ko'ring."
+        },
+        "overview": {
+            "title": "Umumiy ko'rinish",
+            "template": "Shablon",
+            "processed": "Qayta ishlangan",
+            "size": "Fayl hajmi"
+        },
+        "transformations": {
+            "title": "Transformatsiyalar",
+            "total": "Jami qo'llanilgan",
+            "changes": "Kiritilgan o'zgarishlar"
+        },
+        "warnings": {
+            "title": "Ogohlantirishlar",
+            "total": "Jami ogohlantirishlar",
+            "details": "Ogohlantirish tafsilotlari",
+            "row": "Qator"
+        },
+        "comparison": {
+            "before": "Avval",
+            "after": "Keyin",
+            "sideBySide": "Yonma-yon",
+            "beforeData": "Dastlabki ma'lumotlar (NZBH formati)",
+            "afterData": "Qayta ishlangan ma'lumotlar (XMHS formati)",
+            "originalFormat": "Yuklangan fayldan asl format",
+            "ifrsFormat": "Qo'llaniladigan transformatsiyalar bilan XMHS mos formati",
+            "showingRows": "{total}dan {shown} qator ko'rsatilmoqda"
+        },
+        "compliance": {
+            "title": "XMHS muvofiqlik eslatmalari",
+            "depreciation": {
+                "1": "Barcha amortizatsiya hisoblari IAS 16 - Asosiy vositalar standartlariga muvofiq",
+                "2": "Hisobiy qiymat dastlabki qiymatdan to'plangan amortizatsiya va qadrsizlanish zararlarini ayirib tashlashni ifodalaydi",
+                "3": "Amortizatsiya stavkalari taxmin qilingan foydali ishlash muddatlari va qoldiq qiymatlariga asoslangan",
+                "4": "Qadrsizlanish belgilari bo'lgan aktivlar uchun qadrsizlanish testlari tavsiya etiladi"
+            },
+            "discounts": {
+                "1": "Barcha daromadlarni tan olish IFRS 15 - Mijozlar bilan shartnomalardan olinadigan daromadga muvofiq",
+                "2": "Bitim narxlari chegirmalarni o'z ichiga olgan o'zgaruvchan to'lovlarga moslashtiriladi",
+                "3": "Daromadni tan olish vaqti bajarilishi shart bo'lgan majburiyatlarning bajarilishiga asoslanadi",
+                "4": "Shartnoma majburiyatlari tovarlar/xizmatlarni o'tkazish majburiyatlarini ifodalaydi"
+            },
+            "impairment": {
+                "1": "Barcha qadrsizlanish testlari IAS 36 - Aktivlarning qadrsizlanishi standartlariga muvofiq",
+                "2": "Qoplanuvchi summa sotish uchun adolatli qiymat minus xarajatlar va foydalanish qiymatining eng yuqorisidan iborat",
+                "3": "Hisobiy qiymat qoplanuvchi summani oshirganda qadrsizlanish zararini tan olish",
+                "4": "Mustaqil naqd oqimlarini yaratmaydigan aktivlar uchun naqd yaratuvchi birliklar (NYB) aniqlanadi"
+            },
+            "balanceSheet": {
+                "1": "Balans milliy standartlar formatidan IFRS formatiga IAS 1 - Moliyaviy hisobotlarni taqdim etish standartiga muvofiq o'zgartirildi",
+                "2": "Joriy/uzoq muddatli klassifikatsiya 12 oylik operatsion tsikl testiga amal qiladi",
+                "3": "Barcha NSBU hisob kodlari tegishli IFRS qatorlariga moslashtirilgan",
+                "4": "Ushbu moslashtirish tuzilma moslashuvini ta'minlaydi, lekin to'liq IFRS tuzatishlari va professional auditni almashtirmaydi"
+            },
+            "cashFlow": {
+                "processed": "Pul oqimlari qatorlari qayta ishlandi",
+                "changesLabel": "Qator o'zgarishlari",
+                "changes": "185",
+                "formulasLabel": "Sof hisob-kitoblar",
+                "formulas": "24"
+            },
+            "profitLoss": {
+                "1": "Foyda va zararlar hisoboti NSBU byudjetidan IAS 1 ga muvofiq IFRS tuzilmasiga o'zgartirildi",
+                "2": "Daromad IFRS 15 ga muvofiq qurilish xizmatlaridan shartnoma daromadi sifatida tasniflanadi",
+                "3": "Xarajatlar IAS 1 ga muvofiq sotish tannarxi, operatsion xarajatlar va amortizatsiyaga bo'linadi",
+                "4": "EBITDA, EBIT va sof foyda to'liq shaffoflik uchun Excel formulalari orqali hisoblanadi"
+            }
+        },
+        "pagination": {
+            "rowsPerPage": "Sahifadagi qatorlar",
+            "showing": "{start}-{end} dan {total} ko'rsatilmoqda",
+            "previous": "Oldingi",
+            "next": "Keyingi",
+            "page": "Sahifa",
+            "of": "dan"
+        },
+        "balanceSheet": {
+            "title": "MOLIYAVIY AHVOL TO'G'RISIDA HISOBOT (XMHS)",
+            "asAt": "{date} holatiga ko'ra",
+            "inn": "STIR: {inn}",
+            "columns": {
+                "ifrsCode": "XMHS kodi",
+                "lineItem": "Qator nomi",
+                "nsbuCode": "milliy standartlar kodi",
+                "beginningBalance": "Boshlang'ich balans (so'm)",
+                "endingBalance": "Yakuniy balans (so'm)"
+            },
+            "sections": {
+                "nonCurrentAssets": "Uzoq muddatli aktivlar",
+                "currentAssets": "Joriy aktivlar",
+                "equity": "Kapital",
+                "nonCurrentLiabilities": "Uzoq muddatli majburiyatlar",
+                "currentLiabilities": "Joriy majburiyatlar"
+            },
+            "total": "Jami {section}",
+            "totalAssets": "JAMI AKTIVLAR",
+            "totalEquityLiabilities": "JAMI KAPITAL VA MAJBURIYATLAR"
+        },
+        "cashFlow": {
+            "title": "PUL OQIMLARI HISOBOTI (IFRS)",
+            "period": "{date} sanasida tugagan davr uchun",
+            "inn": "INN: {inn}",
+            "columns": {
+                "lineItem": "Pul oqimi qatori",
+                "amount": "Summa (so'm)"
+            },
+            "sections": {
+                "operating": "Operatsion faoliyat",
+                "investing": "Investitsion faoliyat",
+                "financing": "Moliyaviy faoliyat",
+                "reconciliation": "Uzlashtirish"
+            },
+            "totals": {
+                "netOperating": "Operatsion faoliyatdan sof pul mablag'lari",
+                "netInvesting": "Investitsion faoliyatdan sof pul mablag'lari",
+                "netFinancing": "Moliyaviy faoliyatdan sof pul mablag'lari",
+                "netChange": "Pul mablag'larining sof o'sishi/(kamayishi)",
+                "fxEffects": "Valyuta kurslari o'zgarishining ta'siri",
+                "cashBeginning": "Davr boshidagi pul mablag'lari",
+                "cashEnding": "Davr oxiridagi pul mablag'lari"
+            }
+        }
     },
-    "actions": {
-      "download": "Natijani yuklab olish",
-      "downloading": "Yuklab olinmoqda...",
-      "retry": "Qaytarish",
-      "retrying": "Qaytarilmoqda...",
-      "backToDashboard": "Panelga qaytish",
-      "uploadNew": "Yangi fayl yuklash",
-      "viewResults": "Natijalarni ko'rish",
-      "retryUpload": "Yana yuklash",
-      "viewDetails": "Tafsilotlarni ko'rish"
+    "history": {
+        "newFile": "Yangi fayl",
+        "file": "fayl",
+        "files": "fayl",
+        "dateJustNow": "hozirgina",
+        "dateMinutesAgo": "{n} daq. oldin",
+        "dateHoursAgo": "{n} soat oldin",
+        "dateYesterday": "Kecha",
+        "title": "Fayllar tarixi",
+        "subtitle": "Barcha qayta ishlangan fayllarni ko'ring va boshqaring",
+        "filters": {
+            "search": "Qidirish",
+            "searchPlaceholder": "Fayl nomi bo'yicha qidirish...",
+            "status": "Holat",
+            "allStatuses": "Barcha holatlar",
+            "template": "Shablon",
+            "allTemplates": "Barcha shablonlar",
+            "dateRange": "Sana oralig'i",
+            "allDates": "Barcha sanalar",
+            "today": "Bugun",
+            "thisWeek": "Shu hafta",
+            "thisMonth": "Shu oy",
+            "thisQuarter": "3 oy ichida",
+            "clearAll": "Barcha filtrlarni tozalash"
+        },
+        "table": {
+            "fileName": "Fayl nomi",
+            "template": "Shablon",
+            "status": "Holat",
+            "processed": "Sana",
+            "actions": "Amallar",
+            "completed": "Tugallangan"
+        },
+        "actions": {
+            "view": "Natijalarni ko'rish",
+            "viewProcessing": "Qayta ishlashni ko'rish",
+            "download": "Yuklash",
+            "retry": "Qayta ishlashni takrorlash",
+            "delete": "O'chirish",
+            "confirmDelete": "'{name}' faylini o'chirishga ishonchingiz komilmi? Bu amalni bekor qilib bo'lmaydi."
+        },
+        "error": {
+            "title": "Fayllarni yuklashda xatolik",
+            "fetchFailed": "Fayllar tarixini yuklashda xatolik. Qayta urinib ko'ring."
+        },
+        "empty": {
+            "title": "Hali fayllar yo'q",
+            "description": "Siz hali qayta ishlash uchun fayllar yuklamagansiz.",
+            "uploadFirst": "Birinchi faylni yuklash"
+        },
+        "noResults": {
+            "title": "Fayllar topilmadi",
+            "description": "Joriy filtrlar bo'yicha hech qanday fayl topilmadi. Qidiruv mezonlarini o'zgartirib ko'ring."
+        },
+        "showingResults": "{total}dan {count} fayl ko'rsatilmoqda",
+        "pagination": {
+            "showing": "{total}dan {start} dan {end} gacha natija ko'rsatilmoqda",
+            "previous": "Oldingi",
+            "next": "Keyingi",
+            "of": "dan"
+        }
     },
-    "duration": "Qayta ishlash vaqti: {duration}",
-    "timeFormat": {
-      "seconds": "{count} son",
-      "minutes": "{count} daq"
+    "common": {
+        "goHome": "Bosh sahifaga",
+        "loading": "Yuklanmoqda...",
+        "uploading": "Yuklanmoqda...",
+        "error": "Xatolik",
+        "success": "Muvaffaqiyat",
+        "cancel": "Bekor qilish",
+        "save": "Saqlash",
+        "delete": "O'chirish",
+        "edit": "Tahrirlash",
+        "upload": "Yuklash",
+        "download": "Yuklab olish",
+        "process": "Qayta ishlash",
+        "downloading": "Yuklab olinmoqda...",
+        "retry": "Qayta urinish",
+        "back": "Orqaga",
+        "goBack": "Orqaga",
+        "backToDashboard": "Boshqaruv paneliga qaytish",
+        "next": "Keyingi",
+        "all": "Hammasi",
+        "done": "Tayyor"
     },
-    "stuck": {
-      "statusTitle": "Qayta ishlash to'xtab qoldi",
-      "statusDescription": "Fayl qayta ishlash to'xtab qolganga o'xshaydi yoki kutilganidan ko'proq vaqt olmoqda.",
-      "title": "Qayta ishlash to'xtab qoldi",
-      "description": "Sizning faylingiz g'ayrioddiy uzoq vaqt qayta ishlanmoqda. Bu ba'zida juda katta fayllar yoki vaqtinchalik server muammolari bilan sodir bo'ladi.",
-      "suggestions": "Faylni yana yuklashga urinib ko'rishingiz yoki agar muammo davom etsa, qo'llab-quvvatlash bilan bog'lanishingiz mumkin.",
-      "pollingInfo": "{duration} daqiqa ichida {attempts} marta tekshirildi",
-      "troubleshooting": {
-        "title": "Muammolarni hal qilish bo'yicha maslahatlar:",
-        "tip1": "Katta fayllar (>10MB) bir necha daqiqa qayta ishlanishi mumkin",
-        "tip2": "Murakkab hisob-kitoblar ko'proq qayta ishlash vaqtini talab qiladi",
-        "tip3": "Server texnik xizmati vaqtincha qayta ishlashni sekinlashtirishi mumkin"
-      }
+    "transformation": {
+        "sectionTitle": "Avval / Keyin",
+        "sectionHint": "Maʼlumotlar farqini koʻrish uchun bosing",
+        "loading": "Transformatsiya yuklanmoqda…",
+        "generate": "Farqni yaratish",
+        "generating": "Yaratilmoqda…",
+        "notAvailable": {
+            "title": "Transformatsiya maʼlumotlari hali tayyor emas",
+            "description": "Ushbu fayl ushbu funksiya qoʻshilishidan oldin qayta ishlangan. Maʼlumotlarni yaratish uchun quyidagi tugmani bosing."
+        },
+        "unsupported": {
+            "title": "Ushbu shablon uchun farq hali qoʻllab-quvvatlanmaydi",
+            "description": "Ayni paytda faqat balans hisoboti uchun mavjud."
+        },
+        "error": {
+            "title": "Transformatsiyani yuklab boʻlmadi",
+            "generic": "Nimadir xato ketdi. Qayta urinib koʻring."
+        },
+        "toggle": {
+            "source": "Manba",
+            "extracted": "Aniqlangan maydonlar",
+            "ifrs": "XHMS"
+        }
     },
-    "progress": "Jarayon",
-    "error": "Qayta ishlash xatosi"
-  },
-  "results": {
-    "loadFailed": "Fayl tafsilotlarini yuklab bo'lib bo'lmadi.",
-    "deleteFailed": "Faylni o'chirib bo'lmadi.",
-    "templateUsed": "Foydalanilgan shablon",
-    "processed": "Qayta ishlandi",
-    "fileDetails": "Fayl tafsilotlari",
-    "originalFile": "Asl fayl",
-    "template": "Shablon",
-    "status": "Holat",
-    "uploaded": "Yuklandi",
-    "completed": "Tugallandi",
-    "fileSize": "Fayl hajmi",
-    "notes": "Izohlar",
-    "processAnother": "Boshqa faylni qayta ishlash",
-    "confirmDelete": "Bu faylni o'chirishni istaysizmi? Bu amalni bekor qilib bo'lmaydi.",
-    "title": "Fayl natijalari",
-    "error": {
-      "title": "Faylni yuklashda xatolik",
-      "fetchFailed": "Fayl tafsilotlarini yuklashda xatolik. Iltimos, qaytadan urinib ko'ring."
+    "organizations": {
+        "title": "Mening tashkilotlarim",
+        "subtitle": "Tashkilotlar oʻrtasida almashing yoki yangisini yarating.",
+        "createNew": "Yangi tashkilot",
+        "list": {
+            "title": "Faol",
+            "empty": "Hali tashkilot yoʻq. Boshlash uchun birinchisini yarating.",
+            "activeBadge": "Faol"
+        },
+        "invites": {
+            "title": "Takliflar",
+            "invitedAs": "{role} sifatida",
+            "accept": "Qabul qilish"
+        },
+        "role": {
+            "admin": "Administrator",
+            "member": "Aʼzo"
+        },
+        "switcher": {
+            "activeLabel": "Tashkilot",
+            "none": "Tanlanmagan",
+            "switchTo": "Almashish",
+            "manage": "Boshqaruv",
+            "createFirst": "Birinchisini yaratish"
+        }
     },
-    "overview": {
-      "title": "Umumiy ko'rinish",
-      "template": "Shablon",
-      "processed": "Qayta ishlangan",
-      "size": "Fayl hajmi"
+    "onboarding": {
+        "title": "Tashkilotni sozlash",
+        "subtitle": "Bir necha qadam — va sizning hisobot maydoningiz tayyor.",
+        "step1": "Maʼlumotlar",
+        "step2": "Oʻtish davri",
+        "step3": "Tasdiqlash",
+        "creating": "Yaratilmoqda…",
+        "submit": "Yaratish",
+        "fields": {
+            "name": "Nomi",
+            "namePlaceholder": "EX-IM Equipment",
+            "nameHelp": "Ichki foydalanish uchun qisqa nom.",
+            "legalName": "Yuridik nom",
+            "legalNamePlaceholder": "ODTI MChJ",
+            "legalNameHelp": "Reestrdagi toʻliq nom.",
+            "inn": "STIR",
+            "innPlaceholder": "300123456",
+            "innHelp": "Bank koʻchirmalarini taqsimlash uchun.",
+            "firstReportingYear": "Birinchi IFRS hisobot yili",
+            "firstReportingYearHelp": "Birinchi toʻliq hisobot yili.",
+            "transitionDate": "Oʻtish sanasi",
+            "transitionDateHelp": "Solishtirma yilining boshlanishi.",
+            "baseCurrency": "Asosiy valyuta",
+            "baseCurrencyHelp": "Uch harfli ISO kodi. UZS odatda."
+        },
+        "review": {
+            "title": "Tekshirib chiqing",
+            "note": "NSBU hisoblar rejasi va uch davr (kirish, solishtirma, hisobot) avtomatik yaratiladi."
+        }
     },
-    "transformations": {
-      "title": "Transformatsiyalar",
-      "total": "Jami qo'llanilgan",
-      "changes": "Kiritilgan o'zgarishlar"
+    "osvUpload": {
+        "title": "OSV importi",
+        "subtitle": "1C dan OSV faylni yuklang.",
+        "targetPeriod": "Yuklash davri",
+        "dropTitle": "Faylni tashlang yoki tanlang",
+        "dropSub": ".xlsx yoki .xls",
+        "replaceWarning": "Mavjud balanslar qayta yoziladi.",
+        "uploading": "Yuklanmoqda…",
+        "submit": "Yuklash",
+        "summary": {
+            "title": "Import natijasi",
+            "companyHeader": "Tashkilot sarlavhasi",
+            "periodHeader": "Davr sarlavhasi",
+            "inserted": "Qoʻshildi",
+            "replaced": "Almashtirildi",
+            "unknown": "Notanish hisoblar",
+            "warnings": "Parser ogohlantirishlari",
+            "moreWarnings": "yana"
+        }
     },
-    "warnings": {
-      "title": "Ogohlantirishlar",
-      "total": "Jami ogohlantirishlar",
-      "details": "Ogohlantirish tafsilotlari",
-      "row": "Qator"
+    "bankUpload": {
+        "title": "Bank koʻchirmasi",
+        "subtitle": "Fayl tahlil qilinadi.",
+        "targetPeriod": "Davr",
+        "dropTitle": "Koʻchirmani tashlang",
+        "dropSub": ".xlsx yoki .xls",
+        "uploading": "Yuklanmoqda…",
+        "submit": "Tahlil qilish"
     },
-    "comparison": {
-      "before": "Avval",
-      "after": "Keyin",
-      "sideBySide": "Yonma-yon",
-      "beforeData": "Dastlabki ma'lumotlar (NZBH formati)",
-      "afterData": "Qayta ishlangan ma'lumotlar (XMHS formati)",
-      "originalFormat": "Yuklangan fayldan asl format",
-      "ifrsFormat": "Qo'llaniladigan transformatsiyalar bilan XMHS mos formati",
-      "showingRows": "{total}dan {shown} qator ko'rsatilmoqda"
+    "bankPreview": {
+        "title": "Koʻrib chiqish",
+        "subtitle": "Yashil/Sariq/Qizil.",
+        "colors": {
+            "green": "aniqlandi",
+            "yellow": "tekshiring",
+            "red": "kiritish kerak"
+        },
+        "cols": {
+            "row": "Satr",
+            "date": "Sana",
+            "description": "Tavsif",
+            "amount": "Summa",
+            "status": "Holat",
+            "actions": "Amallar"
+        },
+        "actions": {
+            "fix": "Tuzatish"
+        },
+        "empty": "Qoralama yoʻq.",
+        "commitHelp": "Qizil satrlar ({red}) oʻtkazib yuboriladi.",
+        "commitButton": "Qabul qilish",
+        "committing": "Qabul qilinmoqda…",
+        "editor": {
+            "title": "Satrni tuzatish",
+            "accountCode": "Hisob kodi",
+            "accountCodeHelp": "NSBU kodi.",
+            "description": "Tavsif",
+            "learnRule": "Qoidaga qoʻshish"
+        }
     },
-    "compliance": {
-      "title": "XMHS muvofiqlik eslatmalari",
-      "depreciation": {
-        "1": "Barcha amortizatsiya hisoblari IAS 16 - Asosiy vositalar standartlariga muvofiq",
-        "2": "Hisobiy qiymat dastlabki qiymatdan to'plangan amortizatsiya va qadrsizlanish zararlarini ayirib tashlashni ifodalaydi",
-        "3": "Amortizatsiya stavkalari taxmin qilingan foydali ishlash muddatlari va qoldiq qiymatlariga asoslangan",
-        "4": "Qadrsizlanish belgilari bo'lgan aktivlar uchun qadrsizlanish testlari tavsiya etiladi"
-      },
-      "discounts": {
-        "1": "Barcha daromadlarni tan olish IFRS 15 - Mijozlar bilan shartnomalardan olinadigan daromadga muvofiq",
-        "2": "Bitim narxlari chegirmalarni o'z ichiga olgan o'zgaruvchan to'lovlarga moslashtiriladi",
-        "3": "Daromadni tan olish vaqti bajarilishi shart bo'lgan majburiyatlarning bajarilishiga asoslanadi",
-        "4": "Shartnoma majburiyatlari tovarlar/xizmatlarni o'tkazish majburiyatlarini ifodalaydi"
-      },
-      "impairment": {
-        "1": "Barcha qadrsizlanish testlari IAS 36 - Aktivlarning qadrsizlanishi standartlariga muvofiq",
-        "2": "Qoplanuvchi summa sotish uchun adolatli qiymat minus xarajatlar va foydalanish qiymatining eng yuqorisidan iborat",
-        "3": "Hisobiy qiymat qoplanuvchi summani oshirganda qadrsizlanish zararini tan olish",
-        "4": "Mustaqil naqd oqimlarini yaratmaydigan aktivlar uchun naqd yaratuvchi birliklar (NYB) aniqlanadi"
-      },
-      "balanceSheet": {
-        "1": "Balans milliy standartlar formatidan IFRS formatiga IAS 1 - Moliyaviy hisobotlarni taqdim etish standartiga muvofiq o'zgartirildi",
-        "2": "Joriy/uzoq muddatli klassifikatsiya 12 oylik operatsion tsikl testiga amal qiladi",
-        "3": "Barcha NSBU hisob kodlari tegishli IFRS qatorlariga moslashtirilgan",
-        "4": "Ushbu moslashtirish tuzilma moslashuvini ta'minlaydi, lekin to'liq IFRS tuzatishlari va professional auditni almashtirmaydi"
-      },
-      "cashFlow": {
-        "processed": "Pul oqimlari qatorlari qayta ishlandi",
-        "changesLabel": "Qator o'zgarishlari",
-        "changes": "185",
-        "formulasLabel": "Sof hisob-kitoblar",
-        "formulas": "24"
-      },
-      "profitLoss": {
-        "1": "Foyda va zararlar hisoboti NSBU byudjetidan IAS 1 ga muvofiq IFRS tuzilmasiga o'zgartirildi",
-        "2": "Daromad IFRS 15 ga muvofiq qurilish xizmatlaridan shartnoma daromadi sifatida tasniflanadi",
-        "3": "Xarajatlar IAS 1 ga muvofiq sotish tannarxi, operatsion xarajatlar va amortizatsiyaga bo'linadi",
-        "4": "EBITDA, EBIT va sof foyda to'liq shaffoflik uchun Excel formulalari orqali hisoblanadi"
-      }
+    "adjustments": {
+        "title": "IFRS tuzatishlari",
+        "subtitle": "NSBU bazasi ustidagi IFRS qatlami.",
+        "create": "Yangi tuzatish",
+        "empty": "Hali yoʻq.",
+        "filters": {
+            "status": "Holat",
+            "standard": "Standart"
+        },
+        "cols": {
+            "date": "Sana",
+            "standard": "Standart",
+            "reason": "Sabab",
+            "amount": "Summa",
+            "status": "Holat"
+        },
+        "status": {
+            "draft": "Qoralama",
+            "committed": "Qabul qilingan",
+            "reversed": "Bekor qilingan"
+        },
+        "editor": {
+            "titleNew": "Yangi tuzatish",
+            "titleView": "Tuzatish",
+            "date": "Sana",
+            "standard": "IFRS standarti",
+            "reason": "Sabab",
+            "taxEffect": "Soliq effekti",
+            "disclosure": "Eslatma matni",
+            "cols": {
+                "account": "Hisob",
+                "direction": "Tomon",
+                "amount": "Summa",
+                "description": "Izoh"
+            },
+            "addLine": "Qoʻshish",
+            "totalDebit": "Jami Dt",
+            "totalCredit": "Jami Cr",
+            "balanced": "Muvozanatda",
+            "unbalanced": "Farq: {diff}",
+            "saveDraft": "Saqlash",
+            "commit": "Qabul qilish",
+            "reverse": "Bekor qilish"
+        }
     },
-    "pagination": {
-      "rowsPerPage": "Sahifadagi qatorlar",
-      "showing": "{start}-{end} dan {total} ko'rsatilmoqda",
-      "previous": "Oldingi",
-      "next": "Keyingi",
-      "page": "Sahifa",
-      "of": "dan"
+    "periods": {
+        "title": "Hisobot davrlari",
+        "subtitle": "Har bir davr alohida balanslarga ega.",
+        "empty": "Davrlar yoʻq.",
+        "locked": "Yopiq",
+        "kind": {
+            "opening": "Kirish",
+            "comparative": "Solishtirma",
+            "reporting": "Hisobot",
+            "regular": "Oddiy"
+        },
+        "actions": {
+            "osv": "OSV yuklash",
+            "bank": "Koʻchirma",
+            "adjustment": "Tuzatish",
+            "lock": "Yopish",
+            "reopen": "Qayta ochish"
+        },
+        "createNew": "Yangi davr",
+        "createTitle": "Yangi davr yaratish",
+        "fields": {
+            "label": "Nomi",
+            "labelPlaceholder": "Q1 2026",
+            "startDate": "Boshlanish",
+            "endDate": "Tugash"
+        }
     },
-    "balanceSheet": {
-      "title": "MOLIYAVIY AHVOL TO'G'RISIDA HISOBOT (XMHS)",
-      "asAt": "{date} holatiga ko'ra",
-      "inn": "STIR: {inn}",
-      "columns": {
-        "ifrsCode": "XMHS kodi",
-        "lineItem": "Qator nomi",
-        "nsbuCode": "milliy standartlar kodi",
-        "beginningBalance": "Boshlang'ich balans (so'm)",
-        "endingBalance": "Yakuniy balans (so'm)"
-      },
-      "sections": {
-        "nonCurrentAssets": "Uzoq muddatli aktivlar",
-        "currentAssets": "Joriy aktivlar",
-        "equity": "Kapital",
-        "nonCurrentLiabilities": "Uzoq muddatli majburiyatlar",
-        "currentLiabilities": "Joriy majburiyatlar"
-      },
-      "total": "Jami {section}",
-      "totalAssets": "JAMI AKTIVLAR",
-      "totalEquityLiabilities": "JAMI KAPITAL VA MAJBURIYATLAR"
+    "chart": {
+        "title": "NSBU hisoblar rejasi",
+        "subtitle": "1C dan 507 hisob.",
+        "searchPlaceholder": "Qidirish…",
+        "allVids": "Barcha turlar",
+        "empty": "Hisoblar yuklanmagan.",
+        "emptyNote": "Oʻqish endpointi keyingi kommitlarda.",
+        "cols": {
+            "code": "Kod",
+            "name": "Nomi",
+            "vid": "Tur",
+            "subconto": "Subkonto"
+        },
+        "vid": {
+            "active": "Aktiv",
+            "passive": "Passiv",
+            "contraActive": "Kontr-aktiv",
+            "contraPassive": "Kontr-passiv",
+            "technical": "Texnik"
+        }
     },
-    "cashFlow": {
-      "title": "PUL OQIMLARI HISOBOTI (IFRS)",
-      "period": "{date} sanasida tugagan davr uchun",
-      "inn": "INN: {inn}",
-      "columns": {
-        "lineItem": "Pul oqimi qatori",
-        "amount": "Summa (so'm)"
-      },
-      "sections": {
-        "operating": "Operatsion faoliyat",
-        "investing": "Investitsion faoliyat",
-        "financing": "Moliyaviy faoliyat",
-        "reconciliation": "Uzlashtirish"
-      },
-      "totals": {
-        "netOperating": "Operatsion faoliyatdan sof pul mablag'lari",
-        "netInvesting": "Investitsion faoliyatdan sof pul mablag'lari",
-        "netFinancing": "Moliyaviy faoliyatdan sof pul mablag'lari",
-        "netChange": "Pul mablag'larining sof o'sishi/(kamayishi)",
-        "fxEffects": "Valyuta kurslari o'zgarishining ta'siri",
-        "cashBeginning": "Davr boshidagi pul mablag'lari",
-        "cashEnding": "Davr oxiridagi pul mablag'lari"
-      }
+    "matrix": {
+        "title": "Transformatsiya matritsasi",
+        "subtitle": "NSBU → Tasniflash → Tuzatishlar → IFRS.",
+        "period": "Davr",
+        "empty": "Balanslar yoʻq.",
+        "cols": {
+            "account": "Hisob / Subkonto"
+        },
+        "layer": {
+            "nsbu": "NSBU",
+            "reclass": "Tasniflash",
+            "adjustment": "Tuzatish",
+            "ifrs": "IFRS"
+        }
+    },
+    "members": {
+        "title": "Tashkilot aʼzolari",
+        "invite": "Taklif qilish",
+        "send": "Yuborish",
+        "inviteTitle": "Yangi taklif",
+        "editTitle": "Tahrirlash",
+        "empty": "Aʼzo yoʻq.",
+        "fields": {
+            "email": "Email",
+            "role": "Rol",
+            "capabilities": "Vakolatlar"
+        },
+        "actions": {
+            "edit": "Tahrirlash",
+            "revoke": "Olib tashlash"
+        },
+        "status": {
+            "pending": "Kutilmoqda",
+            "revoked": "Olib tashlangan"
+        }
     }
-  },
-  "history": {
-    "newFile": "Yangi fayl",
-    "file": "fayl",
-    "files": "fayl",
-    "dateJustNow": "hozirgina",
-    "dateMinutesAgo": "{n} daq. oldin",
-    "dateHoursAgo": "{n} soat oldin",
-    "dateYesterday": "Kecha",
-    "title": "Fayllar tarixi",
-    "subtitle": "Barcha qayta ishlangan fayllarni ko'ring va boshqaring",
-    "filters": {
-      "search": "Qidirish",
-      "searchPlaceholder": "Fayl nomi bo'yicha qidirish...",
-      "status": "Holat",
-      "allStatuses": "Barcha holatlar",
-      "template": "Shablon",
-      "allTemplates": "Barcha shablonlar",
-      "dateRange": "Sana oralig'i",
-      "allDates": "Barcha sanalar",
-      "today": "Bugun",
-      "thisWeek": "Shu hafta",
-      "thisMonth": "Shu oy",
-      "thisQuarter": "3 oy ichida",
-      "clearAll": "Barcha filtrlarni tozalash"
-    },
-    "table": {
-      "fileName": "Fayl nomi",
-      "template": "Shablon",
-      "status": "Holat",
-      "processed": "Sana",
-      "actions": "Amallar",
-      "completed": "Tugallangan"
-    },
-    "actions": {
-      "view": "Natijalarni ko'rish",
-      "viewProcessing": "Qayta ishlashni ko'rish",
-      "download": "Yuklash",
-      "retry": "Qayta ishlashni takrorlash",
-      "delete": "O'chirish",
-      "confirmDelete": "'{name}' faylini o'chirishga ishonchingiz komilmi? Bu amalni bekor qilib bo'lmaydi."
-    },
-    "error": {
-      "title": "Fayllarni yuklashda xatolik",
-      "fetchFailed": "Fayllar tarixini yuklashda xatolik. Qayta urinib ko'ring."
-    },
-    "empty": {
-      "title": "Hali fayllar yo'q",
-      "description": "Siz hali qayta ishlash uchun fayllar yuklamagansiz.",
-      "uploadFirst": "Birinchi faylni yuklash"
-    },
-    "noResults": {
-      "title": "Fayllar topilmadi",
-      "description": "Joriy filtrlar bo'yicha hech qanday fayl topilmadi. Qidiruv mezonlarini o'zgartirib ko'ring."
-    },
-    "showingResults": "{total}dan {count} fayl ko'rsatilmoqda",
-    "pagination": {
-      "showing": "{total}dan {start} dan {end} gacha natija ko'rsatilmoqda",
-      "previous": "Oldingi",
-      "next": "Keyingi",
-      "of": "dan"
-    }
-  },
-  "common": {
-    "goHome": "Bosh sahifaga",
-    "loading": "Yuklanmoqda...",
-    "uploading": "Yuklanmoqda...",
-    "error": "Xatolik",
-    "success": "Muvaffaqiyat",
-    "cancel": "Bekor qilish",
-    "save": "Saqlash",
-    "delete": "O'chirish",
-    "edit": "Tahrirlash",
-    "upload": "Yuklash",
-    "download": "Yuklab olish",
-    "process": "Qayta ishlash",
-    "downloading": "Yuklab olinmoqda...",
-    "retry": "Qayta urinish",
-    "back": "Orqaga",
-    "goBack": "Orqaga",
-    "backToDashboard": "Boshqaruv paneliga qaytish"
-  },
-  "transformation": {
-    "sectionTitle": "Avval / Keyin",
-    "sectionHint": "Maʼlumotlar farqini koʻrish uchun bosing",
-    "loading": "Transformatsiya yuklanmoqda…",
-    "generate": "Farqni yaratish",
-    "generating": "Yaratilmoqda…",
-    "notAvailable": {
-      "title": "Transformatsiya maʼlumotlari hali tayyor emas",
-      "description": "Ushbu fayl ushbu funksiya qoʻshilishidan oldin qayta ishlangan. Maʼlumotlarni yaratish uchun quyidagi tugmani bosing."
-    },
-    "unsupported": {
-      "title": "Ushbu shablon uchun farq hali qoʻllab-quvvatlanmaydi",
-      "description": "Ayni paytda faqat balans hisoboti uchun mavjud."
-    },
-    "error": {
-      "title": "Transformatsiyani yuklab boʻlmadi",
-      "generic": "Nimadir xato ketdi. Qayta urinib koʻring."
-    },
-    "toggle": {
-      "source": "Manba",
-      "extracted": "Aniqlangan maydonlar",
-      "ifrs": "XHMS"
-    }
-  }
 }

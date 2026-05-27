@@ -9,6 +9,8 @@
 //   - src/admin/seedLocales/*.json  → dist/admin/seedLocales/
 //   - src/mappings/**/*.json        → dist/mappings/**/*.json (none today, but
 //                                     reserved so future seed JSON works)
+//   - src/ledger/seedChart/*.json   → dist/ledger/seedChart/ (NSBU chart-of-
+//                                     accounts seed loaded at org bootstrap)
 
 import { cp, mkdir, readdir, stat } from 'node:fs/promises';
 import * as path from 'node:path';
@@ -22,6 +24,7 @@ const COPIES = [
   // src/mappings/ currently has no JSON, but keep the entry so adding one
   // Just Works without remembering to update this script.
   { src: 'src/mappings', dst: 'dist/mappings', filter: (n) => n.endsWith('.json') },
+  { src: 'src/ledger/seedChart', dst: 'dist/ledger/seedChart', filter: (n) => n.endsWith('.json') },
 ];
 
 async function exists(p) {
