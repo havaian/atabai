@@ -145,7 +145,7 @@ onMounted(loadStats)
     justify-content: space-between;
     align-items: center;
     padding: 6px 0;
-    border-bottom: 1px solid rgba(149, 0, 255, 0.06);
+    border-bottom: 1px solid var(--adm-border-soft);
 }
 
 .adm-bar-row:last-child {
@@ -154,12 +154,12 @@ onMounted(loadStats)
 
 .adm-bar-label {
     font-size: 13px;
-    color: rgba(240, 236, 246, 0.85);
+    color: var(--adm-text);
 }
 
 .adm-bar-value {
     font-size: 14px;
     font-weight: 600;
-    color: rgba(240, 236, 246, 0.95);
+    color: var(--adm-text);
 }
 </style>

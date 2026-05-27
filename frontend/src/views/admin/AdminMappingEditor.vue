@@ -166,9 +166,9 @@
                                 {{ row.section }}<span v-if="row.subsection"> / {{ row.subsection }}</span>
                             </td>
                             <td>
-                                <span v-if="row.isCalculated" class="adm-badge" style="background: rgba(168, 85, 247, 0.18); color: #c084fc;">{{ $t('admin.mappingEditor.flagCalc') }}</span>
-                                <span v-if="row.isNegative" class="adm-badge" style="background: rgba(239, 68, 68, 0.15); color: #fca5a5; margin-left: 4px;">{{ $t('admin.mappingEditor.flagNeg') }}</span>
-                                <span v-if="row.flowType" class="adm-badge" style="background: rgba(59, 130, 246, 0.15); color: #93c5fd; margin-left: 4px;">{{ row.flowType }}</span>
+                                <span v-if="row.isCalculated" class="adm-badge adm-badge--flag-calc">{{ $t('admin.mappingEditor.flagCalc') }}</span>
+                                <span v-if="row.isNegative" class="adm-badge adm-badge--flag-neg">{{ $t('admin.mappingEditor.flagNeg') }}</span>
+                                <span v-if="row.flowType" class="adm-badge adm-badge--flag-flow">{{ row.flowType }}</span>
                             </td>
                             <td class="adm-mono adm-text-xs adm-muted">
                                 {{ formatFormula(row.formula) }}
@@ -208,7 +208,13 @@
                         @connect="onGraphConnect"
                         @edge-click="onGraphEdgeClick"
                     >
-                        <Background pattern-color="rgba(149, 0, 255, 0.08)" :gap="20" />
+                        <!-- Vue Flow `Background` paints SVG dots inline and
+                             does not read CSS custom properties. A faint
+                             purple at 0.08 alpha is visible (just barely)
+                             on both light and dark theme surfaces, so we
+                             leave it literal rather than maintain two
+                             variants. -->
+                        <Background pattern-color="rgba(124, 58, 237, 0.12)" :gap="20" />
                         <MiniMap pannable zoomable />
                         <Controls />
                     </VueFlow>
@@ -229,8 +235,8 @@
                             <div v-for="c in equityConfig.columns" :key="c.key" class="adm-equity-item">
                                 <span class="adm-mono">{{ c.key }}</span>
                                 <span class="adm-text-sm">{{ c.label }}</span>
-                                <span v-if="c.isNegative" class="adm-badge" style="background: rgba(239, 68, 68, 0.15); color: #fca5a5;">{{ $t('admin.mappingEditor.flagNeg') }}</span>
-                                <span v-if="c.isCalculated" class="adm-badge" style="background: rgba(168, 85, 247, 0.18); color: #c084fc;">{{ $t('admin.mappingEditor.flagCalc') }}</span>
+                                <span v-if="c.isNegative" class="adm-badge adm-badge--flag-neg">{{ $t('admin.mappingEditor.flagNeg') }}</span>
+                                <span v-if="c.isCalculated" class="adm-badge adm-badge--flag-calc">{{ $t('admin.mappingEditor.flagCalc') }}</span>
                                 <span class="adm-mono adm-text-xs adm-muted">
                                     [{{ (c.nsbuRows || []).join(', ') }}]
                                 </span>
@@ -244,7 +250,7 @@
                             <div v-for="r in equityConfig.movementRows" :key="r.key" class="adm-equity-item">
                                 <span class="adm-mono">{{ r.key }}</span>
                                 <span class="adm-text-sm">{{ r.label }}</span>
-                                <span v-if="r.isTotal" class="adm-badge" style="background: rgba(168, 85, 247, 0.18); color: #c084fc;">{{ $t('admin.mappingEditor.equityFlagTotal') }}</span>
+                                <span v-if="r.isTotal" class="adm-badge adm-badge--flag-calc">{{ $t('admin.mappingEditor.equityFlagTotal') }}</span>
                             </div>
                         </div>
                     </div>
@@ -317,10 +323,10 @@
                             <div class="adm-muted adm-text-xs" style="margin-top: 6px;">
                                 {{ $t('admin.mappingEditor.equityJsonHint') }}
                             </div>
-                            <div v-if="equityJsonError" class="adm-text-sm" style="color: #fca5a5; margin-top: 8px;">
+                            <div v-if="equityJsonError" class="adm-text-sm" style="color: var(--adm-danger-text); margin-top: 8px;">
                                 {{ equityJsonError }}
                             </div>
-                            <div v-else-if="equitySaveError" class="adm-text-sm" style="color: #fca5a5; margin-top: 8px;">
+                            <div v-else-if="equitySaveError" class="adm-text-sm" style="color: var(--adm-danger-text); margin-top: 8px;">
                                 {{ equitySaveError }}
                             </div>
                         </div>
@@ -671,17 +677,24 @@ function buildGraph() {
         const targets = codes.length > 0 ? codes : [`row:${r.nsbuRowCode}`]
         targets.forEach(code => {
             if (!r.ifrsClassification) return
+            // Vue Flow renders these as inline SVG attributes and does not
+            // resolve CSS custom properties. Colors here are chosen to stay
+            // legible on both light and dark surfaces:
+            //   - label fill: mid-grey (#71717a) reads on white and on
+            //     the dark workspace bg.
+            //   - edge stroke: saturated red (#ef4444) and saturated
+            //     purple (#a855f7) are visible in both themes.
             edges.push({
                 id: `e:${code}->${r.nsbuRowCode}->${r.ifrsClassification}`,
                 source: `nsbu:${code}`,
                 target: `ifrs:${r.ifrsClassification}`,
                 label: r.nsbuRowCode,
-                labelStyle: { fontSize: '10px', fill: 'rgba(240, 236, 246, 0.7)' },
+                labelStyle: { fontSize: '10px', fill: '#71717a' },
                 style: {
-                    stroke: r.isNegative ? '#f87171' : '#a855f7',
+                    stroke: r.isNegative ? '#ef4444' : '#a855f7',
                     strokeWidth: 1.5
                 },
-                markerEnd: { type: MarkerType.ArrowClosed, color: r.isNegative ? '#f87171' : '#a855f7' }
+                markerEnd: { type: MarkerType.ArrowClosed, color: r.isNegative ? '#ef4444' : '#a855f7' }
             })
         })
     })
@@ -1062,8 +1075,8 @@ onMounted(loadSet)
 
 <style scoped>
 .adm-graph-container {
-    background: rgba(20, 14, 32, 0.6);
-    border: 1px solid rgba(149, 0, 255, 0.12);
+    background: var(--adm-surface);
+    border: 1px solid var(--adm-border);
     border-radius: 12px;
     overflow: hidden;
 }
@@ -1073,66 +1086,98 @@ onMounted(loadSet)
     align-items: center;
     gap: 12px;
     padding: 12px 16px;
-    border-bottom: 1px solid rgba(149, 0, 255, 0.1);
+    border-bottom: 1px solid var(--adm-border-soft);
 }
 
 .adm-graph-hint {
     padding: 8px 16px;
-    border-top: 1px solid rgba(149, 0, 255, 0.1);
+    border-top: 1px solid var(--adm-border-soft);
     font-size: 11px;
-    color: rgba(240, 236, 246, 0.5);
-    background: rgba(15, 10, 26, 0.4);
+    color: var(--adm-text-muted);
+    background: var(--adm-input-bg);
 }
 
 .adm-graph-canvas {
     height: calc(100vh - 280px);
     min-height: 500px;
-    background: rgb(15, 10, 26);
+    /* Canvas keeps a slightly recessed surface so the Vue Flow nodes and
+       edges have contrast against it in both themes. --adm-input-bg has
+       the right "darker than the card" character in both light and dark. */
+    background: var(--adm-input-bg);
+}
+
+/* ─── Inline flag badges (used in row + equity column lists) ──────────────
+   Replaced four inline `style="background: rgba(...); color: #..."`
+   sites that hardcoded dark-theme values. The classes below use the
+   shared --adm-badge-* token pairs so they swap with theme. */
+.adm-badge--flag-calc {
+    background: var(--adm-badge-purple-bg);
+    color: var(--adm-badge-purple-text);
+}
+.adm-badge--flag-neg {
+    background: var(--adm-badge-danger-bg);
+    color: var(--adm-badge-danger-text);
+    margin-left: 4px;
+}
+.adm-badge--flag-flow {
+    background: var(--adm-badge-info-bg);
+    color: var(--adm-badge-info-text);
+    margin-left: 4px;
+}
+/* When a flag-calc badge directly follows another badge (e.g. the equity
+   column where flag-neg is rendered before flag-calc), inherit the small
+   gap so the badges don't visually collide. */
+.adm-badge--flag-neg + .adm-badge--flag-calc,
+.adm-badge--flag-flow + .adm-badge--flag-calc {
+    margin-left: 4px;
 }
 
 /* vue-flow node styling */
 :deep(.vue-flow__node) {
-    background: rgba(30, 22, 50, 0.95);
-    border: 1px solid rgba(149, 0, 255, 0.3);
-    color: rgba(240, 236, 246, 0.95);
+    background: var(--adm-surface-2);
+    border: 1px solid var(--adm-border);
+    color: var(--adm-text);
     font-size: 12px;
     padding: 6px 10px;
     border-radius: 6px;
 }
 
 :deep(.adm-flow-node--nsbu) {
-    border-color: rgba(168, 85, 247, 0.45);
+    /* NSBU side of the graph — purple accent to match the product palette. */
+    border-color: var(--adm-badge-purple-bg);
     font-family: 'SF Mono', Monaco, Consolas, monospace;
 }
 
 :deep(.adm-flow-node--ifrs) {
-    border-color: rgba(96, 165, 250, 0.45);
-    background: rgba(20, 30, 50, 0.95);
+    /* IFRS side — blue accent so the two columns are visually distinct
+       regardless of label content. */
+    border-color: var(--adm-badge-info-bg);
+    background: var(--adm-badge-info-bg);
 }
 
 :deep(.vue-flow__node.selected) {
-    border-color: #c084fc;
-    box-shadow: 0 0 0 2px rgba(192, 132, 252, 0.25);
+    border-color: var(--adm-input-border-focus);
+    box-shadow: 0 0 0 2px var(--adm-nav-bg-active);
 }
 
 :deep(.vue-flow__minimap) {
-    background: rgba(15, 10, 26, 0.9);
+    background: var(--adm-surface);
 }
 
 :deep(.vue-flow__controls) {
-    background: rgba(15, 10, 26, 0.9);
-    border: 1px solid rgba(149, 0, 255, 0.2);
+    background: var(--adm-surface);
+    border: 1px solid var(--adm-input-border);
     border-radius: 6px;
 }
 
 :deep(.vue-flow__controls-button) {
     background: transparent;
-    color: rgba(240, 236, 246, 0.85);
-    border-bottom: 1px solid rgba(149, 0, 255, 0.1);
+    color: var(--adm-text);
+    border-bottom: 1px solid var(--adm-border-soft);
 }
 
 :deep(.vue-flow__controls-button:hover) {
-    background: rgba(149, 0, 255, 0.1);
+    background: var(--adm-nav-bg-hover);
 }
 
 /* Equity list */
@@ -1147,7 +1192,7 @@ onMounted(loadSet)
     align-items: center;
     gap: 10px;
     padding: 6px 10px;
-    background: rgba(15, 10, 26, 0.5);
+    background: var(--adm-input-bg);
     border-radius: 6px;
     flex-wrap: wrap;
 }
@@ -1168,14 +1213,14 @@ onMounted(loadSet)
     align-items: flex-start;
     gap: 10px;
     padding: 10px 12px;
-    background: rgba(15, 10, 26, 0.4);
-    border: 1px solid rgba(149, 0, 255, 0.08);
+    background: var(--adm-input-bg);
+    border: 1px solid var(--adm-border-soft);
     border-radius: 8px;
     cursor: pointer;
 }
 
 .adm-flag-row:hover {
-    background: rgba(15, 10, 26, 0.55);
+    background: var(--adm-nav-bg-hover);
 }
 
 .adm-flag-row input[type="checkbox"] {
@@ -1192,7 +1237,7 @@ onMounted(loadSet)
 
 .adm-flag-label {
     font-size: 13px;
-    color: var(--adm-text, #f0ecf6);
+    color: var(--adm-text);
     font-weight: 500;
 }
 
@@ -1208,7 +1253,7 @@ onMounted(loadSet)
 .adm-equity-editor {
     margin-top: 20px;
     padding-top: 16px;
-    border-top: 1px solid rgba(149, 0, 255, 0.1);
+    border-top: 1px solid var(--adm-border-soft);
 }
 
 .adm-equity-json {
@@ -1218,9 +1263,9 @@ onMounted(loadSet)
     font-family: 'SF Mono', 'Monaco', 'Menlo', 'Consolas', monospace;
     font-size: 12.5px;
     line-height: 1.5;
-    color: var(--adm-text, #f0ecf6);
-    background: rgba(10, 6, 18, 0.7);
-    border: 1px solid rgba(149, 0, 255, 0.15);
+    color: var(--adm-text);
+    background: var(--adm-input-bg);
+    border: 1px solid var(--adm-input-border);
     border-radius: 8px;
     resize: vertical;
     box-sizing: border-box;
@@ -1228,7 +1273,7 @@ onMounted(loadSet)
 
 .adm-equity-json:focus {
     outline: none;
-    border-color: rgba(168, 85, 247, 0.5);
+    border-color: var(--adm-input-border-focus);
 }
 
 /* Local copy of the chip style from UserMultiSelect — needed here because
@@ -1239,11 +1284,11 @@ onMounted(loadSet)
     align-items: center;
     gap: 4px;
     padding: 4px 8px;
-    background: rgba(149, 0, 255, 0.15);
-    border: 1px solid rgba(149, 0, 255, 0.3);
+    background: var(--adm-nav-bg-active);
+    border: 1px solid var(--adm-border);
     border-radius: 12px;
     font-size: 12px;
-    color: var(--adm-text, #f0ecf6);
+    color: var(--adm-text);
 }
 
 .adm-user-multi-chip-email {

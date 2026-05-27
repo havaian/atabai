@@ -93,7 +93,9 @@
                         </td>
                         <td>
                             <span class="adm-badge adm-text-xs"
-                                :style="k.source === 'db' ? 'background: rgba(168, 85, 247, 0.15); color: #c084fc;' : 'background: rgba(100, 100, 100, 0.2); color: rgba(240, 236, 246, 0.6);'">
+                                :class="k.source === 'db'
+                                    ? 'adm-badge--source-db'
+                                    : 'adm-badge--source-file'">
                                 {{ k.source }}
                             </span>
                         </td>
@@ -397,11 +399,11 @@ onMounted(async () => {
 }
 
 .adm-locale-cell--missing {
-    background: rgba(239, 68, 68, 0.04);
+    background: var(--adm-btn-danger-bg);
 }
 
 .adm-locale-value {
-    color: rgba(240, 236, 246, 0.92);
+    color: var(--adm-text);
 }
 
 .adm-locale-empty {
@@ -410,9 +412,9 @@ onMounted(async () => {
 
 .adm-locale-edit-textarea {
     width: 100%;
-    background: rgba(15, 10, 26, 0.9);
-    border: 1px solid rgba(168, 85, 247, 0.5);
-    color: rgba(240, 236, 246, 0.95);
+    background: var(--adm-input-bg);
+    border: 1px solid var(--adm-input-border-focus);
+    color: var(--adm-text);
     border-radius: 4px;
     padding: 6px 8px;
     font-size: 12px;
@@ -424,21 +426,36 @@ onMounted(async () => {
 }
 
 .adm-locale-edit-textarea:focus {
-    border-color: #c084fc;
-    box-shadow: 0 0 0 2px rgba(192, 132, 252, 0.18);
+    border-color: var(--adm-input-border-focus);
+    /* Subtle focus halo — uses the focus border color at low opacity so
+       it harmonises with both themes. */
+    box-shadow: 0 0 0 2px var(--adm-nav-bg-active);
 }
 
-.adm-badge--role-user {
-    background: rgba(96, 165, 250, 0.15);
-    color: #93c5fd;
+/* Source badge — distinguishes keys hot-overlaid from the DB vs those
+   bundled from the per-locale JSON files. Replaces a former inline
+   :style="..." conditional which hardcoded dark-theme colors. */
+.adm-badge--source-db {
+    background: var(--adm-badge-purple-bg);
+    color: var(--adm-badge-purple-text);
 }
+.adm-badge--source-file {
+    background: var(--adm-badge-neutral-bg);
+    color: var(--adm-badge-neutral-text);
+}
+
+/* Note: an override here would conflict with the shared admin.css
+   .adm-badge--role-user (neutral grey). Earlier this file redefined
+   .adm-badge--role-user to a blue tint — that was an accidental
+   collision with the shared "user" role styling. The block is removed
+   in favour of the canonical definition in admin.css. */
 
 .adm-2fa-error {
-    color: #fca5a5;
+    color: var(--adm-danger-text);
     font-size: 12px;
     padding: 6px 10px;
-    background: rgba(220, 38, 38, 0.08);
-    border: 1px solid rgba(220, 38, 38, 0.2);
+    background: var(--adm-btn-danger-bg);
+    border: 1px solid var(--adm-btn-danger-bg-hover);
     border-radius: 6px;
     margin-top: 10px;
 }

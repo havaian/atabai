@@ -40,7 +40,7 @@
                             <div class="adm-field-label">{{ $t('admin.fileDetail.fieldOwner') }}</div>
                             <router-link v-if="file.userId"
                                 :to="`/admin/users/${file.userId._id}`"
-                                style="color: #c084fc; text-decoration: none;">
+                                style="color: var(--adm-nav-text-active); text-decoration: none;">
                                 {{ file.userId.email }}
                             </router-link>
                         </div>
@@ -291,16 +291,16 @@ onMounted(loadFile)
     align-items: center;
     gap: 10px;
     padding: 6px 10px;
-    background: rgba(15, 10, 26, 0.5);
+    background: var(--adm-input-bg);
     border-radius: 6px;
 }
 
 .adm-error-pre {
-    background: rgba(220, 38, 38, 0.06);
-    border: 1px solid rgba(220, 38, 38, 0.2);
+    background: var(--adm-btn-danger-bg);
+    border: 1px solid var(--adm-btn-danger-bg-hover);
     padding: 12px;
     border-radius: 8px;
-    color: #fca5a5;
+    color: var(--adm-danger-text);
     font-size: 12px;
     overflow-x: auto;
     white-space: pre-wrap;
@@ -309,11 +309,11 @@ onMounted(loadFile)
 }
 
 .adm-json-pre {
-    background: rgba(15, 10, 26, 0.6);
-    border: 1px solid rgba(149, 0, 255, 0.1);
+    background: var(--adm-input-bg);
+    border: 1px solid var(--adm-border);
     padding: 14px;
     border-radius: 8px;
-    color: rgba(240, 236, 246, 0.85);
+    color: var(--adm-text);
     font-size: 12px;
     font-family: 'SF Mono', Monaco, Consolas, monospace;
     overflow-x: auto;

@@ -271,28 +271,28 @@ function back() { router.push('/app/organizations') }
     margin-bottom: 24px;
 }
 .members-back {
-    background: transparent; border: none; color: var(--text-light); cursor: pointer;
+    background: transparent; border: none; color: var(--ws-text-3); cursor: pointer;
     display: inline-flex; align-items: center; gap: 6px; font-size: 0.85rem;
 }
 .members-header h1 { font-size: 1.3rem; font-weight: 600; }
-.members-header p { font-size: 0.88rem; color: var(--text-light); }
+.members-header p { font-size: 0.88rem; color: var(--ws-text-3); }
 .members-header > div { flex: 1; }
 
 .members-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
 .member-card {
     display: flex; align-items: center; gap: 12px; padding: 12px 16px;
-    background: var(--card-bg, #fff); border: 1px solid var(--border); border-radius: 10px;
+    background: var(--ws-surface); border: 1px solid var(--ws-border); border-radius: 10px;
 }
 .member-card--pending { background: rgba(237, 137, 54, 0.04); border-color: rgba(237, 137, 54, 0.3); }
 .member-card--revoked { opacity: 0.5; }
 .member-card-avatar {
-    width: 36px; height: 36px; border-radius: 8px; background: var(--primary); color: white;
+    width: 36px; height: 36px; border-radius: 8px; background: var(--ws-purple); color: white;
     display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 600;
     flex-shrink: 0;
 }
 .member-card-info { flex: 1; min-width: 0; }
 .member-card-name {
-    display: flex; align-items: center; gap: 8px; font-weight: 500; color: var(--text);
+    display: flex; align-items: center; gap: 8px; font-weight: 500; color: var(--ws-text);
     word-break: break-all;
 }
 .member-card-status {
@@ -301,46 +301,46 @@ function back() { router.push('/app/organizations') }
 .member-card-status--pending { background: rgba(237, 137, 54, 0.15); color: #c05621; }
 .member-card-status--revoked { background: rgba(160, 174, 192, 0.2); color: #4a5568; }
 .member-card-meta {
-    font-size: 0.82rem; color: var(--text-light); display: flex; align-items: center; gap: 4px;
+    font-size: 0.82rem; color: var(--ws-text-3); display: flex; align-items: center; gap: 4px;
     margin-top: 2px;
 }
 .member-card-role { text-transform: capitalize; }
 .member-card-caps { font-family: monospace; font-size: 0.75rem; }
 .member-card-actions { display: flex; gap: 6px; }
 .member-action {
-    padding: 5px 10px; background: transparent; border: 1px solid var(--border); border-radius: 6px;
-    color: var(--text); font-size: 0.78rem; cursor: pointer;
+    padding: 5px 10px; background: transparent; border: 1px solid var(--ws-border); border-radius: 6px;
+    color: var(--ws-text); font-size: 0.78rem; cursor: pointer;
 }
-.member-action:hover:not(:disabled) { background: var(--accent); }
+.member-action:hover:not(:disabled) { background: var(--ws-surface-2); }
 .member-action:disabled { opacity: 0.5; cursor: not-allowed; }
 .member-action--danger { color: #c53030; border-color: rgba(245, 101, 101, 0.4); }
 .member-action--danger:hover:not(:disabled) { background: rgba(245, 101, 101, 0.06); }
 
 .members-empty {
-    padding: 60px 24px; text-align: center; color: var(--text-light);
-    background: var(--accent); border-radius: 12px;
+    padding: 60px 24px; text-align: center; color: var(--ws-text-3);
+    background: var(--ws-surface-2); border-radius: 12px;
 }
 .members-error {
     margin-top: 12px; padding: 10px 14px; background: rgba(245, 101, 101, 0.1);
     color: #c53030; border-radius: 8px; font-size: 0.86rem;
 }
 .spinner {
-    width: 24px; height: 24px; border: 2.5px solid var(--border); border-top-color: var(--primary);
+    width: 24px; height: 24px; border: 2.5px solid var(--ws-border); border-top-color: var(--ws-purple);
     border-radius: 50%; margin: 0 auto; animation: spin 0.85s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 .btn-primary {
-    background: var(--primary); color: white; padding: 9px 16px; border-radius: 8px;
+    background: var(--ws-purple); color: white; padding: 9px 16px; border-radius: 8px;
     border: none; font-weight: 500; cursor: pointer;
     display: inline-flex; align-items: center; gap: 6px; font-size: 0.9rem;
 }
-.btn-primary:hover:not(:disabled) { background: var(--primary-dark); }
+.btn-primary:hover:not(:disabled) { background: #6D28D9; }
 .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
 .btn-ghost {
-    background: transparent; color: var(--text); border: 1px solid var(--border);
+    background: transparent; color: var(--ws-text); border: 1px solid var(--ws-border);
     padding: 9px 16px; border-radius: 8px; cursor: pointer;
 }
-.btn-ghost:hover { background: var(--accent); }
+.btn-ghost:hover { background: var(--ws-surface-2); }
 
 /* Modal — same template as PeriodsView */
 .modal-backdrop {
@@ -348,28 +348,28 @@ function back() { router.push('/app/organizations') }
     display: flex; align-items: center; justify-content: center; z-index: 90;
 }
 .modal-card {
-    background: var(--card-bg, #fff); border-radius: 14px;
+    background: var(--ws-surface); border-radius: 14px;
     width: 100%; max-width: 460px; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
 }
 .modal-header {
     display: flex; align-items: center; justify-content: space-between;
-    padding: 14px 18px; border-bottom: 1px solid var(--border);
+    padding: 14px 18px; border-bottom: 1px solid var(--ws-border);
 }
 .modal-header h2 { font-size: 1.05rem; font-weight: 600; }
-.modal-close { background: transparent; border: none; cursor: pointer; color: var(--text-light); }
+.modal-close { background: transparent; border: none; cursor: pointer; color: var(--ws-text-3); }
 .modal-body { padding: 18px; display: flex; flex-direction: column; gap: 12px; }
 .modal-context {
-    font-size: 0.85rem; color: var(--text-light); background: var(--accent);
+    font-size: 0.85rem; color: var(--ws-text-3); background: var(--ws-surface-2);
     padding: 8px 12px; border-radius: 6px; word-break: break-all;
 }
 .modal-field { display: flex; flex-direction: column; gap: 6px; font-size: 0.85rem; }
 .modal-field input,
 .modal-field select {
-    padding: 9px 11px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.9rem;
-    background: var(--card-bg, #fff);
+    padding: 9px 11px; border: 1px solid var(--ws-border); border-radius: 6px; font-size: 0.9rem;
+    background: var(--ws-surface);
 }
 .modal-field input:focus,
-.modal-field select:focus { outline: none; border-color: var(--primary); }
+.modal-field select:focus { outline: none; border-color: var(--ws-purple); }
 .modal-checkbox {
     display: flex; align-items: center; gap: 8px; font-size: 0.85rem; cursor: pointer;
 }
@@ -379,7 +379,7 @@ function back() { router.push('/app/organizations') }
 }
 .modal-footer {
     display: flex; gap: 8px; justify-content: flex-end;
-    padding: 12px 18px; border-top: 1px solid var(--border);
+    padding: 12px 18px; border-top: 1px solid var(--ws-border);
 }
 .modal-fade-enter-active, .modal-fade-leave-active { transition: opacity 0.15s; }
 .modal-fade-enter-from, .modal-fade-leave-to { opacity: 0; }

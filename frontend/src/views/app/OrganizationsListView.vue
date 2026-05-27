@@ -141,20 +141,20 @@ async function accept(membershipId) {
 .orgs-header h1 {
     font-size: 1.4rem;
     font-weight: 600;
-    color: var(--text);
+    color: var(--ws-text);
     margin-bottom: 4px;
 }
 
 .orgs-header p {
     font-size: 0.92rem;
-    color: var(--text-light);
+    color: var(--ws-text-3);
 }
 
 .orgs-create-btn {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    background: var(--primary);
+    background: var(--ws-purple);
     color: white;
     padding: 9px 14px;
     border-radius: 8px;
@@ -166,7 +166,7 @@ async function accept(membershipId) {
 }
 
 .orgs-create-btn:hover {
-    background: var(--primary-dark);
+    background: #6D28D9;
 }
 
 .orgs-section {
@@ -176,7 +176,7 @@ async function accept(membershipId) {
 .orgs-section-title {
     font-size: 0.85rem;
     font-weight: 600;
-    color: var(--text-light);
+    color: var(--ws-text-3);
     letter-spacing: 0.04em;
     text-transform: uppercase;
     margin-bottom: 12px;
@@ -198,8 +198,8 @@ async function accept(membershipId) {
     align-items: center;
     justify-content: space-between;
     padding: 14px 16px;
-    background: var(--card-bg, #fff);
-    border: 1px solid var(--border);
+    background: var(--ws-surface);
+    border: 1px solid var(--ws-border);
     border-radius: 10px;
     transition: border-color 0.15s, box-shadow 0.15s;
 }
@@ -209,13 +209,13 @@ async function accept(membershipId) {
 }
 
 .orgs-card:hover {
-    border-color: var(--primary-light);
+    border-color: rgba(124, 58, 237, 0.6);
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
 }
 
 .orgs-card--active {
-    border-color: var(--primary);
-    background: rgba(101, 57, 154, 0.04);
+    border-color: var(--ws-purple);
+    background: rgba(124, 58, 237, 0.04);
 }
 
 .orgs-card-main {
@@ -224,7 +224,7 @@ async function accept(membershipId) {
 
 .orgs-card-name {
     font-weight: 500;
-    color: var(--text);
+    color: var(--ws-text);
     margin-bottom: 2px;
 }
 
@@ -233,7 +233,7 @@ async function accept(membershipId) {
     align-items: center;
     gap: 8px;
     font-size: 0.8rem;
-    color: var(--text-light);
+    color: var(--ws-text-3);
 }
 
 .orgs-card-role {
@@ -241,7 +241,7 @@ async function accept(membershipId) {
 }
 
 .orgs-card-active-badge {
-    background: var(--primary);
+    background: var(--ws-purple);
     color: white;
     padding: 1px 7px;
     border-radius: 4px;
@@ -250,15 +250,15 @@ async function accept(membershipId) {
 }
 
 .orgs-card-chevron {
-    color: var(--text-light);
+    color: var(--ws-text-3);
 }
 
 .orgs-card-members {
-    padding: 6px 12px; background: transparent; border: 1px solid var(--border);
-    border-radius: 6px; color: var(--text); font-size: 0.78rem; cursor: pointer;
+    padding: 6px 12px; background: transparent; border: 1px solid var(--ws-border);
+    border-radius: 6px; color: var(--ws-text); font-size: 0.78rem; cursor: pointer;
     margin-right: 8px;
 }
-.orgs-card-members:hover { background: var(--accent); border-color: var(--primary-light); }
+.orgs-card-members:hover { background: var(--ws-surface-2); border-color: rgba(124, 58, 237, 0.6); }
 
 .orgs-invite-info {
     flex: 1;
@@ -267,12 +267,12 @@ async function accept(membershipId) {
 .orgs-invite-name {
     display: block;
     font-weight: 500;
-    color: var(--text);
+    color: var(--ws-text);
 }
 
 .orgs-invite-meta {
     font-size: 0.82rem;
-    color: var(--text-light);
+    color: var(--ws-text-3);
 }
 
 .orgs-btn {
@@ -286,12 +286,12 @@ async function accept(membershipId) {
 }
 
 .orgs-btn--primary {
-    background: var(--primary);
+    background: var(--ws-purple);
     color: white;
 }
 
 .orgs-btn--primary:hover:not(:disabled) {
-    background: var(--primary-dark);
+    background: #6D28D9;
 }
 
 .orgs-btn:disabled {
@@ -302,8 +302,8 @@ async function accept(membershipId) {
 .orgs-empty {
     padding: 32px 16px;
     text-align: center;
-    color: var(--text-light);
-    background: var(--accent);
+    color: var(--ws-text-3);
+    background: var(--ws-surface-2);
     border-radius: 10px;
     display: flex;
     flex-direction: column;
@@ -314,8 +314,8 @@ async function accept(membershipId) {
 .orgs-loading-spinner {
     width: 24px;
     height: 24px;
-    border: 2.5px solid var(--accent);
-    border-top-color: var(--primary);
+    border: 2.5px solid var(--ws-surface-2);
+    border-top-color: var(--ws-purple);
     border-radius: 50%;
     animation: spin 0.85s linear infinite;
 }

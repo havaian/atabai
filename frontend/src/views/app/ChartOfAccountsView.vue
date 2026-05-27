@@ -96,32 +96,32 @@ function subcontoSummary(a) {
 .chart-view { max-width: 1200px; margin: 0 auto; padding: 24px; }
 .chart-view-header { margin-bottom: 20px; }
 .chart-view-header h1 { font-size: 1.3rem; font-weight: 600; margin-bottom: 4px; }
-.chart-view-header p { font-size: 0.88rem; color: var(--text-light); }
+.chart-view-header p { font-size: 0.88rem; color: var(--ws-text-3); }
 .chart-filters { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
 .chart-search,
 .chart-select {
-    padding: 9px 12px; border: 1px solid var(--border); border-radius: 8px;
-    font-size: 0.9rem; background: var(--card-bg, #fff);
+    padding: 9px 12px; border: 1px solid var(--ws-border); border-radius: 8px;
+    font-size: 0.9rem; background: var(--ws-surface);
 }
 .chart-search { flex: 1; min-width: 220px; }
-.chart-search:focus, .chart-select:focus { outline: none; border-color: var(--primary); }
+.chart-search:focus, .chart-select:focus { outline: none; border-color: var(--ws-purple); }
 .chart-empty {
-    padding: 60px 24px; text-align: center; background: var(--accent); border-radius: 12px;
-    display: flex; flex-direction: column; gap: 8px; align-items: center; color: var(--text-light);
+    padding: 60px 24px; text-align: center; background: var(--ws-surface-2); border-radius: 12px;
+    display: flex; flex-direction: column; gap: 8px; align-items: center; color: var(--ws-text-3);
 }
 .chart-empty-note { font-size: 0.82rem; max-width: 480px; }
 .chart-table-wrap {
-    background: var(--card-bg, #fff); border: 1px solid var(--border);
+    background: var(--ws-surface); border: 1px solid var(--ws-border);
     border-radius: 12px; overflow-x: auto;
 }
 .chart-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 0.86rem; }
 .chart-table th {
-    text-align: left; padding: 10px 12px; font-weight: 600; color: var(--text-light);
-    background: var(--accent); border-bottom: 1px solid var(--border);
+    text-align: left; padding: 10px 12px; font-weight: 600; color: var(--ws-text-3);
+    background: var(--ws-surface-2); border-bottom: 1px solid var(--ws-border);
 }
-.chart-table td { padding: 8px 12px; border-bottom: 1px solid var(--border); color: var(--text); }
+.chart-table td { padding: 8px 12px; border-bottom: 1px solid var(--ws-border); color: var(--ws-text); }
 .chart-code { font-family: monospace; font-weight: 500; }
-.chart-subconto { color: var(--text-light); font-size: 0.82rem; }
+.chart-subconto { color: var(--ws-text-3); font-size: 0.82rem; }
 .chart-vid {
     padding: 2px 8px; border-radius: 4px; font-size: 0.74rem; font-weight: 600;
 }
@@ -129,9 +129,9 @@ function subcontoSummary(a) {
 .chart-vid--passive { background: rgba(66, 153, 225, 0.15); color: #2c5282; }
 .chart-vid--contra-active { background: rgba(237, 137, 54, 0.15); color: #c05621; }
 .chart-vid--contra-passive { background: rgba(159, 122, 234, 0.15); color: #553c9a; }
-.chart-vid--tech { background: var(--accent); color: var(--text-light); }
+.chart-vid--tech { background: var(--ws-surface-2); color: var(--ws-text-3); }
 .spinner {
-    width: 24px; height: 24px; border: 2.5px solid var(--border); border-top-color: var(--primary);
+    width: 24px; height: 24px; border: 2.5px solid var(--ws-border); border-top-color: var(--ws-purple);
     border-radius: 50%; animation: spin 0.85s linear infinite; margin: 0 auto;
 }
 @keyframes spin { to { transform: rotate(360deg); } }

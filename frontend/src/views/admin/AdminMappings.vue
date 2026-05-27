@@ -120,7 +120,7 @@
                 </div>
                 <div v-if="['cash_flow', 'equity'].includes(newUserSpecificModal.reportType)"
                     class="adm-text-sm"
-                    style="color: #fbbf24; margin-bottom: 12px;">
+                    style="color: var(--adm-warn-text); margin-bottom: 12px;">
                     {{ $t('admin.mappings.scopeUnsupportedWarning') }}
                 </div>
 
@@ -420,6 +420,10 @@ onMounted(loadSets)
 </script>
 
 <style scoped>
+.adm-card {
+    margin-top: 1em;
+}
+
 .adm-card-header {
     display: flex;
     align-items: center;

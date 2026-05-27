@@ -11,6 +11,7 @@ import * as crypto from 'crypto';
 import * as ExcelJS from 'exceljs';
 import * as fs from 'fs';
 import * as fsPromises from 'fs/promises';
+import { Types, isValidObjectId } from 'mongoose';
 import * as path from 'path';
 import * as XLSX from 'xlsx';
 
@@ -33,6 +34,10 @@ import {
   type UserModel,
   User,
 } from '../users/schemas/user.schema';
+import {
+  Membership,
+  type MembershipModel,
+} from '../organizations/schemas/membership.schema';
 import { File, type FileDocument, type FileModel } from './schemas/file.schema';
 import { SourceWorkbookParser } from './source-workbook-parser';
 import { TransformationEnrichmentService } from './transformation-enrichment.service';
@@ -42,12 +47,20 @@ interface UploadInput {
   file: Express.Multer.File;
   template: TemplateType;
   user: UserDocument;
+  // Active org from X-Active-Org-Id header. Required for new uploads —
+  // post-migration, every file belongs to an org. We reject the upload
+  // when this is missing rather than orphan-creating a null-org file.
+  activeOrgId: string | null;
 }
 
 interface HistoryQuery {
   limit?: number;
   offset?: number;
   status?: string;
+  // Same header. For list endpoints we DON'T reject when null — we just
+  // return an empty list. That keeps the frontend resilient during
+  // log-in / org-switch transitions when the header may not yet be set.
+  activeOrgId: string | null;
 }
 
 interface TemplateFilesQuery extends HistoryQuery {
@@ -62,6 +75,7 @@ export class FilesService {
     @InjectModel(File.name) private readonly fileModel: FileModel,
     @InjectModel(ProcessingJob.name) private readonly jobModel: ProcessingJobModel,
     @InjectModel(User.name) private readonly userModel: UserModel,
+    @InjectModel(Membership.name) private readonly membershipModel: MembershipModel,
     @Inject(PROCESSOR_SERVICE) private readonly processor: IProcessorService,
     private readonly enrichment: TransformationEnrichmentService,
     private readonly sourceParser: SourceWorkbookParser,
@@ -72,12 +86,85 @@ export class FilesService {
     this.uploadPath = configService.get('files.uploadPath', { infer: true });
   }
 
+  // ─── Org-scope helpers (Task 6) ────────────────────────────────────────────
+
+  /**
+   * Convert the X-Active-Org-Id header value into a Mongo ObjectId suitable
+   * for `{ organizationId: ... }` filtering. Returns null when the caller
+   * has no active org or sent a malformed value.
+   *
+   * Why null instead of throw: list endpoints want to degrade to an empty
+   * list rather than 4xx, because the frontend transiently has no orgId
+   * during login / org-switch. Detail endpoints check `null` themselves
+   * and 404 — never reveal existence to a caller without an active org.
+   */
+  private parseOrgScope(activeOrgId: string | null): Types.ObjectId | null {
+    if (!activeOrgId) return null;
+    if (!isValidObjectId(activeOrgId)) return null;
+    return new Types.ObjectId(activeOrgId);
+  }
+
+  /**
+   * Convenience for the detail/download/delete paths: an org-scoped
+   * `findOne` filter shape that combines userId + a strict organizationId
+   * match. When the caller has no active org, returns null and callers
+   * should treat it as "no file" — that's what protects pre-org (null
+   * organizationId) files from being visible to users.
+   */
+  private userOrgFilter(
+    user: UserDocument,
+    activeOrgId: string | null,
+  ): { userId: Types.ObjectId; organizationId: Types.ObjectId } | null {
+    const orgObjectId = this.parseOrgScope(activeOrgId);
+    if (!orgObjectId) return null;
+    return { userId: user._id, organizationId: orgObjectId };
+  }
+
+  /**
+   * Org-scoped lean lookup. Returns null when:
+   *   - the caller has no active org (header missing/malformed), OR
+   *   - the fileId is not a valid ObjectId, OR
+   *   - no file matches (userId, organizationId, _id).
+   *
+   * Callers should treat any null return as "404 FILE_NOT_FOUND". We
+   * deliberately don't differentiate "wrong org" from "doesn't exist" so
+   * the API doesn't leak existence of files in other orgs / pre-org files.
+   */
+  private async findUserFileLean(
+    user: UserDocument,
+    fileId: string,
+    activeOrgId: string | null,
+  ) {
+    const scope = this.userOrgFilter(user, activeOrgId);
+    if (!scope) return null;
+    if (!isValidObjectId(fileId)) return null;
+    return this.fileModel
+      .findOne({ _id: new Types.ObjectId(fileId), ...scope })
+      .lean();
+  }
+
+  /**
+   * Same as findUserFileLean but returns a hydrated document so the caller
+   * can mutate / .save() / delete. Use sparingly — most paths read-only.
+   */
+  private async findUserFileMutable(
+    user: UserDocument,
+    fileId: string,
+    activeOrgId: string | null,
+  ): Promise<FileDocument | null> {
+    const scope = this.userOrgFilter(user, activeOrgId);
+    if (!scope) return null;
+    if (!isValidObjectId(fileId)) return null;
+    return this.fileModel.findOne({ _id: new Types.ObjectId(fileId), ...scope });
+  }
+
   // ─── Upload + dispatch ─────────────────────────────────────────────────────
 
   async uploadAndProcess({
     file,
     template,
     user,
+    activeOrgId,
   }: UploadInput): Promise<{
     success: true;
     message: string;
@@ -95,6 +182,35 @@ export class FilesService {
       throw new BadRequestException({ error: 'INVALID_TEMPLATE', message: 'Invalid template type' });
     }
 
+    // Task 6 — every new file must belong to an organization. Uploads
+    // without a current org are rejected outright (rather than silently
+    // creating an orphaned/legacy-shaped record) so the migration is one-
+    // directional: post-migration files always have organizationId set,
+    // null-org files only ever come from the pre-migration era.
+    const orgObjectId = this.parseOrgScope(activeOrgId);
+    if (!orgObjectId) {
+      throw new BadRequestException({
+        error: 'NO_ACTIVE_ORG',
+        message: 'No active organization selected. Set up or pick an organization first.',
+      });
+    }
+    // Verify the caller is an active member of the org they claim to be
+    // uploading on behalf of. Without this check, anyone could spoof the
+    // X-Active-Org-Id header and write files into someone else's tenant.
+    const membership = await this.membershipModel
+      .findOne({
+        organizationId: orgObjectId,
+        userId: user._id,
+        status: 'active',
+      })
+      .lean();
+    if (!membership) {
+      throw new BadRequestException({
+        error: 'NOT_A_MEMBER',
+        message: 'You are not an active member of this organization',
+      });
+    }
+
     const jobId = crypto.randomUUID();
 
     // Preserve the legacy latin1→utf8 reinterpretation so Cyrillic / Uzbek
@@ -109,6 +225,7 @@ export class FilesService {
       mimeType: file.mimetype,
       templateType: template,
       userId: user._id,
+      organizationId: orgObjectId,
       status: 'uploaded',
       jobId,
     });
@@ -268,7 +385,19 @@ export class FilesService {
   async getHistory(user: UserDocument, query: HistoryQuery) {
     const limit = Number(query.limit) || 50;
     const offset = Number(query.offset) || 0;
-    const filter: Record<string, unknown> = { userId: user._id };
+
+    // Task 6: user-side listing is org-scoped. No active org → empty list,
+    // not an error. This keeps the frontend non-flapping while orgs/period
+    // context resolves on app start or org switch.
+    const orgObjectId = this.parseOrgScope(query.activeOrgId);
+    if (!orgObjectId) {
+      return { success: true, files: [], totalCount: 0, hasMore: false };
+    }
+
+    const filter: Record<string, unknown> = {
+      userId: user._id,
+      organizationId: orgObjectId,
+    };
     if (query.status) filter.status = query.status;
 
     const [files, totalCount] = await Promise.all([
@@ -301,8 +430,22 @@ export class FilesService {
     }
     const limit = Number(query.limit) || 20;
     const offset = Number(query.offset) || 0;
+
+    // Same org-scope rule as getHistory — no org, empty list.
+    const orgObjectId = this.parseOrgScope(query.activeOrgId);
+    if (!orgObjectId) {
+      return {
+        success: true,
+        templateType: query.templateType,
+        files: [],
+        statusSummary: { total: 0, completed: 0, processing: 0, failed: 0, pending: 0 },
+        pagination: { total: 0, limit, offset, hasMore: false },
+      };
+    }
+
     const filter: Record<string, unknown> = {
       userId: user._id,
+      organizationId: orgObjectId,
       templateType: query.templateType,
     };
     if (query.status) filter.status = query.status;
@@ -311,7 +454,13 @@ export class FilesService {
       this.fileModel.find(filter).sort({ createdAt: -1 }).skip(offset).limit(limit).lean(),
       this.fileModel.countDocuments(filter),
       this.fileModel.aggregate<{ _id: string; count: number }>([
-        { $match: { userId: user._id, templateType: query.templateType } },
+        {
+          $match: {
+            userId: user._id,
+            organizationId: orgObjectId,
+            templateType: query.templateType,
+          },
+        },
         { $group: { _id: '$status', count: { $sum: 1 } } },
       ]),
     ]);
@@ -346,12 +495,28 @@ export class FilesService {
 
   // ─── Status + details ──────────────────────────────────────────────────────
 
-  async getProcessingStatus(user: UserDocument, jobId: string) {
+  async getProcessingStatus(user: UserDocument, jobId: string, activeOrgId: string | null) {
+    // Task 6 — the job belongs to a file, and the file is org-scoped. We
+    // resolve the job AND verify the joined file's organizationId matches
+    // the caller's claim. No active org → 404 (legacy jobs are admin-only).
+    const orgObjectId = this.parseOrgScope(activeOrgId);
+    if (!orgObjectId) {
+      throw new NotFoundException({ error: 'JOB_NOT_FOUND', message: 'Processing job not found' });
+    }
     const job = await this.jobModel.findOne({ jobId, userId: user._id }).populate('fileId');
     if (!job) {
       throw new NotFoundException({ error: 'JOB_NOT_FOUND', message: 'Processing job not found' });
     }
-    const populated = job.fileId as unknown as { _id?: { toString(): string }; originalName?: string } | null;
+    // Cross-check: the populated file's organizationId must match. If the
+    // file has null organizationId (legacy) or a different one (somehow
+    // re-scoped), reject — keep pre-org jobs out of the user-side surface.
+    const populated = job.fileId as unknown as
+      | { _id?: { toString(): string }; originalName?: string; organizationId?: Types.ObjectId | null }
+      | null;
+    const fileOrgId = populated?.organizationId?.toString();
+    if (!fileOrgId || fileOrgId !== orgObjectId.toString()) {
+      throw new NotFoundException({ error: 'JOB_NOT_FOUND', message: 'Processing job not found' });
+    }
     return {
       success: true,
       job: {
@@ -370,8 +535,8 @@ export class FilesService {
     };
   }
 
-  async getFileDetails(user: UserDocument, fileId: string) {
-    const file = await this.fileModel.findOne({ _id: fileId, userId: user._id }).lean();
+  async getFileDetails(user: UserDocument, fileId: string, activeOrgId: string | null) {
+    const file = await this.findUserFileLean(user, fileId, activeOrgId);
     if (!file) {
       throw new NotFoundException({ error: 'FILE_NOT_FOUND', message: 'File not found' });
     }
@@ -401,8 +566,9 @@ export class FilesService {
     fileId: string,
     type: 'original' | 'processed',
     res: import('express').Response,
+    activeOrgId: string | null,
   ): Promise<void> {
-    const file = await this.fileModel.findOne({ _id: fileId, userId: user._id });
+    const file = await this.findUserFileMutable(user, fileId, activeOrgId);
     if (!file) {
       throw new NotFoundException({ error: 'FILE_NOT_FOUND', message: 'File not found' });
     }
@@ -445,8 +611,12 @@ export class FilesService {
 
   // ─── Delete ─────────────────────────────────────────────────────────────────
 
-  async deleteFile(user: UserDocument, fileId: string): Promise<{ success: true; message: string }> {
-    const file = await this.fileModel.findOne({ _id: fileId, userId: user._id });
+  async deleteFile(
+    user: UserDocument,
+    fileId: string,
+    activeOrgId: string | null,
+  ): Promise<{ success: true; message: string }> {
+    const file = await this.findUserFileMutable(user, fileId, activeOrgId);
     if (!file) {
       throw new NotFoundException({ error: 'FILE_NOT_FOUND', message: 'File not found' });
     }
@@ -477,9 +647,23 @@ export class FilesService {
 
   // ─── Retry ─────────────────────────────────────────────────────────────────
 
-  async retryProcessing(user: UserDocument, jobId: string) {
+  async retryProcessing(user: UserDocument, jobId: string, activeOrgId: string | null) {
+    // Same org-cross-check as getProcessingStatus — the job's file must
+    // belong to the caller's current org. Without this, a user could
+    // re-trigger processing on a legacy / cross-tenant file.
+    const orgObjectId = this.parseOrgScope(activeOrgId);
+    if (!orgObjectId) {
+      throw new NotFoundException({ error: 'JOB_NOT_FOUND', message: 'Processing job not found' });
+    }
     const job = await this.jobModel.findOne({ jobId, userId: user._id }).populate('fileId');
     if (!job) {
+      throw new NotFoundException({ error: 'JOB_NOT_FOUND', message: 'Processing job not found' });
+    }
+    const fileRef = job.fileId as unknown as FileDocument & {
+      organizationId?: Types.ObjectId | null;
+    };
+    const fileOrgId = fileRef?.organizationId?.toString();
+    if (!fileOrgId || fileOrgId !== orgObjectId.toString()) {
       throw new NotFoundException({ error: 'JOB_NOT_FOUND', message: 'Processing job not found' });
     }
     if (job.status !== 'failed') {
@@ -495,7 +679,6 @@ export class FilesService {
     job.retryCount = (job.retryCount ?? 0) + 1;
     await job.save();
 
-    const fileRef = job.fileId as unknown as FileDocument;
     void this.processFileAsync(fileRef, job).catch((err: Error) =>
       this.logger.error(err, { context: 'retryProcessing.processFileAsync' }),
     );
@@ -514,8 +697,8 @@ export class FilesService {
 
   // ─── Transformation read ──────────────────────────────────────────────────
 
-  async getTransformation(user: UserDocument, fileId: string) {
-    const file = await this.fileModel.findOne({ _id: fileId, userId: user._id }).lean();
+  async getTransformation(user: UserDocument, fileId: string, activeOrgId: string | null) {
+    const file = await this.findUserFileLean(user, fileId, activeOrgId);
     if (!file) {
       throw new NotFoundException({ error: 'FILE_NOT_FOUND', message: 'File not found' });
     }
@@ -574,8 +757,8 @@ export class FilesService {
 
   // ─── Source workbook (Univer JSON) ──────────────────────────────────────────
 
-  async getSourceWorkbook(user: UserDocument, fileId: string) {
-    const file = await this.fileModel.findOne({ _id: fileId, userId: user._id }).lean();
+  async getSourceWorkbook(user: UserDocument, fileId: string, activeOrgId: string | null) {
+    const file = await this.findUserFileLean(user, fileId, activeOrgId);
     if (!file) {
       throw new NotFoundException({ error: 'FILE_NOT_FOUND', message: 'File not found' });
     }
@@ -610,7 +793,7 @@ export class FilesService {
 
   // ─── Regenerate transformation ─────────────────────────────────────────────
 
-  async regenerateTransformation(user: UserDocument, fileId: string) {
+  async regenerateTransformation(user: UserDocument, fileId: string, activeOrgId: string | null) {
     if (!this.lock.tryAcquire(fileId)) {
       throw new ConflictException({
         error: 'REGENERATION_IN_PROGRESS',
@@ -619,7 +802,7 @@ export class FilesService {
     }
 
     try {
-      const file = await this.fileModel.findOne({ _id: fileId, userId: user._id });
+      const file = await this.findUserFileMutable(user, fileId, activeOrgId);
       if (!file) {
         throw new NotFoundException({ error: 'FILE_NOT_FOUND', message: 'File not found' });
       }

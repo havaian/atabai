@@ -137,41 +137,41 @@ function format(decStr) {
     display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 20px;
 }
 .matrix-header h1 { font-size: 1.3rem; font-weight: 600; margin-bottom: 4px; }
-.matrix-header p { font-size: 0.88rem; color: var(--text-light); }
-.matrix-period-picker label { display: flex; flex-direction: column; gap: 4px; font-size: 0.82rem; color: var(--text-light); }
+.matrix-header p { font-size: 0.88rem; color: var(--ws-text-3); }
+.matrix-period-picker label { display: flex; flex-direction: column; gap: 4px; font-size: 0.82rem; color: var(--ws-text-3); }
 .matrix-period-picker select {
-    padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.9rem; min-width: 200px;
+    padding: 8px 10px; border: 1px solid var(--ws-border); border-radius: 6px; font-size: 0.9rem; min-width: 200px;
 }
 .matrix-empty {
-    padding: 60px 24px; text-align: center; background: var(--accent); border-radius: 12px; color: var(--text-light);
+    padding: 60px 24px; text-align: center; background: var(--ws-surface-2); border-radius: 12px; color: var(--ws-text-3);
 }
 .matrix-table-wrap {
-    background: var(--card-bg, #fff); border: 1px solid var(--border);
+    background: var(--ws-surface); border: 1px solid var(--ws-border);
     border-radius: 12px; overflow: auto; max-height: 70vh;
 }
 .matrix-table { border-collapse: separate; border-spacing: 0; font-size: 0.82rem; width: 100%; }
 .matrix-table th {
-    padding: 8px 10px; background: var(--accent); border-bottom: 1px solid var(--border);
-    color: var(--text-light); font-weight: 600; position: sticky; top: 0; z-index: 1;
+    padding: 8px 10px; background: var(--ws-surface-2); border-bottom: 1px solid var(--ws-border);
+    color: var(--ws-text-3); font-weight: 600; position: sticky; top: 0; z-index: 1;
 }
 .matrix-th-group { text-align: center; font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.05em; }
-.matrix-th-group--ifrs { background: rgba(101, 57, 154, 0.1); color: var(--primary); }
+.matrix-th-group--ifrs { background: rgba(124, 58, 237, 0.1); color: var(--ws-purple); }
 .matrix-th-num { text-align: right; }
-.matrix-table td { padding: 6px 10px; border-bottom: 1px solid var(--border); }
+.matrix-table td { padding: 6px 10px; border-bottom: 1px solid var(--ws-border); }
 .matrix-num { text-align: right; font-variant-numeric: tabular-nums; }
 .matrix-num--reclass { background: rgba(66, 153, 225, 0.03); }
 .matrix-num--adj { background: rgba(237, 137, 54, 0.04); }
-.matrix-num--ifrs { background: rgba(101, 57, 154, 0.05); font-weight: 600; }
+.matrix-num--ifrs { background: rgba(124, 58, 237, 0.05); font-weight: 600; }
 .matrix-account { display: flex; flex-direction: column; min-width: 200px; }
 .matrix-account-code { font-family: monospace; font-weight: 600; }
-.matrix-account-subconto { font-size: 0.72rem; color: var(--text-light); }
+.matrix-account-subconto { font-size: 0.72rem; color: var(--ws-text-3); }
 .matrix-td-sticky, .matrix-th-sticky {
-    position: sticky; left: 0; background: var(--card-bg, #fff); z-index: 2;
-    border-right: 1px solid var(--border);
+    position: sticky; left: 0; background: var(--ws-surface); z-index: 2;
+    border-right: 1px solid var(--ws-border);
 }
-.matrix-th-sticky { background: var(--accent); }
+.matrix-th-sticky { background: var(--ws-surface-2); }
 .spinner {
-    width: 24px; height: 24px; border: 2.5px solid var(--border); border-top-color: var(--primary);
+    width: 24px; height: 24px; border: 2.5px solid var(--ws-border); border-top-color: var(--ws-purple);
     border-radius: 50%; animation: spin 0.85s linear infinite; margin: 0 auto;
 }
 @keyframes spin { to { transform: rotate(360deg); } }

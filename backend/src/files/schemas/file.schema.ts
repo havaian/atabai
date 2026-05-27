@@ -70,6 +70,29 @@ export class File {
   @Prop({ type: Types.ObjectId, ref: 'User', required: true, index: true })
   userId!: Types.ObjectId;
 
+  /**
+   * Organization scope (Task 6 — migration to ledger-spine architecture).
+   *
+   * Nullable. Files uploaded BEFORE the migration to the org-scoped
+   * architecture have this set to null. Files uploaded AFTER set this
+   * to the caller's active org at upload time. The absence of this
+   * field IS the legacy marker — we deliberately don't backfill it on
+   * existing documents.
+   *
+   * Access semantics:
+   *   - User-side list endpoints filter `organizationId: <currentOrgId>`,
+   *     so legacy (null) files never appear there.
+   *   - User-side detail / download endpoints reject when the file's
+   *     `organizationId` doesn't match the caller's current org — this
+   *     includes the null case (legacy files are not visible to users
+   *     at all, no matter what file id they put in the URL).
+   *   - Admin endpoints ignore `organizationId` entirely and continue
+   *     to see / operate on every file, which is how legacy data
+   *     remains usable retroactively.
+   */
+  @Prop({ type: Types.ObjectId, ref: 'Organization', default: null, index: true })
+  organizationId!: Types.ObjectId | null;
+
   @Prop({ type: FileResultSchema, default: () => ({}) })
   result!: FileResult;
 
@@ -96,6 +119,10 @@ FileSchema.index({ status: 1, createdAt: -1 });
 FileSchema.index({ templateType: 1, createdAt: -1 });
 FileSchema.index({ jobId: 1, userId: 1 });
 FileSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
+// Org-scoped listing — the user-side list endpoints filter by (userId,
+// organizationId) since after the Task 6 migration a user sees only the
+// files belonging to their current org.
+FileSchema.index({ organizationId: 1, userId: 1, createdAt: -1 });
 
 FileSchema.virtual('processingDuration').get(function (this: FileDocument) {
   if (this.completedAt && (this as unknown as { createdAt: Date }).createdAt) {
@@ -173,7 +200,16 @@ FileSchema.methods.getPublicData = function (this: FileDocument) {
 export interface IFileStatics {
   findByUserId(
     userId: string | Types.ObjectId,
-    options?: { status?: FileStatus; templateType?: TemplateType; limit?: number; skip?: number },
+    options?: {
+      status?: FileStatus;
+      templateType?: TemplateType;
+      limit?: number;
+      skip?: number;
+      // When provided, restricts to files belonging to this org. The user-
+      // side list endpoints always pass this; admin endpoints leave it
+      // undefined to see every file (including legacy null-org ones).
+      organizationId?: string | Types.ObjectId;
+    },
   ): ReturnType<FileModel['find']>;
   findByJobId(jobId: string, userId: string | Types.ObjectId): ReturnType<FileModel['findOne']>;
   getProcessingStats(userId: string | Types.ObjectId): ReturnType<FileModel['aggregate']>;
@@ -182,9 +218,16 @@ export interface IFileStatics {
 const findByUserIdImpl = function (
   this: FileModel,
   userId: string | Types.ObjectId,
-  options: { status?: FileStatus; templateType?: TemplateType; limit?: number; skip?: number } = {},
+  options: {
+    status?: FileStatus;
+    templateType?: TemplateType;
+    limit?: number;
+    skip?: number;
+    organizationId?: string | Types.ObjectId;
+  } = {},
 ) {
   const query = this.find({ userId });
+  if (options.organizationId) query.where({ organizationId: options.organizationId });
   if (options.status) query.where({ status: options.status });
   if (options.templateType) query.where({ templateType: options.templateType });
   query.sort({ createdAt: -1 });

@@ -12,6 +12,7 @@ import {
 
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { ActiveOrgId } from '../common/decorators/active-org-id.decorator';
 import type { UserDocument } from '../users/schemas/user.schema';
 import { CurrentMembership } from './decorators/current-membership.decorator';
 import { RequireOrgAdmin } from './decorators/require-org-admin.decorator';
@@ -73,6 +74,105 @@ export class OrganizationsController {
     return {
       success: true,
       invites: items.map(({ organization, membership }) => ({
+        organization: this.serializeOrganization(organization),
+        membership: this.serializeMembership(membership),
+      })),
+    };
+  }
+
+  /**
+   * GET /api/organizations/session — authoritative session resolver.
+   *
+   * The frontend must NOT gate UI on its own localStorage idea of
+   * "current org". It calls this endpoint after auth and on every org
+   * switch; the server is the source of truth for:
+   *   - which orgs the caller is actually a member of,
+   *   - which one is the *valid* active org (the X-Active-Org-Id claim
+   *     is honoured only if it matches an active membership; otherwise
+   *     the server picks one for the client, or null when none exist),
+   *   - what capabilities apply within that active org (so the frontend
+   *     can hide actions the user couldn't perform anyway).
+   *
+   * This is the spine the sidebar nav reads. Same response on every call;
+   * if the client lies about activeOrgId the server overrides — keeping
+   * presentation and authorization in sync at the only place they can
+   * actually be in sync.
+   *
+   * Pending invites are included so the dashboard / org-list view doesn't
+   * have to do a second round-trip on bootstrap.
+   */
+  @Get('session')
+  async getSession(
+    @CurrentUser() user: UserDocument,
+    @ActiveOrgId() claimedActiveOrgId: string | null,
+  ) {
+    const [items, invites] = await Promise.all([
+      this.orgs.listMyOrganizations(user),
+      this.orgs.listMyPendingInvites(user),
+    ]);
+
+    // Resolve the activeOrgId:
+    //   - If the client claimed an org via header AND it's in their
+    //     active memberships, honour it.
+    //   - Else, if they have any active org, pick the first (most-
+    //     recently-touched per listMyOrganizations sort order). This
+    //     keeps the UX sane after a stale localStorage value.
+    //   - Else null (the onboarding flow takes over).
+    let activeOrgId: string | null = null;
+    let activeMembership: MembershipDocument | null = null;
+    if (claimedActiveOrgId) {
+      const claimed = items.find(
+        ({ organization }) => organization._id.toString() === claimedActiveOrgId,
+      );
+      if (claimed) {
+        activeOrgId = claimed.organization._id.toString();
+        activeMembership = claimed.membership;
+      }
+      // Otherwise fall through: the client's claim is invalid (stale
+      // localStorage, revoked membership, etc.) and we DON'T silently
+      // promote them into another org by accident — but we do default
+      // to one below so they have a usable session.
+    }
+    if (!activeOrgId && items.length > 0) {
+      activeOrgId = items[0].organization._id.toString();
+      activeMembership = items[0].membership;
+    }
+
+    // Derive the capabilities applicable RIGHT NOW. Admin role implies
+    // all capabilities — the frontend uses this set to decide which nav
+    // items to render and which actions to enable.
+    const isAdmin = activeMembership?.role === 'admin';
+    const capabilities = activeMembership
+      ? isAdmin
+        ? [
+            'nsbu.base.read',
+            'nsbu.base.write',
+            'ifrs.overlay.read',
+            'ifrs.overlay.write',
+          ]
+        : [...activeMembership.capabilities]
+      : [];
+
+    return {
+      success: true,
+      session: {
+        userId: user._id.toString(),
+        // The authoritative active org. Client overwrites its localStorage
+        // with this on every /session response; that's how a stale or
+        // tampered claim self-corrects on next request.
+        activeOrgId,
+        // Boolean shortcuts the frontend nav cares about. Backed by the
+        // membership row, not by anything client-controllable.
+        hasAnyOrg: items.length > 0,
+        hasInvites: invites.length > 0,
+        isOrgAdmin: !!isAdmin,
+        capabilities,
+      },
+      organizations: items.map(({ organization, membership }) => ({
+        ...this.serializeOrganization(organization),
+        membership: this.serializeMembership(membership),
+      })),
+      pendingInvites: invites.map(({ organization, membership }) => ({
         organization: this.serializeOrganization(organization),
         membership: this.serializeMembership(membership),
       })),

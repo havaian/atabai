@@ -44,26 +44,110 @@
         </div>
 
         <!-- Templates section -->
-        <div class="section">
+        <!--
+          REMOVED (Task 5 — migration to ledger-spine architecture):
+          The "Choose a template" section that surfaced the 5 NSBU report
+          types (Balance / CF1 / CF2 / P&L1 / P&L2 / Equity) belonged to
+          the old file-in/file-out paradigm. It is preserved on the admin
+          side (/admin/files) so admins can still process legacy uploads
+          retroactively. Users now drive work through the period-scoped
+          workflow surfaced below.
+        -->
+
+        <!-- Workflow section — current period + action cards.
+             Only shown when the caller has an active org AND that org has
+             at least one reporting period. Onboarding handles the empty
+             case at the router level (needsOnboarding redirect). -->
+        <div class="section" v-if="orgsStore.currentOrg">
             <div class="section-header">
-                <h2 class="section-title">{{ $t('dashboard.chooseTemplate') }}</h2>
+                <h2 class="section-title">{{ $t('dashboard.workflow.title') }}</h2>
+                <button class="section-link" @click="router.push('/app/ledger/periods')">
+                    {{ $t('dashboard.workflow.allPeriods') }}
+                    <ArrowRightIcon class="w-3.5 h-3.5" />
+                </button>
             </div>
 
+            <!-- Current period summary card. Soft fallback when no period is
+                 set yet — Periods view is the recovery path. -->
+            <div class="period-card">
+                <div class="period-card-main">
+                    <div class="period-card-label">{{ $t('dashboard.workflow.currentPeriod') }}</div>
+                    <div v-if="activePeriod" class="period-card-name">
+                        {{ activePeriod.label || formatPeriod(activePeriod) }}
+                    </div>
+                    <div v-else class="period-card-empty">{{ $t('dashboard.workflow.noPeriod') }}</div>
+                </div>
+                <button v-if="activePeriod" class="period-card-action" @click="router.push('/app/ledger/periods')">
+                    {{ $t('dashboard.workflow.switchPeriod') }}
+                </button>
+                <button v-else class="period-card-action period-card-action--primary"
+                    @click="router.push('/app/ledger/periods')">
+                    {{ $t('dashboard.workflow.setupPeriod') }}
+                </button>
+            </div>
+
+            <!-- Workflow action grid. Reuses .template-grid + .template-card
+                 chrome so the visual rhythm matches Dashboard's earlier
+                 design — we are swapping intent (templates → actions),
+                 not chrome. Each card routes into a period-scoped page
+                 except Matrix/Adjustments which span all periods. -->
             <div class="template-grid">
-                <div v-for="template in templates" :key="template.id" class="template-card"
-                    @click="selectTemplate(template)">
+                <div class="template-card" @click="goPeriod('osv-import')">
                     <div class="template-card-top">
-                        <div class="template-icon">
-                            <component :is="template.icon" class="w-5 h-5" />
-                        </div>
-                        <span class="template-badge">{{ template.standard }}</span>
+                        <div class="template-icon"><FilePlus2 :size="18" /></div>
+                        <span class="template-badge">OSV</span>
                     </div>
                     <div class="template-card-body">
-                        <h3 class="template-name">{{ $t(`templates.${template.key}`) }}</h3>
-                        <p class="template-desc">{{ $t(`templates.${template.key}Description`) }}</p>
+                        <h3 class="template-name">{{ $t('dashboard.workflow.osvTitle') }}</h3>
+                        <p class="template-desc">{{ $t('dashboard.workflow.osvDesc') }}</p>
                     </div>
                     <div class="template-card-footer">
-                        <span class="template-cat">{{ template.category }}</span>
+                        <span class="template-cat">{{ $t('dashboard.workflow.catImport') }}</span>
+                        <ArrowRightIcon class="template-arrow w-4 h-4" />
+                    </div>
+                </div>
+
+                <div class="template-card" @click="goPeriod('bank-statements')">
+                    <div class="template-card-top">
+                        <div class="template-icon"><Landmark :size="18" /></div>
+                        <span class="template-badge">BANK</span>
+                    </div>
+                    <div class="template-card-body">
+                        <h3 class="template-name">{{ $t('dashboard.workflow.bankTitle') }}</h3>
+                        <p class="template-desc">{{ $t('dashboard.workflow.bankDesc') }}</p>
+                    </div>
+                    <div class="template-card-footer">
+                        <span class="template-cat">{{ $t('dashboard.workflow.catImport') }}</span>
+                        <ArrowRightIcon class="template-arrow w-4 h-4" />
+                    </div>
+                </div>
+
+                <div class="template-card" @click="router.push('/app/ledger/matrix')">
+                    <div class="template-card-top">
+                        <div class="template-icon"><Grid3x3 :size="18" /></div>
+                        <span class="template-badge">IFRS</span>
+                    </div>
+                    <div class="template-card-body">
+                        <h3 class="template-name">{{ $t('dashboard.workflow.matrixTitle') }}</h3>
+                        <p class="template-desc">{{ $t('dashboard.workflow.matrixDesc') }}</p>
+                    </div>
+                    <div class="template-card-footer">
+                        <span class="template-cat">{{ $t('dashboard.workflow.catReview') }}</span>
+                        <ArrowRightIcon class="template-arrow w-4 h-4" />
+                    </div>
+                </div>
+
+                <div class="template-card" @click="router.push('/app/ledger/adjustments')">
+                    <div class="template-card-top">
+                        <div class="template-icon"><Sliders :size="18" /></div>
+                        <span class="template-badge">IAS/IFRS</span>
+                    </div>
+                    <div class="template-card-body">
+                        <h3 class="template-name">{{ $t('dashboard.workflow.adjustTitle') }}</h3>
+                        <p class="template-desc">{{ $t('dashboard.workflow.adjustDesc') }}</p>
+                    </div>
+                    <div class="template-card-footer">
+                        <span class="template-cat">{{ $t('dashboard.workflow.catOverlay') }}</span>
                         <ArrowRightIcon class="template-arrow w-4 h-4" />
                     </div>
                 </div>
@@ -113,23 +197,38 @@ import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
 import { useFilesStore } from '@/stores/files'
-import { useTemplatesStore } from '@/stores/templates'
+import { useOrganizationsStore } from '@/stores/organizations'
+import { useLedgerStore } from '@/stores/ledger'
 import {
-    PlusIcon, DocumentTextIcon, DocumentIcon, DocumentPlusIcon,
+    DocumentTextIcon, DocumentIcon,
     CheckCircleIcon, ArrowRightIcon, SparklesIcon
 } from '@heroicons/vue/24/outline'
+import {
+    FilePlus2, Landmark, Grid3x3, Sliders,
+} from 'lucide-vue-next'
 
 const router = useRouter()
 const route = useRoute()
 const { t } = useI18n()
 const authStore = useAuthStore()
 const filesStore = useFilesStore()
-const templatesStore = useTemplatesStore()
+const orgsStore = useOrganizationsStore()
+const ledgerStore = useLedgerStore()
 
+// Refresh strategy:
+//   - filesStore.fetchRecentFiles is now org-scoped (Task 6) and the store
+//     itself watches orgsStore.currentOrgId, so it will refetch when the
+//     active org changes. We trigger an explicit refresh on mount + on
+//     route re-entry to pick up new uploads from a different tab.
+//   - ledgerStore.fetchPeriods is also org-scoped and idempotent.
+//   - templatesStore is gone — the template chooser was removed with the
+//     migration to the ledger-spine architecture.
 function refreshData() {
     authStore.checkAuth()
     filesStore.fetchRecentFiles(true)
-    templatesStore.fetchTemplates()
+    if (orgsStore.currentOrgId) {
+        ledgerStore.fetchPeriods().catch(() => { /* tolerated by store */ })
+    }
 }
 
 onMounted(refreshData)
@@ -141,7 +240,14 @@ watch(() => route.path, (newPath) => {
     }
 })
 
-const templates = computed(() => templatesStore.availableTemplates)
+// Re-fetch ledger context when the active org changes mid-session
+// (org switcher in the sidebar). Files are handled by the files store itself.
+watch(() => orgsStore.currentOrgId, (orgId) => {
+    if (orgId) {
+        ledgerStore.fetchPeriods().catch(() => { })
+    }
+})
+
 const recentFiles = computed(() => filesStore.recentFiles || [])
 const firstName = computed(() => authStore.user?.name?.split(' ')[0] || '')
 const completedFiles = computed(() => authStore.filesCompletedThisMonth)
@@ -149,9 +255,26 @@ const monthlyLimitDisplay = computed(() => {
     const lim = authStore.monthlyLimit
     return lim === Infinity || lim > 9999 ? '∞' : lim
 })
+const activePeriod = computed(() => ledgerStore.activePeriod)
 
-function selectTemplate(template) {
-    router.push(`/app/upload?template=${template.id}`)
+function goPeriod(leaf) {
+    // Period-scoped routes need a periodId. Fall back to the periods list
+    // (where the user can pick one) when nothing is active yet.
+    if (!activePeriod.value) {
+        router.push('/app/ledger/periods')
+        return
+    }
+    router.push(`/app/ledger/periods/${activePeriod.value.id}/${leaf}`)
+}
+
+function formatPeriod(p) {
+    // Soft fallback if the period has no precomputed label — synthesise one
+    // from kind + start/end. The backend usually provides `label` directly.
+    if (!p) return ''
+    const kind = p.kind ? p.kind.charAt(0).toUpperCase() + p.kind.slice(1) : ''
+    const start = p.startDate ? new Date(p.startDate).toLocaleDateString() : ''
+    const end = p.endDate ? new Date(p.endDate).toLocaleDateString() : ''
+    return `${kind} · ${start} → ${end}`.replace(/^ · /, '')
 }
 
 function openFile(file) {
@@ -343,6 +466,82 @@ function statusClass(status) {
 
 .section-link:hover {
     opacity: 0.7;
+}
+
+/* ─── Period card (workflow section header) ─────────────────────────────────
+   The "current period" summary that sits between the section header and
+   the action grid. Uses the same chrome vocabulary as .stat-card so the
+   visual rhythm matches the stats row above. */
+.period-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 18px;
+    background: var(--ws-surface);
+    border: 1px solid var(--ws-border);
+    border-radius: 12px;
+}
+
+.period-card-main {
+    flex: 1;
+    min-width: 0;
+}
+
+.period-card-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ws-text-3);
+    margin-bottom: 4px;
+}
+
+.period-card-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ws-text);
+    letter-spacing: -0.01em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.period-card-empty {
+    font-size: 13.5px;
+    color: var(--ws-text-3);
+    font-style: italic;
+}
+
+.period-card-action {
+    padding: 8px 14px;
+    background: transparent;
+    border: 1px solid var(--ws-border);
+    color: var(--ws-text-2);
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+    font-family: inherit;
+    flex-shrink: 0;
+}
+
+.period-card-action:hover {
+    background: var(--ws-bg);
+    border-color: var(--ws-purple);
+    color: var(--ws-purple);
+}
+
+.period-card-action--primary {
+    background: var(--ws-purple);
+    color: #fff;
+    border-color: var(--ws-purple);
+}
+
+.period-card-action--primary:hover {
+    background: #6D28D9;
+    border-color: #6D28D9;
+    color: #fff;
 }
 
 /* ─── Template grid ──────────────────────────────────────────────────────── */
@@ -636,6 +835,18 @@ function statusClass(status) {
     .file-template,
     .file-date {
         display: none;
+    }
+
+    /* Stack the period card on mobile so the action button sits below
+       the period name instead of getting squeezed off-screen. */
+    .period-card {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    .period-card-action {
+        align-self: flex-start;
     }
 }
 </style>

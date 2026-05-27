@@ -6,8 +6,9 @@
  */
 
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { apiClient } from '@/plugins/axios'
+import { useOrganizationsStore } from '@/stores/organizations'
 
 export const useFilesStore = defineStore('files', () => {
     // State
@@ -46,6 +47,26 @@ export const useFilesStore = defineStore('files', () => {
         cacheTimestamps.value.recentFiles = null
         cacheTimestamps.value.templateFiles = {}
     }
+
+    // Task 6 — when the active org changes (org switcher or /session
+    // reconciliation), every cached file list is now stale: it was
+    // populated under the previous org's X-Active-Org-Id and is going to
+    // be a list of the wrong org's files. Drop the local arrays AND the
+    // cache timestamps so the next fetch hits the backend fresh.
+    //
+    // We watch the organizations store's currentOrgId rather than wiring
+    // an event because Pinia + Vue reactivity makes this a one-liner and
+    // it covers every code path that could change the org (manual switch,
+    // server-side reconciliation, sign-out).
+    const orgsStore = useOrganizationsStore()
+    watch(() => orgsStore.currentOrgId, (newOrgId, oldOrgId) => {
+        if (newOrgId === oldOrgId) return
+        files.value = []
+        recentFiles.value = []
+        templateFiles.value = {}
+        currentFile.value = null
+        invalidateCache()
+    })
 
     // Get template files for a specific template (with caching)
     function getTemplateFilesFromCache(templateType) {

@@ -164,59 +164,23 @@ async function fetchAndMergeFromAPI(locale) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Stage 3: Polling for version changes (hot-reload when admin edits a key)
+// Stage 3: Polling for version changes — DISABLED
 // ─────────────────────────────────────────────────────────────────────────────
+// Locale strings do not change on the scale of seconds. The DB overlay is
+// loaded once at boot (Stage 2) and re-fetched on locale change. When an
+// admin edits a key in the locale editor, refreshLocaleFromAPI() is called
+// directly in that session so the editor sees its own change immediately.
+// Other users pick up the new strings on next page load — that is fine.
+//
+// The previous version polled /api/locales/version every 30s for every
+// open tab of every user, which is enormous wasted traffic for a feature
+// that is fundamentally not real-time.
+//
+// Function kept as a no-op so the existing call site in initializeI18n()
+// continues to work without a separate edit.
 
-const POLL_INTERVAL_MS = 30 * 1000 // 30 seconds
-let pollTimer = null
-
-/**
- * Start the version poll. Compares server versions against last-seen versions;
- * if any app's version is newer, re-fetches and merges that app's bundle for
- * the CURRENT locale.
- *
- * Skips when document is hidden (tab not focused) to avoid wasting requests;
- * catches up on visibilitychange.
- */
 function startBundleVersionPoll() {
-    if (pollTimer) return // already running
-
-    async function tick() {
-        // Skip when tab is hidden — saves bandwidth, we catch up on focus
-        if (typeof document !== 'undefined' && document.hidden) return
-
-        try {
-            const url = `${API_BASE}/locales/version`
-            const { data } = await axios.get(url, { timeout: 6000 })
-            if (!data?.success || !data.versions) return
-
-            const currentLocale = i18n.global.locale.value
-            const tasks = []
-            for (const app of ['user', 'admin']) {
-                const serverVersion = data.versions[app]
-                if (typeof serverVersion !== 'number') continue
-                const seen = lastSeenVersions[app]
-                if (seen === undefined || serverVersion > seen) {
-                    tasks.push(fetchAndMergeApp(app, currentLocale))
-                }
-            }
-            if (tasks.length > 0) {
-                await Promise.all(tasks)
-            }
-        } catch (err) {
-            // Silent — polling failures are common (offline, server restart)
-            // and the bundled JSON keeps the UI working.
-        }
-    }
-
-    pollTimer = setInterval(tick, POLL_INTERVAL_MS)
-
-    // Catch up immediately when tab regains focus
-    if (typeof document !== 'undefined') {
-        document.addEventListener('visibilitychange', () => {
-            if (!document.hidden) tick()
-        })
-    }
+    // Intentionally empty. See comment above.
 }
 
 /**

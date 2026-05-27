@@ -209,8 +209,8 @@ onMounted(init)
 }
 
 .adm-2fa-card {
-    background: rgba(20, 14, 32, 0.8);
-    border: 1px solid rgba(149, 0, 255, 0.18);
+    background: var(--adm-surface);
+    border: 1px solid var(--adm-input-border);
     border-radius: 14px;
     padding: 36px;
     max-width: 480px;
@@ -225,23 +225,23 @@ onMounted(init)
 .adm-2fa-title {
     font-size: 22px;
     font-weight: 600;
-    color: rgba(240, 236, 246, 0.95);
+    color: var(--adm-text);
     margin: 0 0 12px 0;
 }
 
 .adm-2fa-text {
     font-size: 13px;
-    color: rgba(240, 236, 246, 0.7);
+    color: var(--adm-text-muted);
     line-height: 1.5;
     margin-bottom: 20px;
 }
 
 .adm-2fa-text strong {
-    color: rgba(240, 236, 246, 0.95);
+    color: var(--adm-text);
 }
 
 .adm-2fa-text code {
-    background: rgba(15, 10, 26, 0.6);
+    background: var(--adm-input-bg);
     padding: 1px 6px;
     border-radius: 4px;
     font-family: 'SF Mono', Monaco, Consolas, monospace;
@@ -286,11 +286,11 @@ onMounted(init)
 }
 
 .adm-2fa-error {
-    color: #fca5a5;
+    color: var(--adm-danger-text);
     font-size: 13px;
     padding: 8px 12px;
-    background: rgba(220, 38, 38, 0.08);
-    border: 1px solid rgba(220, 38, 38, 0.2);
+    background: var(--adm-btn-danger-bg);
+    border: 1px solid var(--adm-btn-danger-bg-hover);
     border-radius: 6px;
     margin-top: 10px;
 }
@@ -299,8 +299,8 @@ onMounted(init)
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 8px;
-    background: rgba(15, 10, 26, 0.6);
-    border: 1px solid rgba(149, 0, 255, 0.1);
+    background: var(--adm-input-bg);
+    border: 1px solid var(--adm-border);
     border-radius: 8px;
     padding: 14px;
     margin: 16px 0;
@@ -309,7 +309,7 @@ onMounted(init)
 .adm-backup-code {
     font-family: 'SF Mono', Monaco, Consolas, monospace;
     font-size: 14px;
-    color: rgba(240, 236, 246, 0.95);
+    color: var(--adm-text);
     text-align: center;
     padding: 4px;
     user-select: all;

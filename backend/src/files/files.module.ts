@@ -9,6 +9,10 @@ import {
   ProcessingJob,
   ProcessingJobSchema,
 } from '../jobs/schemas/processing-job.schema';
+// OrganizationsModule re-exports MongooseModule for Membership/Organization,
+// which FilesService injects to verify the X-Active-Org-Id header against
+// the caller's active memberships (Task 6).
+import { OrganizationsModule } from '../organizations/organizations.module';
 import { ProcessorsModule } from '../processors/processors.module';
 import { User, UserSchema } from '../users/schemas/user.schema';
 import { UsersModule } from '../users/users.module';
@@ -26,6 +30,7 @@ import { TransformationLockService } from './utils/transformation-lock';
     // UsersModule is required because JwtAuthGuard / FileProcessingLimitGuard
     // (re-exported by AuthModule) depend on UsersService, which lives here.
     UsersModule,
+    OrganizationsModule,
     ProcessorsModule,
     MulterModule.registerAsync({
       imports: [ConfigModule],

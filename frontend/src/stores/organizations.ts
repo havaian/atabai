@@ -31,12 +31,29 @@ export const useOrganizationsStore = defineStore('organizations', () => {
     const items = ref([])
     /** Pending invites waiting on the caller's accept. */
     const pendingInvites = ref([])
-    /** Currently-active org id — null when the user has no orgs yet. */
+    /**
+     * Currently-active org id. Initially read from localStorage so the first
+     * /session call carries it in the header, but the SERVER is the source
+     * of truth — the response either echoes our claim (valid) or replaces
+     * it (stale / revoked / never-valid). On every /session response we
+     * overwrite from `session.activeOrgId`, not the other way around.
+     */
     const currentOrgId = ref(readActiveOrgId())
     const isLoading = ref(false)
     const error = ref(null)
     /** True after the first successful list fetch — controls onboarding redirect. */
     const isInitialized = ref(false)
+
+    /**
+     * Authoritative capability set for the active membership, as resolved by
+     * the backend's /session endpoint. UI gates on this — NOT on local
+     * inference from items[].membership — because the backend is the only
+     * place that can honestly say "you are an admin here" or "you have
+     * cap X". Empty when there is no active org.
+     */
+    const capabilities = ref([])
+    /** Backend's verdict on whether the user is admin in the active org. */
+    const isOrgAdmin = ref(false)
 
     // ─── Getters ────────────────────────────────────────────────────────────
     const currentOrg = computed(() => {
@@ -58,28 +75,53 @@ export const useOrganizationsStore = defineStore('organizations', () => {
 
     // ─── Actions ────────────────────────────────────────────────────────────
 
-    /** Fetch active memberships + pending invites in parallel. */
-    async function fetchAll() {
+    /**
+     * Fetch the authoritative session from the backend. Replaces the
+     * previous two-call pattern (listMine + listPendingInvites). The
+     * backend honours our X-Active-Org-Id claim only if it matches a real
+     * active membership; otherwise it picks a default and tells us. We
+     * then mirror its choice into localStorage so subsequent requests
+     * carry the same valid id in the header.
+     *
+     * Single round-trip on bootstrap, single round-trip on org switch.
+     * Anything else (gating sidebar nav off localStorage) re-introduces
+     * the divergence between the UI's idea of "current org" and the
+     * server's idea of what the user can do — the exact bug we are
+     * avoiding by going through this endpoint.
+     */
+    async function fetchSession() {
         isLoading.value = true
         error.value = null
         try {
-            const [orgsResp, invitesResp] = await Promise.all([
-                apiClient.get('/organizations'),
-                apiClient.get('/organizations/pending-invites'),
-            ])
-            items.value = orgsResp.data.organizations || []
-            pendingInvites.value = invitesResp.data.invites || []
-            reconcileActiveOrg()
+            // apiClient axios interceptor attaches X-Active-Org-Id from
+            // currentOrgId.value on every request — the backend uses it
+            // to either honour or replace our claim.
+            const resp = await apiClient.get('/organizations/session')
+            const session = resp.data.session || {}
+            items.value = resp.data.organizations || []
+            pendingInvites.value = resp.data.pendingInvites || []
+            // Critical: trust the server's activeOrgId. If our local claim
+            // was stale, this corrects it.
+            const serverActive = session.activeOrgId || null
+            if (serverActive !== currentOrgId.value) {
+                currentOrgId.value = serverActive
+                persistActiveOrgId(serverActive)
+            }
+            capabilities.value = session.capabilities || []
+            isOrgAdmin.value = !!session.isOrgAdmin
             isInitialized.value = true
-            return { orgs: items.value, invites: pendingInvites.value }
+            return { orgs: items.value, invites: pendingInvites.value, session }
         } catch (err) {
-            error.value = err?.response?.data?.message || err?.message || 'Failed to load organizations'
-            console.error('organizations.fetchAll error:', err)
+            error.value = err?.response?.data?.message || err?.message || 'Failed to load session'
+            console.error('organizations.fetchSession error:', err)
             throw err
         } finally {
             isLoading.value = false
         }
     }
+
+    /** Back-compat alias — older call sites still reference fetchAll. */
+    const fetchAll = fetchSession
 
     /**
      * Convenience: call this once after auth bootstrap. No-op if already
@@ -88,19 +130,26 @@ export const useOrganizationsStore = defineStore('organizations', () => {
      */
     async function ensureInitialized(force = false) {
         if (isInitialized.value && !force) return
-        await fetchAll()
+        await fetchSession()
     }
 
     /**
-     * Switch the active org. Persists to localStorage so the choice
-     * survives reloads. Throws if the id isn't in the user's active list —
-     * silently switching to an org the user can't actually access is the
-     * kind of bug that causes "why are my balances empty?" support tickets.
+     * Switch the active org. The client's idea of "active" changes locally
+     * first (so the request that follows carries the new X-Active-Org-Id),
+     * then /session is re-fetched to lock it in with the backend's blessing
+     * + the new capability set. If the backend rejects the claim (revoked
+     * mid-session, etc.) fetchSession will overwrite back to a valid org.
+     *
+     * Throws if the id isn't in the user's known active list — silently
+     * switching to an org the user can't access is the kind of bug that
+     * causes "why are my balances empty?" support tickets.
      */
-    function setCurrentOrg(orgId) {
+    async function setCurrentOrg(orgId) {
         if (!orgId) {
             currentOrgId.value = null
             persistActiveOrgId(null)
+            capabilities.value = []
+            isOrgAdmin.value = false
             return
         }
         const match = items.value.find((o) => o.id === orgId)
@@ -109,6 +158,10 @@ export const useOrganizationsStore = defineStore('organizations', () => {
         }
         currentOrgId.value = orgId
         persistActiveOrgId(orgId)
+        // Re-fetch /session so capabilities and isOrgAdmin reflect the new
+        // active org. Without this the UI would carry the previous org's
+        // capability set until the next bootstrap.
+        await fetchSession()
     }
 
     /**
@@ -123,16 +176,22 @@ export const useOrganizationsStore = defineStore('organizations', () => {
         error.value = null
         try {
             const resp = await apiClient.post('/onboarding/organizations', payload)
-            // The bootstrap response shape differs from /organizations — it
-            // returns the full org + membership + profile + periods + chart
-            // seed counts. Re-fetch the list to pick up the new org in our
-            // canonical shape rather than synthesising it locally.
-            await fetchAll()
-            // Make the just-created org active.
+            // Promote the new org to active locally BEFORE the next /session
+            // call, so the X-Active-Org-Id header sent by the axios
+            // interceptor on that call is already the new org id. This is
+            // what causes the server's /session response to return the new
+            // org as activeOrgId — without it, the server would default to
+            // whichever org was first in the sorted list (which, for a
+            // brand-new tenant, may be a different one).
             const newOrgId = resp.data.organization?.id
-            if (newOrgId && items.value.some((o) => o.id === newOrgId)) {
-                setCurrentOrg(newOrgId)
+            if (newOrgId) {
+                currentOrgId.value = newOrgId
+                persistActiveOrgId(newOrgId)
             }
+            // One /session call replaces the old (fetchAll + setCurrentOrg)
+            // two-call sequence: it returns the canonical list including
+            // the new org AND the server-validated capability set for it.
+            await fetchSession()
             return resp.data
         } catch (err) {
             error.value = err?.response?.data?.message || err?.message || 'Failed to create organization'
@@ -215,25 +274,20 @@ export const useOrganizationsStore = defineStore('organizations', () => {
         items.value = []
         pendingInvites.value = []
         currentOrgId.value = null
+        capabilities.value = []
+        isOrgAdmin.value = false
         isInitialized.value = false
         error.value = null
         persistActiveOrgId(null)
     }
 
     // ─── Internal helpers ───────────────────────────────────────────────────
-
-    function reconcileActiveOrg() {
-        if (items.value.length === 0) {
-            currentOrgId.value = null
-            persistActiveOrgId(null)
-            return
-        }
-        const stillValid = currentOrgId.value && items.value.some((o) => o.id === currentOrgId.value)
-        if (!stillValid) {
-            currentOrgId.value = items.value[0].id
-            persistActiveOrgId(currentOrgId.value)
-        }
-    }
+    //
+    // Note: the previous `reconcileActiveOrg()` helper has been removed.
+    // Reconciliation is now the backend's job — /session decides which org
+    // is active given the client's claim and the membership table. Doing
+    // it locally would re-introduce the divergence between UI state and
+    // authorization state.
 
     function readActiveOrgId() {
         try {
@@ -260,6 +314,8 @@ export const useOrganizationsStore = defineStore('organizations', () => {
         isLoading,
         error,
         isInitialized,
+        capabilities,
+        isOrgAdmin,
         // getters
         currentOrg,
         currentMembership,
@@ -268,6 +324,7 @@ export const useOrganizationsStore = defineStore('organizations', () => {
         needsOnboarding,
         // actions
         fetchAll,
+        fetchSession,
         ensureInitialized,
         setCurrentOrg,
         bootstrap,

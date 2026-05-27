@@ -245,26 +245,26 @@ onMounted(load)
     border-radius: 10px;
     padding: 14px 16px;
     border: 1px solid var(--adm-border);
-    background: var(--ws-bg-elevated, rgba(20, 14, 32, 0.5));
+    background: var(--adm-surface);
     /* Banner sits directly above the stats grid; without bottom margin they
        touch each other on mobile. Stats grid only has margin-bottom, no top. */
     margin-bottom: 16px;
 }
 
 .aa-banner--on {
-    border-color: rgba(34, 197, 94, 0.35);
-    background: rgba(34, 197, 94, 0.06);
+    border-color: var(--adm-badge-success-bg);
+    background: var(--adm-badge-success-bg);
 }
 
 .aa-banner--off {
-    border-color: rgba(245, 158, 11, 0.3);
-    background: rgba(245, 158, 11, 0.05);
+    border-color: var(--adm-badge-warn-bg);
+    background: var(--adm-badge-warn-bg);
 }
 
 .aa-banner__title {
     font-weight: 600;
     font-size: 14px;
-    color: var(--ws-text, #f0ecf6);
+    color: var(--adm-text);
     margin-bottom: 2px;
 }
 
@@ -303,7 +303,7 @@ onMounted(load)
 
 .aa-bulk__result {
     font-size: 13px;
-    color: #4ade80;
+    color: var(--adm-success-text);
 }
 
 .aa-table-card {
@@ -319,7 +319,10 @@ onMounted(load)
 .aa-btn-remove {
     background: transparent;
     border: none;
-    color: rgba(248, 113, 113, 0.7);
+    color: var(--adm-danger-text);
+    /* Slight de-emphasis when at rest so the button doesn't pull the eye
+       on every row — full opacity returns on hover. */
+    opacity: 0.7;
     font-size: 18px;
     line-height: 1;
     cursor: pointer;
@@ -328,8 +331,9 @@ onMounted(load)
 }
 
 .aa-btn-remove:hover {
-    background: rgba(248, 113, 113, 0.1);
-    color: #ef4444;
+    background: var(--adm-btn-danger-bg);
+    color: var(--adm-danger-text);
+    opacity: 1;
 }
 
 @media (max-width: 767px) {

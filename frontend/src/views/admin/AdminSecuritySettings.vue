@@ -47,7 +47,7 @@
                     {{ $t('admin.security.backupDescription') }}
                 </p>
 
-                <div v-if="newBackupCodes.length > 0" class="adm-card" style="background: rgba(34, 197, 94, 0.06); border-color: rgba(34, 197, 94, 0.25); margin-bottom: 14px;">
+                <div v-if="newBackupCodes.length > 0" class="adm-card adm-card--success">
                     <p class="adm-text-sm" style="margin-bottom: 10px;">
                         <strong>{{ $t('admin.security.newCodesTitle') }}</strong>{{ $t('admin.security.newCodesDescription') }}
                     </p>
@@ -201,12 +201,28 @@ onMounted(loadStatus)
 </script>
 
 <style scoped>
+.adm-card {
+    margin-top: 1em;
+}
+
+
+
+/* Success-tinted variant of .adm-card — used for the "new backup codes
+   generated" notice. The base .adm-card lives in admin.css; this only
+   tints the background + border via the same green token pair used by
+   .adm-badge--*-success so the tone is consistent across the admin UI. */
+.adm-card--success {
+    background: var(--adm-badge-success-bg);
+    border-color: var(--adm-badge-success-bg);
+    margin-bottom: 14px;
+}
+
 .adm-backup-codes {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 8px;
-    background: rgba(15, 10, 26, 0.6);
-    border: 1px solid rgba(149, 0, 255, 0.1);
+    background: var(--adm-input-bg);
+    border: 1px solid var(--adm-border);
     border-radius: 8px;
     padding: 14px;
 }
@@ -214,18 +230,18 @@ onMounted(loadStatus)
 .adm-backup-code {
     font-family: 'SF Mono', Monaco, Consolas, monospace;
     font-size: 14px;
-    color: rgba(240, 236, 246, 0.95);
+    color: var(--adm-text);
     text-align: center;
     padding: 4px;
     user-select: all;
 }
 
 .adm-2fa-error {
-    color: #fca5a5;
+    color: var(--adm-danger-text);
     font-size: 12px;
     padding: 6px 10px;
-    background: rgba(220, 38, 38, 0.08);
-    border: 1px solid rgba(220, 38, 38, 0.2);
+    background: var(--adm-btn-danger-bg);
+    border: 1px solid var(--adm-btn-danger-bg-hover);
     border-radius: 6px;
     margin-top: 10px;
     display: inline-block;

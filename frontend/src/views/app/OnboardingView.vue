@@ -235,8 +235,8 @@ async function submit() {
 .onboarding-card {
     width: 100%;
     max-width: 560px;
-    background: var(--card-bg, #fff);
-    border: 1px solid var(--border, #e2e8f0);
+    background: var(--ws-surface);
+    border: 1px solid var(--ws-border);
     border-radius: 16px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
     padding: 32px;
@@ -245,13 +245,13 @@ async function submit() {
 .onboarding-header h1 {
     font-size: 1.5rem;
     font-weight: 600;
-    color: var(--text);
+    color: var(--ws-text);
     margin-bottom: 4px;
 }
 
 .onboarding-header p {
     font-size: 0.95rem;
-    color: var(--text-light);
+    color: var(--ws-text-3);
     margin-bottom: 24px;
 }
 
@@ -267,25 +267,25 @@ async function submit() {
     display: flex;
     align-items: center;
     gap: 8px;
-    color: var(--text-light);
+    color: var(--ws-text-3);
     font-size: 0.85rem;
 }
 
 .onboarding-steps li.active {
-    color: var(--primary);
+    color: var(--ws-purple);
     font-weight: 600;
 }
 
 .onboarding-steps li.done {
-    color: var(--text);
+    color: var(--ws-text);
 }
 
 .onboarding-step-num {
     width: 22px;
     height: 22px;
     border-radius: 50%;
-    background: var(--accent);
-    color: var(--text-light);
+    background: var(--ws-surface-2);
+    color: var(--ws-text-3);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -294,7 +294,7 @@ async function submit() {
 }
 
 .onboarding-steps li.active .onboarding-step-num {
-    background: var(--primary);
+    background: var(--ws-purple);
     color: white;
 }
 
@@ -312,24 +312,24 @@ async function submit() {
 
 .onboarding-label {
     font-size: 0.85rem;
-    color: var(--text);
+    color: var(--ws-text);
     font-weight: 500;
 }
 
 .onboarding-input {
     padding: 10px 12px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--ws-border);
     border-radius: 8px;
     font-size: 0.95rem;
-    background: var(--card-bg, #fff);
-    color: var(--text);
+    background: var(--ws-surface);
+    color: var(--ws-text);
     transition: border-color 0.15s, box-shadow 0.15s;
 }
 
 .onboarding-input:focus {
     outline: none;
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(101, 57, 154, 0.18);
+    border-color: var(--ws-purple);
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.18);
 }
 
 .onboarding-input--currency {
@@ -339,13 +339,13 @@ async function submit() {
 
 .onboarding-help {
     font-size: 0.78rem;
-    color: var(--text-light);
+    color: var(--ws-text-3);
 }
 
 .onboarding-review-title {
     font-size: 1rem;
     font-weight: 600;
-    color: var(--text);
+    color: var(--ws-text);
     margin-bottom: 8px;
 }
 
@@ -354,23 +354,23 @@ async function submit() {
     grid-template-columns: 180px 1fr;
     gap: 10px 16px;
     padding: 16px;
-    background: var(--accent);
+    background: var(--ws-surface-2);
     border-radius: 8px;
     font-size: 0.9rem;
 }
 
 .onboarding-review dt {
-    color: var(--text-light);
+    color: var(--ws-text-3);
     font-weight: 500;
 }
 
 .onboarding-review dd {
-    color: var(--text);
+    color: var(--ws-text);
 }
 
 .onboarding-note {
     font-size: 0.82rem;
-    color: var(--text-light);
+    color: var(--ws-text-3);
     margin-top: 12px;
     line-height: 1.5;
 }
@@ -412,21 +412,21 @@ async function submit() {
 }
 
 .onboarding-btn--primary {
-    background: var(--primary);
+    background: var(--ws-purple);
     color: white;
 }
 
 .onboarding-btn--primary:hover:not(:disabled) {
-    background: var(--primary-dark);
+    background: #6D28D9;
 }
 
 .onboarding-btn--ghost {
     background: transparent;
-    color: var(--text);
-    border: 1px solid var(--border);
+    color: var(--ws-text);
+    border: 1px solid var(--ws-border);
 }
 
 .onboarding-btn--ghost:hover:not(:disabled) {
-    background: var(--accent);
+    background: var(--ws-surface-2);
 }
 </style>

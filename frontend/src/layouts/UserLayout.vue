@@ -120,25 +120,78 @@ import AppLayout from '@/components/layout/AppLayout.vue'
 import OrgSwitcher from '@/components/layout/OrgSwitcher.vue'
 import { useAuthStore } from '@/stores/auth'
 import { useFilesStore } from '@/stores/files'
+import { useOrganizationsStore } from '@/stores/organizations'
 import {
     LayoutDashboard, Archive, Plus, FileText, ChevronRight,
     ShieldCheck, Settings, LogOut,
+    // Ledger-spine nav icons (Task 5 — surfacing new architecture).
+    // OSV and Bank entry-points live on Dashboard, not in the sidebar,
+    // because they're period-scoped actions rather than top-level views.
+    CalendarDays, BookOpen, Grid3x3, Sliders,
 } from 'lucide-vue-next'
 
 const router = useRouter()
 const { t } = useI18n()
 const authStore = useAuthStore()
 const filesStore = useFilesStore()
+const orgsStore = useOrganizationsStore()
 
 const isProfileMenuOpen = ref(false)
 const profileRef = ref(null)
 
 // Named routes — works regardless of locale prefix in URL.
-const navItems = computed(() => [
-    { name: 'Dashboard', label: t('nav.dashboard'), icon: LayoutDashboard },
-    { name: 'FileHistory', label: t('nav.history'), icon: Archive },
-    { name: 'Settings', label: t('dashboard.settings'), icon: Settings },
-])
+//
+// Two-tier nav (Task 5):
+//   - Top tier: Dashboard, History, Settings — visible always.
+//   - Ledger-spine tier: surfaces the new architecture (periods, chart,
+//     ledger matrix, adjustments). Visibility is driven by the SERVER's
+//     view of the session — orgsStore.isOrgAdmin and orgsStore.capabilities
+//     are populated from GET /api/organizations/session, which validates
+//     the X-Active-Org-Id claim against the membership table and returns
+//     the authoritative cap set. Local "currentOrgId" alone is not enough
+//     — that's a client-side breadcrumb, not an authorization check.
+//
+// Capability map:
+//   - Periods / Chart / Matrix → read-only views of the ledger.
+//     `nsbu.base.read` is the floor; admins implicitly have it too.
+//   - Adjustments → the IFRS overlay layer. `ifrs.overlay.read` is the
+//     floor; admins have it.
+//
+// We keep one flat array so AppLayout's nav slot renders a single list.
+// Order matters: Dashboard → daily work → archives.
+const navItems = computed(() => {
+    const hasOrg = orgsStore.hasOrgs && !!orgsStore.currentOrgId
+    if (!hasOrg) {
+        // No org yet: show only top-tier nav. Onboarding redirect handles
+        // the empty state at the router level.
+        return [
+            { name: 'Dashboard', label: t('nav.dashboard'), icon: LayoutDashboard },
+            { name: 'FileHistory', label: t('nav.history'), icon: Archive },
+            { name: 'Settings', label: t('dashboard.settings'), icon: Settings },
+        ]
+    }
+    // Server-blessed capabilities for the active org. Admins receive the
+    // full cap set from the backend already, so the .includes() checks
+    // below succeed for them without a special branch here.
+    const caps = orgsStore.capabilities || []
+    const canReadLedger = caps.includes('nsbu.base.read')
+    const canReadOverlay = caps.includes('ifrs.overlay.read')
+    return [
+        { name: 'Dashboard', label: t('nav.dashboard'), icon: LayoutDashboard },
+        ...(canReadLedger
+            ? [
+                { name: 'Periods', label: t('nav.periods'), icon: CalendarDays },
+                { name: 'ChartOfAccounts', label: t('nav.chart'), icon: BookOpen },
+                { name: 'LedgerMatrix', label: t('nav.matrix'), icon: Grid3x3 },
+            ]
+            : []),
+        ...(canReadOverlay
+            ? [{ name: 'AdjustmentsList', label: t('nav.adjustments'), icon: Sliders }]
+            : []),
+        { name: 'FileHistory', label: t('nav.history'), icon: Archive },
+        { name: 'Settings', label: t('dashboard.settings'), icon: Settings },
+    ]
+})
 
 const recentFiles = computed(() => filesStore.recentFiles || [])
 

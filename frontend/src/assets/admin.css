@@ -1,6 +1,11 @@
 /* Shared styles for admin views.
    Imported once via AdminLayout / per-view <style scoped> uses :deep() when needed.
-   Kept dark by default; will inherit theme tokens if defined globally. */
+
+   Theming: every color in this file resolves through --adm-* tokens defined
+   in theme.css ([data-theme="light"] and [data-theme="dark"] blocks). Do
+   NOT introduce raw rgba()/hex literals here — they would break one theme
+   or the other. If a new visual concept needs its own color, define a new
+   --adm-* token pair in theme.css first, then reference it here. */
 
 .adm-page {
     padding: 24px 28px;
@@ -31,7 +36,7 @@
 .adm-page-title {
     font-size: 22px;
     font-weight: 600;
-    color: var(--ws-text, #f0ecf6);
+    color: var(--adm-text);
     margin: 0;
     /* Long filenames without spaces (e.g. NSBU_Balans_Namuna_MCJ_2023.xlsx)
        overflow the viewport on mobile because there's nothing to break on.
@@ -49,8 +54,8 @@
 
 /* ─── Cards ───────────────────────────────────────────────────────────────── */
 .adm-card {
-    background: rgba(20, 14, 32, 0.6);
-    border: 1px solid rgba(149, 0, 255, 0.12);
+    background: var(--adm-surface);
+    border: 1px solid var(--adm-border);
     border-radius: 12px;
     padding: 20px;
 }
@@ -83,8 +88,8 @@
 }
 
 .adm-stat {
-    background: rgba(20, 14, 32, 0.6);
-    border: 1px solid rgba(149, 0, 255, 0.12);
+    background: var(--adm-surface);
+    border: 1px solid var(--adm-border);
     border-radius: 10px;
     padding: 16px;
     display: flex;
@@ -105,7 +110,7 @@
 .adm-stat-value {
     font-size: 24px;
     font-weight: 600;
-    color: var(--ws-text, #f0ecf6);
+    color: var(--adm-text);
     line-height: 1;
 }
 
@@ -113,7 +118,7 @@
 .adm-table-wrap {
     overflow-x: auto;
     border-radius: 10px;
-    border: 1px solid rgba(149, 0, 255, 0.12);
+    border: 1px solid var(--adm-border);
 }
 
 .adm-table {
@@ -125,7 +130,7 @@
 .adm-table th {
     text-align: left;
     padding: 10px 14px;
-    background: rgba(20, 14, 32, 0.7);
+    background: var(--adm-surface-2);
     color: var(--adm-text-muted);
     font-weight: 600;
     font-size: 11px;
@@ -137,7 +142,7 @@
 
 .adm-table td {
     padding: 10px 14px;
-    border-bottom: 1px solid rgba(149, 0, 255, 0.08);
+    border-bottom: 1px solid var(--adm-border-soft);
     color: var(--adm-text);
     vertical-align: middle;
 }
@@ -151,7 +156,7 @@
 }
 
 .adm-table tbody tr:hover {
-    background: rgba(149, 0, 255, 0.04);
+    background: var(--adm-row-hover);
 }
 
 .adm-table tbody tr.adm-row-clickable {
@@ -166,7 +171,7 @@
     padding: 7px 14px;
     border: none;
     background: var(--adm-nav-bg-active);
-    color: var(--ws-text, #f0ecf6);
+    color: var(--adm-text);
     border-radius: 7px;
     font-size: 13px;
     font-weight: 500;
@@ -177,25 +182,25 @@
 }
 
 .adm-btn:hover {
-    background: rgba(149, 0, 255, 0.28);
+    background: var(--adm-nav-bg-active);
 }
 
 .adm-btn--primary {
-    background: #9333ea;
+    background: var(--adm-btn-primary-bg);
     color: white;
 }
 
 .adm-btn--primary:hover {
-    background: #a855f7;
+    background: var(--adm-btn-primary-bg-hover);
 }
 
 .adm-btn--danger {
-    background: rgba(220, 38, 38, 0.18);
-    color: #fca5a5;
+    background: var(--adm-btn-danger-bg);
+    color: var(--adm-btn-danger-text);
 }
 
 .adm-btn--danger:hover {
-    background: rgba(220, 38, 38, 0.32);
+    background: var(--adm-btn-danger-bg-hover);
 }
 
 .adm-btn--ghost {
@@ -223,10 +228,10 @@
 .adm-textarea {
     width: 100%;
     padding: 8px 12px;
-    background: rgba(15, 10, 26, 0.6);
-    border: 1px solid rgba(149, 0, 255, 0.18);
+    background: var(--adm-input-bg);
+    border: 1px solid var(--adm-input-border);
     border-radius: 7px;
-    color: var(--ws-text, #f0ecf6);
+    color: var(--adm-text);
     font-size: 13px;
     font-family: inherit;
     transition: border-color 0.12s;
@@ -237,11 +242,11 @@
 .adm-select:focus,
 .adm-textarea:focus {
     outline: none;
-    border-color: #9333ea;
+    border-color: var(--adm-input-border-focus);
 }
 
 .adm-input::placeholder {
-    color: rgba(240, 236, 246, 0.35);
+    color: var(--adm-input-placeholder);
 }
 
 .adm-textarea {
@@ -274,21 +279,27 @@
     letter-spacing: 0.05em;
 }
 
-.adm-badge--role-user { background: rgba(100, 116, 139, 0.2); color: #94a3b8; }
-.adm-badge--role-admin { background: rgba(59, 130, 246, 0.18); color: #93c5fd; }
-.adm-badge--role-super_admin { background: rgba(168, 85, 247, 0.2); color: var(--adm-nav-text-active); }
+/* Role badges. "user" is a neutral grey, "admin" reads as informational
+   blue, "super_admin" carries the product purple. */
+.adm-badge--role-user { background: var(--adm-badge-neutral-bg); color: var(--adm-badge-neutral-text); }
+.adm-badge--role-admin { background: var(--adm-badge-info-bg); color: var(--adm-badge-info-text); }
+.adm-badge--role-super_admin { background: var(--adm-badge-purple-bg); color: var(--adm-badge-purple-text); }
 
-.adm-badge--status-uploaded { background: rgba(100, 116, 139, 0.2); color: #94a3b8; }
-.adm-badge--status-processing { background: rgba(234, 179, 8, 0.2); color: #fde047; }
-.adm-badge--status-completed { background: rgba(34, 197, 94, 0.2); color: #86efac; }
-.adm-badge--status-failed { background: rgba(220, 38, 38, 0.2); color: #fca5a5; }
+/* File processing status. uploaded → neutral; processing → warn (yellow);
+   completed → success (green); failed → danger (red). */
+.adm-badge--status-uploaded { background: var(--adm-badge-neutral-bg); color: var(--adm-badge-neutral-text); }
+.adm-badge--status-processing { background: var(--adm-badge-warn-bg); color: var(--adm-badge-warn-text); }
+.adm-badge--status-completed { background: var(--adm-badge-success-bg); color: var(--adm-badge-success-text); }
+.adm-badge--status-failed { background: var(--adm-badge-danger-bg); color: var(--adm-badge-danger-text); }
 
-.adm-badge--mappingset-draft { background: rgba(234, 179, 8, 0.18); color: #fde047; }
-.adm-badge--mappingset-published { background: rgba(34, 197, 94, 0.2); color: #86efac; }
-.adm-badge--mappingset-archived { background: rgba(100, 116, 139, 0.2); color: #94a3b8; }
+/* Mapping-set lifecycle: draft (warn), published (success), archived (neutral). */
+.adm-badge--mappingset-draft { background: var(--adm-badge-warn-bg); color: var(--adm-badge-warn-text); }
+.adm-badge--mappingset-published { background: var(--adm-badge-success-bg); color: var(--adm-badge-success-text); }
+.adm-badge--mappingset-archived { background: var(--adm-badge-neutral-bg); color: var(--adm-badge-neutral-text); }
 
-.adm-badge--active { background: rgba(34, 197, 94, 0.2); color: #86efac; }
-.adm-badge--inactive { background: rgba(220, 38, 38, 0.2); color: #fca5a5; }
+/* Generic active/inactive pills. */
+.adm-badge--active { background: var(--adm-badge-success-bg); color: var(--adm-badge-success-text); }
+.adm-badge--inactive { background: var(--adm-badge-danger-bg); color: var(--adm-badge-danger-text); }
 
 /* ─── Filter bar ──────────────────────────────────────────────────────────── */
 .adm-filter-bar {
@@ -346,7 +357,7 @@
 }
 
 .adm-modal {
-    background: rgb(20, 14, 32);
+    background: var(--adm-surface-elev);
     border: 1px solid var(--adm-border);
     border-radius: 12px;
     padding: 24px;
@@ -360,7 +371,7 @@
     font-size: 16px;
     font-weight: 600;
     margin: 0 0 16px 0;
-    color: var(--ws-text, #f0ecf6);
+    color: var(--adm-text);
 }
 
 .adm-modal-actions {
@@ -478,7 +489,7 @@
 .adm-btn-link {
     background: transparent;
     border: none;
-    color: #9333ea;
+    color: var(--adm-btn-primary-bg);
     cursor: pointer;
     font-size: 12px;
     padding: 2px 6px;

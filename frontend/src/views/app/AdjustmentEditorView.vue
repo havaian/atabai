@@ -261,12 +261,12 @@ function back() {
 .adj-editor { max-width: 1100px; margin: 0 auto; padding: 24px; }
 .adj-editor-header { margin-bottom: 20px; }
 .back-btn {
-    background: transparent; border: none; color: var(--text-light); cursor: pointer;
+    background: transparent; border: none; color: var(--ws-text-3); cursor: pointer;
     display: inline-flex; align-items: center; gap: 6px; font-size: 0.85rem; margin-bottom: 12px;
 }
 .adj-editor-header h1 { font-size: 1.3rem; font-weight: 600; }
 .adj-editor-card {
-    background: var(--card-bg, #fff); border: 1px solid var(--border);
+    background: var(--ws-surface); border: 1px solid var(--ws-border);
     border-radius: 12px; padding: 24px;
 }
 .adj-editor-meta {
@@ -277,46 +277,46 @@ function back() {
 .adj-editor-meta input,
 .adj-editor-meta select,
 .adj-editor-meta textarea {
-    padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.9rem;
-    background: var(--card-bg, #fff); color: var(--text); font-family: inherit;
+    padding: 8px 10px; border: 1px solid var(--ws-border); border-radius: 6px; font-size: 0.9rem;
+    background: var(--ws-surface); color: var(--ws-text); font-family: inherit;
 }
 .adj-editor-meta input:disabled,
 .adj-editor-meta select:disabled,
-.adj-editor-meta textarea:disabled { background: var(--accent); cursor: not-allowed; }
+.adj-editor-meta textarea:disabled { background: var(--ws-surface-2); cursor: not-allowed; }
 
 .adj-editor-lines { margin-bottom: 20px; }
 .adj-editor-table {
     width: 100%; border-collapse: separate; border-spacing: 0; font-size: 0.86rem;
-    border: 1px solid var(--border); border-radius: 8px; overflow: hidden;
+    border: 1px solid var(--ws-border); border-radius: 8px; overflow: hidden;
 }
 .adj-editor-table th {
-    text-align: left; padding: 8px 10px; background: var(--accent); color: var(--text-light); font-weight: 600;
+    text-align: left; padding: 8px 10px; background: var(--ws-surface-2); color: var(--ws-text-3); font-weight: 600;
 }
-.adj-editor-table td { padding: 6px 8px; border-top: 1px solid var(--border); }
+.adj-editor-table td { padding: 6px 8px; border-top: 1px solid var(--ws-border); }
 .adj-editor-table input, .adj-editor-table select {
     width: 100%; padding: 6px 8px; border: 1px solid transparent; border-radius: 4px;
     font-size: 0.86rem; background: transparent;
 }
-.adj-editor-table input:focus, .adj-editor-table select:focus { outline: none; border-color: var(--primary); background: white; }
+.adj-editor-table input:focus, .adj-editor-table select:focus { outline: none; border-color: var(--ws-purple); background: white; }
 .adj-editor-num { text-align: right; font-variant-numeric: tabular-nums; }
 .adj-editor-remove {
-    background: transparent; border: none; cursor: pointer; color: var(--text-light); padding: 4px;
+    background: transparent; border: none; cursor: pointer; color: var(--ws-text-3); padding: 4px;
 }
 .adj-editor-remove:hover { color: #c53030; }
 .adj-editor-add {
     margin-top: 10px; display: inline-flex; align-items: center; gap: 4px;
-    background: transparent; border: 1px dashed var(--border); padding: 6px 12px;
-    border-radius: 6px; color: var(--text-light); cursor: pointer; font-size: 0.82rem;
+    background: transparent; border: 1px dashed var(--ws-border); padding: 6px 12px;
+    border-radius: 6px; color: var(--ws-text-3); cursor: pointer; font-size: 0.82rem;
 }
-.adj-editor-add:hover { border-color: var(--primary); color: var(--primary); }
+.adj-editor-add:hover { border-color: var(--ws-purple); color: var(--ws-purple); }
 
 .adj-editor-totals {
     display: flex; gap: 24px; align-items: center; margin-top: 14px;
-    padding: 10px 14px; background: var(--accent); border-radius: 8px;
+    padding: 10px 14px; background: var(--ws-surface-2); border-radius: 8px;
 }
 .adj-editor-totals-label {
     font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em;
-    color: var(--text-light); display: block;
+    color: var(--ws-text-3); display: block;
 }
 .adj-editor-totals-value { font-weight: 600; font-variant-numeric: tabular-nums; }
 .adj-editor-balance {
@@ -330,21 +330,21 @@ function back() {
 }
 .adj-editor-spacer { flex: 1; }
 .btn-primary {
-    background: var(--primary); color: white; padding: 10px 18px; border-radius: 8px;
+    background: var(--ws-purple); color: white; padding: 10px 18px; border-radius: 8px;
     border: none; font-weight: 500; cursor: pointer;
 }
-.btn-primary:hover:not(:disabled) { background: var(--primary-dark); }
+.btn-primary:hover:not(:disabled) { background: #6D28D9; }
 .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
 .btn-ghost {
-    background: transparent; color: var(--text); border: 1px solid var(--border);
+    background: transparent; color: var(--ws-text); border: 1px solid var(--ws-border);
     padding: 10px 18px; border-radius: 8px; cursor: pointer;
 }
-.btn-ghost:hover { background: var(--accent); }
+.btn-ghost:hover { background: var(--ws-surface-2); }
 .btn-secondary {
-    background: white; color: var(--primary); border: 1px solid var(--primary);
+    background: white; color: var(--ws-purple); border: 1px solid var(--ws-purple);
     padding: 10px 18px; border-radius: 8px; cursor: pointer;
 }
-.btn-secondary:hover { background: rgba(101, 57, 154, 0.04); }
+.btn-secondary:hover { background: rgba(124, 58, 237, 0.04); }
 .adj-error {
     margin-top: 12px; padding: 10px 14px; background: rgba(245, 101, 101, 0.1);
     color: #c53030; border-radius: 8px; font-size: 0.86rem;

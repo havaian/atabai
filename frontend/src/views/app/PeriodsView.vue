@@ -206,15 +206,15 @@ async function submitCreate() {
     margin-bottom: 24px;
 }
 .periods-header h1 { font-size: 1.3rem; font-weight: 600; margin-bottom: 4px; }
-.periods-header p { font-size: 0.88rem; color: var(--text-light); }
+.periods-header p { font-size: 0.88rem; color: var(--ws-text-3); }
 .periods-empty {
-    padding: 60px 24px; text-align: center; color: var(--text-light);
-    background: var(--accent); border-radius: 12px;
+    padding: 60px 24px; text-align: center; color: var(--ws-text-3);
+    background: var(--ws-surface-2); border-radius: 12px;
 }
 .periods-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px; }
 .period-card {
     display: flex; align-items: center; justify-content: space-between; gap: 16px;
-    padding: 14px 18px; background: var(--card-bg, #fff); border: 1px solid var(--border);
+    padding: 14px 18px; background: var(--ws-surface); border: 1px solid var(--ws-border);
     border-radius: 12px; flex-wrap: wrap;
 }
 .period-card--locked { opacity: 0.7; }
@@ -222,24 +222,24 @@ async function submitCreate() {
 .period-card-name {
     display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 4px;
 }
-.period-card-label { font-weight: 600; color: var(--text); }
+.period-card-label { font-weight: 600; color: var(--ws-text); }
 .period-card-kind {
-    padding: 1px 8px; background: rgba(101, 57, 154, 0.12); color: var(--primary);
+    padding: 1px 8px; background: rgba(124, 58, 237, 0.12); color: var(--ws-purple);
     border-radius: 4px; font-size: 0.74rem; text-transform: capitalize;
 }
 .period-card-lock {
     display: inline-flex; align-items: center; gap: 4px;
-    padding: 1px 8px; background: var(--accent); color: var(--text-light);
+    padding: 1px 8px; background: var(--ws-surface-2); color: var(--ws-text-3);
     border-radius: 4px; font-size: 0.74rem;
 }
-.period-card-dates { font-size: 0.84rem; color: var(--text-light); }
+.period-card-dates { font-size: 0.84rem; color: var(--ws-text-3); }
 .period-card-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 .period-card-action {
     display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px;
-    background: transparent; border: 1px solid var(--border); border-radius: 6px;
-    color: var(--text); font-size: 0.8rem; cursor: pointer;
+    background: transparent; border: 1px solid var(--ws-border); border-radius: 6px;
+    color: var(--ws-text); font-size: 0.8rem; cursor: pointer;
 }
-.period-card-action:hover:not(:disabled) { background: var(--accent); border-color: var(--primary-light); }
+.period-card-action:hover:not(:disabled) { background: var(--ws-surface-2); border-color: rgba(124, 58, 237, 0.6); }
 .period-card-action:disabled { opacity: 0.5; cursor: not-allowed; }
 .period-card-action--lock { color: #c05621; border-color: rgba(237, 137, 54, 0.4); }
 .period-card-action--reopen { color: #2c5282; border-color: rgba(66, 153, 225, 0.4); }
@@ -248,22 +248,22 @@ async function submitCreate() {
     color: #c53030; border-radius: 8px; font-size: 0.86rem;
 }
 .spinner {
-    width: 24px; height: 24px; border: 2.5px solid var(--accent); border-top-color: var(--primary);
+    width: 24px; height: 24px; border: 2.5px solid var(--ws-surface-2); border-top-color: var(--ws-purple);
     border-radius: 50%; margin: 0 auto; animation: spin 0.85s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 .btn-primary {
-    background: var(--primary); color: white; padding: 9px 16px; border-radius: 8px;
+    background: var(--ws-purple); color: white; padding: 9px 16px; border-radius: 8px;
     border: none; font-weight: 500; cursor: pointer;
     display: inline-flex; align-items: center; gap: 6px; font-size: 0.9rem;
 }
-.btn-primary:hover:not(:disabled) { background: var(--primary-dark); }
+.btn-primary:hover:not(:disabled) { background: #6D28D9; }
 .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
 .btn-ghost {
-    background: transparent; color: var(--text); border: 1px solid var(--border);
+    background: transparent; color: var(--ws-text); border: 1px solid var(--ws-border);
     padding: 9px 16px; border-radius: 8px; cursor: pointer;
 }
-.btn-ghost:hover { background: var(--accent); }
+.btn-ghost:hover { background: var(--ws-surface-2); }
 
 /* Modal */
 .modal-backdrop {
@@ -271,28 +271,28 @@ async function submitCreate() {
     display: flex; align-items: center; justify-content: center; z-index: 90;
 }
 .modal-card {
-    background: var(--card-bg, #fff); border-radius: 14px;
+    background: var(--ws-surface); border-radius: 14px;
     width: 100%; max-width: 460px; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
 }
 .modal-header {
     display: flex; align-items: center; justify-content: space-between;
-    padding: 14px 18px; border-bottom: 1px solid var(--border);
+    padding: 14px 18px; border-bottom: 1px solid var(--ws-border);
 }
 .modal-header h2 { font-size: 1.05rem; font-weight: 600; }
-.modal-close { background: transparent; border: none; cursor: pointer; color: var(--text-light); }
+.modal-close { background: transparent; border: none; cursor: pointer; color: var(--ws-text-3); }
 .modal-body { padding: 18px; display: flex; flex-direction: column; gap: 12px; }
 .modal-field { display: flex; flex-direction: column; gap: 6px; font-size: 0.85rem; }
 .modal-field input {
-    padding: 9px 11px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.9rem;
+    padding: 9px 11px; border: 1px solid var(--ws-border); border-radius: 6px; font-size: 0.9rem;
 }
-.modal-field input:focus { outline: none; border-color: var(--primary); }
+.modal-field input:focus { outline: none; border-color: var(--ws-purple); }
 .modal-error {
     padding: 8px 10px; background: rgba(245, 101, 101, 0.1);
     color: #c53030; border-radius: 6px; font-size: 0.82rem;
 }
 .modal-footer {
     display: flex; gap: 8px; justify-content: flex-end;
-    padding: 12px 18px; border-top: 1px solid var(--border);
+    padding: 12px 18px; border-top: 1px solid var(--ws-border);
 }
 .modal-fade-enter-active, .modal-fade-leave-active { transition: opacity 0.15s; }
 .modal-fade-enter-from, .modal-fade-leave-to { opacity: 0; }
