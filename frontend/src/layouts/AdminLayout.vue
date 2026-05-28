@@ -6,8 +6,35 @@
 <template>
     <AppLayout :home-link="'/admin'" :brand-tag="$t('admin.layout.brandTag')"
         :nav-items="navItems" :storage-key="'atabai-admin-sidebar-open'">
-        <!-- Body: admin user info block -->
-        <template #body>
+        <!-- Body: admin mode toggle + user info block -->
+        <template #body="{ collapsed, isMobile, closeDrawer }">
+            <!-- Legacy ⇄ New mode switch. Pure UI preference persisted in
+                 localStorage (default Legacy, since that's what's fully
+                 functional today). Swaps the sidebar nav between the
+                 existing admin tools and the new ledger-spine section.
+                 Both modes sit behind the same admin guard — this is a
+                 view preference, not an authorization boundary. -->
+            <div class="admin-mode" :class="{ 'admin-mode--collapsed': collapsed && !isMobile }">
+                <button
+                    class="admin-mode-btn"
+                    :class="{ 'admin-mode-btn--active': mode === 'legacy' }"
+                    :title="$t('admin.mode.legacy')"
+                    @click="setMode('legacy', closeDrawer)"
+                >
+                    <Boxes :size="15" />
+                    <span v-if="!collapsed || isMobile">{{ $t('admin.mode.legacy') }}</span>
+                </button>
+                <button
+                    class="admin-mode-btn"
+                    :class="{ 'admin-mode-btn--active': mode === 'ledger' }"
+                    :title="$t('admin.mode.ledger')"
+                    @click="setMode('ledger', closeDrawer)"
+                >
+                    <Layers :size="15" />
+                    <span v-if="!collapsed || isMobile">{{ $t('admin.mode.ledger') }}</span>
+                </button>
+            </div>
+
             <div class="admin-user-info">
                 <div class="admin-user-name">{{ adminStore.adminInfo?.name }}</div>
                 <div class="admin-user-role">{{ roleLabel }}</div>
@@ -46,7 +73,7 @@
 
 <script setup lang="ts">
 // @ts-nocheck
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import AppLayout from '@/components/layout/AppLayout.vue'
@@ -55,14 +82,53 @@ import AdminTwoFactorGate from '@/views/admin/AdminTwoFactorGate.vue'
 import {
     LayoutDashboard, Users, FileText, Network, ShieldCheck, Languages,
     UserCheck, ArrowLeft, LockKeyhole,
+    // Mode toggle + new-mode nav icons.
+    Boxes, Layers,
 } from 'lucide-vue-next'
 
 const router = useRouter()
 const adminStore = useAdminStore()
 const { t } = useI18n()
 
-// Named routes — works regardless of locale prefix in URL.
-const navItems = computed(() => [
+// ─── Admin mode (Legacy ⇄ New) ────────────────────────────────────────────
+// Pure client-side view preference. Default 'legacy' because the legacy
+// tools are fully functional; the ledger-spine ('ledger') mode is the new
+// section. Persisted so the choice survives reloads. Not security-relevant
+// — both modes are behind the admin guard either way.
+const ADMIN_MODE_KEY = 'atabai-admin-mode'
+const mode = ref(readMode())
+
+function readMode() {
+    try {
+        const v = localStorage.getItem(ADMIN_MODE_KEY)
+        return v === 'ledger' ? 'ledger' : 'legacy'
+    } catch (_) {
+        return 'legacy'
+    }
+}
+
+function setMode(next, closeDrawer) {
+    if (mode.value === next) {
+        // Already in this mode — just navigate to its home so the toggle
+        // still feels responsive when re-tapped.
+        router.push(next === 'ledger' ? '/admin/ledger' : '/admin')
+        if (closeDrawer) closeDrawer()
+        return
+    }
+    mode.value = next
+    try {
+        localStorage.setItem(ADMIN_MODE_KEY, next)
+    } catch (_) {
+        // localStorage unavailable — mode still applies for this session.
+    }
+    // Land on the mode's home page so the user isn't left on a route that
+    // belongs to the other mode's nav.
+    router.push(next === 'ledger' ? '/admin/ledger' : '/admin')
+    if (closeDrawer) closeDrawer()
+}
+
+// Legacy nav — the existing admin tools, unchanged.
+const legacyNav = computed(() => [
     { name: 'AdminDashboard', label: t('admin.nav.dashboard'), icon: LayoutDashboard, exact: true },
     { name: 'AdminUsers', label: t('admin.nav.users'), icon: Users },
     { name: 'AdminFiles', label: t('admin.nav.files'), icon: FileText },
@@ -71,6 +137,15 @@ const navItems = computed(() => [
     { name: 'AdminAccess', label: t('admin.nav.access'), icon: UserCheck },
     { name: 'AdminSecuritySettings', label: t('admin.nav.security'), icon: ShieldCheck },
 ])
+
+// New (ledger-spine) nav — currently the overview landing only. Grows as
+// concrete new-admin features are built (org oversight, ownership transfer,
+// master chart editing, ingestion debugging — see AdminLedgerOverview).
+const ledgerNav = computed(() => [
+    { name: 'AdminLedgerOverview', label: t('admin.nav.ledgerOverview'), icon: Layers, exact: true },
+])
+
+const navItems = computed(() => (mode.value === 'ledger' ? ledgerNav.value : legacyNav.value))
 
 const roleLabel = computed(() => {
     const role = adminStore.adminInfo?.role
@@ -95,11 +170,60 @@ function on2FAVerified() {
 }
 
 onMounted(async () => {
+    // If the admin deep-linked into a ledger-mode route, reflect that in the
+    // toggle so the nav matches the page they're on.
+    if (router.currentRoute.value.name === 'AdminLedgerOverview' && mode.value !== 'ledger') {
+        mode.value = 'ledger'
+    }
     await adminStore.checkAdminAccess()
 })
 </script>
 
 <style scoped>
+/* ─── Admin mode toggle (body slot, top) ─────────────────────────────────── */
+.admin-mode {
+    display: flex;
+    gap: 4px;
+    padding: 4px;
+    margin-bottom: 8px;
+    background: var(--sb-item-hover);
+    border-radius: 9px;
+}
+
+.admin-mode--collapsed {
+    flex-direction: column;
+}
+
+.admin-mode-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 7px 8px;
+    background: transparent;
+    border: none;
+    border-radius: 7px;
+    color: var(--sb-text);
+    font-size: 12.5px;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s, color 0.15s;
+}
+
+.admin-mode-btn:hover {
+    color: var(--sb-text-hover);
+}
+
+/* Active mode pill — uses the sidebar's menu surface so it reads as
+   "lifted" against the recessed track, with violet active text. */
+.admin-mode-btn--active {
+    background: var(--sb-menu-bg);
+    color: var(--sb-text-active);
+}
+
 /* ─── User info block (body slot) ─────────────────────────────────────────
    Pushed to the bottom of the body section with margin-top:auto so it sits
    just above the theme/lang controls (mirrors the original AdminLayout

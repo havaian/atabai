@@ -193,6 +193,23 @@
       "catImport": "Import",
       "catReview": "Review",
       "catOverlay": "Overlay"
+    },
+    "status": {
+      "title": "Period status",
+      "chart": "Chart of accounts",
+      "chartReady": "Seeded ({n} accounts)",
+      "chartMissing": "Not seeded",
+      "osv": "OSV",
+      "osvReady": "Imported ({n} balances)",
+      "osvMissing": "Not imported",
+      "bank": "Bank",
+      "bankReady": "Postings committed",
+      "bankMissing": "No postings",
+      "adjustments": "Adjustments",
+      "adjustmentsReady": "{n} adjustments",
+      "adjustmentsMissing": "No adjustments",
+      "noPeriod": "Pick or create a period to begin",
+      "viewMatrix": "Open matrix"
     }
   },
   "hero": {
@@ -1352,7 +1369,10 @@
       "reclass": "Reclass",
       "adjustment": "Adjustment",
       "ifrs": "IFRS"
-    }
+    },
+    "export": "Export to Excel",
+    "exporting": "Exporting…",
+    "exportFailed": "Export failed"
   },
   "members": {
     "title": "Organization members",

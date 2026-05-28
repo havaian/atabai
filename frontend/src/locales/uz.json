@@ -193,6 +193,23 @@
       "catImport": "Import",
       "catReview": "Koʻrish",
       "catOverlay": "Qoplama"
+    },
+    "status": {
+      "title": "Davr holati",
+      "chart": "Hisoblar rejasi",
+      "chartReady": "Yuklangan ({n} ta hisob)",
+      "chartMissing": "Yuklanmagan",
+      "osv": "OSV",
+      "osvReady": "Import qilingan ({n} ta qoldiq)",
+      "osvMissing": "Import qilinmagan",
+      "bank": "Bank",
+      "bankReady": "Oʻtkazmalar bajarilgan",
+      "bankMissing": "Oʻtkazmalar yoʻq",
+      "adjustments": "Tuzatishlar",
+      "adjustmentsReady": "{n} ta tuzatish",
+      "adjustmentsMissing": "Tuzatishlar yoʻq",
+      "noPeriod": "Boshlash uchun davrni tanlang yoki yarating",
+      "viewMatrix": "Matritsani ochish"
     }
   },
   "hero": {
@@ -1352,7 +1369,10 @@
       "reclass": "Tasniflash",
       "adjustment": "Tuzatish",
       "ifrs": "IFRS"
-    }
+    },
+    "export": "Excelga eksport",
+    "exporting": "Eksport…",
+    "exportFailed": "Eksport amalga oshmadi"
   },
   "members": {
     "title": "Tashkilot aʼzolari",

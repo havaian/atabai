@@ -193,6 +193,23 @@
       "catImport": "Импорт",
       "catReview": "Просмотр",
       "catOverlay": "Наложение"
+    },
+    "status": {
+      "title": "Состояние периода",
+      "chart": "План счетов",
+      "chartReady": "Загружен ({n} счетов)",
+      "chartMissing": "Не загружен",
+      "osv": "ОСВ",
+      "osvReady": "Импортирован ({n} остатков)",
+      "osvMissing": "Не импортирован",
+      "bank": "Банк",
+      "bankReady": "Проводки выполнены",
+      "bankMissing": "Нет проводок",
+      "adjustments": "Корректировки",
+      "adjustmentsReady": "{n} корректировок",
+      "adjustmentsMissing": "Нет корректировок",
+      "noPeriod": "Выберите или создайте период, чтобы начать",
+      "viewMatrix": "Открыть матрицу"
     }
   },
   "hero": {
@@ -1352,7 +1369,10 @@
       "reclass": "Реклассификация",
       "adjustment": "Корректировка",
       "ifrs": "МСФО"
-    }
+    },
+    "export": "Экспорт в Excel",
+    "exporting": "Экспорт…",
+    "exportFailed": "Не удалось экспортировать"
   },
   "members": {
     "title": "Участники организации",

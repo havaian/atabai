@@ -52,7 +52,7 @@
                  remaining vertical space). Hidden when sidebar is collapsed
                  so the footer pinches up against the nav. -->
             <div v-if="$slots.body && sidebarOpen" class="app-sidebar-body">
-                <slot name="body" :collapsed="!sidebarOpen" :is-mobile="false" />
+                <slot name="body" :collapsed="!sidebarOpen" :is-mobile="false" :close-drawer="closeDrawer" />
             </div>
             <div v-else class="app-sidebar-spacer"></div>
 
@@ -138,7 +138,7 @@
                     </nav>
 
                     <div v-if="$slots.body" class="app-sidebar-body">
-                        <slot name="body" :collapsed="false" :is-mobile="true" />
+                        <slot name="body" :collapsed="false" :is-mobile="true" :close-drawer="closeDrawer" />
                     </div>
                     <div v-else class="app-sidebar-spacer"></div>
 

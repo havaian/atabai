@@ -56,6 +56,7 @@ import AdminMappingEditor from '@/views/admin/AdminMappingEditor.vue'
 import AdminSecuritySettings from '@/views/admin/AdminSecuritySettings.vue'
 import AdminLocales from '@/views/admin/AdminLocales.vue'
 import AdminAccess from '@/views/admin/AdminAccess.vue'
+import AdminLedgerOverview from '@/views/admin/AdminLedgerOverview.vue'
 
 // ─── i18n URL routing ─────────────────────────────────────────────────────────
 // All non-prefixed paths are auto-redirected to a prefixed equivalent by the
@@ -274,7 +275,12 @@ const adminChildren = [
         component: AdminSecuritySettings
     },
     { path: 'locales', name: 'AdminLocales', component: AdminLocales },
-    { path: 'access', name: 'AdminAccess', component: AdminAccess }
+    { path: 'access', name: 'AdminAccess', component: AdminAccess },
+    // ─── New (ledger-spine) admin mode ───────────────────────────────────────
+    // Landing/overview for the new-architecture admin section. Concrete
+    // sub-features are added here as they're built (see AdminLedgerOverview
+    // docblock). The mode toggle in AdminLayout swaps the nav to surface this.
+    { path: 'ledger', name: 'AdminLedgerOverview', component: AdminLedgerOverview }
 ]
 
 const routes = [

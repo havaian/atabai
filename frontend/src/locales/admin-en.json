@@ -35,7 +35,8 @@
       "access": "Access",
       "backToApp": "Back to app",
       "logout2FA": "Reset 2FA",
-      "adminPanel": "Admin Panel"
+      "adminPanel": "Admin Panel",
+      "ledgerOverview": "Overview"
     },
     "layout": {
       "brand": "ATABAI",
@@ -413,6 +414,33 @@
       "duplicateError": "This email is already in the whitelist",
       "removeConfirm": "Remove {email} from the whitelist. If the user is already registered, they remain in the system but future sign-ins will be blocked.",
       "removeError": "Failed to delete entry"
+    },
+    "mode": {
+      "legacy": "Legacy",
+      "ledger": "New"
+    },
+    "ledger": {
+      "title": "New architecture",
+      "subtitle": "Administration around the ledger, organizations and periods. This section is under construction.",
+      "planned": "Planned",
+      "areas": {
+        "organizations": {
+          "title": "Organizations",
+          "desc": "Oversight of every organization on the platform — drill into periods, balances and the matrix for support and debugging."
+        },
+        "ownership": {
+          "title": "Ownership transfer",
+          "desc": "Reassign the primary admin of an orphaned organization (super_admin recovery path), audited."
+        },
+        "masterChart": {
+          "title": "Master chart of accounts",
+          "desc": "Edit the base NSBU chart of accounts that new organizations inherit."
+        },
+        "ingestion": {
+          "title": "Ingestion debugging",
+          "desc": "View OSV import logs and unknown-code reports across all organizations."
+        }
+      }
     }
   }
 }

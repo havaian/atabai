@@ -35,7 +35,8 @@
       "access": "Kirish",
       "backToApp": "Ilovaga qaytish",
       "logout2FA": "2FA seansini tugatish",
-      "adminPanel": "Admin panel"
+      "adminPanel": "Admin panel",
+      "ledgerOverview": "Umumiy koʻrinish"
     },
     "layout": {
       "brand": "ATABAI",
@@ -413,6 +414,33 @@
       "duplicateError": "Bu email allaqachon whitelist'da",
       "removeConfirm": "{email} whitelist'dan o‘chirilsinmi. Agar foydalanuvchi ro‘yxatdan o‘tgan bo‘lsa, u tizimda qoladi, lekin keyingi kirishlar bloklanadi.",
       "removeError": "Yozuvni o‘chirishda xatolik"
+    },
+    "mode": {
+      "legacy": "Klassik",
+      "ledger": "Yangi"
+    },
+    "ledger": {
+      "title": "Yangi arxitektura",
+      "subtitle": "Bosh kitob, tashkilotlar va davrlar atrofida administratsiya. Boʻlim ishlab chiqilmoqda.",
+      "planned": "Rejada",
+      "areas": {
+        "organizations": {
+          "title": "Tashkilotlar",
+          "desc": "Platformadagi barcha tashkilotlarni kuzatish — qoʻllab-quvvatlash va nosozliklarni tuzatish uchun davrlar, qoldiqlar va matritsani koʻrish."
+        },
+        "ownership": {
+          "title": "Egalikni oʻtkazish",
+          "desc": "Egasiz tashkilotning asosiy administratorini qayta tayinlash (super_admin tiklash yoʻli), audit bilan."
+        },
+        "masterChart": {
+          "title": "Asosiy hisoblar rejasi",
+          "desc": "Yangi tashkilotlar meros qilib oladigan asosiy MHXSU hisoblar rejasini tahrirlash."
+        },
+        "ingestion": {
+          "title": "Importni tuzatish",
+          "desc": "Barcha tashkilotlar boʻyicha OSV import jurnallari va nomaʼlum hisob kodlari hisobotlarini koʻrish."
+        }
+      }
     }
   }
 }

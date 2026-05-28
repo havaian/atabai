@@ -11,7 +11,10 @@
         <button
             v-if="orgs.hasOrgs"
             class="org-switcher-trigger"
-            :class="{ 'org-switcher-trigger--collapsed': collapsed }"
+            :class="{
+                'org-switcher-trigger--collapsed': collapsed,
+                'org-switcher-trigger--open': isOpen,
+            }"
             @click="toggle"
         >
             <span class="org-switcher-avatar">{{ initials }}</span>
@@ -119,6 +122,13 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', handleDocumentCl
 </script>
 
 <style scoped>
+/* OrgSwitcher lives inside the sidebar chrome, so it styles against the
+   --sb-* token family (same as the nav items around it) rather than the
+   content-area --ws-* tokens. This is what makes hover/active states and
+   text colors match the surrounding sidebar in both themes — the previous
+   version referenced an undefined --primary/--accent/--text/--border set,
+   which fell back to browser-default blue and near-black text (invisible
+   on the dark sidebar). */
 .org-switcher {
     position: relative;
     width: 100%;
@@ -132,17 +142,27 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', handleDocumentCl
     width: 100%;
     padding: 10px 12px;
     background: transparent;
-    border: 1px solid var(--border);
+    border: 1px solid var(--sb-border);
     border-radius: 10px;
-    color: var(--text);
+    color: var(--sb-text);
     cursor: pointer;
-    transition: background 0.15s, border-color 0.15s;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
 }
 
 .org-switcher-trigger:hover,
 .org-switcher-empty:hover {
-    background: var(--accent);
-    border-color: var(--primary-light);
+    background: var(--sb-item-hover);
+    border-color: var(--sb-menu-border);
+    color: var(--sb-text-hover);
+}
+
+/* When the menu is open, keep the trigger in its hover/active appearance
+   so it reads as "this is the thing that's currently expanded" — and
+   crucially uses the purple-tinted sidebar active bg, not blue. */
+.org-switcher-trigger--open {
+    background: var(--sb-item-active-bg);
+    border-color: var(--sb-menu-border);
+    color: var(--sb-text-hover);
 }
 
 .org-switcher-trigger--collapsed {
@@ -155,8 +175,9 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', handleDocumentCl
     width: 28px;
     height: 28px;
     border-radius: 6px;
-    background: var(--primary);
-    color: white;
+    /* Product violet — was var(--primary) (undefined → browser blue). */
+    background: var(--ws-purple);
+    color: #fff;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -176,13 +197,13 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', handleDocumentCl
     font-size: 0.66rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: var(--text-light);
+    color: var(--sb-text);
 }
 
 .org-switcher-name {
     font-size: 0.88rem;
     font-weight: 500;
-    color: var(--text);
+    color: var(--sb-text-hover);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -190,12 +211,12 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', handleDocumentCl
 }
 
 .org-switcher-chevron {
-    color: var(--text-light);
+    color: var(--sb-icon-muted);
     flex-shrink: 0;
 }
 
 .org-switcher-empty {
-    color: var(--primary);
+    color: var(--sb-text-active);
     font-weight: 500;
     font-size: 0.88rem;
     border-style: dashed;
@@ -207,8 +228,8 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', handleDocumentCl
     left: 0;
     right: 0;
     min-width: 240px;
-    background: var(--card-bg, #fff);
-    border: 1px solid var(--border);
+    background: var(--sb-menu-bg);
+    border: 1px solid var(--sb-menu-border);
     border-radius: 10px;
     box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
     z-index: 50;
@@ -220,8 +241,8 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', handleDocumentCl
     font-size: 0.72rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: var(--text-light);
-    border-bottom: 1px solid var(--border);
+    color: var(--sb-text);
+    border-bottom: 1px solid var(--sb-border);
 }
 
 .org-switcher-menu-list {
@@ -241,27 +262,30 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', handleDocumentCl
     padding: 8px 12px;
     background: transparent;
     border: none;
-    color: var(--text);
+    color: var(--sb-menu-text);
     font-size: 0.88rem;
     text-align: left;
     cursor: pointer;
+    transition: background 0.12s, color 0.12s;
 }
 
 .org-switcher-menu-item:hover {
-    background: var(--accent);
+    background: var(--sb-item-hover);
 }
 
+/* Active org row — purple tint bg + violet text, was blue (var(--primary)). */
 .org-switcher-menu-item--active {
-    color: var(--primary);
+    background: var(--sb-item-active-bg);
+    color: var(--sb-text-active);
     font-weight: 500;
 }
 
 .org-switcher-menu-check {
-    color: var(--primary);
+    color: var(--sb-text-active);
 }
 
 .org-switcher-menu-footer {
-    border-top: 1px solid var(--border);
+    border-top: 1px solid var(--sb-border);
     padding: 4px 0;
 }
 
@@ -273,24 +297,23 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', handleDocumentCl
     padding: 8px 12px;
     background: transparent;
     border: none;
-    color: var(--text);
+    color: var(--sb-menu-text);
     font-size: 0.85rem;
     cursor: pointer;
+    transition: background 0.12s;
 }
 
 .org-switcher-menu-link:hover {
-    background: var(--accent);
+    background: var(--sb-item-hover);
 }
 
 .org-switcher-pop-enter-active,
 .org-switcher-pop-leave-active {
-    transition: opacity 0.1s, transform 0.1s;
-    transform-origin: top center;
+    transition: opacity 0.1s;
 }
 
 .org-switcher-pop-enter-from,
 .org-switcher-pop-leave-to {
     opacity: 0;
-    transform: scaleY(0.96);
 }
 </style>

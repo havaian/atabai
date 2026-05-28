@@ -13,15 +13,27 @@
                 <h1>{{ $t('matrix.title') }}</h1>
                 <p>{{ $t('matrix.subtitle') }}</p>
             </div>
-            <div class="matrix-period-picker">
-                <label>
-                    <span>{{ $t('matrix.period') }}</span>
-                    <select v-model="selectedPeriodId" @change="refresh">
-                        <option v-for="p in ledger.periods" :key="p.id" :value="p.id">{{ p.label }}</option>
-                    </select>
-                </label>
+            <div class="matrix-header-actions">
+                <div class="matrix-period-picker">
+                    <label>
+                        <span>{{ $t('matrix.period') }}</span>
+                        <select v-model="selectedPeriodId" @change="refresh">
+                            <option v-for="p in ledger.periods" :key="p.id" :value="p.id">{{ p.label }}</option>
+                        </select>
+                    </label>
+                </div>
+                <button
+                    class="matrix-export-btn"
+                    :disabled="rows.length === 0 || isExporting"
+                    @click="onExport"
+                >
+                    <Download :size="15" />
+                    <span>{{ isExporting ? $t('matrix.exporting') : $t('matrix.export') }}</span>
+                </button>
             </div>
         </header>
+
+        <p v-if="exportError" class="matrix-export-error">{{ exportError }}</p>
 
         <section v-if="isLoading" class="matrix-empty"><div class="spinner" /></section>
 
@@ -74,11 +86,16 @@
 <script setup lang="ts">
 // @ts-nocheck
 import { computed, onMounted, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { Download } from 'lucide-vue-next'
 import { useLedgerStore } from '@/stores/ledger'
 
 const ledger = useLedgerStore()
+const { t } = useI18n()
 const selectedPeriodId = ref(null)
 const isLoading = ref(false)
+const isExporting = ref(false)
+const exportError = ref('')
 
 /**
  * Pivot now comes pre-joined from the server (/matrix endpoint). Each row:
@@ -106,6 +123,20 @@ async function refresh() {
         matrixRows.value = await ledger.fetchMatrix(selectedPeriodId.value).catch(() => [])
     } finally {
         isLoading.value = false
+    }
+}
+
+async function onExport() {
+    if (!selectedPeriodId.value || rows.value.length === 0) return
+    isExporting.value = true
+    exportError.value = ''
+    try {
+        const label = ledger.periods.find((p) => p.id === selectedPeriodId.value)?.label
+        await ledger.exportMatrix(selectedPeriodId.value, label)
+    } catch (err) {
+        exportError.value = err?.response?.data?.message || err?.message || t('matrix.exportFailed')
+    } finally {
+        isExporting.value = false
     }
 }
 
@@ -141,6 +172,23 @@ function format(decStr) {
 .matrix-period-picker label { display: flex; flex-direction: column; gap: 4px; font-size: 0.82rem; color: var(--ws-text-3); }
 .matrix-period-picker select {
     padding: 8px 10px; border: 1px solid var(--ws-border); border-radius: 6px; font-size: 0.9rem; min-width: 200px;
+}
+.matrix-header-actions {
+    display: flex; align-items: flex-end; gap: 12px;
+}
+.matrix-export-btn {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 8px 14px; height: 38px;
+    background: var(--ws-purple); color: #fff;
+    border: none; border-radius: 6px;
+    font-size: 0.88rem; font-weight: 500; font-family: inherit;
+    cursor: pointer; white-space: nowrap;
+    transition: background 0.15s;
+}
+.matrix-export-btn:hover:not(:disabled) { background: #6D28D9; }
+.matrix-export-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.matrix-export-error {
+    font-size: 0.82rem; color: #b91c1c; margin: -8px 0 12px;
 }
 .matrix-empty {
     padding: 60px 24px; text-align: center; background: var(--ws-surface-2); border-radius: 12px; color: var(--ws-text-3);

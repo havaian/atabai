@@ -86,12 +86,53 @@
                 </button>
             </div>
 
-            <!-- Workflow action grid. Reuses .template-grid + .template-card
-                 chrome so the visual rhythm matches Dashboard's earlier
-                 design — we are swapping intent (templates → actions),
-                 not chrome. Each card routes into a period-scoped page
-                 except Matrix/Adjustments which span all periods. -->
-            <div class="template-grid">
+            <!-- Workflow status strip — answers "how do I check if things
+                 work" at a glance for the active period. Each item is a
+                 checklist step in the NSBU→IFRS pipeline; ✓ = done, ○ = not
+                 yet. Driven by cheap reads done in loadStatus(). Only shown
+                 when a period is active. -->
+            <div v-if="activePeriod" class="wf-status">
+                <div class="wf-status-item" :class="{ 'wf-status-item--done': status.chartCount > 0 }">
+                    <component :is="status.chartCount > 0 ? CheckCircleIcon : MinusCircleIcon" class="wf-status-icon" />
+                    <div class="wf-status-body">
+                        <span class="wf-status-label">{{ $t('dashboard.status.chart') }}</span>
+                        <span class="wf-status-detail">
+                            {{ status.chartCount > 0
+                                ? $t('dashboard.status.chartReady', { n: status.chartCount })
+                                : $t('dashboard.status.chartMissing') }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="wf-status-item" :class="{ 'wf-status-item--done': status.balanceCount > 0 }">
+                    <component :is="status.balanceCount > 0 ? CheckCircleIcon : MinusCircleIcon" class="wf-status-icon" />
+                    <div class="wf-status-body">
+                        <span class="wf-status-label">{{ $t('dashboard.status.osv') }}</span>
+                        <span class="wf-status-detail">
+                            {{ status.balanceCount > 0
+                                ? $t('dashboard.status.osvReady', { n: status.balanceCount })
+                                : $t('dashboard.status.osvMissing') }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="wf-status-item" :class="{ 'wf-status-item--done': status.adjustmentCount > 0 }">
+                    <component :is="status.adjustmentCount > 0 ? CheckCircleIcon : MinusCircleIcon" class="wf-status-icon" />
+                    <div class="wf-status-body">
+                        <span class="wf-status-label">{{ $t('dashboard.status.adjustments') }}</span>
+                        <span class="wf-status-detail">
+                            {{ status.adjustmentCount > 0
+                                ? $t('dashboard.status.adjustmentsReady', { n: status.adjustmentCount })
+                                : $t('dashboard.status.adjustmentsMissing') }}
+                        </span>
+                    </div>
+                </div>
+
+                <button class="wf-status-cta" @click="router.push('/app/ledger/matrix')">
+                    {{ $t('dashboard.status.viewMatrix') }}
+                    <ArrowRightIcon class="w-3.5 h-3.5" />
+                </button>
+            </div>
                 <div class="template-card" @click="goPeriod('osv-import')">
                     <div class="template-card-top">
                         <div class="template-icon"><FilePlus2 :size="18" /></div>
@@ -199,9 +240,10 @@ import { useAuthStore } from '@/stores/auth'
 import { useFilesStore } from '@/stores/files'
 import { useOrganizationsStore } from '@/stores/organizations'
 import { useLedgerStore } from '@/stores/ledger'
+import { useAdjustmentsStore } from '@/stores/adjustments'
 import {
     DocumentTextIcon, DocumentIcon,
-    CheckCircleIcon, ArrowRightIcon, SparklesIcon
+    CheckCircleIcon, ArrowRightIcon, SparklesIcon, MinusCircleIcon
 } from '@heroicons/vue/24/outline'
 import {
     FilePlus2, Landmark, Grid3x3, Sliders,
@@ -214,6 +256,38 @@ const authStore = useAuthStore()
 const filesStore = useFilesStore()
 const orgsStore = useOrganizationsStore()
 const ledgerStore = useLedgerStore()
+const adjustmentsStore = useAdjustmentsStore()
+
+// Workflow status for the active period (the "how do I check if it works"
+// panel). Cheap reads: chart length, matrix row count (proxy for "OSV
+// imported" — a populated nsbu_base layer produces matrix rows), and the
+// adjustments list count. Bank state isn't a distinct counter yet (postings
+// roll into balances) so it's folded into the OSV/balance signal for now.
+const status = ref({
+    chartCount: 0,
+    balanceCount: 0,
+    adjustmentCount: 0,
+})
+
+async function loadStatus() {
+    if (!orgsStore.currentOrgId || !ledgerStore.activePeriod) {
+        status.value = { chartCount: 0, balanceCount: 0, adjustmentCount: 0 }
+        return
+    }
+    const periodId = ledgerStore.activePeriod.id
+    // Run the three reads in parallel; tolerate individual failures so one
+    // missing endpoint doesn't blank the whole strip.
+    const [chart, matrix, adjustments] = await Promise.all([
+        ledgerStore.fetchChart().catch(() => []),
+        ledgerStore.fetchMatrix(periodId).catch(() => []),
+        adjustmentsStore.fetchList({ periodId }).catch(() => []),
+    ])
+    status.value = {
+        chartCount: Array.isArray(chart) ? chart.length : 0,
+        balanceCount: Array.isArray(matrix) ? matrix.length : 0,
+        adjustmentCount: Array.isArray(adjustments) ? adjustments.length : 0,
+    }
+}
 
 // Refresh strategy:
 //   - filesStore.fetchRecentFiles is now org-scoped (Task 6) and the store
@@ -227,7 +301,11 @@ function refreshData() {
     authStore.checkAuth()
     filesStore.fetchRecentFiles(true)
     if (orgsStore.currentOrgId) {
-        ledgerStore.fetchPeriods().catch(() => { /* tolerated by store */ })
+        // Fetch periods first, then compute the workflow status from the
+        // resolved active period. loadStatus is a no-op when no period.
+        ledgerStore.fetchPeriods()
+            .then(() => loadStatus())
+            .catch(() => { /* tolerated by store */ })
     }
 }
 
@@ -244,8 +322,15 @@ watch(() => route.path, (newPath) => {
 // (org switcher in the sidebar). Files are handled by the files store itself.
 watch(() => orgsStore.currentOrgId, (orgId) => {
     if (orgId) {
-        ledgerStore.fetchPeriods().catch(() => { })
+        ledgerStore.fetchPeriods()
+            .then(() => loadStatus())
+            .catch(() => { })
     }
+})
+
+// Recompute status whenever the active period resolves/changes.
+watch(() => ledgerStore.activePeriod?.id, (id) => {
+    if (id) loadStatus()
 })
 
 const recentFiles = computed(() => filesStore.recentFiles || [])
@@ -542,6 +627,91 @@ function statusClass(status) {
     background: #6D28D9;
     border-color: #6D28D9;
     color: #fff;
+}
+
+/* ─── Workflow status strip ──────────────────────────────────────────────── */
+.wf-status {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.wf-status-item {
+    flex: 1 1 180px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    background: var(--ws-surface);
+    border: 1px solid var(--ws-border);
+    border-radius: 10px;
+}
+
+.wf-status-icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    /* Default (not-done) = muted; done state overrides to green below. */
+    color: var(--ws-text-3);
+}
+
+.wf-status-item--done .wf-status-icon {
+    color: #15803d;
+}
+
+.wf-status-body {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.wf-status-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--ws-text-3);
+}
+
+.wf-status-detail {
+    font-size: 13px;
+    color: var(--ws-text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.wf-status-cta {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 16px;
+    background: transparent;
+    border: 1px solid var(--ws-purple);
+    color: var(--ws-purple);
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+
+.wf-status-cta:hover {
+    background: var(--ws-purple);
+    color: #fff;
+}
+
+@media (max-width: 640px) {
+    .wf-status-cta {
+        flex: 1 1 100%;
+        justify-content: center;
+        padding: 10px 16px;
+    }
 }
 
 /* ─── Template grid ──────────────────────────────────────────────────────── */

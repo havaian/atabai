@@ -113,6 +113,42 @@ export const useLedgerStore = defineStore('ledger', () => {
         }
     }
 
+    /**
+     * Download the matrix as an XLSX. The backend streams a binary workbook
+     * (Content-Disposition: attachment), so we request it as a blob and
+     * trigger a browser download via a transient object URL. Filename is
+     * taken from the response's Content-Disposition when present, else a
+     * sensible default.
+     *
+     * Returns nothing — its only effect is the file download. Throws on
+     * network / auth errors so the caller can surface a message.
+     */
+    async function exportMatrix(periodId, periodLabel) {
+        if (!orgs.currentOrgId || !periodId) throw new Error('No active organization or period')
+        const resp = await apiClient.get(
+            orgScope(`/periods/${periodId}/matrix/export`),
+            { responseType: 'blob' },
+        )
+        // Derive a filename: prefer the server's, fall back to a slugged label.
+        let filename = `ifrs-matrix-${periodId}.xlsx`
+        const cd = resp.headers?.['content-disposition'] || ''
+        const match = /filename="?([^"]+)"?/.exec(cd)
+        if (match) {
+            filename = match[1]
+        } else if (periodLabel) {
+            const slug = periodLabel.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+            filename = `ifrs-matrix-${slug || periodId}.xlsx`
+        }
+        const url = window.URL.createObjectURL(new Blob([resp.data]))
+        const a = document.createElement('a')
+        a.href = url
+        a.download = filename
+        document.body.appendChild(a)
+        a.click()
+        a.remove()
+        window.URL.revokeObjectURL(url)
+    }
+
     async function createPeriod({ label, startDate, endDate }) {
         if (!orgs.currentOrgId) throw new Error('No active organization')
         const resp = await apiClient.post(orgScope('/periods'), { label, startDate, endDate })
@@ -184,6 +220,7 @@ export const useLedgerStore = defineStore('ledger', () => {
         fetchChart,
         fetchBalances,
         fetchMatrix,
+        exportMatrix,
         createPeriod,
         lockPeriod,
         reopenPeriod,
