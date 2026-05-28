@@ -105,7 +105,8 @@
                 </div>
 
                 <div class="wf-status-item" :class="{ 'wf-status-item--done': status.balanceCount > 0 }">
-                    <component :is="status.balanceCount > 0 ? CheckCircleIcon : MinusCircleIcon" class="wf-status-icon" />
+                    <component :is="status.balanceCount > 0 ? CheckCircleIcon : MinusCircleIcon"
+                        class="wf-status-icon" />
                     <div class="wf-status-body">
                         <span class="wf-status-label">{{ $t('dashboard.status.osv') }}</span>
                         <span class="wf-status-detail">
@@ -117,7 +118,8 @@
                 </div>
 
                 <div class="wf-status-item" :class="{ 'wf-status-item--done': status.adjustmentCount > 0 }">
-                    <component :is="status.adjustmentCount > 0 ? CheckCircleIcon : MinusCircleIcon" class="wf-status-icon" />
+                    <component :is="status.adjustmentCount > 0 ? CheckCircleIcon : MinusCircleIcon"
+                        class="wf-status-icon" />
                     <div class="wf-status-body">
                         <span class="wf-status-label">{{ $t('dashboard.status.adjustments') }}</span>
                         <span class="wf-status-detail">
@@ -133,9 +135,18 @@
                     <ArrowRightIcon class="w-3.5 h-3.5" />
                 </button>
             </div>
+
+            <!-- Workflow action grid. Reuses .template-grid + .template-card
+                 chrome so the visual rhythm matches Dashboard's earlier
+                 design — swapping intent (templates → actions), not chrome.
+                 Each card routes into a period-scoped page except
+                 Matrix/Adjustments which span all periods. -->
+            <div class="template-grid">
                 <div class="template-card" @click="goPeriod('osv-import')">
                     <div class="template-card-top">
-                        <div class="template-icon"><FilePlus2 :size="18" /></div>
+                        <div class="template-icon">
+                            <FilePlus2 :size="18" />
+                        </div>
                         <span class="template-badge">OSV</span>
                     </div>
                     <div class="template-card-body">
@@ -150,7 +161,9 @@
 
                 <div class="template-card" @click="goPeriod('bank-statements')">
                     <div class="template-card-top">
-                        <div class="template-icon"><Landmark :size="18" /></div>
+                        <div class="template-icon">
+                            <Landmark :size="18" />
+                        </div>
                         <span class="template-badge">BANK</span>
                     </div>
                     <div class="template-card-body">
@@ -165,7 +178,9 @@
 
                 <div class="template-card" @click="router.push('/app/ledger/matrix')">
                     <div class="template-card-top">
-                        <div class="template-icon"><Grid3x3 :size="18" /></div>
+                        <div class="template-icon">
+                            <Grid3x3 :size="18" />
+                        </div>
                         <span class="template-badge">IFRS</span>
                     </div>
                     <div class="template-card-body">
@@ -180,7 +195,9 @@
 
                 <div class="template-card" @click="router.push('/app/ledger/adjustments')">
                     <div class="template-card-top">
-                        <div class="template-icon"><Sliders :size="18" /></div>
+                        <div class="template-icon">
+                            <Sliders :size="18" />
+                        </div>
                         <span class="template-badge">IAS/IFRS</span>
                     </div>
                     <div class="template-card-body">
