@@ -4,14 +4,12 @@
      slots. All shared chrome (sidebar shell, mobile drawer, theme/lang
      pickers) is owned by AppLayout. -->
 <template>
-    <AppLayout :home-link="'/app/dashboard'" :nav-items="navItems"
-        :storage-key="'atabai-sidebar-open'">
+    <AppLayout :home-link="'/app/dashboard'" :nav-items="navItems" :storage-key="'atabai-sidebar-open'">
         <!-- Top of sidebar: org switcher + new project CTA -->
         <template #header-cta="{ collapsed, isMobile, closeDrawer }">
             <div class="user-header-stack">
                 <OrgSwitcher :collapsed="collapsed && !isMobile" />
-                <button class="user-new-file-btn"
-                    :class="{ 'user-new-file-btn--icon-only': collapsed && !isMobile }"
+                <button class="user-new-file-btn" :class="{ 'user-new-file-btn--icon-only': collapsed && !isMobile }"
                     @click="goToDashboard(closeDrawer)">
                     <Plus :size="16" class="user-new-file-icon" />
                     <span v-if="!collapsed || isMobile">{{ $t('dashboard.newProject') }}</span>
@@ -19,44 +17,8 @@
             </div>
         </template>
 
-        <!-- Body: divider + recent files -->
-        <template #body="{ isMobile }">
-            <div class="user-divider">
-                <span>{{ $t('dashboard.recentFiles') }}</span>
-            </div>
-            <div class="user-recent-files">
-                <div v-if="filesStore.isLoading && recentFiles.length === 0" class="user-recent-loading">
-                    <div class="user-loading-spinner"></div>
-                </div>
-                <div v-else-if="recentFiles.length === 0" class="user-recent-empty">
-                    <FileText :size="18" class="user-recent-empty-icon" />
-                    <span>{{ $t('dashboard.noFilesYetSidebar') }}</span>
-                </div>
-                <button v-else v-for="file in recentFiles.slice(0, 8)" :key="file.id" class="user-recent-item"
-                    @click="openFile(file)">
-                    <div class="user-recent-file">
-                        <img v-if="file.status === 'completed'" src="/images/icons/excel.svg"
-                            class="user-recent-excel-icon" />
-                        <div v-else class="user-recent-dot" :class="statusDotClass(file.status)"></div>
-                    </div>
-                    <div class="user-recent-info">
-                        <span class="user-recent-name">{{ truncate(file.originalName, 22) }}</span>
-                        <span class="user-recent-meta">{{ formatDate(file.createdAt) }}</span>
-                    </div>
-                </button>
-            </div>
-        </template>
-
-        <!-- Top-right corner: admin panel entry (only if user has admin role) -->
-        <template v-if="authStore.isAdmin" #corner>
-            <button class="user-corner-btn" @click="goTo('/admin')">
-                <ShieldCheck :size="15" class="user-corner-icon" />
-                <span class="user-corner-label">{{ $t('admin.nav.adminPanel') }}</span>
-            </button>
-        </template>
-
         <!-- Profile: dropdown menu on desktop, flat row on mobile -->
-        <template #profile="{ collapsed, isMobile }">
+        <template #profile="{ collapsed, isMobile, closeDrawer }">
             <div v-if="!isMobile" class="user-profile" :class="{ 'user-profile--icon-only': collapsed }"
                 ref="profileRef">
                 <div class="user-profile-avatar" @click="toggleProfileMenu">
@@ -74,6 +36,10 @@
                         <button class="user-menu-item" @click="goTo('/app/settings')">
                             <Settings :size="14" />
                             {{ $t('dashboard.settings') }}
+                        </button>
+                        <button v-if="authStore.isAdmin" class="user-menu-item" @click="goTo('/admin')">
+                            <ShieldCheck :size="14" />
+                            {{ $t('admin.nav.adminPanel') }}
                         </button>
                         <div class="user-menu-divider"></div>
                         <button class="user-menu-item user-menu-item--danger" @click="handleSignOut">
@@ -97,6 +63,9 @@
                         <span class="user-profile-plan">{{ authStore.subscriptionType }}</span>
                     </div>
                 </div>
+                <button v-if="authStore.isAdmin" class="user-mobile-signout-btn" @click="goTo('/admin', closeDrawer)">
+                    <ShieldCheck :size="16" />
+                </button>
                 <button class="user-mobile-signout-btn" @click="handleSignOut">
                     <LogOut :size="16" />
                 </button>
@@ -110,17 +79,16 @@
 
 <script setup lang="ts">
 // @ts-nocheck
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { onClickOutside } from '@vueuse/core'
 import AppLayout from '@/components/layout/AppLayout.vue'
 import OrgSwitcher from '@/components/layout/OrgSwitcher.vue'
 import { useAuthStore } from '@/stores/auth'
-import { useFilesStore } from '@/stores/files'
 import { useOrganizationsStore } from '@/stores/organizations'
 import {
-    LayoutDashboard, Archive, Plus, FileText,
+    LayoutDashboard, Archive, Plus,
     ShieldCheck, Settings, LogOut,
     // Ledger-spine nav icons (Task 5 — surfacing new architecture).
     // OSV and Bank entry-points live on Dashboard, not in the sidebar,
@@ -131,7 +99,6 @@ import {
 const router = useRouter()
 const { t } = useI18n()
 const authStore = useAuthStore()
-const filesStore = useFilesStore()
 const orgsStore = useOrganizationsStore()
 
 const isProfileMenuOpen = ref(false)
@@ -193,8 +160,6 @@ const navItems = computed(() => {
     ]
 })
 
-const recentFiles = computed(() => filesStore.recentFiles || [])
-
 const initials = computed(() => {
     const name = authStore.user?.name || ''
     return name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase() || 'U'
@@ -211,35 +176,6 @@ function goTo(path, closeDrawer) {
     if (closeDrawer) closeDrawer()
 }
 
-function openFile(file) {
-    if (file.status === 'completed') router.push(`/app/files/${file.id}`)
-    else if (file.jobId) router.push(`/app/processing/${file.jobId}`)
-}
-
-function truncate(str, len) {
-    if (!str) return ''
-    return str.length > len ? str.slice(0, len) + '…' : str
-}
-
-function formatDate(d) {
-    const date = new Date(d)
-    const now = new Date()
-    const diffM = Math.floor((now - date) / 60000)
-    if (diffM < 1) return t('history.dateJustNow')
-    if (diffM < 60) return t('history.dateMinutesAgo', { n: diffM })
-    if (diffM < 1440) return t('history.dateHoursAgo', { n: Math.floor(diffM / 60) })
-    return date.toLocaleDateString()
-}
-
-function statusDotClass(status) {
-    return {
-        completed: 'user-dot-green',
-        processing: 'user-dot-blue',
-        failed: 'user-dot-red',
-        pending: 'user-dot-yellow',
-    }[status] || 'user-dot-gray'
-}
-
 function toggleProfileMenu() { isProfileMenuOpen.value = !isProfileMenuOpen.value }
 
 async function handleSignOut() {
@@ -247,12 +183,6 @@ async function handleSignOut() {
 }
 
 onClickOutside(profileRef, () => { isProfileMenuOpen.value = false })
-
-onMounted(async () => {
-    if (filesStore.recentFiles.length === 0) {
-        await filesStore.fetchRecentFiles().catch(() => { })
-    }
-})
 </script>
 
 <style scoped>
@@ -295,157 +225,6 @@ onMounted(async () => {
 
 .user-new-file-icon {
     flex-shrink: 0;
-}
-
-/* ─── Body: divider + recent files ───────────────────────────────────────── */
-.user-divider {
-    margin: 4px 0 8px;
-    font-size: 10px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--sb-divider);
-}
-
-.user-recent-files {
-    display: flex;
-    flex-direction: column;
-    gap: 1px;
-}
-
-.user-recent-item {
-    display: flex;
-    align-items: center;
-    gap: 9px;
-    padding: 7px 8px;
-    border-radius: 7px;
-    border: none;
-    background: transparent;
-    cursor: pointer;
-    text-align: left;
-    transition: background 0.12s;
-    width: 100%;
-    font-family: inherit;
-}
-
-.user-recent-item:hover {
-    background: var(--sb-item-hover);
-}
-
-.user-recent-file {
-    width: 20px;
-    height: 20px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.user-recent-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    flex-shrink: 0;
-}
-
-.user-recent-excel-icon {
-    width: 20px;
-    height: 20px;
-    object-fit: contain;
-}
-
-.user-dot-green { background: #22c55e; }
-.user-dot-blue { background: #60a5fa; }
-.user-dot-red { background: #f87171; }
-.user-dot-yellow { background: #fbbf24; }
-.user-dot-gray { background: var(--sb-divider); }
-
-.user-recent-info {
-    display: flex;
-    flex-direction: column;
-    gap: 1px;
-    overflow: hidden;
-    min-width: 0;
-}
-
-.user-recent-name {
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--sb-recent-name);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.user-recent-meta {
-    font-size: 10px;
-    color: var(--sb-recent-meta);
-}
-
-.user-recent-loading {
-    display: flex;
-    justify-content: center;
-    padding: 16px;
-}
-
-.user-loading-spinner {
-    width: 20px;
-    height: 20px;
-    border: 2px solid var(--sb-item-hover);
-    border-top-color: var(--ws-purple);
-    border-radius: 50%;
-    animation: user-spin 0.8s linear infinite;
-}
-
-@keyframes user-spin {
-    to { transform: rotate(360deg); }
-}
-
-.user-recent-empty {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
-    padding: 20px 8px;
-    color: var(--sb-recent-empty);
-    font-size: 11px;
-    text-align: center;
-}
-
-.user-recent-empty-icon {
-    opacity: 0.3;
-}
-
-/* ─── Admin entry (footer slot) ──────────────────────────────────────────── */
-/* ─── Top-right corner: admin panel entry ────────────────────────────────── */
-.user-corner-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    padding: 7px 13px;
-    border-radius: 8px;
-    background: var(--ws-surface);
-    border: 1px solid var(--ws-border);
-    color: var(--ws-purple);
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background 0.15s, border-color 0.15s, color 0.15s;
-    font-family: inherit;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
-}
-
-.user-corner-btn:hover {
-    background: var(--ws-purple);
-    border-color: var(--ws-purple);
-    color: #fff;
-}
-
-.user-corner-icon {
-    flex-shrink: 0;
-}
-
-.user-corner-label {
-    white-space: nowrap;
 }
 
 /* ─── Profile: desktop ───────────────────────────────────────────────────── */
