@@ -324,7 +324,9 @@
       "disable": "Disable 2FA",
       "disabling": "Disabling...",
       "disableConfirm": "Really disable 2FA? All backup codes will be invalidated.",
-      "disableError": "Failed to disable 2FA"
+      "disableError": "Failed to disable 2FA",
+      "sessionSection": "2FA session",
+      "sessionDescription": "Reset the current verified admin session. After reset you will need to enter your 2FA code again."
     },
     "twoFactor": {
       "loadingStatus": "Checking 2FA status...",

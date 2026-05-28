@@ -48,62 +48,75 @@
                 </router-link>
             </nav>
 
-            <!-- Body slot — recent files, user info, etc. (scrollable / takes
-                 remaining vertical space). Hidden when sidebar is collapsed
-                 so the footer pinches up against the nav. -->
+            <!-- Body slot — recent files, etc. (scrollable / takes remaining
+                 vertical space). When the sidebar is collapsed it's hidden so
+                 the bottom cluster pinches up against the nav. -->
             <div v-if="$slots.body && sidebarOpen" class="app-sidebar-body">
                 <slot name="body" :collapsed="!sidebarOpen" :is-mobile="false" :close-drawer="closeDrawer" />
             </div>
             <div v-else class="app-sidebar-spacer"></div>
 
-            <!-- Theme toggle -->
-            <div class="app-theme-section" :class="{ 'app-theme-section--collapsed': !sidebarOpen }">
-                <div v-if="sidebarOpen" class="app-theme-pill">
-                    <button class="app-theme-pill-btn" :class="{ active: !isDark }"
-                        @click="themeStore.setTheme('light')" :title="$t('settings.personal.themeLight')">
-                        <Sun :size="14" />
-                    </button>
-                    <button class="app-theme-pill-btn" :class="{ active: isDark }"
-                        @click="themeStore.setTheme('dark')" :title="$t('settings.personal.themeDark')">
-                        <Moon :size="14" />
-                    </button>
+            <!-- Bottom cluster — everything below the scrolling body is pinned
+                 to the sidebar's bottom edge as one flex-shrink:0 group, so
+                 it never floats up into the body or gets pushed off-screen.
+                 Order: extras (e.g. admin mode toggle) → theme → lang →
+                 footer → profile. -->
+            <div class="app-sidebar-bottom">
+                <!-- Extras slot — bottom-pinned controls like the admin
+                     Legacy/New mode toggle. Sits directly above the theme row. -->
+                <div v-if="$slots['bottom-extras']" class="app-sidebar-extras">
+                    <slot name="bottom-extras" :collapsed="!sidebarOpen" :is-mobile="false" :close-drawer="closeDrawer" />
                 </div>
-                <button v-else class="app-theme-icon-btn" @click="themeStore.toggle()"
-                    :title="isDark ? $t('settings.personal.themeLight') : $t('settings.personal.themeDark')">
-                    <component :is="isDark ? Sun : Moon" :size="16" />
-                </button>
-            </div>
 
-            <!-- Language picker -->
-            <div class="app-lang-section" :class="{ 'app-lang-section--collapsed': !sidebarOpen }"
-                ref="langRef">
-                <button v-if="sidebarOpen" class="app-lang-trigger" @click="toggleLangMenu">
-                    <img class="app-lang-flag" :src="currentLangFlagSrc" :alt="currentLang.name">
-                    <span class="app-lang-name">{{ currentLang.name }}</span>
-                    <ChevronDown :size="14" class="app-lang-chevron" :class="{ rotated: isLangMenuOpen }" />
-                </button>
-                <button v-else class="app-lang-icon-btn" @click="toggleLangMenu" :title="currentLang.name">
-                    <img class="app-lang-flag" :src="currentLangFlagSrc" :alt="currentLang.name">
-                </button>
-                <Transition name="app-menu-pop">
-                    <div v-if="isLangMenuOpen" class="app-lang-menu">
-                        <button v-for="lang in languages" :key="lang.code" class="app-lang-option"
-                            :class="{ active: selectedLanguage === lang.code }" @click="selectLanguage(lang.code)">
-                            <img class="app-lang-flag" :src="langFlagSrc(lang.flag)" :alt="lang.name">
-                            <span>{{ lang.name }}</span>
+                <!-- Theme toggle -->
+                <div class="app-theme-section" :class="{ 'app-theme-section--collapsed': !sidebarOpen }">
+                    <div v-if="sidebarOpen" class="app-theme-pill">
+                        <button class="app-theme-pill-btn" :class="{ active: !isDark }"
+                            @click="themeStore.setTheme('light')" :title="$t('settings.personal.themeLight')">
+                            <Sun :size="14" />
+                        </button>
+                        <button class="app-theme-pill-btn" :class="{ active: isDark }"
+                            @click="themeStore.setTheme('dark')" :title="$t('settings.personal.themeDark')">
+                            <Moon :size="14" />
                         </button>
                     </div>
-                </Transition>
-            </div>
+                    <button v-else class="app-theme-icon-btn" @click="themeStore.toggle()"
+                        :title="isDark ? $t('settings.personal.themeLight') : $t('settings.personal.themeDark')">
+                        <component :is="isDark ? Sun : Moon" :size="16" />
+                    </button>
+                </div>
 
-            <!-- Footer buttons slot — back-to-app, 2FA logout, admin entry, etc. -->
-            <div v-if="$slots.footer" class="app-sidebar-footer">
-                <slot name="footer" :collapsed="!sidebarOpen" :is-mobile="false" />
-            </div>
+                <!-- Language picker -->
+                <div class="app-lang-section" :class="{ 'app-lang-section--collapsed': !sidebarOpen }"
+                    ref="langRef">
+                    <button v-if="sidebarOpen" class="app-lang-trigger" @click="toggleLangMenu">
+                        <img class="app-lang-flag" :src="currentLangFlagSrc" :alt="currentLang.name">
+                        <span class="app-lang-name">{{ currentLang.name }}</span>
+                        <ChevronDown :size="14" class="app-lang-chevron" :class="{ rotated: isLangMenuOpen }" />
+                    </button>
+                    <button v-else class="app-lang-icon-btn" @click="toggleLangMenu" :title="currentLang.name">
+                        <img class="app-lang-flag" :src="currentLangFlagSrc" :alt="currentLang.name">
+                    </button>
+                    <Transition name="app-menu-pop">
+                        <div v-if="isLangMenuOpen" class="app-lang-menu">
+                            <button v-for="lang in languages" :key="lang.code" class="app-lang-option"
+                                :class="{ active: selectedLanguage === lang.code }" @click="selectLanguage(lang.code)">
+                                <img class="app-lang-flag" :src="langFlagSrc(lang.flag)" :alt="lang.name">
+                                <span>{{ lang.name }}</span>
+                            </button>
+                        </div>
+                    </Transition>
+                </div>
 
-            <!-- Profile slot — avatar + menu (user-side) -->
-            <div v-if="$slots.profile" class="app-sidebar-profile">
-                <slot name="profile" :collapsed="!sidebarOpen" :is-mobile="false" />
+                <!-- Footer buttons slot — reserved for surface-specific extras. -->
+                <div v-if="$slots.footer" class="app-sidebar-footer">
+                    <slot name="footer" :collapsed="!sidebarOpen" :is-mobile="false" />
+                </div>
+
+                <!-- Profile slot — avatar + menu (user-side) / admin info. -->
+                <div v-if="$slots.profile" class="app-sidebar-profile">
+                    <slot name="profile" :collapsed="!sidebarOpen" :is-mobile="false" />
+                </div>
             </div>
         </aside>
 
@@ -141,6 +154,10 @@
                         <slot name="body" :collapsed="false" :is-mobile="true" :close-drawer="closeDrawer" />
                     </div>
                     <div v-else class="app-sidebar-spacer"></div>
+
+                    <div v-if="$slots['bottom-extras']" class="app-sidebar-extras">
+                        <slot name="bottom-extras" :collapsed="false" :is-mobile="true" :close-drawer="closeDrawer" />
+                    </div>
 
                     <div class="app-theme-section">
                         <div class="app-theme-pill">
@@ -186,6 +203,14 @@
 
         <!-- Main content -->
         <main class="app-main">
+            <!-- Top-right corner control — surface-switch button (user→admin
+                 "Admin panel" entry, admin→user "Back to app" exit) lives here
+                 instead of in the sidebar so both sit in the same fixed spot.
+                 Floats over the content's top-right; pages with their own top
+                 padding sit comfortably beneath it. -->
+            <div v-if="$slots.corner" class="app-corner">
+                <slot name="corner" />
+            </div>
             <div class="app-content">
                 <slot />
             </div>
@@ -756,12 +781,31 @@ defineExpose({})
     font-weight: 600;
 }
 
-/* ─── Footer slot (extra buttons: back-to-app, 2FA logout, etc.) ─────────── */
+/* ─── Bottom cluster (pinned below the scrolling body) ───────────────────────
+   Groups extras + theme + lang + footer + profile into one flex-shrink:0
+   block so they always sit flush at the sidebar's bottom edge. The body
+   above (flex:1, min-height:0) scrolls; this cluster never moves. Fixes the
+   overflow where the profile got pushed off-screen on short viewports. */
+.app-sidebar-bottom {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Extras (admin Legacy/New toggle, etc.) — sits at the very top of the
+   bottom cluster, separated from the body above by a hairline. */
+.app-sidebar-extras {
+    flex-shrink: 0;
+    padding: 8px 12px;
+    border-top: 1px solid var(--sb-border);
+}
+
+/* ─── Footer slot (reserved for surface-specific extras) ─────────────────── */
 .app-sidebar-footer {
     display: flex;
     flex-direction: column;
     gap: 4px;
-    padding: 8px 12px 12px;
+    padding: 8px 12px;
     flex-shrink: 0;
 }
 
@@ -769,6 +813,23 @@ defineExpose({})
 .app-sidebar-profile {
     border-top: 1px solid var(--sb-profile-border);
     flex-shrink: 0;
+}
+
+/* ─── Top-right corner control (surface switch) ──────────────────────────── */
+.app-corner {
+    position: absolute;
+    top: 16px;
+    right: 20px;
+    z-index: 20;
+}
+
+@media (max-width: 767px) {
+    /* On mobile the sidebar is a drawer and the content starts under the
+       mobile header, so the corner control anchors below that header. */
+    .app-corner {
+        top: 64px;
+        right: 12px;
+    }
 }
 
 /* ─── Mobile drawer ──────────────────────────────────────────────────────── */
@@ -821,6 +882,8 @@ defineExpose({})
     flex-direction: column;
     min-width: 0;
     overflow: hidden;
+    /* Positioning context for the absolutely-placed .app-corner control. */
+    position: relative;
 }
 
 .app-content {

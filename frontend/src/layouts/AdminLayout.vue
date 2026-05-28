@@ -6,14 +6,13 @@
 <template>
     <AppLayout :home-link="'/admin'" :brand-tag="$t('admin.layout.brandTag')"
         :nav-items="navItems" :storage-key="'atabai-admin-sidebar-open'">
-        <!-- Body: admin mode toggle + user info block -->
-        <template #body="{ collapsed, isMobile, closeDrawer }">
-            <!-- Legacy ⇄ New mode switch. Pure UI preference persisted in
-                 localStorage (default Legacy, since that's what's fully
-                 functional today). Swaps the sidebar nav between the
-                 existing admin tools and the new ledger-spine section.
-                 Both modes sit behind the same admin guard — this is a
-                 view preference, not an authorization boundary. -->
+        <!-- Bottom extras: Legacy ⇄ New mode switch, pinned to the bottom of
+             the sidebar (just above the profile block). Pure UI preference
+             persisted in localStorage (default Legacy). Swaps the sidebar
+             nav between the existing admin tools and the new ledger-spine
+             section. Both modes sit behind the same admin guard — view
+             preference, not an authorization boundary. -->
+        <template #bottom-extras="{ collapsed, isMobile, closeDrawer }">
             <div class="admin-mode" :class="{ 'admin-mode--collapsed': collapsed && !isMobile }">
                 <button
                     class="admin-mode-btn"
@@ -34,26 +33,26 @@
                     <span v-if="!collapsed || isMobile">{{ $t('admin.mode.ledger') }}</span>
                 </button>
             </div>
+        </template>
 
-            <div class="admin-user-info">
-                <div class="admin-user-name">{{ adminStore.adminInfo?.name }}</div>
-                <div class="admin-user-role">{{ roleLabel }}</div>
+        <!-- Profile: admin user info, pinned to the bottom of the sidebar
+             exactly like the user-side profile block. -->
+        <template #profile="{ collapsed }">
+            <div class="admin-user-info" :class="{ 'admin-user-info--collapsed': collapsed }">
+                <div class="admin-user-avatar">{{ adminInitials }}</div>
+                <div v-if="!collapsed" class="admin-user-meta">
+                    <div class="admin-user-name">{{ adminStore.adminInfo?.name }}</div>
+                    <div class="admin-user-role">{{ roleLabel }}</div>
+                </div>
             </div>
         </template>
 
-        <!-- Footer: 2FA logout (if session active) + back-to-app -->
-        <template #footer="{ collapsed, isMobile, closeDrawer }">
-            <button v-if="adminStore.hasValidAdminSession" class="admin-back-link"
-                :class="{ 'admin-back-link--icon-only': collapsed && !isMobile }"
-                @click="logout2FA(closeDrawer)" :title="$t('admin.nav.logout2FA')">
-                <LockKeyhole :size="16" class="admin-back-icon" />
-                <span v-if="!collapsed || isMobile">{{ $t('admin.nav.logout2FA') }}</span>
-            </button>
-            <button class="admin-back-link"
-                :class="{ 'admin-back-link--icon-only': collapsed && !isMobile }"
-                @click="goToApp(closeDrawer)" :title="$t('admin.nav.backToApp')">
-                <ArrowLeft :size="16" class="admin-back-icon" />
-                <span v-if="!collapsed || isMobile">{{ $t('admin.nav.backToApp') }}</span>
+        <!-- Top-right corner: back-to-app exit (mirrors the user-side
+             "Admin panel" entry which sits in the same spot). -->
+        <template #corner>
+            <button class="admin-corner-btn" @click="goToApp()" :title="$t('admin.nav.backToApp')">
+                <ArrowLeft :size="15" class="admin-corner-icon" />
+                <span class="admin-corner-label">{{ $t('admin.nav.backToApp') }}</span>
             </button>
         </template>
 
@@ -81,7 +80,7 @@ import { useAdminStore } from '@/stores/admin'
 import AdminTwoFactorGate from '@/views/admin/AdminTwoFactorGate.vue'
 import {
     LayoutDashboard, Users, FileText, Network, ShieldCheck, Languages,
-    UserCheck, ArrowLeft, LockKeyhole,
+    UserCheck, ArrowLeft,
     // Mode toggle + new-mode nav icons.
     Boxes, Layers,
 } from 'lucide-vue-next'
@@ -154,11 +153,13 @@ const roleLabel = computed(() => {
     return ''
 })
 
-async function logout2FA(closeDrawer) {
-    if (!confirm(t('admin.layout.resetSessionPrompt'))) return
-    await adminStore.adminLogout2FA()
-    if (closeDrawer) closeDrawer()
-}
+// Initials for the profile avatar — first letters of up to two name parts.
+const adminInitials = computed(() => {
+    const name = adminStore.adminInfo?.name || ''
+    const parts = name.trim().split(/\s+/).filter(Boolean)
+    if (parts.length === 0) return 'A'
+    return parts.slice(0, 2).map((p) => p[0].toUpperCase()).join('')
+})
 
 function goToApp(closeDrawer) {
     router.push('/app/dashboard')
@@ -180,12 +181,11 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-/* ─── Admin mode toggle (body slot, top) ─────────────────────────────────── */
+/* ─── Admin mode toggle (bottom-extras slot) ─────────────────────────────── */
 .admin-mode {
     display: flex;
     gap: 4px;
     padding: 4px;
-    margin-bottom: 8px;
     background: var(--sb-item-hover);
     border-radius: 9px;
 }
@@ -224,13 +224,37 @@ onMounted(async () => {
     color: var(--sb-text-active);
 }
 
-/* ─── User info block (body slot) ─────────────────────────────────────────
-   Pushed to the bottom of the body section with margin-top:auto so it sits
-   just above the theme/lang controls (mirrors the original AdminLayout
-   structure where user info was the top item of the bottom footer cluster). */
+/* ─── Admin user info (profile slot — pinned to sidebar bottom) ──────────────
+   Mirrors the user-side profile row: avatar + name/role, with the top border
+   coming from the shared .app-sidebar-profile wrapper. */
 .admin-user-info {
-    padding: 4px 8px;
-    margin-top: auto;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+}
+
+.admin-user-info--collapsed {
+    justify-content: center;
+    padding: 12px 8px;
+}
+
+.admin-user-avatar {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: var(--ws-purple);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.admin-user-meta {
+    min-width: 0;
 }
 
 .admin-user-name {
@@ -250,38 +274,38 @@ onMounted(async () => {
     margin-top: 2px;
 }
 
-/* ─── Back-to-app / 2FA logout (footer slot) ─────────────────────────────── */
-.admin-back-link {
-    display: flex;
+/* ─── Top-right corner: back-to-app exit ─────────────────────────────────────
+   Visually identical to the user-side .user-corner-btn so the entry/exit
+   pair reads as one consistent control sitting in the same spot. */
+.admin-corner-btn {
+    display: inline-flex;
     align-items: center;
-    gap: 10px;
-    padding: 10px 12px;
+    gap: 7px;
+    padding: 7px 13px;
     border-radius: 8px;
-    background: transparent;
-    border: none;
-    color: var(--sb-text);
+    background: var(--adm-surface);
+    border: 1px solid var(--adm-border);
+    color: var(--ws-purple);
     font-size: 13px;
     font-weight: 500;
     cursor: pointer;
-    transition: background 0.15s, color 0.15s;
-    text-align: left;
-    text-decoration: none;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
     font-family: inherit;
-    width: 100%;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
-.admin-back-link:hover {
-    background: var(--sb-item-hover);
-    color: var(--sb-text-hover);
+.admin-corner-btn:hover {
+    background: var(--ws-purple);
+    border-color: var(--ws-purple);
+    color: #fff;
 }
 
-.admin-back-link--icon-only {
-    justify-content: center;
-    padding: 10px;
-}
-
-.admin-back-icon {
+.admin-corner-icon {
     flex-shrink: 0;
+}
+
+.admin-corner-label {
+    white-space: nowrap;
 }
 
 /* ─── Main content states ────────────────────────────────────────────────── */

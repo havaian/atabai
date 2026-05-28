@@ -324,7 +324,9 @@
       "disable": "2FA ni o‘chirish",
       "disabling": "O‘chirilmoqda...",
       "disableConfirm": "2FA ni rostdan o‘chirish? Barcha zaxira kodlari bekor qilinadi.",
-      "disableError": "2FA ni o‘chirib bo‘lmadi"
+      "disableError": "2FA ni o‘chirib bo‘lmadi",
+      "sessionSection": "2FA sessiyasi",
+      "sessionDescription": "Joriy tasdiqlangan administrator sessiyasini qayta tiklash. Qayta tiklashdan soʻng 2FA kodini qayta kiritishingiz kerak boʻladi."
     },
     "twoFactor": {
       "loadingStatus": "2FA holati tekshirilmoqda...",

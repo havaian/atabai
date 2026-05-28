@@ -40,6 +40,25 @@
                 </div>
             </div>
 
+            <!-- Admin 2FA session — reset/end the current verified session.
+                 Moved here from the admin sidebar (it was a nav button); this
+                 is its natural home alongside the other 2FA controls. After
+                 reset the admin must re-enter their code to continue. -->
+            <div v-if="adminStore.hasValidAdminSession" class="adm-card">
+                <h3 class="adm-card-title">{{ $t('admin.security.sessionSection') }}</h3>
+                <p class="adm-text-sm adm-muted" style="margin-bottom: 14px;">
+                    {{ $t('admin.security.sessionDescription') }}
+                </p>
+                <button
+                    class="adm-btn adm-btn--ghost"
+                    @click="doResetSession"
+                    :disabled="busy"
+                >
+                    {{ $t('admin.nav.logout2FA') }}
+                </button>
+                <div v-if="resetSessionError" class="adm-2fa-error">{{ resetSessionError }}</div>
+            </div>
+
             <!-- Backup codes regeneration -->
             <div v-if="status?.totpEnabled" class="adm-card">
                 <h3 class="adm-card-title">{{ $t('admin.security.backupSection') }}</h3>
@@ -139,6 +158,8 @@ const newBackupCodes = ref([])
 const disableCode = ref('')
 const disableError = ref(null)
 
+const resetSessionError = ref(null)
+
 async function loadStatus() {
     loading.value = true
     try {
@@ -147,6 +168,22 @@ async function loadStatus() {
         // ignore — admin layout will surface bigger issues
     } finally {
         loading.value = false
+    }
+}
+
+// Reset the verified admin 2FA session (moved here from the admin sidebar).
+// After this the layout's hasValidAdminSession flips false and the
+// AdminTwoFactorGate re-renders, prompting for the code again.
+async function doResetSession() {
+    if (!confirm(t('admin.layout.resetSessionPrompt'))) return
+    busy.value = true
+    resetSessionError.value = null
+    try {
+        await adminStore.adminLogout2FA()
+    } catch (err) {
+        resetSessionError.value = err?.response?.data?.message || err?.message || t('admin.common.error')
+    } finally {
+        busy.value = false
     }
 }
 
@@ -201,12 +238,6 @@ onMounted(loadStatus)
 </script>
 
 <style scoped>
-.adm-card {
-    margin-top: 1em;
-}
-
-
-
 /* Success-tinted variant of .adm-card — used for the "new backup codes
    generated" notice. The base .adm-card lives in admin.css; this only
    tints the background + border via the same green token pair used by

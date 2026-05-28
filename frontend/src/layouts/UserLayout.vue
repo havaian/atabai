@@ -47,13 +47,11 @@
             </div>
         </template>
 
-        <!-- Footer: admin entry (only if user has admin role) -->
-        <template v-if="authStore.isAdmin" #footer="{ collapsed, isMobile, closeDrawer }">
-            <button class="user-admin-link" :class="{ 'user-admin-link--icon-only': collapsed && !isMobile }"
-                @click="goTo('/admin', closeDrawer)">
-                <ShieldCheck :size="16" class="user-admin-icon" />
-                <span v-if="!collapsed || isMobile" class="user-admin-label">{{ $t('admin.nav.adminPanel') }}</span>
-                <ChevronRight v-if="!collapsed || isMobile" :size="14" class="user-admin-chevron" />
+        <!-- Top-right corner: admin panel entry (only if user has admin role) -->
+        <template v-if="authStore.isAdmin" #corner>
+            <button class="user-corner-btn" @click="goTo('/admin')">
+                <ShieldCheck :size="15" class="user-corner-icon" />
+                <span class="user-corner-label">{{ $t('admin.nav.adminPanel') }}</span>
             </button>
         </template>
 
@@ -122,7 +120,7 @@ import { useAuthStore } from '@/stores/auth'
 import { useFilesStore } from '@/stores/files'
 import { useOrganizationsStore } from '@/stores/organizations'
 import {
-    LayoutDashboard, Archive, Plus, FileText, ChevronRight,
+    LayoutDashboard, Archive, Plus, FileText,
     ShieldCheck, Settings, LogOut,
     // Ledger-spine nav icons (Task 5 — surfacing new architecture).
     // OSV and Bank entry-points live on Dashboard, not in the sidebar,
@@ -167,7 +165,7 @@ const navItems = computed(() => {
         return [
             { name: 'Dashboard', label: t('nav.dashboard'), icon: LayoutDashboard },
             { name: 'FileHistory', label: t('nav.history'), icon: Archive },
-            { name: 'Settings', label: t('dashboard.settings'), icon: Settings },
+            // Settings omitted — available in the profile dropdown.
         ]
     }
     // Server-blessed capabilities for the active org. Admins receive the
@@ -189,7 +187,9 @@ const navItems = computed(() => {
             ? [{ name: 'AdjustmentsList', label: t('nav.adjustments'), icon: Sliders }]
             : []),
         { name: 'FileHistory', label: t('nav.history'), icon: Archive },
-        { name: 'Settings', label: t('dashboard.settings'), icon: Settings },
+        // Settings intentionally omitted from the nav — it's reachable from
+        // the profile dropdown at the bottom of the sidebar, so duplicating
+        // it here would be redundant.
     ]
 })
 
@@ -416,45 +416,36 @@ onMounted(async () => {
 }
 
 /* ─── Admin entry (footer slot) ──────────────────────────────────────────── */
-.user-admin-link {
-    display: flex;
+/* ─── Top-right corner: admin panel entry ────────────────────────────────── */
+.user-corner-btn {
+    display: inline-flex;
     align-items: center;
-    gap: 10px;
-    width: 100%;
-    padding: 10px 12px;
+    gap: 7px;
+    padding: 7px 13px;
     border-radius: 8px;
-    background: transparent;
-    border: none;
+    background: var(--ws-surface);
+    border: 1px solid var(--ws-border);
     color: var(--ws-purple);
     font-size: 13px;
     font-weight: 500;
     cursor: pointer;
-    transition: background 0.15s;
-    text-align: left;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
     font-family: inherit;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
-.user-admin-link:hover {
-    background: rgba(124, 58, 237, 0.1);
+.user-corner-btn:hover {
+    background: var(--ws-purple);
+    border-color: var(--ws-purple);
+    color: #fff;
 }
 
-.user-admin-link--icon-only {
-    justify-content: center;
-    padding: 10px;
-}
-
-.user-admin-icon {
+.user-corner-icon {
     flex-shrink: 0;
 }
 
-.user-admin-label {
-    flex: 1;
+.user-corner-label {
     white-space: nowrap;
-}
-
-.user-admin-chevron {
-    color: var(--ws-purple);
-    flex-shrink: 0;
 }
 
 /* ─── Profile: desktop ───────────────────────────────────────────────────── */
