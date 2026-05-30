@@ -2,13 +2,10 @@ import {
   Controller,
   Get,
   Param,
-  Res,
   UseGuards,
 } from '@nestjs/common';
-import type { Response } from 'express';
 import { InjectModel } from '@nestjs/mongoose';
 import { Types } from 'mongoose';
-import * as ExcelJS from 'exceljs';
 
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { MEMBERSHIP_CAPABILITIES } from '../../organizations/constants/membership-capabilities';
@@ -69,126 +66,8 @@ export class MatrixController {
   }
 
   /**
-   * XLSX export of the same matrix. Streams a workbook with one row per
-   * (account, subconto-combo) and the four layers as grouped Dt/Cr column
-   * pairs — mirroring the on-screen table so the file is recognisable.
-   *
-   * Reuses the exact aggregation behind GET /matrix so the export can never
-   * drift from what the user is looking at. Money stays as decimal strings
-   * all the way to the cell; we write them as text-formatted numbers so
-   * Excel shows them right-aligned without re-introducing float error.
-   */
-  @Get('matrix/export')
-  @RequireCapability(MEMBERSHIP_CAPABILITIES.NSBU_BASE_READ)
-  async exportMatrix(
-    @Param('orgId') orgId: string,
-    @Param('periodId') periodId: string,
-    @Res() res: Response,
-  ): Promise<void> {
-    const matrix = await this.buildMatrix(orgId, periodId);
-
-    const wb = new ExcelJS.Workbook();
-    wb.creator = 'ATABAI';
-    wb.created = new Date();
-    const ws = wb.addWorksheet('IFRS Matrix', {
-      views: [{ state: 'frozen', xSplit: 1, ySplit: 2 }],
-    });
-
-    // Two header rows: layer groups on top, Dt/Cr beneath. Mirrors the
-    // <thead> in LedgerMatrixView so the export is visually familiar.
-    ws.mergeCells('A1:A2');
-    ws.getCell('A1').value = 'Account';
-    ws.mergeCells('B1:C1');
-    ws.getCell('B1').value = 'NSBU';
-    ws.mergeCells('D1:E1');
-    ws.getCell('D1').value = 'Reclassification';
-    ws.mergeCells('F1:G1');
-    ws.getCell('F1').value = 'Adjustments';
-    ws.mergeCells('H1:I1');
-    ws.getCell('H1').value = 'IFRS';
-    ws.getRow(2).values = ['', 'Dt', 'Cr', 'Dt', 'Cr', 'Dt', 'Cr', 'Dt', 'Cr'];
-
-    // Header styling — bold, centred, light fill; IFRS group accented purple
-    // to match the on-screen highlight.
-    for (const rowIdx of [1, 2]) {
-      const row = ws.getRow(rowIdx);
-      row.font = { bold: true, size: 10 };
-      row.alignment = { horizontal: 'center', vertical: 'middle' };
-      row.eachCell((cell) => {
-        cell.fill = {
-          type: 'pattern',
-          pattern: 'solid',
-          fgColor: { argb: 'FFEDE9F7' },
-        };
-        cell.border = {
-          bottom: { style: 'thin', color: { argb: 'FFD8D2E8' } },
-          right: { style: 'thin', color: { argb: 'FFD8D2E8' } },
-        };
-      });
-    }
-    // Accent the IFRS group header cells.
-    for (const addr of ['H1', 'H2', 'I2']) {
-      ws.getCell(addr).fill = {
-        type: 'pattern',
-        pattern: 'solid',
-        fgColor: { argb: 'FFE5DBFB' },
-      };
-    }
-
-    // Data rows.
-    const num = (v?: string) => {
-      // Blank cell when zero/absent — matches the on-screen format() helper.
-      if (!v || v === '0') return null;
-      const parsed = Number(v);
-      return Number.isFinite(parsed) ? parsed : v;
-    };
-    for (const m of matrix) {
-      const subcontoLabel = [m.subconto1Value, m.subconto2Value, m.subconto3Value]
-        .filter(Boolean)
-        .join(' / ');
-      const accountCell = subcontoLabel
-        ? `${m.accountCode}  (${subcontoLabel})`
-        : m.accountCode;
-      const L = m.layers;
-      ws.addRow([
-        accountCell,
-        num(L.nsbu_base?.closingDebit),
-        num(L.nsbu_base?.closingCredit),
-        num(L.reclassification?.closingDebit),
-        num(L.reclassification?.closingCredit),
-        num(L.adjustment?.closingDebit),
-        num(L.adjustment?.closingCredit),
-        num(L.ifrs?.closingDebit),
-        num(L.ifrs?.closingCredit),
-      ]);
-    }
-
-    // Column widths + number format on the money columns.
-    ws.getColumn(1).width = 42;
-    for (let c = 2; c <= 9; c++) {
-      const col = ws.getColumn(c);
-      col.width = 16;
-      col.numFmt = '#,##0.00;(#,##0.00)'; // negatives in brackets, accounting style
-      col.alignment = { horizontal: 'right' };
-    }
-    ws.getColumn(1).font = { name: 'Consolas', size: 10 };
-
-    res.setHeader(
-      'Content-Type',
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    );
-    res.setHeader(
-      'Content-Disposition',
-      `attachment; filename="ifrs-matrix-${periodId}.xlsx"`,
-    );
-    await wb.xlsx.write(res);
-    res.end();
-  }
-
-  /**
    * Shared aggregation — collapses the four balance layers into one row per
-   * (account, subconto-combo). Used by both the JSON endpoint and the XLSX
-   * export so they can never disagree.
+   * (account, subconto-combo) for the JSON matrix endpoint.
    */
   private async buildMatrix(orgId: string, periodId: string): Promise<MatrixRow[]> {
     type Aggregated = {

@@ -1369,10 +1369,7 @@
       "reclass": "Tasniflash",
       "adjustment": "Tuzatish",
       "ifrs": "IFRS"
-    },
-    "export": "Excelga eksport",
-    "exporting": "Eksport…",
-    "exportFailed": "Eksport amalga oshmadi"
+    }
   },
   "members": {
     "title": "Tashkilot aʼzolari",

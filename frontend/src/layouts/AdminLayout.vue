@@ -1,11 +1,11 @@
 <!-- frontend/src/layouts/AdminLayout.vue
      Thin wrapper around AppLayout — provides admin-side specific content
-     (user info block in body, 2FA logout + back-to-app buttons in footer,
-     access guards on main content) via slots. All shared chrome (sidebar
+     (mode switch + admin user dropdown with back-to-app exit in the profile
+     slot, access guards on main content) via slots. All shared chrome (sidebar
      shell, mobile drawer, theme/lang pickers) is owned by AppLayout. -->
 <template>
-    <AppLayout :home-link="'/admin'" :brand-tag="$t('admin.layout.brandTag')"
-        :nav-items="navItems" :storage-key="'atabai-admin-sidebar-open'">
+    <AppLayout :home-link="'/admin'" :brand-tag="$t('admin.layout.brandTag')" :nav-items="navItems"
+        :storage-key="'atabai-admin-sidebar-open'">
         <!-- Bottom extras: Legacy ⇄ New mode switch, pinned to the bottom of
              the sidebar (just above the profile block). Pure UI preference
              persisted in localStorage (default Legacy). Swaps the sidebar
@@ -14,46 +14,53 @@
              preference, not an authorization boundary. -->
         <template #bottom-extras="{ collapsed, isMobile, closeDrawer }">
             <div class="admin-mode" :class="{ 'admin-mode--collapsed': collapsed && !isMobile }">
-                <button
-                    class="admin-mode-btn"
-                    :class="{ 'admin-mode-btn--active': mode === 'legacy' }"
-                    :title="$t('admin.mode.legacy')"
-                    @click="setMode('legacy', closeDrawer)"
-                >
+                <button class="admin-mode-btn" :class="{ 'admin-mode-btn--active': mode === 'legacy' }"
+                    :title="$t('admin.mode.legacy')" @click="setMode('legacy', closeDrawer)">
                     <Boxes :size="15" />
                     <span v-if="!collapsed || isMobile">{{ $t('admin.mode.legacy') }}</span>
                 </button>
-                <button
-                    class="admin-mode-btn"
-                    :class="{ 'admin-mode-btn--active': mode === 'ledger' }"
-                    :title="$t('admin.mode.ledger')"
-                    @click="setMode('ledger', closeDrawer)"
-                >
+                <button class="admin-mode-btn" :class="{ 'admin-mode-btn--active': mode === 'ledger' }"
+                    :title="$t('admin.mode.ledger')" @click="setMode('ledger', closeDrawer)">
                     <Layers :size="15" />
                     <span v-if="!collapsed || isMobile">{{ $t('admin.mode.ledger') }}</span>
                 </button>
             </div>
         </template>
 
-        <!-- Profile: admin user info, pinned to the bottom of the sidebar
-             exactly like the user-side profile block. -->
-        <template #profile="{ collapsed }">
-            <div class="admin-user-info" :class="{ 'admin-user-info--collapsed': collapsed }">
-                <div class="admin-user-avatar">{{ adminInitials }}</div>
-                <div v-if="!collapsed" class="admin-user-meta">
+        <!-- Profile: dropdown menu on desktop, flat row on mobile —
+             mirrors the user-side profile block. -->
+        <template #profile="{ collapsed, isMobile, closeDrawer }">
+            <div v-if="!isMobile" class="admin-user-info" :class="{ 'admin-user-info--collapsed': collapsed }"
+                ref="profileRef">
+                <div class="admin-user-avatar" @click="toggleProfileMenu">{{ adminInitials }}</div>
+                <div v-if="!collapsed" class="admin-user-meta" @click="toggleProfileMenu">
                     <div class="admin-user-name">{{ adminStore.adminInfo?.name }}</div>
                     <div class="admin-user-role">{{ roleLabel }}</div>
                 </div>
+                <Transition name="app-menu-pop">
+                    <div v-if="isProfileMenuOpen" class="admin-profile-menu"
+                        :class="{ 'admin-profile-menu--collapsed': collapsed }">
+                        <button class="admin-menu-item" @click="goToApp()">
+                            <ArrowLeft :size="14" />
+                            {{ $t('admin.nav.backToApp') }}
+                        </button>
+                    </div>
+                </Transition>
             </div>
-        </template>
 
-        <!-- Top-right corner: back-to-app exit (mirrors the user-side
-             "Admin panel" entry which sits in the same spot). -->
-        <template #corner>
-            <button class="admin-corner-btn" @click="goToApp()" :title="$t('admin.nav.backToApp')">
-                <ArrowLeft :size="15" class="admin-corner-icon" />
-                <span class="admin-corner-label">{{ $t('admin.nav.backToApp') }}</span>
-            </button>
+            <!-- Mobile: flat avatar + name/role + back-to-app button -->
+            <div v-else class="admin-mobile-profile">
+                <div class="admin-mobile-profile-info">
+                    <div class="admin-user-avatar">{{ adminInitials }}</div>
+                    <div class="admin-mobile-profile-text">
+                        <div class="admin-user-name">{{ adminStore.adminInfo?.name }}</div>
+                        <div class="admin-user-role">{{ roleLabel }}</div>
+                    </div>
+                </div>
+                <button class="admin-mobile-exit-btn" @click="goToApp(closeDrawer)" :title="$t('admin.nav.backToApp')">
+                    <ArrowLeft :size="16" />
+                </button>
+            </div>
         </template>
 
         <!-- Main content: access guards then router-view -->
@@ -75,6 +82,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import { onClickOutside } from '@vueuse/core'
 import AppLayout from '@/components/layout/AppLayout.vue'
 import { useAdminStore } from '@/stores/admin'
 import AdminTwoFactorGate from '@/views/admin/AdminTwoFactorGate.vue'
@@ -161,10 +169,19 @@ const adminInitials = computed(() => {
     return parts.slice(0, 2).map((p) => p[0].toUpperCase()).join('')
 })
 
+// ─── Profile dropdown (mirrors the user-side profile menu) ─────────────────
+const isProfileMenuOpen = ref(false)
+const profileRef = ref(null)
+
+function toggleProfileMenu() { isProfileMenuOpen.value = !isProfileMenuOpen.value }
+
 function goToApp(closeDrawer) {
     router.push('/app/dashboard')
+    isProfileMenuOpen.value = false
     if (closeDrawer) closeDrawer()
 }
+
+onClickOutside(profileRef, () => { isProfileMenuOpen.value = false })
 
 function on2FAVerified() {
     // After successful verify, hasValidAdminSession becomes true and router-view renders.
@@ -232,6 +249,13 @@ onMounted(async () => {
     align-items: center;
     gap: 10px;
     padding: 12px;
+    position: relative;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.admin-user-info:hover {
+    background: var(--sb-item-hover);
 }
 
 .admin-user-info--collapsed {
@@ -251,10 +275,12 @@ onMounted(async () => {
     justify-content: center;
     font-size: 12px;
     font-weight: 600;
+    cursor: pointer;
 }
 
 .admin-user-meta {
     min-width: 0;
+    cursor: pointer;
 }
 
 .admin-user-name {
@@ -274,38 +300,87 @@ onMounted(async () => {
     margin-top: 2px;
 }
 
-/* ─── Top-right corner: back-to-app exit ─────────────────────────────────────
-   Visually identical to the user-side .user-corner-btn so the entry/exit
-   pair reads as one consistent control sitting in the same spot. */
-.admin-corner-btn {
+/* ─── Profile dropdown menu (mirrors user-side .user-profile-menu) ─────────── */
+.admin-profile-menu {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 12px;
+    right: 12px;
+    background: var(--sb-menu-bg);
+    border: 1px solid var(--sb-menu-border);
+    border-radius: 12px;
+    padding: 8px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    z-index: 200;
+}
+
+.admin-profile-menu--collapsed {
+    position: fixed;
+    bottom: 12px;
+    left: 72px;
+    right: unset;
+    min-width: 200px;
+}
+
+.admin-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 8px 10px;
+    border: none;
+    border-radius: 7px;
+    background: transparent;
+    color: var(--sb-menu-text);
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.12s, color 0.12s;
+    text-align: left;
+    font-family: inherit;
+}
+
+.admin-menu-item:hover {
+    background: var(--sb-item-hover);
+    color: var(--sb-text-hover);
+}
+
+/* ─── Profile: mobile (flat row + exit button) ───────────────────────────── */
+.admin-mobile-profile {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px;
+}
+
+.admin-mobile-profile-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.admin-mobile-profile-text {
+    min-width: 0;
+}
+
+.admin-mobile-exit-btn {
+    flex-shrink: 0;
     display: inline-flex;
     align-items: center;
-    gap: 7px;
-    padding: 7px 13px;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
     border-radius: 8px;
-    background: var(--adm-surface);
+    background: transparent;
     border: 1px solid var(--adm-border);
     color: var(--ws-purple);
-    font-size: 13px;
-    font-weight: 500;
     cursor: pointer;
-    transition: background 0.15s, border-color 0.15s, color 0.15s;
-    font-family: inherit;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+    transition: background 0.15s, color 0.15s;
 }
 
-.admin-corner-btn:hover {
+.admin-mobile-exit-btn:hover {
     background: var(--ws-purple);
-    border-color: var(--ws-purple);
     color: #fff;
-}
-
-.admin-corner-icon {
-    flex-shrink: 0;
-}
-
-.admin-corner-label {
-    white-space: nowrap;
 }
 
 /* ─── Main content states ────────────────────────────────────────────────── */

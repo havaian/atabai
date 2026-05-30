@@ -22,20 +22,12 @@
                         </select>
                     </label>
                 </div>
-                <button
-                    class="matrix-export-btn"
-                    :disabled="rows.length === 0 || isExporting"
-                    @click="onExport"
-                >
-                    <Download :size="15" />
-                    <span>{{ isExporting ? $t('matrix.exporting') : $t('matrix.export') }}</span>
-                </button>
             </div>
         </header>
 
-        <p v-if="exportError" class="matrix-export-error">{{ exportError }}</p>
-
-        <section v-if="isLoading" class="matrix-empty"><div class="spinner" /></section>
+        <section v-if="isLoading" class="matrix-empty">
+            <div class="spinner" />
+        </section>
 
         <section v-else-if="rows.length === 0" class="matrix-empty">
             <p>{{ $t('matrix.empty') }}</p>
@@ -66,12 +58,14 @@
                     <tr v-for="row in rows" :key="row.key">
                         <td class="matrix-td-sticky matrix-account">
                             <span class="matrix-account-code">{{ row.accountCode }}</span>
-                            <span v-if="row.subcontoLabel" class="matrix-account-subconto">{{ row.subcontoLabel }}</span>
+                            <span v-if="row.subcontoLabel" class="matrix-account-subconto">{{ row.subcontoLabel
+                                }}</span>
                         </td>
                         <td class="matrix-num">{{ format(row.nsbu_base?.closingDebit) }}</td>
                         <td class="matrix-num">{{ format(row.nsbu_base?.closingCredit) }}</td>
                         <td class="matrix-num matrix-num--reclass">{{ format(row.reclassification?.closingDebit) }}</td>
-                        <td class="matrix-num matrix-num--reclass">{{ format(row.reclassification?.closingCredit) }}</td>
+                        <td class="matrix-num matrix-num--reclass">{{ format(row.reclassification?.closingCredit) }}
+                        </td>
                         <td class="matrix-num matrix-num--adj">{{ format(row.adjustment?.closingDebit) }}</td>
                         <td class="matrix-num matrix-num--adj">{{ format(row.adjustment?.closingCredit) }}</td>
                         <td class="matrix-num matrix-num--ifrs">{{ format(row.ifrs?.closingDebit) }}</td>
@@ -86,16 +80,11 @@
 <script setup lang="ts">
 // @ts-nocheck
 import { computed, onMounted, ref, watch } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { Download } from 'lucide-vue-next'
 import { useLedgerStore } from '@/stores/ledger'
 
 const ledger = useLedgerStore()
-const { t } = useI18n()
 const selectedPeriodId = ref(null)
 const isLoading = ref(false)
-const isExporting = ref(false)
-const exportError = ref('')
 
 /**
  * Pivot now comes pre-joined from the server (/matrix endpoint). Each row:
@@ -105,7 +94,7 @@ const exportError = ref('')
 const matrixRows = ref([])
 
 onMounted(async () => {
-    await ledger.fetchPeriods().catch(() => {})
+    await ledger.fetchPeriods().catch(() => { })
     selectedPeriodId.value = ledger.activePeriod?.id || ledger.periods[0]?.id || null
     if (selectedPeriodId.value) await refresh()
 })
@@ -123,20 +112,6 @@ async function refresh() {
         matrixRows.value = await ledger.fetchMatrix(selectedPeriodId.value).catch(() => [])
     } finally {
         isLoading.value = false
-    }
-}
-
-async function onExport() {
-    if (!selectedPeriodId.value || rows.value.length === 0) return
-    isExporting.value = true
-    exportError.value = ''
-    try {
-        const label = ledger.periods.find((p) => p.id === selectedPeriodId.value)?.label
-        await ledger.exportMatrix(selectedPeriodId.value, label)
-    } catch (err) {
-        exportError.value = err?.response?.data?.message || err?.message || t('matrix.exportFailed')
-    } finally {
-        isExporting.value = false
     }
 }
 
@@ -163,64 +138,168 @@ function format(decStr) {
 </script>
 
 <style scoped>
-.matrix-view { max-width: 1400px; margin: 0 auto; padding: 24px; }
+.matrix-view {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 24px;
+}
+
 .matrix-header {
-    display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 20px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 20px;
 }
-.matrix-header h1 { font-size: 1.3rem; font-weight: 600; margin-bottom: 4px; }
-.matrix-header p { font-size: 0.88rem; color: var(--ws-text-3); }
-.matrix-period-picker label { display: flex; flex-direction: column; gap: 4px; font-size: 0.82rem; color: var(--ws-text-3); }
+
+.matrix-header h1 {
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.matrix-header p {
+    font-size: 0.88rem;
+    color: var(--ws-text-3);
+}
+
+.matrix-period-picker label {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 0.82rem;
+    color: var(--ws-text-3);
+}
+
 .matrix-period-picker select {
-    padding: 8px 10px; border: 1px solid var(--ws-border); border-radius: 6px; font-size: 0.9rem; min-width: 200px;
+    padding: 8px 10px;
+    border: 1px solid var(--ws-border);
+    border-radius: 6px;
+    font-size: 0.9rem;
+    min-width: 200px;
 }
+
 .matrix-header-actions {
-    display: flex; align-items: flex-end; gap: 12px;
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
 }
-.matrix-export-btn {
-    display: inline-flex; align-items: center; gap: 7px;
-    padding: 8px 14px; height: 38px;
-    background: var(--ws-purple); color: #fff;
-    border: none; border-radius: 6px;
-    font-size: 0.88rem; font-weight: 500; font-family: inherit;
-    cursor: pointer; white-space: nowrap;
-    transition: background 0.15s;
-}
-.matrix-export-btn:hover:not(:disabled) { background: #6D28D9; }
-.matrix-export-btn:disabled { opacity: 0.45; cursor: not-allowed; }
-.matrix-export-error {
-    font-size: 0.82rem; color: #b91c1c; margin: -8px 0 12px;
-}
+
 .matrix-empty {
-    padding: 60px 24px; text-align: center; background: var(--ws-surface-2); border-radius: 12px; color: var(--ws-text-3);
+    padding: 60px 24px;
+    text-align: center;
+    background: var(--ws-surface-2);
+    border-radius: 12px;
+    color: var(--ws-text-3);
 }
+
 .matrix-table-wrap {
-    background: var(--ws-surface); border: 1px solid var(--ws-border);
-    border-radius: 12px; overflow: auto; max-height: 70vh;
+    background: var(--ws-surface);
+    border: 1px solid var(--ws-border);
+    border-radius: 12px;
+    overflow: auto;
+    max-height: 70vh;
 }
-.matrix-table { border-collapse: separate; border-spacing: 0; font-size: 0.82rem; width: 100%; }
+
+.matrix-table {
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 0.82rem;
+    width: 100%;
+}
+
 .matrix-table th {
-    padding: 8px 10px; background: var(--ws-surface-2); border-bottom: 1px solid var(--ws-border);
-    color: var(--ws-text-3); font-weight: 600; position: sticky; top: 0; z-index: 1;
+    padding: 8px 10px;
+    background: var(--ws-surface-2);
+    border-bottom: 1px solid var(--ws-border);
+    color: var(--ws-text-3);
+    font-weight: 600;
+    position: sticky;
+    top: 0;
+    z-index: 1;
 }
-.matrix-th-group { text-align: center; font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.05em; }
-.matrix-th-group--ifrs { background: rgba(124, 58, 237, 0.1); color: var(--ws-purple); }
-.matrix-th-num { text-align: right; }
-.matrix-table td { padding: 6px 10px; border-bottom: 1px solid var(--ws-border); }
-.matrix-num { text-align: right; font-variant-numeric: tabular-nums; }
-.matrix-num--reclass { background: rgba(66, 153, 225, 0.03); }
-.matrix-num--adj { background: rgba(237, 137, 54, 0.04); }
-.matrix-num--ifrs { background: rgba(124, 58, 237, 0.05); font-weight: 600; }
-.matrix-account { display: flex; flex-direction: column; min-width: 200px; }
-.matrix-account-code { font-family: monospace; font-weight: 600; }
-.matrix-account-subconto { font-size: 0.72rem; color: var(--ws-text-3); }
-.matrix-td-sticky, .matrix-th-sticky {
-    position: sticky; left: 0; background: var(--ws-surface); z-index: 2;
+
+.matrix-th-group {
+    text-align: center;
+    font-size: 0.74rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.matrix-th-group--ifrs {
+    background: rgba(124, 58, 237, 0.1);
+    color: var(--ws-purple);
+}
+
+.matrix-th-num {
+    text-align: right;
+}
+
+.matrix-table td {
+    padding: 6px 10px;
+    border-bottom: 1px solid var(--ws-border);
+}
+
+.matrix-num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.matrix-num--reclass {
+    background: rgba(66, 153, 225, 0.03);
+}
+
+.matrix-num--adj {
+    background: rgba(237, 137, 54, 0.04);
+}
+
+.matrix-num--ifrs {
+    background: rgba(124, 58, 237, 0.05);
+    font-weight: 600;
+}
+
+.matrix-account {
+    display: flex;
+    flex-direction: column;
+    min-width: 200px;
+}
+
+.matrix-account-code {
+    font-family: monospace;
+    font-weight: 600;
+}
+
+.matrix-account-subconto {
+    font-size: 0.72rem;
+    color: var(--ws-text-3);
+}
+
+.matrix-td-sticky,
+.matrix-th-sticky {
+    position: sticky;
+    left: 0;
+    background: var(--ws-surface);
+    z-index: 2;
     border-right: 1px solid var(--ws-border);
 }
-.matrix-th-sticky { background: var(--ws-surface-2); }
-.spinner {
-    width: 24px; height: 24px; border: 2.5px solid var(--ws-border); border-top-color: var(--ws-purple);
-    border-radius: 50%; animation: spin 0.85s linear infinite; margin: 0 auto;
+
+.matrix-th-sticky {
+    background: var(--ws-surface-2);
 }
-@keyframes spin { to { transform: rotate(360deg); } }
+
+.spinner {
+    width: 24px;
+    height: 24px;
+    border: 2.5px solid var(--ws-border);
+    border-top-color: var(--ws-purple);
+    border-radius: 50%;
+    animation: spin 0.85s linear infinite;
+    margin: 0 auto;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
 </style>
