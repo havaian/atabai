@@ -238,6 +238,10 @@ onMounted(loadStatus)
 </script>
 
 <style scoped>
+.adm-card {
+    margin-top: 1em;
+}
+
 /* Success-tinted variant of .adm-card — used for the "new backup codes
    generated" notice. The base .adm-card lives in admin.css; this only
    tints the background + border via the same green token pair used by
