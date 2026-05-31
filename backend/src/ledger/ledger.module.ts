@@ -22,34 +22,22 @@ import { TreasuryResolverService } from './bank/treasury-resolver.service';
 import { OsvIngestionService } from './ingestion/osv-ingestion.service';
 import { OnboardingController } from './onboarding.controller';
 import { OsvImportsController } from './osv-imports.controller';
-import {
-  AccountBalance,
-  AccountBalanceSchema,
-} from './schemas/account-balance.schema';
-import {
-  ChartOfAccount,
-  ChartOfAccountSchema,
-} from './schemas/chart-of-account.schema';
+import { ReclassificationsController } from './reclassifications/reclassifications.controller';
+import { ReclassificationService } from './reclassifications/reclassifications.service';
+import { AccountBalance, AccountBalanceSchema } from './schemas/account-balance.schema';
+import { ChartOfAccount, ChartOfAccountSchema } from './schemas/chart-of-account.schema';
 import { Counterparty, CounterpartySchema } from './schemas/counterparty.schema';
-import {
-  JournalEntryLine,
-  JournalEntryLineSchema,
-} from './schemas/journal-entry-line.schema';
-import {
-  JournalEntry,
-  JournalEntrySchema,
-} from './schemas/journal-entry.schema';
+import { JournalEntryLine, JournalEntryLineSchema } from './schemas/journal-entry-line.schema';
+import { JournalEntry, JournalEntrySchema } from './schemas/journal-entry.schema';
 import {
   OrganizationProfile,
   OrganizationProfileSchema,
 } from './schemas/organization-profile.schema';
-import {
-  ReportingPeriod,
-  ReportingPeriodSchema,
-} from './schemas/reporting-period.schema';
+import { ReportingPeriod, ReportingPeriodSchema } from './schemas/reporting-period.schema';
 import { TreasuryRule, TreasuryRuleSchema } from './schemas/treasury-rule.schema';
 import { BalanceRollupService } from './services/balance-rollup.service';
 import { ChartSeedService } from './services/chart-seed.service';
+import { IfrsDerivationService } from './services/ifrs-derivation.service';
 import { LedgerBootstrapService } from './services/ledger-bootstrap.service';
 import { OrganizationProfilesService } from './services/organization-profiles.service';
 import { PeriodsService } from './services/periods.service';
@@ -105,6 +93,7 @@ import { PeriodsService } from './services/periods.service';
     OsvImportsController,
     BankStatementsController,
     AdjustmentsController,
+    ReclassificationsController,
     PeriodsReadController,
     ChartController,
     BalancesController,
@@ -122,6 +111,8 @@ import { PeriodsService } from './services/periods.service';
     RunningBalanceService,
     BankIngestionService,
     AdjustmentsService,
+    IfrsDerivationService,
+    ReclassificationService,
   ],
   exports: [
     MongooseModule,
@@ -133,6 +124,8 @@ import { PeriodsService } from './services/periods.service';
     LedgerBootstrapService,
     BankIngestionService,
     AdjustmentsService,
+    IfrsDerivationService,
+    ReclassificationService,
   ],
 })
 export class LedgerModule {}
