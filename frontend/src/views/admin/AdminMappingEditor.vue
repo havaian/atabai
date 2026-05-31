@@ -165,7 +165,7 @@
                             <td class="adm-text-sm adm-muted">
                                 {{ row.section }}<span v-if="row.subsection"> / {{ row.subsection }}</span>
                             </td>
-                            <td>
+                            <td class="adm-buttons">
                                 <span v-if="row.isCalculated" class="adm-badge adm-badge--flag-calc">{{ $t('admin.mappingEditor.flagCalc') }}</span>
                                 <span v-if="row.isNegative" class="adm-badge adm-badge--flag-neg">{{ $t('admin.mappingEditor.flagNeg') }}</span>
                                 <span v-if="row.flowType" class="adm-badge adm-badge--flag-flow">{{ row.flowType }}</span>
@@ -1074,6 +1074,10 @@ onMounted(loadSet)
 </script>
 
 <style scoped>
+.adm-buttons {
+    display: flex !important;
+}
+
 .adm-graph-container {
     background: var(--adm-surface);
     border: 1px solid var(--adm-border);

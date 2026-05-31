@@ -1,922 +1,264 @@
-# ATABAI - Техническое задание
-## Платформа автоматизации Excel для МСФО
+# ATABAI
 
-### Версия документа: 1.0
-### Дата создания: Октябрь 2025
+**NSBU → IFRS transformation platform for Uzbekistan.**
 
----
+ATABAI automates the transformation of Uzbek national-standard accounting (НСБУ / NSBU)
+into IFRS-compliant outputs. Go-to-market is **B2B2B** — sold through IFRS specialists who
+each serve many client companies, not direct to end companies.
 
-## 1. Общее описание проекта
+The single non-negotiable constraint is **transformation accuracy**. Specialists stake their
+professional reputation on the output; a single error gets the product permanently dismissed.
+Every architectural decision below serves that constraint first.
 
-### 1.1 Назначение системы
-ATABAI представляет собой веб-платформу для автоматизации финансовых расчетов в Excel файлах в соответствии с требованиями Международных стандартов финансовой отчетности (МСФО) и законодательством Республики Узбекистан.
-
-### 1.2 Правовая база
-Система создается в соответствии с требованиями:
-- Постановления Президента РУз №ПП-4611 от 24.02.2020
-- Постановления Президента РУз №ПП-282 от 15.09.2025
-- Международными стандартами финансовой отчетности (IFRS)
-
-### 1.3 Целевая аудитория
-- Акционерные общества
-- Коммерческие банки
-- Страховые организации
-- Крупные налогоплательщики
-- Общественно значимые организации (PIE)
-- Финансовые специалисты и бухгалтеры
-
-### 1.4 Бизнес-цели
-- Автоматизация расчетов амортизации, скидок и обесценения
-- Обеспечение соответствия требованиям МСФО
-- Минимизация ошибок в финансовой отчетности
-- Сокращение времени подготовки отчетности
+> **Reference documents**
+> - **`ATABAI — Architecture: Current vs Target`** (May 2026) is the authoritative design spec.
+>   Code comments reference it as *"architecture doc §N"*. Sections 6–7 of that doc are
+>   **settled decisions** — do not re-litigate them without explicit instruction.
+> - **This README** is the live source of truth for *what exists today and how to run it*.
+>   It reflects the real codebase, not the design intent.
+>
+> An older `README.md` once described an Express + formula-template application. That app was
+> never built; it was aspirational. The real backend is **NestJS** with a stateful ledger. If
+> you find any reference to Express, `src/app.js`, Joi, or formula-template processing, treat it
+> as historical noise.
 
 ---
 
-## 2. Функциональные требования
+## 1. What the product does
 
-### 2.1 Пользовательские роли
+The transformation follows the IFRS specialist's **7-step methodology** (`Методика_МСФО.xlsx`):
 
-#### 2.1.1 Неавторизованный пользователь
-**Права доступа:**
-- Просмотр лендинговой страницы
-- Ознакомление с функциональностью
-- Инициация процесса регистрации
+1. **Reporting period + transition date** — first-time adoption seeds an opening balance, a
+   comparative year, and a full reporting period. Multi-period from the start.
+2. **IFRS accounting policy + chart of accounts** — analyze NSBU↔IFRS differences; build the
+   account-level map.
+3. **Reclassification** — move the trial balance (ОСВ) into the model and regroup
+   (long/short-term, etc.). **Financial result unchanged.**
+4. **Adjustment entries** — the real IFRS work: fixed assets (IAS 16), leases (IFRS 16),
+   receivables / ECL (IFRS 9), revenue / control-transfer timing (IFRS 15). **This is where
+   numbers move.**
+5. **Deferred tax** — temporary differences from step 4 → deferred tax assets/liabilities (IAS 12).
+6. **Assembly** — consolidate into the four final statements (Balance Sheet, P&L, Cash Flow, SOCE).
+7. **Notes & disclosures.**
 
-**Ограничения:**
-- Отсутствие доступа к функциональности обработки файлов
-- Невозможность сохранения результатов
+Upstream of the methodology, a **bank-statement posting module** (`Bank_statements.xlsx`, sheet
+`ТЗ`) ingests bank statements and produces the double-entry postings that *become* the ledger /
+ОСВ the methodology consumes. It is a separate system, not part of the transformation.
 
-#### 2.1.2 Авторизованный пользователь (Basic)
-**Права доступа:**
-- Загрузка Excel файлов (до 5 файлов в месяц)
-- Применение базовых МСФО шаблонов
-- Просмотр результатов обработки
-- Экспорт обработанных файлов
-- Просмотр истории обработки (последние 10 файлов)
-
-**Ограничения:**
-- Лимит на количество обрабатываемых файлов
-- Ограниченный набор шаблонов
-- Отсутствие приоритетной обработки
-
-#### 2.1.3 Авторизованный пользователь (Premium)
-**Права доступа:**
-- Неограниченная загрузка файлов
-- Доступ ко всем МСФО шаблонам
-- Приоритетная обработка
-- Полная история обработки
-- Техническая поддержка
-- API доступ
-
-### 2.2 Основные функциональные модули
-
-#### 2.2.1 Модуль аутентификации
-**Требования:**
-- Интеграция с Google OAuth 2.0
-- Автоматическое создание профиля пользователя
-- Управление сессиями через JWT токены
-- Хранение токенов в Redis с TTL
-- Обновление токенов (refresh token flow)
-
-**Атрибуты пользователя:**
-```javascript
-{
-  googleId: String,
-  email: String,
-  name: String,
-  picture: String,
-  subscriptionType: String, // 'basic' | 'premium'
-  createdAt: Date,
-  lastLoginAt: Date,
-  isActive: Boolean
-}
 ```
-
-#### 2.2.2 Модуль управления шаблонами
-**Типы шаблонов:**
-
-1. **Амортизация основных средств**
-   - Линейный метод
-   - Метод уменьшающегося остатка
-   - Метод суммы лет
-   - Производственный метод
-
-2. **Расчеты скидок**
-   - Торговые скидки
-   - Скидки за досрочную оплату
-   - Сезонные скидки
-   - Объемные скидки
-
-3. **Обесценение активов**
-   - Тестирование на обесценение
-   - Расчет возмещаемой стоимости
-   - Признание убытков от обесценения
-
-4. **Финансовые отчеты**
-   - Отчет о прибылях и убытках
-   - Отчет о финансовом положении
-   - Отчет о движении денежных средств
-
-**Структура шаблона:**
-```javascript
-{
-  id: String,
-  name: String,
-  category: String,
-  description: String,
-  ifrsStandard: String, // IAS 16, IFRS 9, etc.
-  formulas: [{
-    cellRange: String,
-    formula: String,
-    validation: Object
-  }],
-  requiredFields: [String],
-  outputFormat: Object,
-  isActive: Boolean,
-  version: String
-}
-```
-
-#### 2.2.3 Модуль обработки файлов
-
-**Поддерживаемые форматы:**
-- Excel (.xlsx, .xls)
-- CSV (с автоматическим определением разделителей)
-
-**Максимальные ограничения:**
-- Размер файла: 50 МБ (Basic), 200 МБ (Premium)
-- Количество строк: 100,000
-- Количество столбцов: 500
-
-**Процесс обработки:**
-1. **Валидация файла**
-   - Проверка формата
-   - Проверка размера
-   - Сканирование на вредоносный код
-   - Проверка структуры данных
-
-2. **Анализ содержимого**
-   - Определение типа данных в ячейках
-   - Идентификация финансовых показателей
-   - Поиск существующих формул
-   - Анализ структуры таблицы
-
-3. **Применение шаблонов**
-   - Сопоставление данных с шаблонами
-   - Применение МСФО формул
-   - Валидация результатов
-   - Генерация отчета об изменениях
-
-4. **Генерация результата**
-   - Создание новой версии файла
-   - Сохранение метаданных обработки
-   - Подготовка файла для скачивания
-
-**API обработки:**
-```javascript
-POST /api/files/process
-Content-Type: multipart/form-data
-
-{
-  file: File,
-  templateId: String,
-  options: {
-    preserveFormatting: Boolean,
-    addComments: Boolean,
-    generateReport: Boolean
-  }
-}
-
-Response:
-{
-  processId: String,
-  status: 'processing' | 'completed' | 'error',
-  originalFile: {
-    name: String,
-    size: Number,
-    sheets: [String]
-  },
-  processedFile: {
-    url: String,
-    expiresAt: Date
-  },
-  changes: [{
-    sheet: String,
-    cell: String,
-    oldValue: Any,
-    newValue: Any,
-    formulaApplied: String
-  }],
-  report: {
-    summary: String,
-    warnings: [String],
-    errors: [String]
-  }
-}
-```
-
-#### 2.2.4 Модуль сравнения результатов
-
-**Функциональность:**
-- Отображение исходного файла (read-only)
-- Отображение обработанного файла
-- Подсветка измененных ячеек
-- Детализация примененных формул
-- Экспорт отчета о изменениях
-
-**Интерфейс сравнения:**
-```vue
-<template>
-  <div class="comparison-view">
-    <div class="tabs">
-      <Tab name="before" label="До обработки" />
-      <Tab name="after" label="После обработки" />
-      <Tab name="changes" label="Изменения" />
-    </div>
-    
-    <div class="spreadsheet-container">
-      <SpreadsheetViewer 
-        :data="currentData" 
-        :readonly="currentTab === 'before'"
-        :highlights="changes"
-      />
-    </div>
-  </div>
-</template>
+Bank ТЗ module            Методика steps 3–7              Output
+────────────────         ───────────────────            ──────────────
+bank statements    ─►    ОСВ / trial balance      ─►    4 IFRS statements
+→ counterparty ID        → reclassification               + notes
+→ treasury rules         → adjustment entries
+→ Дт/Кт postings         → deferred tax
+→ ledger / ОСВ           → assemble statements
 ```
 
 ---
 
-## 3. Техническая архитектура
+## 2. Architecture in one paragraph
 
-### 3.1 Общая архитектура системы
+ATABAI is a **stateful, account-level ledger**. The system of record is a four-layer
+transformation matrix held per `(organization, account, subconto-combo, period)`:
 
 ```
-┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│   Фронтенд      │    │     Бэкенд       │    │   База данных   │
-│   Vue.js 3      │◄──►│   Node.js        │◄──►│   MongoDB       │
-│   Composition   │    │   Express.js     │    │   Redis         │
-│   API           │    │   JWT Auth       │    │                 │
-└─────────────────┘    └──────────────────┘    └─────────────────┘
-                                │
-                                ▼
-                       ┌──────────────────┐
-                       │ Внешние сервисы  │
-                       │ Google OAuth     │
-                       │ File Storage     │
-                       └──────────────────┘
+nsbu_base  →  reclassification  →  adjustment  →  ifrs
+(immutable     (regrouping,         (journal       (= sum across
+ client base)   no Δ result)         entries)        the row, derived)
 ```
 
-### 3.2 Бэкенд архитектура
+- **`nsbu_base`** is immutable client input — it is what the client files with the regulator.
+  The trust proposition is *"your NSBU untouched; exactly what we changed and why; the IFRS result."*
+- **`reclassification`** regroups statements with zero net change to the financial result.
+- **`adjustment`** is the **only** layer where numbers move. Each carries an IFRS standard tag,
+  a human reason, its deferred-tax effect, and its disclosure text.
+- **`ifrs`** is derived (`nsbu_base + reclassification + adjustment`), stored so the matrix view
+  doesn't recompute on every read.
 
-#### 3.2.1 Структура проекта
+All money is **`Decimal128`** end to end (`ledger/decimal-arithmetic.ts`). Number-typed money
+would let `0.1 × 100 ≠ 10.0` land in client-visible reports — unacceptable on the ledger spine.
+
+> **Two transformation subsystems currently coexist.** The new **ledger spine**
+> (`backend/src/ledger/*`) above is the real model and the future. A **legacy processor pipeline**
+> (`backend/src/processors/*`) still exists: it does *presentation-only reclass* of one finished
+> NSBU form into IFRS sections, changes zero numbers, and is wired to the old file-upload UI. It
+> is being superseded — see §6.
+
+---
+
+## 3. Stack
+
+| Layer | Technology |
+|-------|------------|
+| Backend | **NestJS** (module-per-feature), Mongoose / **MongoDB**, **Redis** |
+| Excel | **ExcelJS** (write/format) + **SheetJS** (`xlsx`, read/convert) |
+| Frontend | **Vue 3** (Vite, Pinia, vue-i18n), **Univer** (spreadsheet rendering), Vue Flow, Tailwind, Heroicons |
+| Auth | JWT (per-user secret) + Google OAuth 2.0; TOTP 2FA for admins |
+| Infra | Docker, GitLab CI/CD, Node ≥ 24 |
+
+---
+
+## 4. Repository layout
+
 ```
-src/
-├── config/
-│   ├── database.js
-│   ├── redis.js
-│   ├── oauth.js
-│   └── constants.js
-├── components/
-│   ├── auth/
-│   │   ├── controller.js
-│   │   ├── routes.js
-│   │   ├── middleware.js
-│   │   └── model.js
-│   ├── users/
-│   │   ├── controller.js
-│   │   ├── routes.js
-│   │   ├── middleware.js
-│   │   └── model.js
-│   ├── files/
-│   │   ├── controller.js
-│   │   ├── routes.js
-│   │   ├── middleware.js
-│   │   └── model.js
-│   └── templates/
-│       ├── controller.js
-│       ├── routes.js
-│       ├── middleware.js
-│       └── model.js
-├── middleware/
-│   ├── validation.js
-│   ├── upload.js
-│   └── rateLimit.js
-├── services/
-│   ├── auth.js
-│   ├── file.js
-│   ├── excel.js
-│   └── template.js
-├── utils/
-│   ├── logger.js
-│   ├── errors.js
-│   └── validators.js
-└── app.js
-```
-
-#### 3.2.2 Основные зависимости
-```json
-{
-  "engines": {
-    "node": "24.x"
-  },
-  "dependencies": {
-    "express": "^4.18.2",
-    "mongoose": "^7.5.0",
-    "redis": "^4.6.8",
-    "jsonwebtoken": "^9.0.2",
-    "passport": "^0.6.0",
-    "passport-google-oauth20": "^2.0.0",
-    "multer": "^1.4.5",
-    "exceljs": "^4.3.0",
-    "helmet": "^7.0.0",
-    "cors": "^2.8.5",
-    "joi": "^17.9.2",
-    "bcrypt": "^5.1.1",
-    "express-rate-limit": "^6.8.1",
-    "winston": "^3.10.0"
-  }
-}
-```
-
-#### 3.2.3 API Routes
-
-**Аутентификация:**
-```javascript
-GET  /api/auth/google          // Инициация OAuth
-GET  /api/auth/google/callback // Callback OAuth
-POST /api/auth/refresh         // Обновление токена
-POST /api/auth/logout          // Выход
-GET  /api/auth/profile         // Профиль пользователя
-```
-
-**Файлы:**
-```javascript
-POST /api/files/upload         // Загрузка файла
-POST /api/files/process        // Обработка файла
-GET  /api/files/download/:id   // Скачивание результата
-GET  /api/files/history        // История обработки
-DELETE /api/files/:id          // Удаление файла
-GET  /api/files/status/:jobId  // Статус обработки
-```
-
-**Шаблоны:**
-```javascript
-GET  /api/templates            // Список доступных шаблонов
-GET  /api/templates/:id        // Детали шаблона
-POST /api/templates/validate   // Валидация данных для шаблона
-```
-
-### 3.3 Фронтенд архитектура
-
-#### 3.3.1 Структура проекта
-```
-src/
-├── components/
-│   ├── common/
-│   │   ├── Header.vue
-│   │   ├── Footer.vue
-│   │   └── LoadingSpinner.vue
-│   ├── auth/
-│   │   ├── LoginButton.vue
-│   │   └── UserProfile.vue
-│   ├── files/
-│   │   ├── FileUpload.vue
-│   │   ├── ProcessingStatus.vue
-│   │   └── FileHistory.vue
-│   └── spreadsheet/
-│       ├── SpreadsheetViewer.vue
-│       ├── ComparisonView.vue
-│       └── CellEditor.vue
-├── views/
-│   ├── LandingPage.vue
-│   ├── Dashboard.vue
-│   ├── ProcessingPage.vue
-│   └── ResultsPage.vue
-├── stores/
-│   ├── auth.js
-│   ├── files.js
-│   └── templates.js
-├── services/
-│   ├── api.js
-│   ├── auth.service.js
-│   └── file.service.js
-├── utils/
-│   ├── constants.js
-│   └── validators.js
-└── router/
-    └── index.js
-```
-
-#### 3.2.3 Основные зависимости фронтенда
-```json
-{
-  "engines": {
-    "node": "24.x"
-  },
-  "dependencies": {
-    "vue": "^3.3.4",
-    "vue-router": "^4.2.4",
-    "pinia": "^2.1.6",
-    "axios": "^1.5.0",
-    "@vueuse/core": "^10.4.1",
-    "lucide-vue-next": "^0.279.0",
-    "tailwindcss": "^3.3.3"
-  }
-}
+.
+├── backend/            NestJS API
+│   └── src/
+│       ├── ledger/         ← the system of record (see §5)
+│       ├── organizations/  ← access spine: User ⋈ Membership ⋈ Organization
+│       ├── processors/     ← LEGACY presentation-reclass pipeline (being superseded)
+│       ├── mappings/       ← versioned MappingSet infra (row-code → IFRS classification)
+│       ├── files/          ← legacy upload + one-shot processing orchestration
+│       ├── auth/  users/  admin/  jobs/  common/  config/  redis/  database/
+│       └── templates/
+├── frontend/           Vue 3 SPA
+│   └── src/
+│       ├── views/app/      ← onboarding, periods, chart, OSV upload, bank review,
+│       │                     adjustments, matrix (ledger UI) + legacy upload/history
+│       ├── views/admin/    ← users, files, mappings, locales, access, ledger overview
+│       ├── stores/         ← auth, organizations, ledger, bank, adjustments, files, …
+│       └── router/  components/  locales/  layouts/
+├── shared/types/       Cross-cutting API types
+├── docker-compose.yml
+└── ATABAI — Architecture: Current vs Target.docx   (design spec; referenced as "arch doc §N")
 ```
 
 ---
 
-## 4. База данных
+## 5. The ledger module (`backend/src/ledger`)
 
-### 4.1 MongoDB коллекции
+### Schemas (`schemas/`)
 
-#### 4.1.1 Коллекция Users
-```javascript
-{
-  _id: ObjectId,
-  googleId: String, // unique
-  email: String, // unique
-  name: String,
-  picture: String,
-  subscriptionType: {
-    type: String,
-    enum: ['basic', 'premium'],
-    default: 'basic'
-  },
-  subscriptionExpiresAt: Date,
-  filesProcessedThisMonth: {
-    type: Number,
-    default: 0
-  },
-  monthlyResetDate: Date,
-  isActive: {
-    type: Boolean,
-    default: true
-  },
-  preferences: {
-    language: {
-      type: String,
-      enum: ['ru', 'uz', 'en'],
-      default: 'ru'
-    },
-    defaultTemplate: String,
-    notifications: {
-      email: Boolean,
-      browser: Boolean
-    }
-  },
-  createdAt: Date,
-  updatedAt: Date,
-  lastLoginAt: Date
-}
-```
+| Schema | Purpose |
+|--------|---------|
+| `OrganizationProfile` | Ledger-side org requisites: transition date, base currency, ИНН, legal name, settlement accounts. (Kept separate from the access-spine `Organization`.) |
+| `ReportingPeriod` | Period dimension — kinds `opening` / `comparative` / `reporting` / `regular`; lockable. |
+| `ChartOfAccount` | The 507-account NSBU chart. **`Вид` (А/П/КА/КП)** drives intrinsic sign (КА/КП = contra). `subconto1/2/3` analytical dimensions. |
+| `AccountBalance` | The universal currency. Unique `balance_key` = `(org, period, accountCode, layer, subconto1/2/3)`. Opening/period/closing × debit/credit, all `Decimal128`. |
+| `JournalEntry` | Posting header. `source` (`bank_statement` / `opening_balance` / `reclassification` / `adjustment` / `manual`), `layer`, `status` (`draft` / `committed` / `reversed`), optional `adjustmentMeta`. |
+| `JournalEntryLine` | One Dt/Cr leg. `amount ≥ 0` + `direction`; subconto axis mirrors `AccountBalance` so rollup is a flat group-by. |
+| `Counterparty` | Keyed by ИНН; auto-created from bank rows. |
+| `TreasuryRule` | Payment-purpose / long-tax-account → posting-account learning table. |
 
-#### 4.1.2 Коллекция Templates
-```javascript
-{
-  _id: ObjectId,
-  name: {
-    ru: String,
-    uz: String,
-    en: String
-  },
-  description: {
-    ru: String,
-    uz: String,
-    en: String
-  },
-  category: {
-    type: String,
-    enum: ['depreciation', 'discounts', 'impairment', 'reports']
-  },
-  ifrsStandard: String, // IAS 16, IFRS 9, etc.
-  subscriptionRequired: {
-    type: String,
-    enum: ['basic', 'premium']
-  },
-  formulas: [{
-    name: String,
-    description: String,
-    cellPattern: String, // Regular expression for cell matching
-    formula: String,
-    validation: {
-      required: Boolean,
-      type: String, // 'number', 'date', 'text'
-      min: Number,
-      max: Number,
-      format: String
-    }
-  }],
-  requiredColumns: [String],
-  outputFormat: {
-    addColumns: [String],
-    modifications: Object
-  },
-  isActive: Boolean,
-  version: String,
-  createdAt: Date,
-  updatedAt: Date
-}
-```
+### Constants (`constants/`)
+`balance-layers.ts` (the four layers), `account-vid.ts` (Вид → sign), `subconto-dimensions.ts`,
+`treasury.ts` (treasury ИНН `201122919`).
 
-#### 4.1.3 Коллекция ProcessingJobs
-```javascript
-{
-  _id: ObjectId,
-  userId: ObjectId,
-  originalFileName: String,
-  processedFileName: String,
-  templateId: ObjectId,
-  status: {
-    type: String,
-    enum: ['pending', 'processing', 'completed', 'failed']
-  },
-  fileSize: Number,
-  originalFileUrl: String,
-  processedFileUrl: String,
-  expiresAt: Date,
-  processingOptions: {
-    preserveFormatting: Boolean,
-    addComments: Boolean,
-    generateReport: Boolean
-  },
-  changes: [{
-    sheet: String,
-    cellAddress: String,
-    oldValue: Schema.Types.Mixed,
-    newValue: Schema.Types.Mixed,
-    formulaApplied: String,
-    changeType: {
-      type: String,
-      enum: ['formula', 'value', 'format']
-    }
-  }],
-  processingReport: {
-    summary: String,
-    totalChanges: Number,
-    warnings: [String],
-    errors: [String],
-    processingTime: Number // milliseconds
-  },
-  error: {
-    message: String,
-    stack: String,
-    code: String
-  },
-  createdAt: Date,
-  completedAt: Date
-}
-```
+### Services (`services/`, `ingestion/`, `bank/`, `adjustments/`)
 
-#### 4.1.4 Коллекция FileHistory
-```javascript
-{
-  _id: ObjectId,
-  userId: ObjectId,
-  fileName: String,
-  templateName: String,
-  processingJobId: ObjectId,
-  fileSize: Number,
-  status: String,
-  downloadCount: {
-    type: Number,
-    default: 0
-  },
-  lastDownloadAt: Date,
-  tags: [String], // User tags
-  notes: String, // User notes
-  createdAt: Date
-}
-```
+| Service | Role | Status |
+|---------|------|:------:|
+| `ChartSeedService` | Seeds the 507-account NSBU chart per org (idempotent). | ✅ |
+| `PeriodsService` | Seeds 3 first-time-adoption periods; lock/reopen with audit; `assertWritable`. | ✅ |
+| `OrganizationProfilesService` | Upserts ledger-side org requisites. | ✅ |
+| `LedgerBootstrapService` | One-shot: org + admin → profile → chart → periods. | ✅ |
+| `OsvIngestionService` | Parses a 1C ОСВ export into `nsbu_base` balances (full-replace per period scope). | ✅ |
+| **Bank posting engine** (`bank/`) | Full per ТЗ: counterparty resolve by ИНН, treasury rules, Scenario A/B postings (`5110`/`6010`/`4310`/`4010`/`6310`), green/yellow/red preview, learn-rule loop, draft → commit. | ✅ |
+| `AdjustmentsService` | **Generic** overlay engine: draft → commit → reverse, balanced Dt=Cr, `adjustmentMeta`, append-only reversal, rolls up into balances. | ✅ (generic) |
+| `BalanceRollupService` | Materializes `AccountBalance` rows from committed postings. | ✅ |
+| `MatrixController` | Pivots balances into the `account × {nsbu/reclass/adjustment/ifrs}` matrix. | ✅ |
 
-### 4.2 Redis структуры
-
-#### 4.2.1 Сессии пользователей
+### HTTP surface (selected)
 ```
-Key: session:{userId}
-Value: {
-  accessToken: String,
-  refreshToken: String,
-  expiresAt: Number,
-  userAgent: String,
-  ipAddress: String
-}
-TTL: 24 hours
-```
-
-#### 4.2.2 Rate limiting
-```
-Key: rateLimit:{userId}:{endpoint}
-Value: Number (request count)
-TTL: 1 hour
-```
-
-#### 4.2.3 File processing status
-```
-Key: processing:{jobId}
-Value: {
-  status: String,
-  progress: Number,
-  currentStep: String,
-  eta: Number
-}
-TTL: 1 hour
+POST   /onboarding/organizations
+GET    /organizations/:orgId/ledger/chart-of-accounts
+GET    /organizations/:orgId/ledger/periods           POST .../periods            POST .../periods/:id/{lock,reopen}
+POST   /organizations/:orgId/ledger/periods/:periodId/osv-imports
+POST   /organizations/:orgId/ledger/periods/:periodId/bank-statements
+GET    .../bank-statements/:uploadId/drafts           POST .../commit
+PATCH  .../bank-statements/:uploadId/drafts/:entryId   POST .../drafts/:entryId/learn-rule
+POST   /organizations/:orgId/ledger/periods/:periodId/adjustments
+GET    /organizations/:orgId/ledger/adjustments        GET/POST .../adjustments/:entryId{,/commit,/reverse}
+GET    /organizations/:orgId/ledger/periods/:periodId/{balances,matrix}
 ```
 
 ---
 
-## 5. UI/UX требования
+## 6. Build status — what's done and what's next
 
-### 5.1 Дизайн-система
+The build sequence (arch doc §9) is: **(1)** ledger spine + periods + ОСВ → **(2)** bank posting
+engine → **(3)** adjustments, one IFRS standard at a time behind specialist sign-off; the
+**access spine** lands in parallel.
 
-#### 5.1.1 Цветовая палитра
-```css
-:root {
-  --primary: #65399a;        /* Violet primary */
-  --primary-light: #8b7ed8;  /* Lighter violet */
-  --primary-dark: #5d4a9e;   /* Darker violet */
-  --secondary: #10B981;      /* Emerald-500 */
-  --danger: #EF4444;         /* Red-500 */
-  --warning: #F59E0B;        /* Amber-500 */
-  --success: #10B981;        /* Emerald-500 */
-  --gray-50: #F9FAFB;
-  --gray-100: #F3F4F6;
-  --gray-500: #6B7280;
-  --gray-900: #111827;
-  --accent: #9333ea;         /* Purple accent */
-}
-```
+### Done
+- **Access spine** — `User` / `Membership` / `Organization`, capability-based authorization
+  (`nsbu.base.{read,write}`, `ifrs.overlay.{read,write}`), org-scoped guard, never-last-admin,
+  invite-accept (incl. pending email invites).
+- **Ledger spine** — all schemas, chart seed (507 accts), period model + transition seeding,
+  ОСВ ingestion, `BalanceRollupService`, matrix endpoint.
+- **Bank posting engine** — complete per the ТЗ.
+- **Adjustments** — the **generic** draft→commit→reverse engine.
+- **Frontend** — full ledger UI: onboarding, organizations + switcher, periods, chart-of-accounts,
+  OSV upload, bank upload + review (green/yellow/red), adjustment list/editor, matrix view.
 
-#### 5.1.2 Типографика
-```css
-/* Headers */
-.h1 { font-size: 2.25rem; font-weight: 700; font-family: 'Montserrat', sans-serif; }
-.h2 { font-size: 1.875rem; font-weight: 600; font-family: 'Montserrat', sans-serif; }
-.h3 { font-size: 1.5rem; font-weight: 600; font-family: 'Montserrat', sans-serif; }
+### Not yet built — the NSBU → IFRS close
+This is the live work. Steps 5–7 and the second half of step 3 have no service yet:
 
-/* Body text */
-.body { font-size: 1rem; line-height: 1.5; font-family: 'Montserrat', sans-serif; }
-.small { font-size: 0.875rem; line-height: 1.25; font-family: 'Montserrat', sans-serif; }
-```
+| # | Service | Methodology step | Why it matters |
+|---|---------|------------------|----------------|
+| 1 | **`ReclassificationService`** | 3 (2nd half) | Sign-symmetric, zero-net postings on the `reclassification` layer. Only the layer enum exists today. Can reuse the `AdjustmentsService` draft→commit machinery with a "net result = 0" invariant. |
+| 2 | **`IfrsDerivationService`** | 6 (core) | Computes the `ifrs` layer = `nsbu_base + reclassification + adjustment`. **The matrix's `ifrs` column is currently empty without it.** |
+| 3 | **`StatementAssemblyService`** | 6 (output) | Maps `ifrs` balances → the four forms (BS / PL / CF / SOCE). Needs the account-level statement map (the missing piece of step 2). Reuse legacy `stylers/*` for rendering, fed from the ledger. |
+| 4 | **Per-standard adjustment engines** | 4 | IAS 16 / IFRS 16 / IFRS 9 / IFRS 15, each a domain service on top of the generic engine, shipped one at a time behind specialist sign-off. |
+| 5 | **`DeferredTaxService`** | 5 | Sweep `adjustmentMeta.taxEffectAmount` across the period → IAS 12 entries on the adjustment layer. |
+| 6 | **`NotesService`** | 7 | Project `adjustmentMeta.disclosureText` + structural data into a notes draft. |
 
-### 5.2 Адаптивность
-- Мобильные устройства: 320px - 768px
-- Планшеты: 768px - 1024px
-- Десктоп: 1024px+
+**Suggested critical path to a closed-beta demo** (*"ОСВ in → 4 IFRS forms out"*):
+**2 → 1 → 3**, then layer in per-standard engines (4) afterward.
 
-### 5.3 Доступность
-- Соответствие WCAG 2.1 AA
-- Поддержка навигации с клавиатуры
-- Альтернативный текст для изображений
-- Высокий контраст цветов
+### Known operational tails (documented in code)
+- No bootstrap "resume" path on partial failure — a `LedgerResetService` (super_admin) is planned.
+- Bank running-balance excludes drafts, so sequentially-dependent payments in one statement need
+  batch commits.
+- ОСВ ingestion writes balances with null subconto; the bank engine is subconto-aware. Grain can
+  diverge for per-counterparty receivable/payable accounts.
 
 ---
 
-## 6. Безопасность
+## 7. Running locally
 
-### 6.1 Аутентификация и авторизация
-- OAuth 2.0 с Google
-- JWT токены с коротким временем жизни (15 минут)
-- Refresh токены с длительным временем жизни (7 дней)
-- Валидация токенов на каждом запросе
+**Prerequisites:** Node ≥ 24, a MongoDB instance, a Redis instance, Docker (optional).
 
-### 6.2 Защита от атак
-```javascript
-// Rate limiting
-const rateLimit = require('express-rate-limit');
-
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit requests per IP
-  message: 'Too many requests from this IP address'
-});
+```bash
+cp .env.sample .env       # then fill in MONGO_*, JWT_*, GOOGLE_* (OAuth), REDIS_PASSWORD, etc.
 ```
 
-### 6.3 Валидация данных
-```javascript
-const Joi = require('joi');
+### Backend
+```bash
+cd backend
+npm ci
+npm run start:dev         # nest start --watch  (http://localhost:${BACKEND_PORT})
+```
+Other scripts: `npm run build` · `npm run start:prod` · `npm run typecheck` · `npm run lint` · `npm test`
 
-const fileUploadSchema = Joi.object({
-  templateId: Joi.string().required(),
-  options: Joi.object({
-    preserveFormatting: Joi.boolean().default(true),
-    addComments: Joi.boolean().default(false),
-    generateReport: Joi.boolean().default(true)
-  })
-});
+### Frontend
+```bash
+cd frontend
+npm ci
+npm run dev               # vite, http://localhost:8080
+```
+Other scripts: `npm run build` · `npm run typecheck` · `npm run lint`
+
+### Docker Compose
+`docker compose` brings up **redis**, **backend**, and **frontend-prod**. **MongoDB is expected
+to be external** (managed/host) — its service block is intentionally commented out in
+`docker-compose.yml`; point `MONGO_*` in `.env` at your instance.
+
+```bash
+docker compose up -d
+docker compose logs -f backend
 ```
 
-### 6.4 Защита файлов
-- Сканирование загружаемых файлов на вирусы
-- Ограничение типов файлов
-- Временные ссылки для скачивания (expires через 24 часа)
-- Шифрование файлов при хранении
+> Use `docker compose` (with a space), never `docker-compose`.
 
 ---
 
-## 7. Производительность
+## 8. Conventions
 
-### 7.1 Требования к производительности
-- Время загрузки главной страницы: < 2 сек
-- Время обработки файла (до 10 МБ): < 30 сек
-- Время ответа API: < 500 мс
-- Поддержка 1000+ одновременных пользователей
-
-### 7.2 Оптимизации
-
-#### 7.2.1 Кэширование
-```javascript
-// Cache templates with Redis
-const getTemplate = async (templateId) => {
-  const cached = await redis.get(`template:${templateId}`);
-  if (cached) return JSON.parse(cached);
-  
-  const template = await Template.findById(templateId);
-  await redis.setex(`template:${templateId}`, 3600, JSON.stringify(template));
-  return template;
-};
-```
-
-#### 7.2.2 Asynchronous file processing
-```javascript
-const processFileAsync = async (jobId, file, template) => {
-  try {
-    await updateJobStatus(jobId, 'processing');
-    const result = await applyTemplate(file, template);
-    await updateJobStatus(jobId, 'completed', result);
-  } catch (error) {
-    await updateJobStatus(jobId, 'failed', null, error);
-  }
-};
-```
-
----
-
-## 8. Развертывание и DevOps
-
-### 8.1 Контейнеризация
-
-#### 8.1.1 Dockerfile для бэкенда
-```dockerfile
-FROM node:24-alpine
-
-WORKDIR /app
-
-COPY package*.json ./
-RUN npm ci --only=production
-
-COPY . .
-
-EXPOSE 3000
-
-CMD ["node", "src/app.js"]
-```
-
-#### 8.1.2 Docker Compose
-```yaml
-version: '3.8'
-
-services:
-  app:
-    build: .
-    ports:
-      - "3000:3000"
-    environment:
-      - NODE_ENV=production
-      - MONGODB_URI=mongodb://mongo:27017/aitable
-      - REDIS_URI=redis://redis:6379
-    depends_on:
-      - mongo
-      - redis
-
-  mongo:
-    image: mongo:6.0
-    volumes:
-      - mongo_data:/data/db
-
-  redis:
-    image: redis:7-alpine
-    volumes:
-      - redis_data:/data
-
-volumes:
-  mongo_data:
-  redis_data:
-```
-
-### 8.2 CI/CD Pipeline
-```yaml
-# .gitlab-ci.yml
-# Include the universal template for deployment
-include:
-  - project: 'templates/gitlab-ci'
-    file: '.gitlab-ci-template.yml'
-
-stages:
-  - build
-  - deploy
-
-variables:
-  NODE_VERSION: "24"
-
-build:
-  stage: build
-  image: node:24-alpine
-  script:
-    - npm ci
-    - npm run build
-  artifacts:
-    paths:
-      - dist/
-    expire_in: 1 hour
-
-deploy_production:
-  stage: deploy
-  only:
-    - main
-  script:
-    - chmod +x deploy.sh
-    - ./deploy.sh
-  environment:
-    name: production
-    url: https://atabai.com
-```
-
----
-
-## 9. Мониторинг и логирование
-
-### 9.1 Логирование
-```javascript
-const winston = require('winston');
-
-const logger = winston.createLogger({
-  level: 'info',
-  format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.errors({ stack: true }),
-    winston.format.json()
-  ),
-  transports: [
-    new winston.transports.File({ filename: 'error.log', level: 'error' }),
-    new winston.transports.File({ filename: 'combined.log' })
-  ]
-});
-```
-
-### 9.2 Метрики производительности
-- Время ответа API endpoints
-- Количество обработанных файлов
-- Использование памяти и CPU
-- Количество активных пользователей
-- Ошибки и их частота
-
----
-
-## 10. Планы развития
-
-### 10.1 Версия 1.0 (MVP)
-- [x] Базовая аутентификация через Google
-- [x] Загрузка и обработка Excel файлов
-- [x] 4 основных типа шаблонов МСФО
-- [x] Интерфейс сравнения результатов
-- [x] Базовая система подписок
-
-### 10.2 Версия 1.1
-- [ ] API для интеграции с внешними системами
-- [ ] Пакетная обработка файлов
-- [ ] Расширенная аналитика использования
-- [ ] Многоязычная поддержка (узбекский, английский)
-
-### 10.3 Версия 2.0
-- [ ] ИИ-помощник для консультаций по МСФО
-- [ ] Интеграция с популярными учетными системами
-- [ ] Мобильное приложение
-- [ ] Корпоративные функции (команды, роли, права)
-
----
-
-## 11. Заключение
-
-Данное техническое задание определяет полный объем работ по созданию платформы ATABAI для автоматизации МСФО расчетов в Excel. Документ содержит детальные спецификации всех компонентов системы и может служить основой для разработки, тестирования и развертывания продукта.
-
-**Ключевые принципы реализации:**
-- Модульная архитектура для легкости расширения
-- Безопасность данных как приоритет
-- Производительность и масштабируемость
-- Соответствие международным стандартам МСФО
-- Простота использования для конечных пользователей
-
-**Критерии готовности к релизу:**
-- Время обработки файлов в заданных лимитах
-- Успешное прохождение нагрузочного тестирования
-- Соответствие требованиям безопасности
-- Валидация МСФО расчетов экспертами
-
----
-
-*Версия документа: 1.0*  
-*Дата последнего обновления: Октябрь 2025*
+- **English** for code and all technical identifiers; **Russian** for product/business discussion.
+- **`Decimal128`** for every monetary value — never `number`.
+- Authorization resolves through the org-membership helper/guard — **never inline `=== userId`
+  ownership checks** (keeps a future Firm/Practice layer additive).
+- ExcelJS formula strings: **strip the leading `=`** (ExcelJS adds one).
+- Account sign comes from **`Вид`** (А/П/КА/КП), not a hand-set per-row flag.
