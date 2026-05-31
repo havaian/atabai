@@ -3,25 +3,14 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Types } from 'mongoose';
 
 import { AppLoggerService } from '../../common/logger/app-logger.service';
-import {
-  addDecimals,
-  netSides,
-  toDecimal128,
-  toDecimalString,
-} from '../decimal-arithmetic';
-import {
-  AccountBalance,
-  type AccountBalanceModel,
-} from '../schemas/account-balance.schema';
+import { addDecimals, netSides, toDecimal128, toDecimalString } from '../decimal-arithmetic';
+import { AccountBalance, type AccountBalanceModel } from '../schemas/account-balance.schema';
 import {
   JournalEntry,
   type JournalEntryDocument,
   type JournalEntryModel,
 } from '../schemas/journal-entry.schema';
-import {
-  JournalEntryLine,
-  type JournalEntryLineModel,
-} from '../schemas/journal-entry-line.schema';
+import { JournalEntryLine, type JournalEntryLineModel } from '../schemas/journal-entry-line.schema';
 
 export interface RollupKey {
   accountCode: string;
@@ -99,17 +88,14 @@ export class BalanceRollupService {
     const now = new Date();
 
     for (const key of uniqueKeys) {
-      const sums = await this.aggregateCommittedPostings(
-        organizationId,
-        periodId,
-        key,
-      );
+      const sums = await this.aggregateCommittedPostings(organizationId, periodId, key);
 
       const existing = await this.balanceModel.findOne({
         organizationId,
         periodId,
         accountCode: key.accountCode,
         layer: key.layer,
+        level: 0,
         subconto1Value: key.subconto1Value,
         subconto2Value: key.subconto2Value,
         subconto3Value: key.subconto3Value,
@@ -141,6 +127,7 @@ export class BalanceRollupService {
           periodId,
           accountCode: key.accountCode,
           layer: key.layer,
+          level: 0,
           subconto1Value: key.subconto1Value,
           subconto2Value: key.subconto2Value,
           subconto3Value: key.subconto3Value,
@@ -187,9 +174,7 @@ export class BalanceRollupService {
 
     const lines = await this.lineModel
       .find({ entryId: { $in: entryIds } })
-      .select(
-        'accountCode layer subconto1Value subconto2Value subconto3Value counterpartyId',
-      )
+      .select('accountCode layer subconto1Value subconto2Value subconto3Value counterpartyId')
       .lean();
 
     const keys: RollupKey[] = lines.map((l) => ({

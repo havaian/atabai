@@ -1,26 +1,13 @@
-import {
-  BadRequestException,
-  Injectable,
-} from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Types } from 'mongoose';
 
 import { AppLoggerService } from '../../common/logger/app-logger.service';
 import { BALANCE_LAYER } from '../constants/balance-layers';
-import {
-  AccountBalance,
-  type AccountBalanceModel,
-} from '../schemas/account-balance.schema';
-import {
-  ChartOfAccount,
-  type ChartOfAccountModel,
-} from '../schemas/chart-of-account.schema';
+import { AccountBalance, type AccountBalanceModel } from '../schemas/account-balance.schema';
+import { ChartOfAccount, type ChartOfAccountModel } from '../schemas/chart-of-account.schema';
 import { PeriodsService } from '../services/periods.service';
-import {
-  type OsvParseResult,
-  type ParsedOsvRow,
-  parseOsv,
-} from './osv-parser';
+import { type OsvParseResult, type ParsedOsvRow, parseOsv } from './osv-parser';
 
 export interface OsvIngestionSummary {
   /** Number of AccountBalance rows written. */
@@ -96,9 +83,7 @@ export class OsvIngestionService {
         ? new Types.ObjectId(args.organizationId)
         : args.organizationId;
     const periodId =
-      typeof args.periodId === 'string'
-        ? new Types.ObjectId(args.periodId)
-        : args.periodId;
+      typeof args.periodId === 'string' ? new Types.ObjectId(args.periodId) : args.periodId;
 
     // Validate the period exists, belongs to the org, AND is writable (not
     // locked). PeriodsService throws 404 or 403 as appropriate — those flow
@@ -124,9 +109,7 @@ export class OsvIngestionService {
       .select('code')
       .lean();
     const knownCodes = new Set(knownCharts.map((c) => c.code));
-    const unknownAccountCodes = Array.from(codesInFile).filter(
-      (c) => !knownCodes.has(c),
-    );
+    const unknownAccountCodes = Array.from(codesInFile).filter((c) => !knownCodes.has(c));
 
     // Full-replace mode — delete all nsbu_base balances for this period scope
     // so a re-import doesn't leak stale rows. RECLASSIFICATION / ADJUSTMENT /
@@ -182,6 +165,7 @@ export class OsvIngestionService {
       periodId,
       accountCode: row.code,
       layer: BALANCE_LAYER.NSBU_BASE,
+      level: row.level,
       subconto1Value: null,
       subconto2Value: null,
       subconto3Value: null,

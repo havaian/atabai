@@ -1,9 +1,4 @@
-import {
-  Controller,
-  Get,
-  Param,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, HttpCode, Param, Post, UseGuards } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Types } from 'mongoose';
 
@@ -12,10 +7,9 @@ import { MEMBERSHIP_CAPABILITIES } from '../../organizations/constants/membershi
 import { RequireCapability } from '../../organizations/decorators/require-capability.decorator';
 import { OrgMembershipGuard } from '../../organizations/guards/org-membership.guard';
 import { ALL_BALANCE_LAYERS } from '../constants/balance-layers';
-import {
-  AccountBalance,
-  type AccountBalanceModel,
-} from '../schemas/account-balance.schema';
+import { AccountBalance, type AccountBalanceModel } from '../schemas/account-balance.schema';
+import { IfrsDerivationService } from '../services/ifrs-derivation.service';
+import { PeriodsService } from '../services/periods.service';
 
 /** One pivoted matrix row, shared by the JSON and XLSX export paths. */
 interface MatrixRow {
@@ -24,14 +18,17 @@ interface MatrixRow {
   subconto2Value: string | null;
   subconto3Value: string | null;
   counterpartyId: string | null;
-  layers: Record<string, {
-    openingDebit: string;
-    openingCredit: string;
-    periodDebit: string;
-    periodCredit: string;
-    closingDebit: string;
-    closingCredit: string;
-  }>;
+  layers: Record<
+    string,
+    {
+      openingDebit: string;
+      openingCredit: string;
+      periodDebit: string;
+      periodCredit: string;
+      closingDebit: string;
+      closingCredit: string;
+    }
+  >;
 }
 
 /**
@@ -53,16 +50,49 @@ export class MatrixController {
   constructor(
     @InjectModel(AccountBalance.name)
     private readonly balanceModel: AccountBalanceModel,
+    private readonly ifrsDerivation: IfrsDerivationService,
+    private readonly periods: PeriodsService,
   ) {}
 
   @Get('matrix')
   @RequireCapability(MEMBERSHIP_CAPABILITIES.NSBU_BASE_READ)
-  async getMatrix(
-    @Param('orgId') orgId: string,
-    @Param('periodId') periodId: string,
-  ) {
+  async getMatrix(@Param('orgId') orgId: string, @Param('periodId') periodId: string) {
     const matrix = await this.buildMatrix(orgId, periodId);
     return { success: true, matrix };
+  }
+
+  /**
+   * Re-derive the IFRS layer for the whole period and return the refreshed
+   * matrix. The commit paths (adjustment / reclassification) already derive
+   * IFRS incrementally for the keys they touch, so this is the safety-net:
+   *   - backfill periods whose committed data predates IfrsDerivationService;
+   *   - refresh after a derivation-logic change.
+   *
+   * Gated on IFRS_OVERLAY_WRITE — it materializes the IFRS result, which is
+   * the overlay specialist's domain (org admin implies the capability). It
+   * does NOT require the period to be writable: the IFRS layer is derived
+   * output, so recomputing it is non-destructive even on a locked period.
+   * `getPeriod` still validates the period exists in this org (404 otherwise).
+   */
+  @Post('ifrs/rederive')
+  @HttpCode(200)
+  @RequireCapability(MEMBERSHIP_CAPABILITIES.IFRS_OVERLAY_WRITE)
+  async rederiveIfrs(@Param('orgId') orgId: string, @Param('periodId') periodId: string) {
+    await this.periods.getPeriod(orgId, periodId);
+    const result = await this.ifrsDerivation.deriveForPeriod(
+      new Types.ObjectId(orgId),
+      new Types.ObjectId(periodId),
+    );
+    const matrix = await this.buildMatrix(orgId, periodId);
+    return {
+      success: true,
+      derived: {
+        recomputed: result.recomputed,
+        created: result.created,
+        keys: result.derivedKeys.length,
+      },
+      matrix,
+    };
   }
 
   /**
@@ -79,6 +109,7 @@ export class MatrixController {
       };
       byLayer: Array<{
         layer: string;
+        level: number;
         openingDebit: Types.Decimal128;
         openingCredit: Types.Decimal128;
         periodDebit: Types.Decimal128;
@@ -110,6 +141,7 @@ export class MatrixController {
           byLayer: {
             $push: {
               layer: '$layer',
+              level: '$level',
               openingDebit: '$openingDebit',
               openingCredit: '$openingCredit',
               periodDebit: '$periodDebit',
@@ -128,8 +160,20 @@ export class MatrixController {
     ]);
 
     return rows.map((row) => {
+      // nsbu_base may appear at multiple ОСВ levels for one code (a rollup line
+      // plus a deeper detail line under the same code). The transformation
+      // matrix shows the account-grain value — the shallowest (min-level) row;
+      // deeper detail rows live in the balances endpoint, not here. Every other
+      // layer sits at level 0, one entry each.
+      const nsbuLevels = row.byLayer
+        .filter((l) => l.layer === 'nsbu_base')
+        .map((l) => l.level ?? 0);
+      const minNsbuLevel = nsbuLevels.length ? Math.min(...nsbuLevels) : null;
       const layers: MatrixRow['layers'] = {};
       for (const layerRow of row.byLayer) {
+        if (layerRow.layer === 'nsbu_base' && (layerRow.level ?? 0) !== minNsbuLevel) {
+          continue;
+        }
         layers[layerRow.layer] = {
           openingDebit: layerRow.openingDebit.toString(),
           openingCredit: layerRow.openingCredit.toString(),

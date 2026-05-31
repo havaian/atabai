@@ -1,10 +1,4 @@
-import {
-  Controller,
-  Get,
-  Param,
-  Query,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Types } from 'mongoose';
 
@@ -12,10 +6,7 @@ import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { MEMBERSHIP_CAPABILITIES } from '../../organizations/constants/membership-capabilities';
 import { RequireCapability } from '../../organizations/decorators/require-capability.decorator';
 import { OrgMembershipGuard } from '../../organizations/guards/org-membership.guard';
-import {
-  ALL_BALANCE_LAYERS,
-  type BalanceLayer,
-} from '../constants/balance-layers';
+import { ALL_BALANCE_LAYERS, type BalanceLayer } from '../constants/balance-layers';
 import {
   AccountBalance,
   type AccountBalanceDocument,
@@ -78,6 +69,7 @@ export class BalancesController {
       id: b._id.toString(),
       accountCode: b.accountCode,
       layer: b.layer,
+      level: b.level,
       subconto1Value: b.subconto1Value,
       subconto2Value: b.subconto2Value,
       subconto3Value: b.subconto3Value,
