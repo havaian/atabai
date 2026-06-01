@@ -190,10 +190,10 @@ const adminChildren = [
     },
     { path: 'locales', name: 'AdminLocales', component: AdminLocales },
     { path: 'access', name: 'AdminAccess', component: AdminAccess },
-    // ─── New (ledger-spine) admin mode ───────────────────────────────────────
-    // Landing/overview for the new-architecture admin section. Concrete
+    // ─── Ledger-spine admin (planned surface) ────────────────────────────────
+    // Landing/overview for the ledger-spine admin section. Concrete
     // sub-features are added here as they're built (see AdminLedgerOverview
-    // docblock). The mode toggle in AdminLayout swaps the nav to surface this.
+    // docblock). Reached from the single admin nav.
     { path: 'ledger', name: 'AdminLedgerOverview', component: AdminLedgerOverview }
 ]
 

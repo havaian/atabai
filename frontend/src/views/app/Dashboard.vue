@@ -11,38 +11,6 @@
             </div>
         </div>
 
-        <!-- Stats row -->
-        <div class="stats-row">
-            <div class="stat-card">
-                <div class="stat-icon stat-icon-purple">
-                    <DocumentTextIcon class="w-5 h-5" />
-                </div>
-                <div>
-                    <div class="stat-value">{{ authStore.filesProcessedThisMonth }}</div>
-                    <div class="stat-label">{{ $t('dashboard.filesThisMonth') }}</div>
-                </div>
-                <div class="stat-limit">/ {{ monthlyLimitDisplay }}</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon stat-icon-green">
-                    <CheckCircleIcon class="w-5 h-5" />
-                </div>
-                <div>
-                    <div class="stat-value">{{ completedFiles }}</div>
-                    <div class="stat-label">{{ $t('dashboard.totalCompleted') }}</div>
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon stat-icon-violet">
-                    <SparklesIcon class="w-5 h-5" />
-                </div>
-                <div>
-                    <div class="stat-value plan-badge">{{ authStore.subscriptionType?.toUpperCase() }}</div>
-                    <div class="stat-label">{{ $t('dashboard.subscription') }}</div>
-                </div>
-            </div>
-        </div>
-
         <!--
           The old "Choose a template" section that surfaced the 5 NSBU report
           types belonged to the file-in/file-out transformation paradigm, which
@@ -154,10 +122,10 @@ import { useAuthStore } from '@/stores/auth'
 import { useOrganizationsStore } from '@/stores/organizations'
 import { useLedgerStore } from '@/stores/ledger'
 import {
-    CheckCircleIcon, ArrowRightIcon, SparklesIcon, MinusCircleIcon
+    CheckCircleIcon, ArrowRightIcon, MinusCircleIcon
 } from '@heroicons/vue/24/outline'
 import {
-    FilePlus2, Landmark,
+    Landmark,
 } from 'lucide-vue-next'
 
 const router = useRouter()
@@ -231,11 +199,6 @@ watch(() => ledgerStore.activePeriod?.id, (id) => {
 })
 
 const firstName = computed(() => authStore.user?.name?.split(' ')[0] || '')
-const completedFiles = computed(() => authStore.filesCompletedThisMonth)
-const monthlyLimitDisplay = computed(() => {
-    const lim = authStore.monthlyLimit
-    return lim === Infinity || lim > 9999 ? '∞' : lim
-})
 const activePeriod = computed(() => ledgerStore.activePeriod)
 
 function goPeriod(leaf) {
@@ -290,87 +253,6 @@ function formatPeriod(p) {
     font-size: 14px;
     color: var(--ws-text-3);
     margin: 0;
-}
-
-/* ─── Stats ──────────────────────────────────────────────────────────────── */
-.stats-row {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 14px;
-}
-
-.stat-card {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    padding: 18px 20px;
-    background: var(--ws-surface);
-    border: 1px solid var(--ws-border);
-    border-radius: 14px;
-    position: relative;
-    overflow: hidden;
-}
-
-.stat-card::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, rgba(124, 58, 237, 0.02) 0%, transparent 60%);
-    pointer-events: none;
-}
-
-.stat-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-
-.stat-icon-purple {
-    background: rgba(124, 58, 237, 0.1);
-    color: #7C3AED;
-}
-
-.stat-icon-green {
-    background: rgba(34, 197, 94, 0.1);
-    color: #16A34A;
-}
-
-.stat-icon-violet {
-    background: rgba(167, 139, 250, 0.15);
-    color: #8B5CF6;
-}
-
-.stat-value {
-    font-size: 22px;
-    font-weight: 700;
-    color: var(--ws-text);
-    letter-spacing: -0.02em;
-    line-height: 1;
-    margin-bottom: 3px;
-}
-
-.plan-badge {
-    font-size: 14px;
-    font-weight: 700;
-    color: #7C3AED;
-    letter-spacing: 0.06em;
-}
-
-.stat-label {
-    font-size: 12px;
-    color: var(--ws-text-3);
-    font-weight: 500;
-}
-
-.stat-limit {
-    font-size: 13px;
-    color: var(--ws-text-3);
-    font-weight: 500;
-    margin-left: auto;
 }
 
 /* ─── Section ────────────────────────────────────────────────────────────── */
@@ -836,11 +718,6 @@ function formatPeriod(p) {
     .dash {
         padding: 20px 16px 48px;
         gap: 20px;
-    }
-
-    .stats-row {
-        grid-template-columns: 1fr;
-        gap: 10px;
     }
 
     .template-grid {
