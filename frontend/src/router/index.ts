@@ -28,31 +28,19 @@ import Help from '@/views/misc/Help.vue'
 // ─── App (authenticated workspace) ───────────────────────────────────────────
 import Dashboard from '@/views/app/Dashboard.vue'
 import Settings from '@/views/app/Settings.vue'
-import UploadPage from '@/views/app/UploadPage.vue'
-import ProcessingPage from '@/views/app/ProcessingPage.vue'
-import FileDetailsPage from '@/views/app/FileDetailsPage.vue'
-import FileHistoryPage from '@/views/app/FileHistoryPage.vue'
 import OnboardingView from '@/views/app/OnboardingView.vue'
 import OrganizationsListView from '@/views/app/OrganizationsListView.vue'
 import OrganizationMembersView from '@/views/app/OrganizationMembersView.vue'
-import OsvUploadView from '@/views/app/OsvUploadView.vue'
 import BankUploadView from '@/views/app/BankUploadView.vue'
 import BankPreviewView from '@/views/app/BankPreviewView.vue'
-import AdjustmentsListView from '@/views/app/AdjustmentsListView.vue'
-import AdjustmentEditorView from '@/views/app/AdjustmentEditorView.vue'
 import PeriodsView from '@/views/app/PeriodsView.vue'
 import ChartOfAccountsView from '@/views/app/ChartOfAccountsView.vue'
-import LedgerMatrixView from '@/views/app/LedgerMatrixView.vue'
 
 // ─── Admin ────────────────────────────────────────────────────────────────────
 import AdminLayout from '@/layouts/AdminLayout.vue'
 import AdminDashboard from '@/views/admin/AdminDashboard.vue'
 import AdminUsers from '@/views/admin/AdminUsers.vue'
 import AdminUserDetail from '@/views/admin/AdminUserDetail.vue'
-import AdminFiles from '@/views/admin/AdminFiles.vue'
-import AdminFileDetail from '@/views/admin/AdminFileDetail.vue'
-import AdminMappings from '@/views/admin/AdminMappings.vue'
-import AdminMappingEditor from '@/views/admin/AdminMappingEditor.vue'
 import AdminSecuritySettings from '@/views/admin/AdminSecuritySettings.vue'
 import AdminLocales from '@/views/admin/AdminLocales.vue'
 import AdminAccess from '@/views/admin/AdminAccess.vue'
@@ -129,42 +117,6 @@ const appChildren = [
         }
     },
     {
-        path: 'upload',
-        name: 'Upload',
-        component: UploadPage,
-        meta: {
-            titleKey: 'pageTitles./upload',
-            descriptionKey: 'pageDescriptions./upload'
-        }
-    },
-    {
-        path: 'processing/:jobId',
-        name: 'Processing',
-        component: ProcessingPage,
-        meta: {
-            titleKey: 'pageTitles./processing',
-            descriptionKey: 'pageDescriptions./processing'
-        }
-    },
-    {
-        path: 'files/:fileId',
-        name: 'FileDetails',
-        component: FileDetailsPage,
-        meta: {
-            titleKey: 'pageTitles./results',
-            descriptionKey: 'pageDescriptions./results'
-        }
-    },
-    {
-        path: 'history',
-        name: 'FileHistory',
-        component: FileHistoryPage,
-        meta: {
-            titleKey: 'pageTitles./history',
-            descriptionKey: 'pageDescriptions./history'
-        }
-    },
-    {
         path: 'settings',
         name: 'Settings',
         component: Settings,
@@ -209,18 +161,6 @@ const appChildren = [
         meta: { titleKey: 'pageTitles./chart', requiresOrg: true }
     },
     {
-        path: 'ledger/matrix',
-        name: 'LedgerMatrix',
-        component: LedgerMatrixView,
-        meta: { titleKey: 'pageTitles./matrix', requiresOrg: true }
-    },
-    {
-        path: 'ledger/periods/:periodId/osv-import',
-        name: 'OsvUpload',
-        component: OsvUploadView,
-        meta: { titleKey: 'pageTitles./osvImport', requiresOrg: true }
-    },
-    {
         path: 'ledger/periods/:periodId/bank-statements',
         name: 'BankUpload',
         component: BankUploadView,
@@ -231,24 +171,6 @@ const appChildren = [
         name: 'BankPreview',
         component: BankPreviewView,
         meta: { titleKey: 'pageTitles./bankPreview', requiresOrg: true }
-    },
-    {
-        path: 'ledger/adjustments',
-        name: 'AdjustmentsList',
-        component: AdjustmentsListView,
-        meta: { titleKey: 'pageTitles./adjustments', requiresOrg: true }
-    },
-    {
-        path: 'ledger/periods/:periodId/adjustments/new',
-        name: 'AdjustmentNew',
-        component: AdjustmentEditorView,
-        meta: { titleKey: 'pageTitles./adjustmentNew', requiresOrg: true }
-    },
-    {
-        path: 'ledger/adjustments/:entryId',
-        name: 'AdjustmentDetail',
-        component: AdjustmentEditorView,
-        meta: { titleKey: 'pageTitles./adjustmentDetail', requiresOrg: true }
     }
 ]
 
@@ -261,14 +183,6 @@ const adminChildren = [
     },
     { path: 'users', name: 'AdminUsers', component: AdminUsers },
     { path: 'users/:userId', name: 'AdminUserDetail', component: AdminUserDetail },
-    { path: 'files', name: 'AdminFiles', component: AdminFiles },
-    { path: 'files/:fileId', name: 'AdminFileDetail', component: AdminFileDetail },
-    { path: 'mappings', name: 'AdminMappings', component: AdminMappings },
-    {
-        path: 'mappings/sets/:setId',
-        name: 'AdminMappingEditor',
-        component: AdminMappingEditor
-    },
     {
         path: 'security',
         name: 'AdminSecuritySettings',
@@ -395,10 +309,6 @@ const routes = [
             {
                 path: 'dashboard',
                 redirect: to => `/${to.params.locale || DEFAULT_LOCALE}/app/dashboard`
-            },
-            {
-                path: 'upload',
-                redirect: to => `/${to.params.locale || DEFAULT_LOCALE}/app/upload`
             }
             // NOTE: previously had an inside-locale catch-all here
             // (`:pathMatch(.*)*` redirecting to `/<locale>/`). Removed because

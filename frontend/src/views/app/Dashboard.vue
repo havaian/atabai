@@ -43,15 +43,11 @@
             </div>
         </div>
 
-        <!-- Templates section -->
         <!--
-          REMOVED (Task 5 — migration to ledger-spine architecture):
-          The "Choose a template" section that surfaced the 5 NSBU report
-          types (Balance / CF1 / CF2 / P&L1 / P&L2 / Equity) belonged to
-          the old file-in/file-out paradigm. It is preserved on the admin
-          side (/admin/files) so admins can still process legacy uploads
-          retroactively. Users now drive work through the period-scoped
-          workflow surfaced below.
+          The old "Choose a template" section that surfaced the 5 NSBU report
+          types belonged to the file-in/file-out transformation paradigm, which
+          has been removed. Users drive work through the period-scoped workflow
+          surfaced below.
         -->
 
         <!-- Workflow section — current period + action cards.
@@ -117,20 +113,7 @@
                     </div>
                 </div>
 
-                <div class="wf-status-item" :class="{ 'wf-status-item--done': status.adjustmentCount > 0 }">
-                    <component :is="status.adjustmentCount > 0 ? CheckCircleIcon : MinusCircleIcon"
-                        class="wf-status-icon" />
-                    <div class="wf-status-body">
-                        <span class="wf-status-label">{{ $t('dashboard.status.adjustments') }}</span>
-                        <span class="wf-status-detail">
-                            {{ status.adjustmentCount > 0
-                                ? $t('dashboard.status.adjustmentsReady', { n: status.adjustmentCount })
-                                : $t('dashboard.status.adjustmentsMissing') }}
-                        </span>
-                    </div>
-                </div>
-
-                <button class="wf-status-cta" @click="router.push('/app/ledger/matrix')">
+                <button class="wf-status-cta" @click="goPeriod('bank-statements')">
                     {{ $t('dashboard.status.viewMatrix') }}
                     <ArrowRightIcon class="w-3.5 h-3.5" />
                 </button>
@@ -139,26 +122,8 @@
             <!-- Workflow action grid. Reuses .template-grid + .template-card
                  chrome so the visual rhythm matches Dashboard's earlier
                  design — swapping intent (templates → actions), not chrome.
-                 Each card routes into a period-scoped page except
-                 Matrix/Adjustments which span all periods. -->
+                 Each card routes into a period-scoped page. -->
             <div class="template-grid">
-                <div class="template-card" @click="goPeriod('osv-import')">
-                    <div class="template-card-top">
-                        <div class="template-icon">
-                            <FilePlus2 :size="18" />
-                        </div>
-                        <span class="template-badge">OSV</span>
-                    </div>
-                    <div class="template-card-body">
-                        <h3 class="template-name">{{ $t('dashboard.workflow.osvTitle') }}</h3>
-                        <p class="template-desc">{{ $t('dashboard.workflow.osvDesc') }}</p>
-                    </div>
-                    <div class="template-card-footer">
-                        <span class="template-cat">{{ $t('dashboard.workflow.catImport') }}</span>
-                        <ArrowRightIcon class="template-arrow w-4 h-4" />
-                    </div>
-                </div>
-
                 <div class="template-card" @click="goPeriod('bank-statements')">
                     <div class="template-card-top">
                         <div class="template-icon">
@@ -175,74 +140,6 @@
                         <ArrowRightIcon class="template-arrow w-4 h-4" />
                     </div>
                 </div>
-
-                <div class="template-card" @click="router.push('/app/ledger/matrix')">
-                    <div class="template-card-top">
-                        <div class="template-icon">
-                            <Grid3x3 :size="18" />
-                        </div>
-                        <span class="template-badge">IFRS</span>
-                    </div>
-                    <div class="template-card-body">
-                        <h3 class="template-name">{{ $t('dashboard.workflow.matrixTitle') }}</h3>
-                        <p class="template-desc">{{ $t('dashboard.workflow.matrixDesc') }}</p>
-                    </div>
-                    <div class="template-card-footer">
-                        <span class="template-cat">{{ $t('dashboard.workflow.catReview') }}</span>
-                        <ArrowRightIcon class="template-arrow w-4 h-4" />
-                    </div>
-                </div>
-
-                <div class="template-card" @click="router.push('/app/ledger/adjustments')">
-                    <div class="template-card-top">
-                        <div class="template-icon">
-                            <Sliders :size="18" />
-                        </div>
-                        <span class="template-badge">IAS/IFRS</span>
-                    </div>
-                    <div class="template-card-body">
-                        <h3 class="template-name">{{ $t('dashboard.workflow.adjustTitle') }}</h3>
-                        <p class="template-desc">{{ $t('dashboard.workflow.adjustDesc') }}</p>
-                    </div>
-                    <div class="template-card-footer">
-                        <span class="template-cat">{{ $t('dashboard.workflow.catOverlay') }}</span>
-                        <ArrowRightIcon class="template-arrow w-4 h-4" />
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Recent files section -->
-        <div class="section" v-if="recentFiles.length > 0">
-            <div class="section-header">
-                <h2 class="section-title">{{ $t('dashboard.recentFiles') }}</h2>
-                <button class="section-link" @click="router.push('/app/history')">
-                    {{ $t('dashboard.viewAll') }}
-                    <ArrowRightIcon class="w-3.5 h-3.5" />
-                </button>
-            </div>
-
-            <div class="files-table">
-                <div class="files-table-row files-table-head">
-                    <span>{{ $t('history.table.fileName') }}</span>
-                    <span>{{ $t('history.table.template') }}</span>
-                    <span>{{ $t('history.table.status') }}</span>
-                    <span>{{ $t('history.table.processed') }}</span>
-                    <span></span>
-                </div>
-                <div v-for="file in recentFiles.slice(0, 6)" :key="file.id" class="files-table-row files-table-data"
-                    @click="openFile(file)">
-                    <div class="file-name-cell">
-                        <DocumentIcon class="w-4 h-4 text-gray-400 flex-shrink-0" />
-                        <span class="file-name-text">{{ file.originalName }}</span>
-                    </div>
-                    <span class="file-template">{{ formatTemplate(file.templateType) }}</span>
-                    <span class="status-pill" :class="statusClass(file.status)">
-                        {{ $t(`processing.status.${(file.status).toString()}`) }}
-                    </span>
-                    <span class="file-date">{{ formatDate(file.createdAt) }}</span>
-                    <ArrowRightIcon class="w-4 h-4 text-gray-300 hover:text-violet-500 transition-colors" />
-                </div>
             </div>
         </div>
     </div>
@@ -254,69 +151,53 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
-import { useFilesStore } from '@/stores/files'
 import { useOrganizationsStore } from '@/stores/organizations'
 import { useLedgerStore } from '@/stores/ledger'
-import { useAdjustmentsStore } from '@/stores/adjustments'
 import {
-    DocumentTextIcon, DocumentIcon,
     CheckCircleIcon, ArrowRightIcon, SparklesIcon, MinusCircleIcon
 } from '@heroicons/vue/24/outline'
 import {
-    FilePlus2, Landmark, Grid3x3, Sliders,
+    FilePlus2, Landmark,
 } from 'lucide-vue-next'
 
 const router = useRouter()
 const route = useRoute()
 const { t } = useI18n()
 const authStore = useAuthStore()
-const filesStore = useFilesStore()
 const orgsStore = useOrganizationsStore()
 const ledgerStore = useLedgerStore()
-const adjustmentsStore = useAdjustmentsStore()
 
 // Workflow status for the active period (the "how do I check if it works"
-// panel). Cheap reads: chart length, matrix row count (proxy for "OSV
-// imported" — a populated nsbu_base layer produces matrix rows), and the
-// adjustments list count. Bank state isn't a distinct counter yet (postings
-// roll into balances) so it's folded into the OSV/balance signal for now.
+// panel). Cheap reads: chart length and balance row count (a populated
+// ledger produces balance rows). Bank state isn't a distinct counter yet
+// (postings roll into balances) so it's folded into the balance signal.
 const status = ref({
     chartCount: 0,
     balanceCount: 0,
-    adjustmentCount: 0,
 })
 
 async function loadStatus() {
     if (!orgsStore.currentOrgId || !ledgerStore.activePeriod) {
-        status.value = { chartCount: 0, balanceCount: 0, adjustmentCount: 0 }
+        status.value = { chartCount: 0, balanceCount: 0 }
         return
     }
     const periodId = ledgerStore.activePeriod.id
-    // Run the three reads in parallel; tolerate individual failures so one
+    // Run the reads in parallel; tolerate individual failures so one
     // missing endpoint doesn't blank the whole strip.
-    const [chart, matrix, adjustments] = await Promise.all([
+    const [chart, balances] = await Promise.all([
         ledgerStore.fetchChart().catch(() => []),
-        ledgerStore.fetchMatrix(periodId).catch(() => []),
-        adjustmentsStore.fetchList({ periodId }).catch(() => []),
+        ledgerStore.fetchBalances({ periodId }).catch(() => []),
     ])
     status.value = {
         chartCount: Array.isArray(chart) ? chart.length : 0,
-        balanceCount: Array.isArray(matrix) ? matrix.length : 0,
-        adjustmentCount: Array.isArray(adjustments) ? adjustments.length : 0,
+        balanceCount: Array.isArray(balances) ? balances.length : 0,
     }
 }
 
 // Refresh strategy:
-//   - filesStore.fetchRecentFiles is now org-scoped (Task 6) and the store
-//     itself watches orgsStore.currentOrgId, so it will refetch when the
-//     active org changes. We trigger an explicit refresh on mount + on
-//     route re-entry to pick up new uploads from a different tab.
-//   - ledgerStore.fetchPeriods is also org-scoped and idempotent.
-//   - templatesStore is gone — the template chooser was removed with the
-//     migration to the ledger-spine architecture.
+//   - ledgerStore.fetchPeriods is org-scoped and idempotent.
 function refreshData() {
     authStore.checkAuth()
-    filesStore.fetchRecentFiles(true)
     if (orgsStore.currentOrgId) {
         // Fetch periods first, then compute the workflow status from the
         // resolved active period. loadStatus is a no-op when no period.
@@ -330,13 +211,12 @@ onMounted(refreshData)
 
 watch(() => route.path, (newPath) => {
     if (newPath === '/app/dashboard') {
-        filesStore.invalidateCache()
         refreshData()
     }
 })
 
 // Re-fetch ledger context when the active org changes mid-session
-// (org switcher in the sidebar). Files are handled by the files store itself.
+// (org switcher in the sidebar).
 watch(() => orgsStore.currentOrgId, (orgId) => {
     if (orgId) {
         ledgerStore.fetchPeriods()
@@ -350,7 +230,6 @@ watch(() => ledgerStore.activePeriod?.id, (id) => {
     if (id) loadStatus()
 })
 
-const recentFiles = computed(() => filesStore.recentFiles || [])
 const firstName = computed(() => authStore.user?.name?.split(' ')[0] || '')
 const completedFiles = computed(() => authStore.filesCompletedThisMonth)
 const monthlyLimitDisplay = computed(() => {
@@ -377,43 +256,6 @@ function formatPeriod(p) {
     const start = p.startDate ? new Date(p.startDate).toLocaleDateString() : ''
     const end = p.endDate ? new Date(p.endDate).toLocaleDateString() : ''
     return `${kind} · ${start} → ${end}`.replace(/^ · /, '')
-}
-
-function openFile(file) {
-    if (file.status === 'completed') router.push(`/app/files/${file.id}`)
-    else if (file.jobId) router.push(`/app/processing/${file.jobId}`)
-}
-
-function formatTemplate(type) {
-    const map = {
-        balanceSheet: 'Balance Sheet',
-        cashFlow: 'Cash Flow',
-        profitLoss: 'P&L (Budget)',
-        profitLossForm2: 'P&L (Form 2)',
-        equity: 'Equity',
-    }
-    return map[type] || type
-}
-
-function formatDate(d) {
-    const date = new Date(d)
-    const now = new Date()
-    const diffM = Math.floor((now - date) / 60000)
-    if (diffM < 1) return t('history.dateJustNow')
-    if (diffM < 60) return t('history.dateMinutesAgo', { n: diffM })
-    if (diffM < 1440) return t('history.dateHoursAgo', { n: Math.floor(diffM / 60) })
-    if (diffM < 2880) return t('history.dateYesterday')
-    return date.toLocaleDateString()
-}
-
-function statusClass(status) {
-    return {
-        completed: 'status-green',
-        processing: 'status-blue',
-        failed: 'status-red',
-        pending: 'status-yellow',
-        uploaded: 'status-gray',
-    }[status] || 'status-gray'
 }
 </script>
 

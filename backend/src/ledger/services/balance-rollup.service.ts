@@ -14,7 +14,6 @@ import { JournalEntryLine, type JournalEntryLineModel } from '../schemas/journal
 
 export interface RollupKey {
   accountCode: string;
-  layer: string;
   subconto1Value: string | null;
   subconto2Value: string | null;
   subconto3Value: string | null;
@@ -30,31 +29,30 @@ export interface RollupResult {
 /**
  * Materializes AccountBalance rows from the canonical posting history.
  *
- * The bank engine and adjustment engine both write JournalEntryLine rows
- * but those don't move balances on their own — balances are the
- * universal-currency materialized view (architecture doc §7.1). When an
+ * The bank engine and the manual-entry engine both write JournalEntryLine
+ * rows but those don't move balances on their own — balances are the
+ * universal-currency materialized view (architecture doc §3.2). When an
  * entry flips to `committed`, we recompute every AccountBalance row whose
  * key matches one of the entry's lines.
  *
  * Algorithm per key:
  *   1. Aggregate sums of `amount` per direction across all COMMITTED
- *      JournalEntryLine rows for (org, period, layer, accountCode,
+ *      JournalEntryLine rows for (org, period, accountCode,
  *      subconto1/2/3) — yields `periodDebit`, `periodCredit`.
  *   2. Look up the existing AccountBalance row for that key:
- *      a. Found → preserve its imported `openingDebit` / `openingCredit`,
+ *      a. Found → preserve its existing `openingDebit` / `openingCredit`,
  *         replace `periodDebit` / `periodCredit` with the new sums,
  *         recompute closing via `netSides(opening+period)`.
  *      b. Not found → create a fresh row with opening = 0 and the new
  *         period totals. `source = 'posting_rollup'`.
  *
+ * Single-layer note (architecture doc §3.2): the ledger is a general
+ * ledger with one kind of figure — the real, posted balance. The old
+ * four-layer matrix (nsbu_base → reclassification → adjustment → ifrs)
+ * was a transformation overlay and has been removed; there is no longer
+ * a `layer` dimension on the key, and no derived IFRS layer to compute.
+ *
  * What the rollup does NOT do:
- *   - Touch ОСВ-imported balances whose key isn't in the affected set.
- *     `OsvIngestionService.ingestFromFile` already runs a full-replace
- *     within (org, period, NSBU_BASE) scope; this service is incremental
- *     and complements it.
- *   - Derive the IFRS layer. IFRS = NSBU + reclass + adjustments and is
- *     computed by a (not-yet-written) `IfrsDerivationService` that
- *     consumes the other layers as input.
  *   - Hold a lock. Two concurrent rollups on the same key race; in
  *     practice the bank-engine commit is operator-driven and one-at-a-
  *     time per period. If that assumption breaks, wrap each key update
@@ -94,7 +92,6 @@ export class BalanceRollupService {
         organizationId,
         periodId,
         accountCode: key.accountCode,
-        layer: key.layer,
         level: 0,
         subconto1Value: key.subconto1Value,
         subconto2Value: key.subconto2Value,
@@ -126,7 +123,6 @@ export class BalanceRollupService {
           organizationId,
           periodId,
           accountCode: key.accountCode,
-          layer: key.layer,
           level: 0,
           subconto1Value: key.subconto1Value,
           subconto2Value: key.subconto2Value,
@@ -174,12 +170,11 @@ export class BalanceRollupService {
 
     const lines = await this.lineModel
       .find({ entryId: { $in: entryIds } })
-      .select('accountCode layer subconto1Value subconto2Value subconto3Value counterpartyId')
+      .select('accountCode subconto1Value subconto2Value subconto3Value counterpartyId')
       .lean();
 
     const keys: RollupKey[] = lines.map((l) => ({
       accountCode: l.accountCode,
-      layer: l.layer,
       subconto1Value: l.subconto1Value,
       subconto2Value: l.subconto2Value,
       subconto3Value: l.subconto3Value,
@@ -221,7 +216,6 @@ export class BalanceRollupService {
         $match: {
           organizationId,
           periodId,
-          layer: key.layer,
           accountCode: key.accountCode,
           subconto1Value: key.subconto1Value,
           subconto2Value: key.subconto2Value,
@@ -246,7 +240,6 @@ export class BalanceRollupService {
     for (const k of keys) {
       const sig = [
         k.accountCode,
-        k.layer,
         k.subconto1Value ?? '',
         k.subconto2Value ?? '',
         k.subconto3Value ?? '',

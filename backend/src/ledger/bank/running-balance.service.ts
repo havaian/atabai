@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Types } from 'mongoose';
 
-import { BALANCE_LAYER } from '../constants/balance-layers';
 import {
   addDecimals,
   compareDecimals,
@@ -27,13 +26,6 @@ export interface RunningBalanceArgs {
   periodId: Types.ObjectId;
   accountCode: string;
   counterpartyId: Types.ObjectId;
-  /**
-   * Layer the running balance is computed against. The bank engine writes
-   * postings on the NSBU_BASE layer, so this is almost always 'nsbu_base'.
-   * Parameterized for future flexibility (reclass might query a different
-   * layer's snapshot).
-   */
-  layer?: string;
 }
 
 export interface RunningBalanceResult {
@@ -54,8 +46,8 @@ export interface RunningBalanceResult {
  * at the moment of the query.
  *
  * Two contributors:
- *   - The opening / NSBU-base AccountBalance row for that key (the imported
- *     trial-balance amount from the ОСВ snapshot).
+ *   - The existing AccountBalance row for that key (opening + period totals
+ *     materialized by the rollup).
  *   - All COMMITTED JournalEntryLine rows for that key in this period.
  *
  * Draft entries are deliberately excluded — the bank engine processes a
@@ -80,11 +72,9 @@ export class RunningBalanceService {
   ) {}
 
   async getBalance(args: RunningBalanceArgs): Promise<RunningBalanceResult> {
-    const layer = args.layer ?? BALANCE_LAYER.NSBU_BASE;
-
-    // 1. Imported opening + period values from the ОСВ snapshot. Aggregated
-    //    across all subconto slots for this counterparty — the bank engine
-    //    treats the counterparty as the primary subconto.
+    // 1. Existing opening + period values from the materialized balance row.
+    //    Aggregated across all subconto slots for this counterparty — the bank
+    //    engine treats the counterparty as the primary subconto.
     const importedAgg = await this.balanceModel.aggregate<{
       _id: null;
       openingDebit: Types.Decimal128;
@@ -97,7 +87,6 @@ export class RunningBalanceService {
           organizationId: args.organizationId,
           periodId: args.periodId,
           accountCode: args.accountCode,
-          layer,
           counterpartyId: args.counterpartyId,
         },
       },
@@ -133,7 +122,6 @@ export class RunningBalanceService {
         $match: {
           organizationId: args.organizationId,
           periodId: args.periodId,
-          layer,
           accountCode: args.accountCode,
           counterpartyId: args.counterpartyId,
           entryId: { $in: committedEntryIds },

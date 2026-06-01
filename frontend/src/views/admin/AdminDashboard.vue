@@ -5,161 +5,79 @@
                 <h1 class="adm-page-title">{{ $t('admin.dashboard.title') }}</h1>
                 <div class="adm-page-subtitle">{{ $t('admin.dashboard.subtitle') }}</div>
             </div>
-            <button class="adm-btn adm-btn--ghost" @click="loadStats" :disabled="loading">
-                <RefreshCw :size="14" />
-                {{ $t('admin.common.refresh') }}
-            </button>
         </div>
 
-        <div v-if="loading" class="adm-empty">{{ $t('admin.common.loading') }}</div>
-        <div v-else-if="error" class="adm-empty">{{ error }}</div>
-        <div v-else-if="stats">
-            <!-- Top stats -->
-            <div class="adm-stats-grid">
-                <div class="adm-stat">
-                    <div class="adm-stat-label">{{ $t('admin.dashboard.totalUsers') }}</div>
-                    <div class="adm-stat-value">{{ stats.totalUsers }}</div>
+        <!-- Quick links to the admin surfaces. The stats overview was removed
+             along with the transformation pipeline (no file/template metrics
+             to aggregate anymore); this landing just routes into the tools. -->
+        <div class="adm-grid-2">
+            <button class="adm-card adm-link-card" @click="go('AdminUsers')">
+                <Users :size="20" class="adm-link-icon" />
+                <div class="adm-link-body">
+                    <h3 class="adm-card-title">{{ $t('admin.nav.users') }}</h3>
                 </div>
-                <div class="adm-stat">
-                    <div class="adm-stat-label">{{ $t('admin.dashboard.totalFiles') }}</div>
-                    <div class="adm-stat-value">{{ stats.totalFiles }}</div>
-                </div>
-                <div class="adm-stat">
-                    <div class="adm-stat-label">{{ $t('admin.dashboard.activeUsers') }}</div>
-                    <div class="adm-stat-value">{{ activeUsersCount }}</div>
-                </div>
-                <div class="adm-stat">
-                    <div class="adm-stat-label">{{ $t('admin.dashboard.filesCompleted') }}</div>
-                    <div class="adm-stat-value">{{ filesByStatusMap.completed || 0 }}</div>
-                </div>
-                <div class="adm-stat">
-                    <div class="adm-stat-label">{{ $t('admin.dashboard.filesFailed') }}</div>
-                    <div class="adm-stat-value">{{ filesByStatusMap.failed || 0 }}</div>
-                </div>
-                <div class="adm-stat">
-                    <div class="adm-stat-label">{{ $t('admin.dashboard.filesProcessing') }}</div>
-                    <div class="adm-stat-value">{{ filesByStatusMap.processing || 0 }}</div>
-                </div>
-            </div>
+            </button>
 
-            <!-- Detail cards -->
-            <div class="adm-grid-2">
-                <!-- Users by role -->
-                <div class="adm-card">
-                    <h3 class="adm-card-title">{{ $t('admin.dashboard.usersByRole') }}</h3>
-                    <div v-if="stats.usersByRole.length === 0" class="adm-muted adm-text-sm">{{ $t('admin.common.noData') }}</div>
-                    <div v-else class="adm-bars">
-                        <div v-for="r in stats.usersByRole" :key="r._id" class="adm-bar-row">
-                            <span class="adm-bar-label">
-                                <span class="adm-badge" :class="`adm-badge--role-${r._id}`">{{ roleLabel(r._id) }}</span>
-                            </span>
-                            <span class="adm-bar-value">{{ r.count }}</span>
-                        </div>
-                    </div>
+            <button class="adm-card adm-link-card" @click="go('AdminLocales')">
+                <Languages :size="20" class="adm-link-icon" />
+                <div class="adm-link-body">
+                    <h3 class="adm-card-title">{{ $t('admin.nav.locales') }}</h3>
                 </div>
+            </button>
 
-                <!-- Files by template type -->
-                <div class="adm-card">
-                    <h3 class="adm-card-title">{{ $t('admin.dashboard.filesByTemplate') }}</h3>
-                    <div v-if="stats.filesByTemplate.length === 0" class="adm-muted adm-text-sm">{{ $t('admin.common.noData') }}</div>
-                    <div v-else class="adm-bars">
-                        <div v-for="t in stats.filesByTemplate" :key="t._id || 'unknown'" class="adm-bar-row">
-                            <span class="adm-bar-label adm-mono">{{ t._id || '—' }}</span>
-                            <span class="adm-bar-value">{{ t.count }}</span>
-                        </div>
-                    </div>
+            <button class="adm-card adm-link-card" @click="go('AdminAccess')">
+                <UserCheck :size="20" class="adm-link-icon" />
+                <div class="adm-link-body">
+                    <h3 class="adm-card-title">{{ $t('admin.nav.access') }}</h3>
                 </div>
-            </div>
+            </button>
 
-            <!-- Last 7 days -->
-            <div class="adm-card adm-card-stacked">
-                <h3 class="adm-card-title">{{ $t('admin.dashboard.filesLast7Days') }}</h3>
-                <div v-if="stats.filesLast7Days.length === 0" class="adm-muted adm-text-sm">
-                    {{ $t('admin.dashboard.noFilesThisWeek') }}
+            <button class="adm-card adm-link-card" @click="go('AdminSecuritySettings')">
+                <ShieldCheck :size="20" class="adm-link-icon" />
+                <div class="adm-link-body">
+                    <h3 class="adm-card-title">{{ $t('admin.nav.security') }}</h3>
                 </div>
-                <div v-else class="adm-bars">
-                    <div v-for="d in stats.filesLast7Days" :key="d._id" class="adm-bar-row">
-                        <span class="adm-bar-label adm-mono">{{ d._id }}</span>
-                        <span class="adm-bar-value">{{ d.count }}</span>
-                    </div>
-                </div>
-            </div>
+            </button>
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
 // @ts-nocheck
-import { ref, computed, onMounted } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { useAdminStore } from '@/stores/admin'
-import { RefreshCw } from 'lucide-vue-next'
+import { useRouter } from 'vue-router'
+import { Users, Languages, UserCheck, ShieldCheck } from 'lucide-vue-next'
 
-const adminStore = useAdminStore()
-const { t } = useI18n()
-const stats = ref(null)
-const loading = ref(false)
-const error = ref(null)
+const router = useRouter()
 
-const activeUsersCount = computed(() => {
-    if (!stats.value) return 0
-    const active = stats.value.usersByActive.find(u => u._id === true)
-    return active?.count || 0
-})
-
-const filesByStatusMap = computed(() => {
-    if (!stats.value) return {}
-    return Object.fromEntries(stats.value.filesByStatus.map(s => [s._id, s.count]))
-})
-
-function roleLabel(role) {
-    if (role === 'super_admin') return t('admin.roles.superShort')
-    if (role === 'admin') return t('admin.roles.admin')
-    return t('admin.roles.user')
+function go(name) {
+    router.push({ name })
 }
-
-async function loadStats() {
-    loading.value = true
-    error.value = null
-    try {
-        stats.value = await adminStore.fetchStats()
-    } catch (err) {
-        error.value = err.response?.data?.message || t('admin.dashboard.loadStatsError')
-    } finally {
-        loading.value = false
-    }
-}
-
-onMounted(loadStats)
 </script>
 
 <style scoped>
-.adm-bars {
+.adm-link-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    text-align: left;
+    cursor: pointer;
+    border: 1px solid var(--adm-border);
+    background: var(--adm-card-bg, transparent);
+    transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.adm-link-card:hover {
+    border-color: var(--adm-border-strong, var(--adm-border));
+    background: var(--adm-nav-bg-hover, transparent);
+}
+
+.adm-link-icon {
+    color: var(--adm-text);
+    flex-shrink: 0;
+}
+
+.adm-link-body {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-}
-
-.adm-bar-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 6px 0;
-    border-bottom: 1px solid var(--adm-border-soft);
-}
-
-.adm-bar-row:last-child {
-    border-bottom: none;
-}
-
-.adm-bar-label {
-    font-size: 13px;
-    color: var(--adm-text);
-}
-
-.adm-bar-value {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--adm-text);
 }
 </style>

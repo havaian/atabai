@@ -17,9 +17,9 @@ export const LINE_DIRECTIONS: readonly LineDirection[] = ['debit', 'credit'];
  * embedded on JournalEntry — see [[journal-entry]] for the rationale.
  *
  * The subconto/counterparty fields mirror those on AccountBalance so a
- * rollup is a straight group-by-(account, layer, subconto1/2/3) aggregation
- * with no shape translation. The organizationId/periodId/layer are denormalized
- * from the parent JournalEntry so the rollup pipeline does not need a $lookup.
+ * rollup is a straight group-by-(account, subconto1/2/3) aggregation with no
+ * shape translation. organizationId/periodId are denormalized from the parent
+ * JournalEntry so the rollup pipeline does not need a $lookup.
  *
  * `amount` is always non-negative (Decimal128.fromString('0').gte). Sign is
  * carried by `direction`. Storing signed amounts would lose Dt/Cr distinction
@@ -49,9 +49,6 @@ export class JournalEntryLine {
 
   @Prop({ type: Types.ObjectId, ref: 'ReportingPeriod', required: true, index: true })
   periodId!: Types.ObjectId;
-
-  @Prop({ type: String, required: true, index: true })
-  layer!: string; // BalanceLayer — kept as string to match parent enum without redefining.
 
   // Business date — usually === JournalEntry.date but explicit for line-level
   // aggregations that scan without joining the parent.
@@ -108,12 +105,15 @@ export class JournalEntryLine {
 export const JournalEntryLineSchema = SchemaFactory.createForClass(JournalEntryLine);
 
 // THE rollup index — exactly the group key for recomputing AccountBalance.
-// Scanned with $match on (org, period, layer) and $group on the rest.
+// Scanned with $match on (org, period) and $group on the rest.
+//
+// MIGRATION NOTE: the previous line_rollup_key included `layer`. As with
+// balance_key, the old index must be dropped once on the live DB before this
+// definition can build (same-name index, different key spec).
 JournalEntryLineSchema.index(
   {
     organizationId: 1,
     periodId: 1,
-    layer: 1,
     accountCode: 1,
     subconto1Value: 1,
     subconto2Value: 1,

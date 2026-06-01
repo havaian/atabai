@@ -6,7 +6,6 @@ import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { MEMBERSHIP_CAPABILITIES } from '../../organizations/constants/membership-capabilities';
 import { RequireCapability } from '../../organizations/decorators/require-capability.decorator';
 import { OrgMembershipGuard } from '../../organizations/guards/org-membership.guard';
-import { ALL_BALANCE_LAYERS, type BalanceLayer } from '../constants/balance-layers';
 import {
   AccountBalance,
   type AccountBalanceDocument,
@@ -15,12 +14,11 @@ import {
 
 /**
  * Read-only AccountBalance surface. Per period (required path param) +
- * optional layer / accountCode / counterparty filters.
+ * optional accountCode / counterparty filters.
  *
- * The matrix view fetches each of the four layers separately and joins
- * client-side — a server-side pivot endpoint (one row per key with all
- * four layers projected as columns) is a follow-up if the client-side
- * join becomes hot in real traffic.
+ * Single-layer (architecture doc §3.2): balances carry one posted figure
+ * per key; the old four-layer matrix view and its per-layer filter were
+ * removed with the transformation pipeline.
  */
 @Controller('organizations/:orgId/ledger/periods/:periodId')
 @UseGuards(JwtAuthGuard, OrgMembershipGuard)
@@ -35,7 +33,6 @@ export class BalancesController {
   async list(
     @Param('orgId') orgId: string,
     @Param('periodId') periodId: string,
-    @Query('layer') layer?: string,
     @Query('accountCode') accountCode?: string,
     @Query('counterpartyId') counterpartyId?: string,
   ) {
@@ -43,9 +40,6 @@ export class BalancesController {
       organizationId: new Types.ObjectId(orgId),
       periodId: new Types.ObjectId(periodId),
     };
-    if (layer && (ALL_BALANCE_LAYERS as readonly string[]).includes(layer)) {
-      query.layer = layer as BalanceLayer;
-    }
     if (accountCode) {
       query.accountCode = accountCode;
     }
@@ -68,7 +62,6 @@ export class BalancesController {
     return {
       id: b._id.toString(),
       accountCode: b.accountCode,
-      layer: b.layer,
       level: b.level,
       subconto1Value: b.subconto1Value,
       subconto2Value: b.subconto2Value,

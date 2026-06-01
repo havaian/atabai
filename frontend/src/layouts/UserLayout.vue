@@ -131,7 +131,6 @@ const navItems = computed(() => {
         // the empty state at the router level.
         return [
             { name: 'Dashboard', label: t('nav.dashboard'), icon: LayoutDashboard },
-            { name: 'FileHistory', label: t('nav.history'), icon: Archive },
             // Settings omitted — available in the profile dropdown.
         ]
     }
@@ -140,20 +139,14 @@ const navItems = computed(() => {
     // below succeed for them without a special branch here.
     const caps = orgsStore.capabilities || []
     const canReadLedger = caps.includes('nsbu.base.read')
-    const canReadOverlay = caps.includes('ifrs.overlay.read')
     return [
         { name: 'Dashboard', label: t('nav.dashboard'), icon: LayoutDashboard },
         ...(canReadLedger
             ? [
                 { name: 'Periods', label: t('nav.periods'), icon: CalendarDays },
                 { name: 'ChartOfAccounts', label: t('nav.chart'), icon: BookOpen },
-                { name: 'LedgerMatrix', label: t('nav.matrix'), icon: Grid3x3 },
             ]
             : []),
-        ...(canReadOverlay
-            ? [{ name: 'AdjustmentsList', label: t('nav.adjustments'), icon: Sliders }]
-            : []),
-        { name: 'FileHistory', label: t('nav.history'), icon: Archive },
         // Settings intentionally omitted from the nav — it's reachable from
         // the profile dropdown at the bottom of the sidebar, so duplicating
         // it here would be redundant.

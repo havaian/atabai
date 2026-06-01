@@ -40,14 +40,8 @@
                     </div>
                 </div>
                 <div class="period-card-actions">
-                    <button class="period-card-action" :disabled="p.status === 'locked'" @click="goOsv(p.id)">
-                        <FileSpreadsheet :size="14" /> {{ $t('periods.actions.osv') }}
-                    </button>
                     <button class="period-card-action" :disabled="p.status === 'locked'" @click="goBank(p.id)">
                         <Banknote :size="14" /> {{ $t('periods.actions.bank') }}
-                    </button>
-                    <button class="period-card-action" :disabled="p.status === 'locked'" @click="goAdjustment(p.id)">
-                        <SlidersHorizontal :size="14" /> {{ $t('periods.actions.adjustment') }}
                     </button>
                     <button v-if="isAdmin && p.status === 'open'" class="period-card-action period-card-action--lock"
                         @click="lock(p)" :disabled="lockingId === p.id">
@@ -139,9 +133,7 @@ onMounted(async () => {
     await ledger.fetchPeriods().catch(() => {})
 })
 
-function goOsv(periodId) { router.push(`/app/ledger/periods/${periodId}/osv-import`) }
 function goBank(periodId) { router.push(`/app/ledger/periods/${periodId}/bank-statements`) }
-function goAdjustment(periodId) { router.push(`/app/ledger/periods/${periodId}/adjustments/new`) }
 function formatDate(d) { return d ? new Date(d).toISOString().slice(0, 10) : '' }
 
 async function lock(p) {

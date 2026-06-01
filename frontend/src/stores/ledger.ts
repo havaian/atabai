@@ -100,27 +100,13 @@ export const useLedgerStore = defineStore("ledger", () => {
     }
   }
 
-  async function fetchBalances({ periodId, layer }) {
+  async function fetchBalances({ periodId }) {
     if (!orgs.currentOrgId || !periodId) return [];
     try {
       const resp = await apiClient.get(
-        orgScope(`/periods/${periodId}/balances`),
-        {
-          params: { layer },
-        }
+        orgScope(`/periods/${periodId}/balances`)
       );
       return resp.data.balances || [];
-    } catch (err) {
-      if (err?.response?.status === 404) return [];
-      throw err;
-    }
-  }
-
-  async function fetchMatrix(periodId) {
-    if (!orgs.currentOrgId || !periodId) return [];
-    try {
-      const resp = await apiClient.get(orgScope(`/periods/${periodId}/matrix`));
-      return resp.data.matrix || [];
     } catch (err) {
       if (err?.response?.status === 404) return [];
       throw err;
@@ -164,18 +150,6 @@ export const useLedgerStore = defineStore("ledger", () => {
     if (idx !== -1) periods.value[idx] = updated;
   }
 
-  async function uploadOsv({ periodId, file }) {
-    if (!orgs.currentOrgId) throw new Error("No active organization");
-    const fd = new FormData();
-    fd.append("file", file);
-    const resp = await apiClient.post(
-      orgScope(`/periods/${periodId}/osv-imports`),
-      fd,
-      { headers: { "Content-Type": "multipart/form-data" } }
-    );
-    return resp.data;
-  }
-
   // Invalidate caches when active org changes.
   watch(
     () => orgs.currentOrgId,
@@ -203,11 +177,9 @@ export const useLedgerStore = defineStore("ledger", () => {
     fetchPeriods,
     fetchChart,
     fetchBalances,
-    fetchMatrix,
     createPeriod,
     lockPeriod,
     reopenPeriod,
-    uploadOsv,
     reset,
   };
 });

@@ -3,7 +3,6 @@ import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model, Types } from 'mongoose';
 
 import { AppLoggerService } from '../common/logger/app-logger.service';
-import { File, type FileDocument, type FileModel } from '../files/schemas/file.schema';
 import {
   User,
   type UserDocument,
@@ -26,7 +25,6 @@ interface ListUsersOptions {
 export class AdminUsersService {
   constructor(
     @InjectModel(User.name) private readonly userModel: UserModel,
-    @InjectModel(File.name) private readonly fileModel: FileModel,
     private readonly logger: AppLoggerService,
   ) {}
 
@@ -77,26 +75,7 @@ export class AdminUsersService {
     const user = await this.userModel.findById(userId).lean();
     if (!user) throw new NotFoundException({ error: 'USER_NOT_FOUND', message: 'User not found' });
 
-    const raw = await this.fileModel.aggregate<{ _id: string; count: number; totalSize: number }>([
-      { $match: { userId: user._id } },
-      { $group: { _id: '$status', count: { $sum: 1 }, totalSize: { $sum: '$fileSize' } } },
-    ]);
-
-    const fileStats = {
-      total: 0,
-      uploaded: 0,
-      processing: 0,
-      completed: 0,
-      failed: 0,
-      totalSize: 0,
-    };
-    for (const row of raw) {
-      if (row._id in fileStats) (fileStats as Record<string, number>)[row._id] = row.count;
-      fileStats.total += row.count;
-      fileStats.totalSize += row.totalSize || 0;
-    }
-
-    return { success: true, user, fileStats };
+    return { success: true, user };
   }
 
   async updateUserRole(adminUserId: string | Types.ObjectId, userId: string, role: UserRole) {
@@ -191,39 +170,6 @@ export class AdminUsersService {
         subscriptionType: user.subscriptionType,
         subscriptionExpiresAt: user.subscriptionExpiresAt,
       },
-    };
-  }
-
-  async getUserFiles(
-    userId: string,
-    opts: { status?: string; templateType?: string; page?: number; limit?: number },
-  ) {
-    const exists = await this.userModel.exists({ _id: userId });
-    if (!exists) {
-      throw new NotFoundException({ error: 'USER_NOT_FOUND', message: 'User not found' });
-    }
-
-    const filter: FilterQuery<FileDocument> = { userId };
-    if (opts.status) filter.status = opts.status;
-    if (opts.templateType) filter.templateType = opts.templateType;
-
-    const pageNum = Math.max(1, Number(opts.page) || 1);
-    const limitNum = Math.min(100, Math.max(1, Number(opts.limit) || 25));
-
-    const [files, total] = await Promise.all([
-      this.fileModel
-        .find(filter)
-        .sort({ createdAt: -1 })
-        .skip((pageNum - 1) * limitNum)
-        .limit(limitNum)
-        .lean(),
-      this.fileModel.countDocuments(filter),
-    ]);
-
-    return {
-      success: true,
-      files,
-      pagination: { page: pageNum, limit: limitNum, total, pages: Math.ceil(total / limitNum) },
     };
   }
 }

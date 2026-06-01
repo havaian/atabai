@@ -13,13 +13,8 @@ import { RedisModule } from './redis/redis.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { AdminModule } from './admin/admin.module';
-import { FilesModule } from './files/files.module';
-import { JobsModule } from './jobs/jobs.module';
 import { LedgerModule } from './ledger/ledger.module';
-import { MappingsModule } from './mappings/mappings.module';
 import { OrganizationsModule } from './organizations/organizations.module';
-import { ProcessorsModule } from './processors/processors.module';
-import { TemplatesModule } from './templates/templates.module';
 
 @Module({
   imports: [
@@ -56,12 +51,7 @@ import { TemplatesModule } from './templates/templates.module';
     AuthModule,
     OrganizationsModule,
     LedgerModule,
-    MappingsModule,
     AdminModule,
-    ProcessorsModule,
-    FilesModule,
-    TemplatesModule,
-    JobsModule,
   ],
   controllers: [AppController],
   providers: [

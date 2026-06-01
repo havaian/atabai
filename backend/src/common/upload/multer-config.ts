@@ -9,8 +9,10 @@ import * as path from 'path';
 import type { AppConfig } from '../../config/configuration';
 
 /**
- * Multer disk-storage configuration — ported from backend/src/config/multer.js
- * with the upload path now coming from config (was hard-coded `/uploads`).
+ * Multer disk-storage configuration. Lives in backend/src/common/upload/ as
+ * shared infrastructure — the ledger bank-statement upload endpoint uses it.
+ * Lifted here out of files/utils/ so it survives the removal of the legacy
+ * transformation upload pipeline (files/).
  *
  * Filenames are UUIDs to avoid encoding issues with Cyrillic / Uzbek
  * characters in the original filename; we preserve the original name on the

@@ -138,8 +138,6 @@ function setMode(next, closeDrawer) {
 const legacyNav = computed(() => [
     { name: 'AdminDashboard', label: t('admin.nav.dashboard'), icon: LayoutDashboard, exact: true },
     { name: 'AdminUsers', label: t('admin.nav.users'), icon: Users },
-    { name: 'AdminFiles', label: t('admin.nav.files'), icon: FileText },
-    { name: 'AdminMappings', label: t('admin.nav.mappings'), icon: Network },
     { name: 'AdminLocales', label: t('admin.nav.locales'), icon: Languages },
     { name: 'AdminAccess', label: t('admin.nav.access'), icon: UserCheck },
     { name: 'AdminSecuritySettings', label: t('admin.nav.security'), icon: ShieldCheck },

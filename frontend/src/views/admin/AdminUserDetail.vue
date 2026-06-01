@@ -99,77 +99,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- File stats -->
-            <div class="adm-card">
-                <h3 class="adm-card-title">{{ $t('admin.userDetail.fileStatsSection') }}</h3>
-                <div class="adm-stats-grid" style="margin-bottom: 0;">
-                    <div class="adm-stat">
-                        <div class="adm-stat-label">{{ $t('admin.userDetail.fileStatsTotal') }}</div>
-                        <div class="adm-stat-value">{{ fileStats?.total || 0 }}</div>
-                    </div>
-                    <div class="adm-stat">
-                        <div class="adm-stat-label">{{ $t('admin.userDetail.fileStatsCompleted') }}</div>
-                        <div class="adm-stat-value">{{ fileStats?.completed || 0 }}</div>
-                    </div>
-                    <div class="adm-stat">
-                        <div class="adm-stat-label">{{ $t('admin.userDetail.fileStatsFailed') }}</div>
-                        <div class="adm-stat-value">{{ fileStats?.failed || 0 }}</div>
-                    </div>
-                    <div class="adm-stat">
-                        <div class="adm-stat-label">{{ $t('admin.userDetail.fileStatsProcessing') }}</div>
-                        <div class="adm-stat-value">{{ fileStats?.processing || 0 }}</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Files list -->
-            <div class="adm-card">
-                <h3 class="adm-card-title">{{ $t('admin.userDetail.filesSection') }}</h3>
-                <div v-if="filesLoading" class="adm-empty">{{ $t('admin.common.loading') }}</div>
-                <div v-else-if="files.length === 0" class="adm-empty">{{ $t('admin.userDetail.filesNone') }}</div>
-                <div v-else class="adm-table-wrap">
-                    <table class="adm-table">
-                        <thead>
-                            <tr>
-                                <th>{{ $t('admin.userDetail.tableFileName') }}</th>
-                                <th>{{ $t('admin.userDetail.tableType') }}</th>
-                                <th>{{ $t('admin.files.tableStatus') }}</th>
-                                <th>{{ $t('admin.userDetail.tableSize') }}</th>
-                                <th>{{ $t('admin.userDetail.tableCreated') }}</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-for="f in files" :key="f._id" class="adm-row-clickable" @click="openFile(f._id)">
-                                <td class="adm-mono adm-text-sm">{{ f.originalName }}</td>
-                                <td class="adm-text-sm">{{ f.templateType }}</td>
-                                <td>
-                                    <span class="adm-badge" :class="`adm-badge--status-${f.status}`">{{ f.status }}</span>
-                                </td>
-                                <td class="adm-text-sm adm-muted">{{ formatSize(f.fileSize) }}</td>
-                                <td class="adm-text-sm adm-muted">{{ formatDate(f.createdAt) }}</td>
-                                <td>
-                                    <button class="adm-btn adm-btn--sm adm-btn--ghost" @click.stop="openFile(f._id)">
-                                        {{ $t('admin.common.open') }}
-                                    </button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div v-if="filesPagination && filesPagination.pages > 1" class="adm-pagination">
-                    <span>{{ $t('admin.userDetail.pageOf', { page: filesPagination.page, pages: filesPagination.pages }) }}</span>
-                    <div class="adm-pagination-buttons">
-                        <button class="adm-btn adm-btn--sm adm-btn--ghost"
-                            @click="loadFiles(filesPagination.page - 1)"
-                            :disabled="filesPagination.page <= 1">{{ $t('admin.common.prev') }}</button>
-                        <button class="adm-btn adm-btn--sm adm-btn--ghost"
-                            @click="loadFiles(filesPagination.page + 1)"
-                            :disabled="filesPagination.page >= filesPagination.pages">{{ $t('admin.common.next') }}</button>
-                    </div>
-                </div>
-            </div>
         </template>
 
         <!-- Role change modal -->
@@ -209,12 +138,8 @@ const adminStore = useAdminStore()
 const { t, locale } = useI18n()
 
 const user = ref(null)
-const fileStats = ref(null)
-const files = ref([])
-const filesPagination = ref(null)
 
 const loading = ref(false)
-const filesLoading = ref(false)
 const error = ref(null)
 
 const showRoleModal = ref(false)
@@ -267,25 +192,11 @@ async function loadUser() {
     try {
         const data = await adminStore.getUserDetails(userId.value)
         user.value = data.user
-        fileStats.value = data.fileStats
         newRole.value = data.user.role
     } catch (err) {
         error.value = err.response?.data?.message || t('admin.userDetail.loadError')
     } finally {
         loading.value = false
-    }
-}
-
-async function loadFiles(page = 1) {
-    filesLoading.value = true
-    try {
-        const data = await adminStore.getUserFiles(userId.value, { page, limit: 25 })
-        files.value = data.files
-        filesPagination.value = data.pagination
-    } catch (err) {
-        console.error('Failed to load files:', err)
-    } finally {
-        filesLoading.value = false
     }
 }
 
@@ -313,15 +224,6 @@ async function toggleActive() {
     }
 }
 
-function openFile(fileId) {
-    // Pass referrer info so the file-detail page knows to send the user back
-    // to this specific user page (not to the generic /admin/files list).
-    router.push({
-        path: `/admin/files/${fileId}`,
-        query: { from: 'user', userId: route.params.userId }
-    })
-}
-
 function formatDate(d) {
     if (!d) return '—'
     const localeMap = { ru: 'ru-RU', en: 'en-GB', uz: 'uz-UZ' }
@@ -331,16 +233,7 @@ function formatDate(d) {
     })
 }
 
-function formatSize(bytes) {
-    if (!bytes) return '—'
-    const k = 1024
-    if (bytes < k) return `${bytes} B`
-    if (bytes < k * k) return `${(bytes / k).toFixed(1)} KB`
-    return `${(bytes / k / k).toFixed(1)} MB`
-}
-
 onMounted(async () => {
     await loadUser()
-    await loadFiles(1)
 })
 </script>

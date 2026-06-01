@@ -9,7 +9,6 @@ import { Types, isValidObjectId } from 'mongoose';
 
 import { AppLoggerService } from '../../common/logger/app-logger.service';
 import type { UserDocument } from '../../users/schemas/user.schema';
-import { BALANCE_LAYER } from '../constants/balance-layers';
 import { isTreasuryInn } from '../constants/treasury';
 import {
   ChartOfAccount,
@@ -577,7 +576,6 @@ export class BankIngestionService {
       description: row.purpose.substring(0, 1990),
       source: 'bank_statement',
       sourceRef: `bank:${uploadId}:${row.sourceRow}`,
-      layer: BALANCE_LAYER.NSBU_BASE,
       status: 'draft',
       totalAmount: Types.Decimal128.fromString(amount),
       createdBy: actor._id,
@@ -593,7 +591,6 @@ export class BankIngestionService {
         entryId: entry._id,
         organizationId: orgId,
         periodId,
-        layer: BALANCE_LAYER.NSBU_BASE,
         date: row.date,
         accountCode: debitAccount,
         direction: 'debit',
@@ -606,7 +603,6 @@ export class BankIngestionService {
         entryId: entry._id,
         organizationId: orgId,
         periodId,
-        layer: BALANCE_LAYER.NSBU_BASE,
         date: row.date,
         accountCode: creditAccount,
         direction: 'credit',

@@ -188,12 +188,6 @@ export const useAdminStore = defineStore('admin', () => {
         return response.data
     }
 
-    // ─── Stats ────────────────────────────────────────────────────────────────
-    async function fetchStats() {
-        const response = await adminGet('/admin/stats')
-        return response.data.stats
-    }
-
     // ─── Users ────────────────────────────────────────────────────────────────
     async function listUsers(params = {}) {
         const response = await adminGet('/admin/users', { params })
@@ -202,11 +196,6 @@ export const useAdminStore = defineStore('admin', () => {
 
     async function getUserDetails(userId) {
         const response = await adminGet(`/admin/users/${userId}`)
-        return response.data
-    }
-
-    async function getUserFiles(userId, params = {}) {
-        const response = await adminGet(`/admin/users/${userId}/files`, { params })
         return response.data
     }
 
@@ -246,129 +235,6 @@ export const useAdminStore = defineStore('admin', () => {
 
     async function removeWhitelistEntry(entryId) {
         const response = await adminDelete(`/admin/whitelist/${entryId}`)
-        return response.data
-    }
-
-    // ─── Files ────────────────────────────────────────────────────────────────
-    async function listAllFiles(params = {}) {
-        const response = await adminGet('/admin/files', { params })
-        return response.data
-    }
-
-    async function getFileDetails(fileId) {
-        const response = await adminGet(`/admin/files/${fileId}`)
-        return response.data
-    }
-
-    async function getFileTransformation(fileId) {
-        const response = await adminGet(`/admin/files/${fileId}/transformation`)
-        return response.data
-    }
-
-    function downloadFileUrl(fileId, type = 'processed') {
-        const base = apiClient.defaults.baseURL || ''
-        return `${base}/admin/files/${fileId}/download?type=${type}`
-    }
-
-    async function downloadFile(fileId, type = 'processed') {
-        const response = await adminGet(
-            `/admin/files/${fileId}/download`,
-            { params: { type }, responseType: 'blob' }
-        )
-        return response
-    }
-
-    // ─── Mappings ─────────────────────────────────────────────────────────────
-    async function listMappingSets() {
-        const response = await adminGet('/admin/mappings')
-        return response.data
-    }
-
-    async function getPublishedSet(reportType) {
-        const response = await adminGet(`/admin/mappings/${reportType}/published`)
-        return response.data
-    }
-
-    async function getDraftSet(reportType) {
-        try {
-            const response = await adminGet(`/admin/mappings/${reportType}/draft`)
-            return response.data
-        } catch (err) {
-            if (err.response?.status === 404) return null
-            throw err
-        }
-    }
-
-    async function getSetById(setId) {
-        const response = await adminGet(`/admin/mappings/sets/${setId}`)
-        return response.data
-    }
-
-    async function createDraft(reportType) {
-        const response = await adminPost(`/admin/mappings/${reportType}/draft`, {})
-        return response.data
-    }
-
-    // Fork an arbitrary set (published or archived) into a new draft. Optional
-    // body overrides assignedUsers and label.
-    async function forkSet(setId, { assignedUsers, label } = {}) {
-        const body = {}
-        if (Array.isArray(assignedUsers)) body.assignedUsers = assignedUsers
-        if (typeof label === 'string') body.label = label
-        const response = await adminPost(`/admin/mappings/sets/${setId}/fork`, body)
-        return response.data
-    }
-
-    // Create a blank user-specific draft. assignedUsers is required.
-    async function createBlankDraft(reportType, { assignedUsers, label } = {}) {
-        const response = await adminPost(`/admin/mappings/${reportType}/blank-draft`, {
-            assignedUsers: assignedUsers || [],
-            label: label || ''
-        })
-        return response.data
-    }
-
-    // Update assignedUsers and/or label on a draft.
-    async function updateSetScope(setId, { assignedUsers, label } = {}) {
-        const body = {}
-        if (Array.isArray(assignedUsers)) body.assignedUsers = assignedUsers
-        if (typeof label === 'string') body.label = label
-        const response = await adminPatch(`/admin/mappings/sets/${setId}/scope`, body)
-        return response.data
-    }
-
-    async function publishDraft(setId, notes) {
-        const response = await adminPost(`/admin/mappings/sets/${setId}/publish`, { notes })
-        return response.data
-    }
-
-    async function deleteSet(setId) {
-        const response = await adminDelete(`/admin/mappings/sets/${setId}`)
-        return response.data
-    }
-
-    async function addRow(setId, payload) {
-        const response = await adminPost(`/admin/mappings/sets/${setId}/rows`, payload)
-        return response.data
-    }
-
-    async function updateRow(rowId, payload) {
-        const response = await adminPatch(`/admin/mappings/rows/${rowId}`, payload)
-        return response.data
-    }
-
-    async function deleteRow(rowId) {
-        const response = await adminDelete(`/admin/mappings/rows/${rowId}`)
-        return response.data
-    }
-
-    async function updateEquityConfig(setId, payload) {
-        const response = await adminPut(`/admin/mappings/sets/${setId}/equity`, payload)
-        return response.data
-    }
-
-    async function runMappingSeed() {
-        const response = await adminPost('/admin/mappings/seed', {})
         return response.data
     }
 
@@ -431,12 +297,9 @@ export const useAdminStore = defineStore('admin', () => {
         adminLogout2FA,
         disable2FA,
         regenerateBackupCodes,
-        // stats
-        fetchStats,
         // users
         listUsers,
         getUserDetails,
-        getUserFiles,
         updateUserRole,
         updateUserActive,
         updateUserSubscription,
@@ -445,28 +308,6 @@ export const useAdminStore = defineStore('admin', () => {
         addWhitelistEntry,
         bulkAddWhitelist,
         removeWhitelistEntry,
-        // files
-        listAllFiles,
-        getFileDetails,
-        getFileTransformation,
-        downloadFileUrl,
-        downloadFile,
-        // mappings
-        listMappingSets,
-        getPublishedSet,
-        getDraftSet,
-        getSetById,
-        createDraft,
-        forkSet,
-        createBlankDraft,
-        updateSetScope,
-        publishDraft,
-        deleteSet,
-        addRow,
-        updateRow,
-        deleteRow,
-        updateEquityConfig,
-        runMappingSeed,
         // locales
         listLocaleKeys,
         listLocaleNamespaces,

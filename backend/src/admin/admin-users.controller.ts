@@ -43,22 +43,6 @@ export class AdminUsersController {
     return this.users.getUserDetails(userId);
   }
 
-  @Get(':userId/files')
-  getUserFiles(
-    @Param('userId') userId: string,
-    @Query('status') status?: string,
-    @Query('templateType') templateType?: string,
-    @Query('page') page?: string,
-    @Query('limit') limit?: string,
-  ) {
-    return this.users.getUserFiles(userId, {
-      status,
-      templateType,
-      page: page ? Number(page) : undefined,
-      limit: limit ? Number(limit) : undefined,
-    });
-  }
-
   @Patch(':userId/role')
   @Roles('super_admin')
   updateRole(

@@ -14,9 +14,13 @@ import * as XLSX from 'xlsx';
  *   bold      true if the cell font is bold (used for subheader detection)
  *   indent    cell alignment indent level (0 = no indent)
  *
- * Ported from backend/src/processors/readers/excelReader.js — every heuristic
- * (cell-value flattening, multi-format support, bold/indent propagation,
- * sheet picker) preserved exactly.
+ * Lives in backend/src/common/excel/ as shared infrastructure: the heuristic
+ * sheet scorer (pickBestSheet) and the cell/row helpers are reused by every
+ * transaction-source module's parser (bank, then purchases, sales). Lifted
+ * here out of processors/readers/ so it survives the removal of the legacy
+ * transformation pipeline. Every heuristic (cell-value flattening,
+ * multi-format support, bold/indent propagation, sheet picker) preserved
+ * exactly from the original.
  */
 
 export interface NormalizedCell {
