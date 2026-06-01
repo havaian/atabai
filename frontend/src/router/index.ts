@@ -44,7 +44,6 @@ import AdminUserDetail from '@/views/admin/AdminUserDetail.vue'
 import AdminSecuritySettings from '@/views/admin/AdminSecuritySettings.vue'
 import AdminLocales from '@/views/admin/AdminLocales.vue'
 import AdminAccess from '@/views/admin/AdminAccess.vue'
-import AdminLedgerOverview from '@/views/admin/AdminLedgerOverview.vue'
 
 // ─── i18n URL routing ─────────────────────────────────────────────────────────
 // All non-prefixed paths are auto-redirected to a prefixed equivalent by the
@@ -189,12 +188,7 @@ const adminChildren = [
         component: AdminSecuritySettings
     },
     { path: 'locales', name: 'AdminLocales', component: AdminLocales },
-    { path: 'access', name: 'AdminAccess', component: AdminAccess },
-    // ─── Ledger-spine admin (planned surface) ────────────────────────────────
-    // Landing/overview for the ledger-spine admin section. Concrete
-    // sub-features are added here as they're built (see AdminLedgerOverview
-    // docblock). Reached from the single admin nav.
-    { path: 'ledger', name: 'AdminLedgerOverview', component: AdminLedgerOverview }
+    { path: 'access', name: 'AdminAccess', component: AdminAccess }
 ]
 
 const routes = [

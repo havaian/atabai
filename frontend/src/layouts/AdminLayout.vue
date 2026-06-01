@@ -67,7 +67,7 @@ import { useAdminStore } from '@/stores/admin'
 import AdminTwoFactorGate from '@/views/admin/AdminTwoFactorGate.vue'
 import {
     LayoutDashboard, Users, ShieldCheck, Languages,
-    UserCheck, ArrowLeft, Layers,
+    UserCheck, ArrowLeft,
 } from 'lucide-vue-next'
 
 const router = useRouter()
@@ -75,15 +75,13 @@ const adminStore = useAdminStore()
 const { t } = useI18n()
 
 // Single admin nav. The former Legacy ⇄ New mode split was removed — there is
-// just one admin side now. AdminLedgerOverview (planned ledger-spine admin
-// surface) sits alongside the existing tools.
+// just one admin side now.
 const navItems = computed(() => [
     { name: 'AdminDashboard', label: t('admin.nav.dashboard'), icon: LayoutDashboard, exact: true },
     { name: 'AdminUsers', label: t('admin.nav.users'), icon: Users },
     { name: 'AdminLocales', label: t('admin.nav.locales'), icon: Languages },
     { name: 'AdminAccess', label: t('admin.nav.access'), icon: UserCheck },
     { name: 'AdminSecuritySettings', label: t('admin.nav.security'), icon: ShieldCheck },
-    { name: 'AdminLedgerOverview', label: t('admin.nav.ledgerOverview'), icon: Layers },
 ])
 
 const roleLabel = computed(() => {
