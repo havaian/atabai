@@ -318,7 +318,7 @@ function shortRef(ref) {
 }
 .btn-ghost:hover { background: var(--ws-surface-2); }
 .btn-secondary {
-    background: white; color: var(--ws-purple); border: 1px solid var(--ws-purple);
+    background: var(--ws-surface); color: var(--ws-purple); border: 1px solid var(--ws-purple);
     padding: 10px 18px; border-radius: 8px; cursor: pointer;
 }
 .btn-secondary:hover:not(:disabled) { background: rgba(124, 58, 237, 0.04); }
@@ -349,7 +349,9 @@ function shortRef(ref) {
 .modal-input {
     padding: 9px 11px; border: 1px solid var(--ws-border); border-radius: 6px;
     font-size: 0.9rem;
+    background: var(--ws-surface-2); color: var(--ws-text);
 }
+.modal-input::placeholder { color: var(--ws-text-3); }
 .modal-input:focus { outline: none; border-color: var(--ws-purple); }
 .modal-help { font-size: 0.76rem; color: var(--ws-text-3); }
 .modal-error {
