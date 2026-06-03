@@ -95,21 +95,46 @@ export class BankStatementsController {
     };
   }
 
+  @Get('bank-statements')
+  @RequireCapability(MEMBERSHIP_CAPABILITIES.NSBU_BASE_READ)
+  async listBatches(
+    @Param('orgId') orgId: string,
+    @Param('periodId') periodId: string,
+  ) {
+    const batches = await this.bank.listBatchesForPeriod({
+      organizationId: orgId,
+      periodId,
+    });
+    // Derive a single human-facing status per batch so the UI doesn't have
+    // to: any still-draft rows → 'draft' (needs attention); otherwise the
+    // whole batch is 'committed'.
+    const items = batches.map((b) => ({
+      ...b,
+      status: b.statusCounts.draft > 0 ? 'draft' : 'committed',
+      pendingRed: b.draftColorCounts.red,
+    }));
+    return { success: true, batches: items };
+  }
+
   @Get('bank-statements/:uploadId/drafts')
   @RequireCapability(MEMBERSHIP_CAPABILITIES.NSBU_BASE_READ)
   async listDrafts(
     @Param('orgId') orgId: string,
     @Param('uploadId') uploadId: string,
     @Query('color') color?: BankPreviewColor,
+    @Query('status') status?: 'draft' | 'committed',
   ) {
     const enriched = await this.bank.listDraftsForUpload({
       organizationId: orgId,
       uploadId,
+      // Default (no status) keeps the live preview behaviour: draft rows only.
+      // A committed batch passes ?status=committed to load it read-only.
+      statuses: status ? [status] : undefined,
     });
 
     const items = enriched
       .filter((d) => !color || d.color === color)
-      .map(({ entry, color: c, reason }) => ({
+      .map(({ entry, color: c, reason, recordAccount, direction }) => ({
         id: entry._id.toString(),
         sourceRef: entry.sourceRef,
         date: entry.date,
@@ -118,6 +143,8 @@ export class BankStatementsController {
         status: entry.status,
         color: c,
         previewReason: reason,
+        recordAccount,
+        direction,
         createdAt: (entry as unknown as { createdAt: Date }).createdAt,
       }));
 

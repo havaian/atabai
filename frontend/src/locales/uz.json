@@ -110,7 +110,8 @@
     "/adjustments": "Tuzatishlar",
     "/adjustmentNew": "Yangi tuzatish",
     "/adjustmentDetail": "Tuzatish",
-    "/members": "Aʼzolar"
+    "/members": "Aʼzolar",
+    "/bankBatches": "Bank koʻchirmalari"
   },
   "pageDescriptions": {
     "/": "XMHS ni avtomatlashtiring. Su'niy Intellekt bilan.. Murakkab moliyaviy ma'lumotlarni aniq, auditga tayyor XMHS hisobotlariga aylantiring — tezroq, arzonroq va to'liq shaffoflik bilan..",
@@ -203,13 +204,15 @@
       "osvReady": "Import qilingan ({n} ta qoldiq)",
       "osvMissing": "Import qilinmagan",
       "bank": "Bank",
-      "bankReady": "Oʻtkazmalar bajarilgan",
+      "bankReady": "Yuklangan ({n} ta koʻchirma)",
       "bankMissing": "Oʻtkazmalar yoʻq",
       "adjustments": "Tuzatishlar",
       "adjustmentsReady": "{n} ta tuzatish",
       "adjustmentsMissing": "Tuzatishlar yoʻq",
       "noPeriod": "Boshlash uchun davrni tanlang yoki yarating",
-      "viewMatrix": "Matritsani ochish"
+      "viewMatrix": "Matritsani ochish",
+      "bankPending": "{n} ta tekshiruvga",
+      "viewBatches": "Koʻchirmalarni ochish"
     }
   },
   "hero": {
@@ -1246,7 +1249,8 @@
       "description": "Tavsif",
       "amount": "Summa",
       "status": "Holat",
-      "actions": "Amallar"
+      "actions": "Amallar",
+      "account": "Hisob"
     },
     "actions": {
       "fix": "Tuzatish"
@@ -1261,7 +1265,9 @@
       "accountCodeHelp": "NSBU kodi.",
       "description": "Tavsif",
       "learnRule": "Qoidaga qoʻshish"
-    }
+    },
+    "committedTitle": "Joylangan koʻchirma",
+    "committedSubtitle": "Allaqachon hisobga joylangan — faqat koʻrish."
   },
   "adjustments": {
     "title": "IFRS tuzatishlari",
@@ -1324,7 +1330,8 @@
       "bank": "Koʻchirma",
       "adjustment": "Tuzatish",
       "lock": "Yopish",
-      "reopen": "Qayta ochish"
+      "reopen": "Qayta ochish",
+      "bankBatches": "Koʻchirmalar"
     },
     "createNew": "Yangi davr",
     "createTitle": "Yangi davr yaratish",
@@ -1391,6 +1398,16 @@
     "status": {
       "pending": "Kutilmoqda",
       "revoked": "Olib tashlangan"
+    }
+  },
+  "bankBatches": {
+    "title": "Bank koʻchirmalari",
+    "upload": "Koʻchirma yuklash",
+    "empty": "Bu davr uchun hali koʻchirma yuklanmagan.",
+    "rows": "{n} qator",
+    "status": {
+      "draft": "Tekshirish kerak",
+      "committed": "Joylangan"
     }
   }
 }

@@ -32,6 +32,7 @@ import OnboardingView from '@/views/app/OnboardingView.vue'
 import OrganizationsListView from '@/views/app/OrganizationsListView.vue'
 import OrganizationMembersView from '@/views/app/OrganizationMembersView.vue'
 import BankUploadView from '@/views/app/BankUploadView.vue'
+import BankBatchesView from '@/views/app/BankBatchesView.vue'
 import BankPreviewView from '@/views/app/BankPreviewView.vue'
 import PeriodsView from '@/views/app/PeriodsView.vue'
 import ChartOfAccountsView from '@/views/app/ChartOfAccountsView.vue'
@@ -164,6 +165,12 @@ const appChildren = [
         name: 'BankUpload',
         component: BankUploadView,
         meta: { titleKey: 'pageTitles./bankUpload', requiresOrg: true }
+    },
+    {
+        path: 'ledger/periods/:periodId/bank-batches',
+        name: 'BankBatches',
+        component: BankBatchesView,
+        meta: { titleKey: 'pageTitles./bankBatches', requiresOrg: true }
     },
     {
         path: 'ledger/periods/:periodId/bank-statements/:uploadId',

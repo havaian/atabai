@@ -26,6 +26,7 @@ import {
   JournalEntry,
   type JournalEntryDocument,
   type JournalEntryModel,
+  type JournalEntryStatus,
 } from '../schemas/journal-entry.schema';
 import { BalanceRollupService } from '../services/balance-rollup.service';
 import { PeriodsService } from '../services/periods.service';
@@ -195,21 +196,33 @@ export class BankIngestionService {
   async listDraftsForUpload(args: {
     organizationId: Types.ObjectId | string;
     uploadId: string;
+    /**
+     * Which entry statuses to include. Defaults to ['draft'] so the live
+     * preview screen behaves exactly as before. The batch-history view
+     * passes ['committed'] (or omits the filter) to inspect a batch that
+     * has already been posted, read-only.
+     */
+    statuses?: JournalEntryStatus[];
   }): Promise<Array<{
     entry: JournalEntryDocument;
     color: BankPreviewColor;
     reason: string;
+    recordAccount: string | null;
+    direction: 'we_pay' | 'we_receive' | null;
   }>> {
     const orgId =
       typeof args.organizationId === 'string'
         ? new Types.ObjectId(args.organizationId)
         : args.organizationId;
 
+    const statusFilter =
+      args.statuses && args.statuses.length > 0 ? args.statuses : ['draft'];
+
     const entries = await this.entryModel
       .find({
         organizationId: orgId,
         source: 'bank_statement',
-        status: 'draft',
+        status: { $in: statusFilter },
         sourceRef: { $regex: `^bank:${this.escapeRegex(args.uploadId)}:` },
       })
       .sort({ date: 1, sourceRef: 1 });
@@ -221,7 +234,7 @@ export class BankIngestionService {
     const entryIds = entries.map((e) => e._id);
     const allLines = await this.lineModel
       .find({ entryId: { $in: entryIds } })
-      .select('entryId accountCode counterpartyId')
+      .select('entryId accountCode counterpartyId direction')
       .lean();
     const linesByEntryId = new Map<string, typeof allLines>();
     for (const line of allLines) {
@@ -251,6 +264,18 @@ export class BankIngestionService {
 
     return entries.map((entry) => {
       const lines = linesByEntryId.get(entry._id.toString()) ?? [];
+      // The "record" leg is whichever line is NOT the org's current account
+      // (5110). Direction: if the record account is on the debit side we paid
+      // out; if on the credit side money came in.
+      const recordLine =
+        lines.find((l) => l.accountCode !== BANK_POSTING_ACCOUNTS.CURRENT_ACCOUNT) ?? null;
+      const recordAccount = recordLine?.accountCode ?? null;
+      const direction: 'we_pay' | 'we_receive' | null = recordLine
+        ? recordLine.direction === 'debit'
+          ? 'we_pay'
+          : 'we_receive'
+        : null;
+
       const hasPlaceholder = lines.some(
         (l) => l.accountCode === '000',
       );
@@ -260,6 +285,8 @@ export class BankIngestionService {
           color: 'red' as const,
           reason:
             'Unrecognized treasury payment — pick the record account before posting',
+          recordAccount,
+          direction,
         };
       }
       const counterpartyId = lines.find((l) => l.counterpartyId)?.counterpartyId;
@@ -270,10 +297,12 @@ export class BankIngestionService {
             entry,
             color: 'yellow' as const,
             reason: 'Counterparty auto-created from this statement — verify',
+            recordAccount,
+            direction,
           };
         }
       }
-      return { entry, color: 'green' as const, reason: '' };
+      return { entry, color: 'green' as const, reason: '', recordAccount, direction };
     });
   }
 
@@ -667,6 +696,158 @@ export class BankIngestionService {
       return `${base} (treasury rule matched on ${treasuryMatchedOn}) [${side}]`;
     }
     return `${base} [${side}]`;
+  }
+
+  // ─── List upload batches for a period (batch-history screen) ────────────────
+
+  /**
+   * Aggregate every bank-statement entry in a period into one row per upload
+   * batch. There is no separate "upload" collection — each upload's identity
+   * lives only in the `sourceRef` (`bank:{uploadId}:{rowIndex}`), so we group
+   * by the embedded uploadId here.
+   *
+   * Per batch we report: total rows, a per-status breakdown, the green/yellow/
+   * red breakdown of the still-draft rows (so the list can show how much is
+   * left to fix), and the earliest createdAt as the batch's "uploaded at".
+   *
+   * This is what makes a batch reachable again after the operator closes the
+   * preview tab — the uploadId is otherwise lost (it only ever lived in the
+   * preview URL).
+   */
+  async listBatchesForPeriod(args: {
+    organizationId: Types.ObjectId | string;
+    periodId: Types.ObjectId | string;
+  }): Promise<
+    Array<{
+      uploadId: string;
+      uploadedAt: Date | null;
+      totalRows: number;
+      statusCounts: Record<JournalEntryStatus, number>;
+      draftColorCounts: Record<BankPreviewColor, number>;
+    }>
+  > {
+    const orgId =
+      typeof args.organizationId === 'string'
+        ? new Types.ObjectId(args.organizationId)
+        : args.organizationId;
+    const periodId =
+      typeof args.periodId === 'string'
+        ? new Types.ObjectId(args.periodId)
+        : args.periodId;
+
+    // Pull the lean fields we need for every bank entry in the period, plus
+    // the placeholder-account signal (whether any line is '000' → RED) so the
+    // draft color breakdown can be computed without an N+1 over batches.
+    const entries = await this.entryModel
+      .find({
+        organizationId: orgId,
+        periodId,
+        source: 'bank_statement',
+        sourceRef: { $regex: '^bank:' },
+      })
+      .select('_id sourceRef status createdAt')
+      .lean();
+
+    if (entries.length === 0) return [];
+
+    // Map entryId → has a '000' placeholder line (RED). One bulk query.
+    const entryIds = entries.map((e) => e._id);
+    const placeholderLines = await this.lineModel
+      .find({ entryId: { $in: entryIds }, accountCode: '000' })
+      .select('entryId')
+      .lean();
+    const redEntryIds = new Set(placeholderLines.map((l) => l.entryId.toString()));
+
+    // Counterparty auto-created signal (YELLOW) for the remaining draft rows.
+    const draftLineEntryIds = entries
+      .filter((e) => e.status === 'draft' && !redEntryIds.has(e._id.toString()))
+      .map((e) => e._id);
+    const draftLines =
+      draftLineEntryIds.length > 0
+        ? await this.lineModel
+            .find({ entryId: { $in: draftLineEntryIds }, counterpartyId: { $ne: null } })
+            .select('entryId counterpartyId')
+            .lean()
+        : [];
+    const cpartyIds = Array.from(
+      new Set(
+        draftLines
+          .map((l) => l.counterpartyId?.toString())
+          .filter((id): id is string => typeof id === 'string'),
+      ),
+    );
+    const autoCreatedCparties =
+      cpartyIds.length > 0
+        ? await this.counterpartyModel
+            .find({
+              _id: { $in: cpartyIds.map((id) => new Types.ObjectId(id)) },
+              createdFromBankRow: true,
+            })
+            .select('_id')
+            .lean()
+        : [];
+    const autoCreatedSet = new Set(autoCreatedCparties.map((c) => c._id.toString()));
+    // entryId → is yellow (first counterparty line is auto-created).
+    const yellowEntryIds = new Set<string>();
+    for (const line of draftLines) {
+      const cpId = line.counterpartyId?.toString();
+      if (cpId && autoCreatedSet.has(cpId)) {
+        yellowEntryIds.add(line.entryId.toString());
+      }
+    }
+
+    // Group by uploadId parsed out of `bank:{uploadId}:{rowIndex}`.
+    const batches = new Map<
+      string,
+      {
+        uploadId: string;
+        uploadedAt: Date | null;
+        totalRows: number;
+        statusCounts: Record<JournalEntryStatus, number>;
+        draftColorCounts: Record<BankPreviewColor, number>;
+      }
+    >();
+
+    for (const e of entries) {
+      const ref = e.sourceRef ?? '';
+      const parts = ref.split(':'); // ['bank', uploadId, rowIndex]
+      const uploadId = parts[1];
+      if (!uploadId) continue;
+
+      let batch = batches.get(uploadId);
+      if (!batch) {
+        batch = {
+          uploadId,
+          uploadedAt: null,
+          totalRows: 0,
+          statusCounts: { draft: 0, committed: 0, reversed: 0 },
+          draftColorCounts: { green: 0, yellow: 0, red: 0 },
+        };
+        batches.set(uploadId, batch);
+      }
+
+      batch.totalRows += 1;
+      batch.statusCounts[e.status] = (batch.statusCounts[e.status] ?? 0) + 1;
+
+      const created = (e as unknown as { createdAt?: Date }).createdAt ?? null;
+      if (created && (!batch.uploadedAt || created < batch.uploadedAt)) {
+        batch.uploadedAt = created;
+      }
+
+      if (e.status === 'draft') {
+        const id = e._id.toString();
+        if (redEntryIds.has(id)) batch.draftColorCounts.red += 1;
+        else if (yellowEntryIds.has(id)) batch.draftColorCounts.yellow += 1;
+        else batch.draftColorCounts.green += 1;
+      }
+    }
+
+    // Newest upload first.
+    return Array.from(batches.values()).sort((a, b) => {
+      const at = a.uploadedAt ? a.uploadedAt.getTime() : 0;
+      const bt = b.uploadedAt ? b.uploadedAt.getTime() : 0;
+      return bt - at;
+    });
   }
 
   private escapeRegex(s: string): string {

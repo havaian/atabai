@@ -50,11 +50,35 @@ export const useBankStore = defineStore('bank', () => {
         }
     }
 
-    async function fetchDrafts({ periodId, uploadId }) {
+    // All upload batches in a period (the batch-history list). Each row is one
+    // upload, discoverable again after the preview tab is closed.
+    const batches = ref([])
+
+    async function fetchBatches({ periodId }) {
+        isLoading.value = true
+        error.value = null
+        try {
+            const resp = await apiClient.get(
+                orgScope(`/periods/${periodId}/bank-statements`),
+            )
+            batches.value = resp.data.batches || []
+            return batches.value
+        } catch (err) {
+            error.value = err?.response?.data?.message || err?.message || 'Failed to load batches'
+            throw err
+        } finally {
+            isLoading.value = false
+        }
+    }
+
+    async function fetchDrafts({ periodId, uploadId, status }) {
         isLoading.value = true
         try {
             const resp = await apiClient.get(
                 orgScope(`/periods/${periodId}/bank-statements/${uploadId}/drafts`),
+                // status=committed loads an already-posted batch read-only;
+                // omitted → live draft preview (unchanged behaviour).
+                { params: status ? { status } : {} },
             )
             drafts.value = resp.data.drafts || []
             return drafts.value
@@ -104,17 +128,20 @@ export const useBankStore = defineStore('bank', () => {
     function reset() {
         lastUploadSummary.value = null
         drafts.value = []
+        batches.value = []
         error.value = null
     }
 
     return {
         lastUploadSummary,
         drafts,
+        batches,
         isLoading,
         isUploading,
         isCommitting,
         error,
         uploadStatement,
+        fetchBatches,
         fetchDrafts,
         updateDraft,
         learnRule,

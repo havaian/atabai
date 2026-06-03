@@ -14,10 +14,10 @@
                 <ArrowLeft :size="16" /> {{ $t('common.back') }}
             </button>
             <div class="bank-preview-titles">
-                <h1>{{ $t('bankPreview.title') }}</h1>
-                <p>{{ $t('bankPreview.subtitle') }}</p>
+                <h1>{{ isReadOnly ? $t('bankPreview.committedTitle') : $t('bankPreview.title') }}</h1>
+                <p>{{ isReadOnly ? $t('bankPreview.committedSubtitle') : $t('bankPreview.subtitle') }}</p>
             </div>
-            <div class="bank-preview-counts">
+            <div v-if="!isReadOnly" class="bank-preview-counts">
                 <span class="bank-preview-count bank-preview-count--green">
                     {{ countByColor.green }} {{ $t('bankPreview.colors.green') }}
                 </span>
@@ -28,6 +28,9 @@
                     {{ countByColor.red }} {{ $t('bankPreview.colors.red') }}
                 </span>
             </div>
+            <span v-else class="bank-preview-count bank-preview-count--committed">
+                {{ $t('bankBatches.status.committed') }}
+            </span>
         </header>
 
         <section class="bank-preview-table-wrap">
@@ -37,9 +40,10 @@
                         <th>{{ $t('bankPreview.cols.row') }}</th>
                         <th>{{ $t('bankPreview.cols.date') }}</th>
                         <th>{{ $t('bankPreview.cols.description') }}</th>
+                        <th>{{ $t('bankPreview.cols.account') }}</th>
                         <th class="bank-preview-num">{{ $t('bankPreview.cols.amount') }}</th>
                         <th>{{ $t('bankPreview.cols.status') }}</th>
-                        <th>{{ $t('bankPreview.cols.actions') }}</th>
+                        <th v-if="!isReadOnly">{{ $t('bankPreview.cols.actions') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -47,13 +51,17 @@
                         <td class="bank-preview-row-id">{{ shortRef(draft.sourceRef) }}</td>
                         <td>{{ formatDate(draft.date) }}</td>
                         <td class="bank-preview-desc">{{ draft.description }}</td>
+                        <td class="bank-preview-account">{{ draft.recordAccount || '—' }}</td>
                         <td class="bank-preview-num">{{ formatAmount(draft.totalAmount) }}</td>
                         <td>
-                            <span :class="`bank-preview-pill bank-preview-pill--${rowColor(draft)}`">
+                            <span v-if="isReadOnly" class="bank-preview-pill bank-preview-pill--committed">
+                                {{ $t('bankBatches.status.committed') }}
+                            </span>
+                            <span v-else :class="`bank-preview-pill bank-preview-pill--${rowColor(draft)}`">
                                 {{ $t(`bankPreview.colors.${rowColor(draft)}`) }}
                             </span>
                         </td>
-                        <td>
+                        <td v-if="!isReadOnly">
                             <button class="bank-preview-fix" v-if="rowColor(draft) !== 'green'" @click="openEditor(draft)">
                                 <Pencil :size="13" />
                                 {{ $t('bankPreview.actions.fix') }}
@@ -61,7 +69,7 @@
                         </td>
                     </tr>
                     <tr v-if="bank.drafts.length === 0 && !bank.isLoading">
-                        <td colspan="6" class="bank-preview-empty">{{ $t('bankPreview.empty') }}</td>
+                        <td :colspan="isReadOnly ? 6 : 7" class="bank-preview-empty">{{ $t('bankPreview.empty') }}</td>
                     </tr>
                 </tbody>
             </table>
@@ -69,7 +77,7 @@
 
         <div v-if="bank.error" class="bank-preview-error">{{ bank.error }}</div>
 
-        <footer class="bank-preview-footer">
+        <footer v-if="!isReadOnly" class="bank-preview-footer">
             <span class="bank-preview-help">{{ $t('bankPreview.commitHelp', { red: countByColor.red }) }}</span>
             <span class="bank-preview-spacer" />
             <button
@@ -139,6 +147,8 @@ const bank = useBankStore()
 
 const periodId = computed(() => route.params.periodId)
 const uploadId = computed(() => route.params.uploadId)
+// ?status=committed → this batch is already posted; render read-only.
+const isReadOnly = computed(() => route.query.status === 'committed')
 
 const editing = ref(null)
 const editPatch = ref({ accountCode: '', description: '' })
@@ -146,7 +156,11 @@ const isSavingEdit = ref(false)
 const modalError = ref('')
 
 onMounted(async () => {
-    await bank.fetchDrafts({ periodId: periodId.value, uploadId: uploadId.value })
+    await bank.fetchDrafts({
+        periodId: periodId.value,
+        uploadId: uploadId.value,
+        status: isReadOnly.value ? 'committed' : undefined,
+    })
 })
 
 /**
@@ -221,13 +235,13 @@ async function learnRule() {
 async function commit() {
     try {
         await bank.commit({ periodId: periodId.value, uploadId: uploadId.value })
-        router.push('/app/ledger/periods')
+        router.push(`/app/ledger/periods/${periodId.value}/bank-batches`)
     } catch (_) {
         // bank.error already populated; renders inline.
     }
 }
 
-function back() { router.push('/app/ledger/periods') }
+function back() { router.push(`/app/ledger/periods/${periodId.value}/bank-batches`) }
 function formatDate(d) { return d ? new Date(d).toISOString().slice(0, 10) : '' }
 function formatAmount(a) {
     if (!a) return '0'
@@ -260,6 +274,7 @@ function shortRef(ref) {
 .bank-preview-count--green { background: rgba(72, 187, 120, 0.15); color: #2f855a; }
 .bank-preview-count--yellow { background: rgba(237, 137, 54, 0.15); color: #c05621; }
 .bank-preview-count--red { background: rgba(245, 101, 101, 0.15); color: #c53030; }
+.bank-preview-count--committed { background: rgba(72, 187, 120, 0.15); color: #2f855a; }
 
 .bank-preview-table-wrap {
     background: var(--ws-surface); border: 1px solid var(--ws-border);
@@ -289,6 +304,8 @@ function shortRef(ref) {
 .bank-preview-pill--green { background: rgba(72, 187, 120, 0.15); color: #2f855a; }
 .bank-preview-pill--yellow { background: rgba(237, 137, 54, 0.15); color: #c05621; }
 .bank-preview-pill--red { background: rgba(245, 101, 101, 0.15); color: #c53030; }
+.bank-preview-pill--committed { background: rgba(72, 187, 120, 0.15); color: #2f855a; }
+.bank-preview-account { font-family: monospace; font-size: 0.82rem; color: var(--ws-text-2); }
 .bank-preview-fix {
     display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px;
     background: transparent; border: 1px solid var(--ws-border); border-radius: 6px;

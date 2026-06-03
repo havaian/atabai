@@ -40,6 +40,9 @@
                     </div>
                 </div>
                 <div class="period-card-actions">
+                    <button class="period-card-action" @click="goBatches(p.id)">
+                        <Layers :size="14" /> {{ $t('periods.actions.bankBatches') }}
+                    </button>
                     <button class="period-card-action" :disabled="p.status === 'locked'" @click="goBank(p.id)">
                         <Banknote :size="14" /> {{ $t('periods.actions.bank') }}
                     </button>
@@ -100,7 +103,7 @@
 // @ts-nocheck
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { Banknote, FileSpreadsheet, Lock, Plus, SlidersHorizontal, Unlock, X } from 'lucide-vue-next'
+import { Banknote, FileSpreadsheet, Layers, Lock, Plus, SlidersHorizontal, Unlock, X } from 'lucide-vue-next'
 import { useAuthStore } from '@/stores/auth'
 import { useLedgerStore } from '@/stores/ledger'
 import { useOrganizationsStore } from '@/stores/organizations'
@@ -134,6 +137,7 @@ onMounted(async () => {
 })
 
 function goBank(periodId) { router.push(`/app/ledger/periods/${periodId}/bank-statements`) }
+function goBatches(periodId) { router.push(`/app/ledger/periods/${periodId}/bank-batches`) }
 function formatDate(d) { return d ? new Date(d).toISOString().slice(0, 10) : '' }
 
 async function lock(p) {

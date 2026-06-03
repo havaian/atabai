@@ -81,8 +81,25 @@
                     </div>
                 </div>
 
-                <button class="wf-status-cta" @click="goPeriod('bank-statements')">
-                    {{ $t('dashboard.status.viewMatrix') }}
+                <div class="wf-status-item" :class="{ 'wf-status-item--done': status.bankBatches > 0 }">
+                    <component :is="status.bankBatches > 0 ? CheckCircleIcon : MinusCircleIcon"
+                        class="wf-status-icon" />
+                    <div class="wf-status-body">
+                        <span class="wf-status-label">{{ $t('dashboard.status.bank') }}</span>
+                        <span class="wf-status-detail">
+                            <template v-if="status.bankBatches > 0">
+                                {{ $t('dashboard.status.bankReady', { n: status.bankBatches }) }}
+                                <template v-if="status.bankPending > 0">
+                                    · {{ $t('dashboard.status.bankPending', { n: status.bankPending }) }}
+                                </template>
+                            </template>
+                            <template v-else>{{ $t('dashboard.status.bankMissing') }}</template>
+                        </span>
+                    </div>
+                </div>
+
+                <button class="wf-status-cta" @click="goPeriod('bank-batches')">
+                    {{ $t('dashboard.status.viewBatches') }}
                     <ArrowRightIcon class="w-3.5 h-3.5" />
                 </button>
             </div>
@@ -92,7 +109,7 @@
                  design — swapping intent (templates → actions), not chrome.
                  Each card routes into a period-scoped page. -->
             <div class="template-grid">
-                <div class="template-card" @click="goPeriod('bank-statements')">
+                <div class="template-card" @click="goPeriod('bank-batches')">
                     <div class="template-card-top">
                         <div class="template-icon">
                             <Landmark :size="18" />
@@ -121,6 +138,7 @@ import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
 import { useOrganizationsStore } from '@/stores/organizations'
 import { useLedgerStore } from '@/stores/ledger'
+import { useBankStore } from '@/stores/bank'
 import {
     CheckCircleIcon, ArrowRightIcon, MinusCircleIcon
 } from '@heroicons/vue/24/outline'
@@ -134,31 +152,39 @@ const { t } = useI18n()
 const authStore = useAuthStore()
 const orgsStore = useOrganizationsStore()
 const ledgerStore = useLedgerStore()
+const bankStore = useBankStore()
 
 // Workflow status for the active period (the "how do I check if it works"
-// panel). Cheap reads: chart length and balance row count (a populated
-// ledger produces balance rows). Bank state isn't a distinct counter yet
-// (postings roll into balances) so it's folded into the balance signal.
+// panel). Cheap reads: chart length, balance row count, and bank-batch
+// counts (so the operator can see uploaded statements + how many still
+// have draft rows to fix, instead of the batch being invisible).
 const status = ref({
     chartCount: 0,
     balanceCount: 0,
+    bankBatches: 0,
+    bankPending: 0,
 })
 
 async function loadStatus() {
     if (!orgsStore.currentOrgId || !ledgerStore.activePeriod) {
-        status.value = { chartCount: 0, balanceCount: 0 }
+        status.value = { chartCount: 0, balanceCount: 0, bankBatches: 0, bankPending: 0 }
         return
     }
     const periodId = ledgerStore.activePeriod.id
     // Run the reads in parallel; tolerate individual failures so one
     // missing endpoint doesn't blank the whole strip.
-    const [chart, balances] = await Promise.all([
+    const [chart, balances, batches] = await Promise.all([
         ledgerStore.fetchChart().catch(() => []),
         ledgerStore.fetchBalances({ periodId }).catch(() => []),
+        bankStore.fetchBatches({ periodId }).catch(() => []),
     ])
+    const batchList = Array.isArray(batches) ? batches : []
     status.value = {
         chartCount: Array.isArray(chart) ? chart.length : 0,
         balanceCount: Array.isArray(balances) ? balances.length : 0,
+        bankBatches: batchList.length,
+        // Batches still carrying draft rows the operator needs to review.
+        bankPending: batchList.filter((b) => b.status === 'draft').length,
     }
 }
 

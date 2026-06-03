@@ -110,7 +110,8 @@
     "/adjustments": "Adjustments",
     "/adjustmentNew": "New adjustment",
     "/adjustmentDetail": "Adjustment",
-    "/members": "Members"
+    "/members": "Members",
+    "/bankBatches": "Bank statements"
   },
   "pageDescriptions": {
     "/": "Automate IFRS. Powered by AI.. Turn complex financial data into accurate, audit-ready IFRS reports — faster, cheaper, and with full transparency..",
@@ -203,13 +204,15 @@
       "osvReady": "Imported ({n} balances)",
       "osvMissing": "Not imported",
       "bank": "Bank",
-      "bankReady": "Postings committed",
+      "bankReady": "Uploaded ({n} statements)",
       "bankMissing": "No postings",
       "adjustments": "Adjustments",
       "adjustmentsReady": "{n} adjustments",
       "adjustmentsMissing": "No adjustments",
       "noPeriod": "Pick or create a period to begin",
-      "viewMatrix": "Open matrix"
+      "viewMatrix": "Open matrix",
+      "bankPending": "{n} need review",
+      "viewBatches": "Open statements"
     }
   },
   "hero": {
@@ -1246,7 +1249,8 @@
       "description": "Description",
       "amount": "Amount",
       "status": "Status",
-      "actions": "Actions"
+      "actions": "Actions",
+      "account": "Account"
     },
     "actions": {
       "fix": "Fix"
@@ -1261,7 +1265,9 @@
       "accountCodeHelp": "NSBU code, e.g. 6010 or 4420.",
       "description": "Description",
       "learnRule": "Add to rules"
-    }
+    },
+    "committedTitle": "Posted statement",
+    "committedSubtitle": "Already committed to the ledger — read-only."
   },
   "adjustments": {
     "title": "IFRS adjustments",
@@ -1324,7 +1330,8 @@
       "bank": "Upload statement",
       "adjustment": "New adjustment",
       "lock": "Lock",
-      "reopen": "Reopen"
+      "reopen": "Reopen",
+      "bankBatches": "Statements"
     },
     "createNew": "New period",
     "createTitle": "Create regular period",
@@ -1391,6 +1398,16 @@
     "status": {
       "pending": "Pending",
       "revoked": "Revoked"
+    }
+  },
+  "bankBatches": {
+    "title": "Bank statements",
+    "upload": "Upload statement",
+    "empty": "No statements uploaded for this period yet.",
+    "rows": "{n} rows",
+    "status": {
+      "draft": "Needs review",
+      "committed": "Posted"
     }
   }
 }
