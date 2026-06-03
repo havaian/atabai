@@ -207,10 +207,17 @@ export class OrganizationsController {
 
   @Get(':orgId/members')
   @UseGuards(OrgMembershipGuard)
-  async listMembers(@Param('orgId') orgId: string) {
+  async listMembers(
+    @CurrentUser() user: UserDocument,
+    @Param('orgId') orgId: string,
+  ) {
     const members = await this.orgs.listMembers(orgId);
     return {
       success: true,
+      // The caller's own id, so the UI can mark their row as "You" and
+      // block self-edit. Sent explicitly rather than inferred client-side
+      // because the client doesn't otherwise hold its own user id here.
+      currentUserId: user._id.toString(),
       members: members.map((m) => this.serializeMembership(m)),
     };
   }
@@ -270,6 +277,8 @@ export class OrganizationsController {
     id: string;
     organizationId: string;
     userId: string | null;
+    userName: string | null;
+    userEmail: string | null;
     invitedEmail: string | null;
     role: MembershipRole;
     capabilities: string[];
@@ -281,10 +290,38 @@ export class OrganizationsController {
     createdAt: Date;
     updatedAt: Date;
   } {
+    // userId may be a raw ObjectId (most call sites) or a populated User doc
+    // (listMembers populates 'name email'). Detect the populated shape and
+    // pull name/email; otherwise leave them null and keep userId as the id
+    // string so the existing contract is unchanged.
+    const rawUserId = m.userId as unknown as
+      | { _id: Types.ObjectId; name?: string; email?: string }
+      | Types.ObjectId
+      | null;
+    let userId: string | null = null;
+    let userName: string | null = null;
+    let userEmail: string | null = null;
+    if (rawUserId) {
+      if (
+        typeof rawUserId === 'object' &&
+        '_id' in rawUserId &&
+        (rawUserId as { name?: string }).name !== undefined
+      ) {
+        const populated = rawUserId as { _id: Types.ObjectId; name?: string; email?: string };
+        userId = populated._id.toString();
+        userName = populated.name ?? null;
+        userEmail = populated.email ?? null;
+      } else {
+        userId = (rawUserId as Types.ObjectId).toString();
+      }
+    }
+
     return {
       id: m._id.toString(),
       organizationId: m.organizationId.toString(),
-      userId: m.userId?.toString() ?? null,
+      userId,
+      userName,
+      userEmail,
       invitedEmail: m.invitedEmail,
       role: m.role,
       capabilities: m.capabilities,

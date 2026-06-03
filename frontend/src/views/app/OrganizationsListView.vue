@@ -132,7 +132,7 @@ async function accept(membershipId) {
 
 .orgs-header {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: space-between;
     gap: 16px;
     margin-bottom: 32px;

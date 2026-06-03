@@ -235,7 +235,7 @@ function formatPeriod(p) {
 /* ─── Header ─────────────────────────────────────────────────────────────── */
 .dash-header {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: space-between;
     gap: 16px;
 }
@@ -518,7 +518,7 @@ function formatPeriod(p) {
     letter-spacing: -0.01em;
     min-height: 2.8em;
     display: flex;
-    align-items: flex-start;
+    align-items: center;
 }
 
 .template-desc {
@@ -726,7 +726,7 @@ function formatPeriod(p) {
 
     .dash-header {
         flex-direction: column;
-        align-items: flex-start;
+        align-items: center;
         gap: 12px;
     }
 

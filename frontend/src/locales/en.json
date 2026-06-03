@@ -1373,6 +1373,7 @@
   },
   "members": {
     "title": "Organization members",
+    "you": "You",
     "invite": "Invite",
     "send": "Send",
     "inviteTitle": "New invite",

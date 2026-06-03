@@ -42,6 +42,7 @@ FROM nginx:alpine AS production
 RUN apk add --no-cache curl
 
 # Remove default nginx website
+
 RUN rm -rf /usr/share/nginx/html/*
 
 # Copy built application from builder stage

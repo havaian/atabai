@@ -75,7 +75,7 @@
     .adm-page-header,
     [class*="adm-page-header"] {
         flex-direction: column !important;
-        align-items: flex-start !important;
+        align-items: center !important;
         gap: 12px !important;
     }
     .adm-page-header > * {

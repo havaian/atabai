@@ -112,7 +112,7 @@ onUnmounted(() => document.removeEventListener('keydown', handleKeydown))
 .select-icon {
     width: 15px;
     height: 15px;
-    color: rgba(240, 236, 246, 0.4);
+    color: var(--ws-text-3);
     flex-shrink: 0;
 }
 
@@ -135,7 +135,7 @@ onUnmounted(() => document.removeEventListener('keydown', handleKeydown))
 .select-chevron {
     width: 15px;
     height: 15px;
-    color: rgba(240, 236, 246, 0.3);
+    color: var(--ws-text-3);
     flex-shrink: 0;
     transition: transform 0.18s;
 }
@@ -197,18 +197,18 @@ onUnmounted(() => document.removeEventListener('keydown', handleKeydown))
 
 .select-option.active {
     background: rgba(124, 58, 237, 0.12);
-    color: #C084FC;
+    color: var(--ws-purple);
 }
 
 .option-icon {
     width: 14px;
     height: 14px;
     flex-shrink: 0;
-    color: rgba(240, 236, 246, 0.35);
+    color: var(--ws-text-3);
 }
 
 .select-option.active .option-icon {
-    color: #A78BFA;
+    color: var(--ws-purple);
 }
 
 .option-label {
@@ -221,7 +221,7 @@ onUnmounted(() => document.removeEventListener('keydown', handleKeydown))
 .option-check {
     width: 14px;
     height: 14px;
-    color: #A78BFA;
+    color: var(--ws-purple);
     flex-shrink: 0;
     margin-left: auto;
 }

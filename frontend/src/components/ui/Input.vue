@@ -101,7 +101,7 @@ defineExpose({
 .input-label {
     font-size: 12.5px;
     font-weight: 600;
-    color: rgba(240, 236, 246, 0.55);
+    color: var(--ws-text-2);
     letter-spacing: 0.02em;
 }
 
@@ -131,7 +131,7 @@ defineExpose({
 }
 
 .input-el::placeholder {
-    color: rgba(240, 236, 246, 0.2);
+    color: var(--ws-text-3);
 }
 
 .input-el:focus {
@@ -197,7 +197,7 @@ defineExpose({
 .icon {
     width: 15px;
     height: 15px;
-    color: rgba(240, 236, 246, 0.3);
+    color: var(--ws-text-3);
 }
 
 .icon-error {
@@ -214,14 +214,14 @@ defineExpose({
 }
 
 .icon-clickable:hover {
-    color: rgba(240, 236, 246, 0.7);
+    color: var(--ws-text-2);
 }
 
 /* ── Spinner ── */
 .input-spinner {
     width: 14px;
     height: 14px;
-    border: 2px solid rgba(240, 236, 246, 0.1);
+    border: 2px solid var(--ws-border-2);
     border-top-color: #7C3AED;
     border-radius: 50%;
     animation: spin 0.7s linear infinite;
@@ -241,7 +241,7 @@ defineExpose({
     transform: translateY(-50%);
     background: transparent;
     border: none;
-    color: rgba(240, 236, 246, 0.3);
+    color: var(--ws-text-3);
     cursor: pointer;
     padding: 3px;
     border-radius: 4px;
@@ -252,13 +252,13 @@ defineExpose({
 }
 
 .input-clear:hover {
-    color: rgba(240, 236, 246, 0.7);
+    color: var(--ws-text-2);
 }
 
 /* ── Helper text ── */
 .input-helper {
     font-size: 12px;
-    color: rgba(240, 236, 246, 0.35);
+    color: var(--ws-text-3);
     margin: 0;
 }
 

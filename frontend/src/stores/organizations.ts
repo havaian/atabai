@@ -239,12 +239,15 @@ export const useOrganizationsStore = defineStore('organizations', () => {
         }
     }
 
-    /** List members of the current org. Returns the array, doesn't cache (small + dynamic). */
+    /** List members of the current org. Returns { members, currentUserId }; doesn't cache (small + dynamic). */
     async function listMembers(orgId) {
         const targetOrgId = orgId || currentOrgId.value
         if (!targetOrgId) throw new Error('No active organization')
         const resp = await apiClient.get(`/organizations/${targetOrgId}/members`)
-        return resp.data.members || []
+        return {
+            members: resp.data.members || [],
+            currentUserId: resp.data.currentUserId || null,
+        }
     }
 
     async function updateMember({ orgId, membershipId, role, capabilities }) {

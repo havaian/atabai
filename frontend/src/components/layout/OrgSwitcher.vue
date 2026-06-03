@@ -188,7 +188,7 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', handleDocumentCl
 .org-switcher-info {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
     min-width: 0;
     flex: 1;
 }

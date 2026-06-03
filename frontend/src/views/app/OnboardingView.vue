@@ -326,6 +326,14 @@ async function submit() {
     transition: border-color 0.15s, box-shadow 0.15s;
 }
 
+.onboarding-input::placeholder {
+    color: var(--ws-text-3);
+}
+
+.onboarding-input:hover:not(:focus) {
+    border-color: rgba(124, 58, 237, 0.25);
+}
+
 .onboarding-input:focus {
     outline: none;
     border-color: var(--ws-purple);

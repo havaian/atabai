@@ -484,7 +484,7 @@ function selectTheme(value) {
 
     .settings-row {
         flex-direction: column;
-        align-items: flex-start;
+        align-items: center;
         gap: 12px;
     }
 

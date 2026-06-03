@@ -243,7 +243,7 @@ function shortRef(ref) {
 <style scoped>
 .bank-preview { max-width: 1200px; margin: 0 auto; padding: 24px; }
 .bank-preview-header {
-    display: flex; align-items: flex-start; gap: 24px;
+    display: flex; align-items: center; gap: 24px;
     margin-bottom: 20px; flex-wrap: wrap;
 }
 .bank-preview-back {
@@ -306,22 +306,31 @@ function shortRef(ref) {
 }
 .bank-preview-help { font-size: 0.84rem; color: var(--ws-text-3); }
 .bank-preview-spacer { flex: 1; }
+/* NOTE: global .btn-primary/.btn-ghost/.btn-secondary (App.vue + main.css)
+   are landing-page styles that leak in here via @layer/@apply. We pin the
+   properties they fight over: hover text color (their text-gray-* would go
+   invisible on our dark surfaces) and transform (App.vue's .btn-primary
+   carries hover:scale-105, which we don't want on a modal action button). */
 .btn-primary {
-    background: var(--ws-purple); color: white; padding: 10px 18px; border-radius: 8px;
+    background: var(--ws-purple); color: #fff; padding: 10px 18px; border-radius: 8px;
     border: none; font-weight: 500; cursor: pointer;
+    transform: none !important; box-shadow: none !important;
 }
-.btn-primary:hover:not(:disabled) { background: #6D28D9; }
+.btn-primary:hover:not(:disabled) { background: #6D28D9; color: #fff !important; transform: none !important; }
 .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
 .btn-ghost {
     background: transparent; color: var(--ws-text); border: 1px solid var(--ws-border);
     padding: 10px 18px; border-radius: 8px; cursor: pointer;
+    transform: none !important;
 }
-.btn-ghost:hover { background: var(--ws-surface-2); }
+.btn-ghost:hover { background: var(--ws-surface-2); color: var(--ws-text) !important; }
 .btn-secondary {
     background: var(--ws-surface); color: var(--ws-purple); border: 1px solid var(--ws-purple);
     padding: 10px 18px; border-radius: 8px; cursor: pointer;
+    transform: none !important;
 }
-.btn-secondary:hover:not(:disabled) { background: rgba(124, 58, 237, 0.04); }
+.btn-secondary::after { display: none !important; }
+.btn-secondary:hover:not(:disabled) { background: rgba(124, 58, 237, 0.04); color: var(--ws-purple) !important; }
 .btn-secondary:disabled { opacity: 0.5; cursor: not-allowed; }
 
 /* Modal */
@@ -346,13 +355,17 @@ function shortRef(ref) {
     padding: 10px; border-radius: 8px; white-space: pre-wrap; word-break: break-word;
 }
 .modal-field { display: flex; flex-direction: column; gap: 6px; font-size: 0.85rem; }
+.modal-field > span { color: var(--ws-text-2); font-weight: 500; }
 .modal-input {
-    padding: 9px 11px; border: 1px solid var(--ws-border); border-radius: 6px;
+    padding: 9px 11px; border: 1px solid var(--ws-border); border-radius: 8px;
     font-size: 0.9rem;
     background: var(--ws-surface-2); color: var(--ws-text);
+    outline: none; transition: border-color 0.15s, box-shadow 0.15s;
+    font-family: inherit; resize: vertical;
 }
 .modal-input::placeholder { color: var(--ws-text-3); }
-.modal-input:focus { outline: none; border-color: var(--ws-purple); }
+.modal-input:hover:not(:focus) { border-color: rgba(124, 58, 237, 0.25); }
+.modal-input:focus { border-color: var(--ws-purple); box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.15); }
 .modal-help { font-size: 0.76rem; color: var(--ws-text-3); }
 .modal-error {
     padding: 8px 10px; background: rgba(245, 101, 101, 0.1);

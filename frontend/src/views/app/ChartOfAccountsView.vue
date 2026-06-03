@@ -101,10 +101,21 @@ function subcontoSummary(a) {
 .chart-search,
 .chart-select {
     padding: 9px 12px; border: 1px solid var(--ws-border); border-radius: 8px;
-    font-size: 0.9rem; background: var(--ws-surface);
+    font-size: 0.9rem; background: var(--ws-surface); color: var(--ws-text);
+    outline: none; transition: border-color 0.15s, box-shadow 0.15s;
 }
+.chart-search::placeholder { color: var(--ws-text-3); }
 .chart-search { flex: 1; min-width: 220px; }
-.chart-search:focus, .chart-select:focus { outline: none; border-color: var(--ws-purple); }
+.chart-select {
+    appearance: none; -webkit-appearance: none; -moz-appearance: none;
+    padding-right: 32px; cursor: pointer;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%237C3AED' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 11px center;
+}
+.chart-select option { background: var(--ws-surface); color: var(--ws-text); }
+.chart-search:hover:not(:focus), .chart-select:hover { border-color: rgba(124, 58, 237, 0.25); }
+.chart-search:focus, .chart-select:focus { border-color: var(--ws-purple); box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.15); }
 .chart-empty {
     padding: 60px 24px; text-align: center; background: var(--ws-surface-2); border-radius: 12px;
     display: flex; flex-direction: column; gap: 8px; align-items: center; color: var(--ws-text-3);

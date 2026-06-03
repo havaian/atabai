@@ -194,7 +194,7 @@ async function submitCreate() {
 <style scoped>
 .periods-view { max-width: 1000px; margin: 0 auto; padding: 24px; }
 .periods-header {
-    display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
     margin-bottom: 24px;
 }
 .periods-header h1 { font-size: 1.3rem; font-weight: 600; margin-bottom: 4px; }
@@ -274,10 +274,20 @@ async function submitCreate() {
 .modal-close { background: transparent; border: none; cursor: pointer; color: var(--ws-text-3); }
 .modal-body { padding: 18px; display: flex; flex-direction: column; gap: 12px; }
 .modal-field { display: flex; flex-direction: column; gap: 6px; font-size: 0.85rem; }
+.modal-field > span { color: var(--ws-text-2); font-weight: 500; }
 .modal-field input {
-    padding: 9px 11px; border: 1px solid var(--ws-border); border-radius: 6px; font-size: 0.9rem;
+    padding: 9px 11px; border: 1px solid var(--ws-border); border-radius: 8px; font-size: 0.9rem;
+    background: var(--ws-surface); color: var(--ws-text);
+    outline: none; transition: border-color 0.15s, box-shadow 0.15s; font-family: inherit;
 }
-.modal-field input:focus { outline: none; border-color: var(--ws-purple); }
+.modal-field input::placeholder { color: var(--ws-text-3); }
+.modal-field input:hover:not(:focus) { border-color: rgba(124, 58, 237, 0.25); }
+.modal-field input:focus { border-color: var(--ws-purple); box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.15); }
+/* Tint the native date-picker indicator purple in dark theme (where the
+   default black glyph would vanish against a dark field). */
+[data-theme="dark"] .modal-field input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(0.7) sepia(1) saturate(5) hue-rotate(230deg);
+}
 .modal-error {
     padding: 8px 10px; background: rgba(245, 101, 101, 0.1);
     color: #c53030; border-radius: 6px; font-size: 0.82rem;

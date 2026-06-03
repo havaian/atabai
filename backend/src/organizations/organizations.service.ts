@@ -150,8 +150,12 @@ export class OrganizationsService {
   }
 
   async listMembers(orgId: string): Promise<MembershipDocument[]> {
+    // Populate the linked User so the controller can surface a human-readable
+    // name/email in the members list instead of the raw ObjectId. Pending
+    // email invites have userId:null and fall back to invitedEmail.
     return this.membershipModel
       .find({ organizationId: new Types.ObjectId(orgId), status: { $ne: 'revoked' } })
+      .populate('userId', 'name email')
       .sort({ status: 1, createdAt: 1 });
   }
 

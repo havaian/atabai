@@ -30,11 +30,14 @@
 
         <ul v-else-if="members.length > 0" class="members-list">
             <li v-for="m in members" :key="m.id" class="member-card"
-                :class="{ 'member-card--pending': m.status === 'invited', 'member-card--revoked': m.status === 'revoked' }">
+                :class="{ 'member-card--pending': m.status === 'invited', 'member-card--revoked': m.status === 'revoked', 'member-card--self': isSelf(m) }">
                 <div class="member-card-avatar">{{ initialsFor(m) }}</div>
                 <div class="member-card-info">
                     <div class="member-card-name">
-                        {{ m.invitedEmail || m.userId || '—' }}
+                        {{ displayName(m) }}
+                        <span v-if="isSelf(m)" class="member-card-status member-card-status--self">
+                            {{ $t('members.you') }}
+                        </span>
                         <span v-if="m.status === 'invited'" class="member-card-status member-card-status--pending">
                             {{ $t('members.status.pending') }}
                         </span>
@@ -42,6 +45,7 @@
                             {{ $t('members.status.revoked') }}
                         </span>
                     </div>
+                    <div v-if="subtitleFor(m)" class="member-card-subtitle">{{ subtitleFor(m) }}</div>
                     <div class="member-card-meta">
                         <span class="member-card-role">{{ $t(`organizations.role.${m.role}`) }}</span>
                         <span v-if="m.capabilities?.length" class="member-card-caps">
@@ -49,7 +53,10 @@
                         </span>
                     </div>
                 </div>
-                <div v-if="isAdmin && m.status !== 'revoked'" class="member-card-actions">
+                <!-- Admins manage everyone EXCEPT themselves — self-edit/revoke
+                     is blocked here (and the never-last-admin rule guards the
+                     server side anyway). -->
+                <div v-if="isAdmin && m.status !== 'revoked' && !isSelf(m)" class="member-card-actions">
                     <button class="member-action" @click="openEdit(m)">{{ $t('members.actions.edit') }}</button>
                     <button class="member-action member-action--danger" @click="revoke(m)"
                         :disabled="actingOn === m.id">
@@ -76,20 +83,21 @@
                     <div class="modal-body">
                         <label class="modal-field">
                             <span>{{ $t('members.fields.email') }}</span>
-                            <input v-model="inviteForm.email" type="email" placeholder="user@example.com" />
+                            <input v-model="inviteForm.email" type="email" class="modal-input" placeholder="user@example.com" />
                         </label>
                         <label class="modal-field">
                             <span>{{ $t('members.fields.role') }}</span>
-                            <select v-model="inviteForm.role">
+                            <select v-model="inviteForm.role" class="modal-select">
                                 <option value="member">{{ $t('organizations.role.member') }}</option>
                                 <option value="admin">{{ $t('organizations.role.admin') }}</option>
                             </select>
                         </label>
-                        <fieldset v-if="inviteForm.role === 'member'" class="modal-field">
+                        <fieldset v-if="inviteForm.role === 'member'" class="modal-field modal-fieldset">
                             <legend>{{ $t('members.fields.capabilities') }}</legend>
                             <label v-for="c in allCapabilities" :key="c.value" class="modal-checkbox">
                                 <input type="checkbox" :value="c.value" v-model="inviteForm.capabilities" />
-                                <span>{{ c.label }}</span>
+                                <span class="modal-checkbox-box"><Check :size="12" :stroke-width="3" /></span>
+                                <span class="modal-checkbox-label">{{ c.label }}</span>
                             </label>
                         </fieldset>
                         <div v-if="modalError" class="modal-error">{{ modalError }}</div>
@@ -113,19 +121,20 @@
                         <button class="modal-close" @click="closeEdit"><X :size="18" /></button>
                     </header>
                     <div class="modal-body">
-                        <p class="modal-context">{{ editing.invitedEmail || editing.userId || '—' }}</p>
+                        <p class="modal-context">{{ displayName(editing) }}</p>
                         <label class="modal-field">
                             <span>{{ $t('members.fields.role') }}</span>
-                            <select v-model="editForm.role">
+                            <select v-model="editForm.role" class="modal-select">
                                 <option value="member">{{ $t('organizations.role.member') }}</option>
                                 <option value="admin">{{ $t('organizations.role.admin') }}</option>
                             </select>
                         </label>
-                        <fieldset v-if="editForm.role === 'member'" class="modal-field">
+                        <fieldset v-if="editForm.role === 'member'" class="modal-field modal-fieldset">
                             <legend>{{ $t('members.fields.capabilities') }}</legend>
                             <label v-for="c in allCapabilities" :key="c.value" class="modal-checkbox">
                                 <input type="checkbox" :value="c.value" v-model="editForm.capabilities" />
-                                <span>{{ c.label }}</span>
+                                <span class="modal-checkbox-box"><Check :size="12" :stroke-width="3" /></span>
+                                <span class="modal-checkbox-label">{{ c.label }}</span>
                             </label>
                         </fieldset>
                         <div v-if="modalError" class="modal-error">{{ modalError }}</div>
@@ -146,13 +155,14 @@
 // @ts-nocheck
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { ArrowLeft, UserPlus, X } from 'lucide-vue-next'
+import { ArrowLeft, UserPlus, X, Check } from 'lucide-vue-next'
 import { useOrganizationsStore } from '@/stores/organizations'
 
 const router = useRouter()
 const orgs = useOrganizationsStore()
 
 const members = ref([])
+const currentUserId = ref(null)
 const isLoading = ref(false)
 const error = ref('')
 const actingOn = ref(null)
@@ -182,7 +192,9 @@ async function refresh() {
     isLoading.value = true
     error.value = ''
     try {
-        members.value = await orgs.listMembers()
+        const res = await orgs.listMembers()
+        members.value = res.members
+        currentUserId.value = res.currentUserId
     } catch (err) {
         error.value = err?.response?.data?.message || err?.message || 'Failed to load members'
     } finally {
@@ -190,8 +202,27 @@ async function refresh() {
     }
 }
 
+/** True when this membership row belongs to the signed-in user. */
+function isSelf(m) {
+    return !!currentUserId.value && m.userId === currentUserId.value
+}
+
+/** Primary display: real name → invited email → raw id as last resort. */
+function displayName(m) {
+    return m.userName || m.invitedEmail || m.userId || '—'
+}
+
+/** Secondary line under the name: email when we have a name to pair it with. */
+function subtitleFor(m) {
+    if (m.userName && m.userEmail) return m.userEmail
+    return ''
+}
+
 function initialsFor(m) {
-    const src = m.invitedEmail || m.userId || '?'
+    const src = m.userName || m.invitedEmail || m.userId || '?'
+    // For "Firstname Lastname" use both initials; otherwise first 2 chars.
+    const parts = src.trim().split(/\s+/)
+    if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase()
     return src.slice(0, 2).toUpperCase()
 }
 
@@ -248,7 +279,7 @@ async function submitEdit() {
 }
 
 async function revoke(m) {
-    if (!confirm(`Revoke "${m.invitedEmail || m.userId}"?`)) return
+    if (!confirm(`Revoke "${displayName(m)}"?`)) return
     actingOn.value = m.id
     error.value = ''
     try {
@@ -267,7 +298,7 @@ function back() { router.push('/app/organizations') }
 <style scoped>
 .members-view { max-width: 900px; margin: 0 auto; padding: 24px; }
 .members-header {
-    display: flex; align-items: flex-start; gap: 20px; flex-wrap: wrap;
+    display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
     margin-bottom: 24px;
 }
 .members-back {
@@ -285,6 +316,7 @@ function back() { router.push('/app/organizations') }
 }
 .member-card--pending { background: rgba(237, 137, 54, 0.04); border-color: rgba(237, 137, 54, 0.3); }
 .member-card--revoked { opacity: 0.5; }
+.member-card--self { border-color: var(--ws-purple); background: var(--ws-purple-lt); }
 .member-card-avatar {
     width: 36px; height: 36px; border-radius: 8px; background: var(--ws-purple); color: white;
     display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 600;
@@ -293,13 +325,17 @@ function back() { router.push('/app/organizations') }
 .member-card-info { flex: 1; min-width: 0; }
 .member-card-name {
     display: flex; align-items: center; gap: 8px; font-weight: 500; color: var(--ws-text);
-    word-break: break-all;
+    word-break: break-word;
+}
+.member-card-subtitle {
+    font-size: 0.8rem; color: var(--ws-text-3); margin-top: 1px; word-break: break-all;
 }
 .member-card-status {
     padding: 1px 8px; border-radius: 999px; font-size: 0.72rem; font-weight: 600;
 }
 .member-card-status--pending { background: rgba(237, 137, 54, 0.15); color: #c05621; }
 .member-card-status--revoked { background: rgba(160, 174, 192, 0.2); color: #4a5568; }
+.member-card-status--self { background: var(--ws-purple); color: #fff; }
 .member-card-meta {
     font-size: 0.82rem; color: var(--ws-text-3); display: flex; align-items: center; gap: 4px;
     margin-top: 2px;
@@ -330,17 +366,19 @@ function back() { router.push('/app/organizations') }
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 .btn-primary {
-    background: var(--ws-purple); color: white; padding: 9px 16px; border-radius: 8px;
+    background: var(--ws-purple); color: #fff; padding: 9px 16px; border-radius: 8px;
     border: none; font-weight: 500; cursor: pointer;
     display: inline-flex; align-items: center; gap: 6px; font-size: 0.9rem;
+    transform: none !important; box-shadow: none !important;
 }
-.btn-primary:hover:not(:disabled) { background: #6D28D9; }
+.btn-primary:hover:not(:disabled) { background: #6D28D9; color: #fff !important; transform: none !important; }
 .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
 .btn-ghost {
     background: transparent; color: var(--ws-text); border: 1px solid var(--ws-border);
     padding: 9px 16px; border-radius: 8px; cursor: pointer;
+    transform: none !important;
 }
-.btn-ghost:hover { background: var(--ws-surface-2); }
+.btn-ghost:hover { background: var(--ws-surface-2); color: var(--ws-text) !important; }
 
 /* Modal — same template as PeriodsView */
 .modal-backdrop {
@@ -363,16 +401,58 @@ function back() { router.push('/app/organizations') }
     padding: 8px 12px; border-radius: 6px; word-break: break-all;
 }
 .modal-field { display: flex; flex-direction: column; gap: 6px; font-size: 0.85rem; }
-.modal-field input,
-.modal-field select {
-    padding: 9px 11px; border: 1px solid var(--ws-border); border-radius: 6px; font-size: 0.9rem;
-    background: var(--ws-surface);
+.modal-field > span,
+.modal-fieldset > legend { color: var(--ws-text-2); font-weight: 500; }
+/* Inputs/selects — atabai chrome, theme-aware via --ws-* tokens. */
+.modal-input,
+.modal-select {
+    width: 100%;
+    padding: 9px 11px; border: 1px solid var(--ws-border); border-radius: 8px; font-size: 0.9rem;
+    background: var(--ws-surface); color: var(--ws-text);
+    outline: none; transition: border-color 0.15s, box-shadow 0.15s;
 }
-.modal-field input:focus,
-.modal-field select:focus { outline: none; border-color: var(--ws-purple); }
+.modal-input::placeholder { color: var(--ws-text-3); }
+.modal-input:hover:not(:focus),
+.modal-select:hover { border-color: rgba(124, 58, 237, 0.25); }
+.modal-input:focus,
+.modal-select:focus { border-color: var(--ws-purple); box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.15); }
+/* Native select: strip the OS arrow, draw our own chevron. */
+.modal-select {
+    appearance: none; -webkit-appearance: none; -moz-appearance: none;
+    padding-right: 32px; cursor: pointer;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%237C3AED' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 11px center;
+}
+.modal-select option { background: var(--ws-surface); color: var(--ws-text); }
+.modal-fieldset { border: none; padding: 0; margin: 0; }
+
+/* Stylized checkbox — native input hidden, custom box driven by :checked. */
 .modal-checkbox {
-    display: flex; align-items: center; gap: 8px; font-size: 0.85rem; cursor: pointer;
+    display: flex; align-items: center; gap: 9px; font-size: 0.85rem; cursor: pointer;
+    padding: 3px 0;
 }
+.modal-checkbox input[type="checkbox"] {
+    position: absolute; opacity: 0; width: 0; height: 0; margin: 0;
+}
+.modal-checkbox-box {
+    flex-shrink: 0;
+    width: 18px; height: 18px; border-radius: 5px;
+    border: 1.5px solid var(--ws-border);
+    background: var(--ws-surface);
+    display: inline-flex; align-items: center; justify-content: center;
+    color: #fff; transition: background 0.12s, border-color 0.12s;
+}
+.modal-checkbox-box :deep(svg) { opacity: 0; transition: opacity 0.12s; }
+.modal-checkbox:hover .modal-checkbox-box { border-color: rgba(124, 58, 237, 0.45); }
+.modal-checkbox input[type="checkbox"]:checked + .modal-checkbox-box {
+    background: var(--ws-purple); border-color: var(--ws-purple);
+}
+.modal-checkbox input[type="checkbox"]:checked + .modal-checkbox-box :deep(svg) { opacity: 1; }
+.modal-checkbox input[type="checkbox"]:focus-visible + .modal-checkbox-box {
+    box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.3);
+}
+.modal-checkbox-label { color: var(--ws-text-2); }
 .modal-error {
     padding: 8px 10px; background: rgba(245, 101, 101, 0.1);
     color: #c53030; border-radius: 6px; font-size: 0.82rem;
