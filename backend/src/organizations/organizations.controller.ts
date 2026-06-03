@@ -144,12 +144,7 @@ export class OrganizationsController {
     const isAdmin = activeMembership?.role === 'admin';
     const capabilities = activeMembership
       ? isAdmin
-        ? [
-            'nsbu.base.read',
-            'nsbu.base.write',
-            'ifrs.overlay.read',
-            'ifrs.overlay.write',
-          ]
+        ? ['nsbu.base.read', 'nsbu.base.write', 'ifrs.overlay.read', 'ifrs.overlay.write']
         : [...activeMembership.capabilities]
       : [];
 
@@ -193,10 +188,7 @@ export class OrganizationsController {
 
   @Get(':orgId')
   @UseGuards(OrgMembershipGuard)
-  async get(
-    @Param('orgId') orgId: string,
-    @CurrentMembership() membership: MembershipDocument,
-  ) {
+  async get(@Param('orgId') orgId: string, @CurrentMembership() membership: MembershipDocument) {
     const organization = await this.orgs.getOrganization(orgId);
     return {
       success: true,
@@ -207,10 +199,7 @@ export class OrganizationsController {
 
   @Get(':orgId/members')
   @UseGuards(OrgMembershipGuard)
-  async listMembers(
-    @CurrentUser() user: UserDocument,
-    @Param('orgId') orgId: string,
-  ) {
+  async listMembers(@CurrentUser() user: UserDocument, @Param('orgId') orgId: string) {
     const members = await this.orgs.listMembers(orgId);
     return {
       success: true,
@@ -293,10 +282,12 @@ export class OrganizationsController {
     // userId may be a raw ObjectId (most call sites) or a populated User doc
     // (listMembers populates 'name email'). Detect the populated shape and
     // pull name/email; otherwise leave them null and keep userId as the id
-    // string so the existing contract is unchanged.
+    // string so the existing contract is unchanged. Typed structurally (both
+    // an ObjectId and a populated User doc expose toString()/_id) so this
+    // file needs no mongoose Types import.
     const rawUserId = m.userId as unknown as
-      | { _id: Types.ObjectId; name?: string; email?: string }
-      | Types.ObjectId
+      | { _id: { toString(): string }; name?: string; email?: string }
+      | { toString(): string }
       | null;
     let userId: string | null = null;
     let userName: string | null = null;
@@ -307,12 +298,16 @@ export class OrganizationsController {
         '_id' in rawUserId &&
         (rawUserId as { name?: string }).name !== undefined
       ) {
-        const populated = rawUserId as { _id: Types.ObjectId; name?: string; email?: string };
+        const populated = rawUserId as {
+          _id: { toString(): string };
+          name?: string;
+          email?: string;
+        };
         userId = populated._id.toString();
         userName = populated.name ?? null;
         userEmail = populated.email ?? null;
       } else {
-        userId = (rawUserId as Types.ObjectId).toString();
+        userId = (rawUserId as { toString(): string }).toString();
       }
     }
 
