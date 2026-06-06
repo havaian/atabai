@@ -19,9 +19,9 @@
                 <h1>{{ $t('members.title') }}</h1>
                 <p>{{ orgs.currentOrg?.name }}</p>
             </div>
-            <button v-if="isAdmin" class="btn-primary" @click="openInvite">
+            <UiButton v-if="isAdmin" variant="primary" @click="openInvite">
                 <UserPlus :size="16" /> {{ $t('members.invite') }}
-            </button>
+            </UiButton>
         </header>
 
         <div v-if="isLoading && members.length === 0" class="members-empty">
@@ -73,81 +73,63 @@
         <div v-if="error" class="members-error">{{ error }}</div>
 
         <!-- Invite modal -->
-        <Transition name="modal-fade">
-            <div v-if="showInvite" class="modal-backdrop" @click.self="closeInvite">
-                <div class="modal-card">
-                    <header class="modal-header">
-                        <h2>{{ $t('members.inviteTitle') }}</h2>
-                        <button class="modal-close" @click="closeInvite"><X :size="18" /></button>
-                    </header>
-                    <div class="modal-body">
-                        <label class="modal-field">
-                            <span>{{ $t('members.fields.email') }}</span>
-                            <input v-model="inviteForm.email" type="email" class="modal-input" placeholder="user@example.com" />
-                        </label>
-                        <label class="modal-field">
-                            <span>{{ $t('members.fields.role') }}</span>
-                            <select v-model="inviteForm.role" class="modal-select">
-                                <option value="member">{{ $t('organizations.role.member') }}</option>
-                                <option value="admin">{{ $t('organizations.role.admin') }}</option>
-                            </select>
-                        </label>
-                        <fieldset v-if="inviteForm.role === 'member'" class="modal-field modal-fieldset">
-                            <legend>{{ $t('members.fields.capabilities') }}</legend>
-                            <label v-for="c in allCapabilities" :key="c.value" class="modal-checkbox">
-                                <input type="checkbox" :value="c.value" v-model="inviteForm.capabilities" />
-                                <span class="modal-checkbox-box"><Check :size="12" :stroke-width="3" /></span>
-                                <span class="modal-checkbox-label">{{ c.label }}</span>
-                            </label>
-                        </fieldset>
-                        <div v-if="modalError" class="modal-error">{{ modalError }}</div>
-                    </div>
-                    <footer class="modal-footer">
-                        <button class="btn-ghost" @click="closeInvite">{{ $t('common.cancel') }}</button>
-                        <button class="btn-primary" @click="submitInvite" :disabled="!inviteForm.email || isSubmitting">
-                            {{ isSubmitting ? $t('common.loading') : $t('members.send') }}
-                        </button>
-                    </footer>
-                </div>
+        <UiModal v-model="showInvite" :title="$t('members.inviteTitle')" @close="closeInvite">
+            <div class="modal-fields">
+                <UiField :label="$t('members.fields.email')" v-model="inviteForm.email"
+                    type="email" placeholder="user@example.com" />
+                <label class="modal-field">
+                    <span>{{ $t('members.fields.role') }}</span>
+                    <select v-model="inviteForm.role" class="modal-select">
+                        <option value="member">{{ $t('organizations.role.member') }}</option>
+                        <option value="admin">{{ $t('organizations.role.admin') }}</option>
+                    </select>
+                </label>
+                <fieldset v-if="inviteForm.role === 'member'" class="modal-field modal-fieldset">
+                    <legend>{{ $t('members.fields.capabilities') }}</legend>
+                    <label v-for="c in allCapabilities" :key="c.value" class="modal-checkbox">
+                        <input type="checkbox" :value="c.value" v-model="inviteForm.capabilities" />
+                        <span class="modal-checkbox-box"><Check :size="12" :stroke-width="3" /></span>
+                        <span class="modal-checkbox-label">{{ c.label }}</span>
+                    </label>
+                </fieldset>
+                <div v-if="modalError" class="modal-error">{{ modalError }}</div>
             </div>
-        </Transition>
+            <template #footer>
+                <UiButton variant="ghost" @click="closeInvite">{{ $t('common.cancel') }}</UiButton>
+                <UiButton variant="primary" :loading="isSubmitting" :disabled="!inviteForm.email" @click="submitInvite">
+                    {{ $t('members.send') }}
+                </UiButton>
+            </template>
+        </UiModal>
 
         <!-- Edit member modal -->
-        <Transition name="modal-fade">
-            <div v-if="editing" class="modal-backdrop" @click.self="closeEdit">
-                <div class="modal-card">
-                    <header class="modal-header">
-                        <h2>{{ $t('members.editTitle') }}</h2>
-                        <button class="modal-close" @click="closeEdit"><X :size="18" /></button>
-                    </header>
-                    <div class="modal-body">
-                        <p class="modal-context">{{ displayName(editing) }}</p>
-                        <label class="modal-field">
-                            <span>{{ $t('members.fields.role') }}</span>
-                            <select v-model="editForm.role" class="modal-select">
-                                <option value="member">{{ $t('organizations.role.member') }}</option>
-                                <option value="admin">{{ $t('organizations.role.admin') }}</option>
-                            </select>
-                        </label>
-                        <fieldset v-if="editForm.role === 'member'" class="modal-field modal-fieldset">
-                            <legend>{{ $t('members.fields.capabilities') }}</legend>
-                            <label v-for="c in allCapabilities" :key="c.value" class="modal-checkbox">
-                                <input type="checkbox" :value="c.value" v-model="editForm.capabilities" />
-                                <span class="modal-checkbox-box"><Check :size="12" :stroke-width="3" /></span>
-                                <span class="modal-checkbox-label">{{ c.label }}</span>
-                            </label>
-                        </fieldset>
-                        <div v-if="modalError" class="modal-error">{{ modalError }}</div>
-                    </div>
-                    <footer class="modal-footer">
-                        <button class="btn-ghost" @click="closeEdit">{{ $t('common.cancel') }}</button>
-                        <button class="btn-primary" @click="submitEdit" :disabled="isSubmitting">
-                            {{ isSubmitting ? $t('common.loading') : $t('common.save') }}
-                        </button>
-                    </footer>
-                </div>
+        <UiModal v-model="editOpen" :title="$t('members.editTitle')" @close="closeEdit">
+            <div class="modal-fields">
+                <p class="modal-context">{{ editing && displayName(editing) }}</p>
+                <label class="modal-field">
+                    <span>{{ $t('members.fields.role') }}</span>
+                    <select v-model="editForm.role" class="modal-select">
+                        <option value="member">{{ $t('organizations.role.member') }}</option>
+                        <option value="admin">{{ $t('organizations.role.admin') }}</option>
+                    </select>
+                </label>
+                <fieldset v-if="editForm.role === 'member'" class="modal-field modal-fieldset">
+                    <legend>{{ $t('members.fields.capabilities') }}</legend>
+                    <label v-for="c in allCapabilities" :key="c.value" class="modal-checkbox">
+                        <input type="checkbox" :value="c.value" v-model="editForm.capabilities" />
+                        <span class="modal-checkbox-box"><Check :size="12" :stroke-width="3" /></span>
+                        <span class="modal-checkbox-label">{{ c.label }}</span>
+                    </label>
+                </fieldset>
+                <div v-if="modalError" class="modal-error">{{ modalError }}</div>
             </div>
-        </Transition>
+            <template #footer>
+                <UiButton variant="ghost" @click="closeEdit">{{ $t('common.cancel') }}</UiButton>
+                <UiButton variant="primary" :loading="isSubmitting" @click="submitEdit">
+                    {{ $t('common.save') }}
+                </UiButton>
+            </template>
+        </UiModal>
     </div>
 </template>
 
@@ -155,8 +137,11 @@
 // @ts-nocheck
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { ArrowLeft, UserPlus, X, Check } from 'lucide-vue-next'
+import { ArrowLeft, UserPlus, Check } from 'lucide-vue-next'
 import { useOrganizationsStore } from '@/stores/organizations'
+import UiButton from '@/components/ui/UiButton.vue'
+import UiField from '@/components/ui/UiField.vue'
+import UiModal from '@/components/ui/UiModal.vue'
 
 const router = useRouter()
 const orgs = useOrganizationsStore()
@@ -171,6 +156,13 @@ const showInvite = ref(false)
 const editing = ref(null)
 const isSubmitting = ref(false)
 const modalError = ref('')
+
+// UiModal takes a boolean v-model; bridge it to `editing` so Esc / backdrop
+// close routes through closeEdit().
+const editOpen = computed({
+    get: () => !!editing.value,
+    set: (v) => { if (!v) closeEdit() },
+})
 
 const inviteForm = reactive({ email: '', role: 'member', capabilities: [] })
 const editForm = reactive({ role: 'member', capabilities: [] })
@@ -365,37 +357,9 @@ function back() { router.push('/app/organizations') }
     border-radius: 50%; margin: 0 auto; animation: spin 0.85s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
-.btn-primary {
-    background: var(--ws-purple); color: #fff; padding: 9px 16px; border-radius: 8px;
-    border: none; font-weight: 500; cursor: pointer;
-    display: inline-flex; align-items: center; gap: 6px; font-size: 0.9rem;
-    transform: none !important; box-shadow: none !important;
-}
-.btn-primary:hover:not(:disabled) { background: #6D28D9; color: #fff !important; transform: none !important; }
-.btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
-.btn-ghost {
-    background: transparent; color: var(--ws-text); border: 1px solid var(--ws-border);
-    padding: 9px 16px; border-radius: 8px; cursor: pointer;
-    transform: none !important;
-}
-.btn-ghost:hover { background: var(--ws-surface-2); color: var(--ws-text) !important; }
-
-/* Modal — same template as PeriodsView */
-.modal-backdrop {
-    position: fixed; inset: 0; background: rgba(0, 0, 0, 0.45);
-    display: flex; align-items: center; justify-content: center; z-index: 90;
-}
-.modal-card {
-    background: var(--ws-surface); border-radius: 14px;
-    width: 100%; max-width: 460px; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-}
-.modal-header {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 14px 18px; border-bottom: 1px solid var(--ws-border);
-}
-.modal-header h2 { font-size: 1.05rem; font-weight: 600; }
-.modal-close { background: transparent; border: none; cursor: pointer; color: var(--ws-text-3); }
-.modal-body { padding: 18px; display: flex; flex-direction: column; gap: 12px; }
+/* Modal body bits — scaffolding now from UiModal/UiButton; selects and
+   checkboxes stay native (UiField covers text inputs only). */
+.modal-fields { display: flex; flex-direction: column; gap: 12px; }
 .modal-context {
     font-size: 0.85rem; color: var(--ws-text-3); background: var(--ws-surface-2);
     padding: 8px 12px; border-radius: 6px; word-break: break-all;
@@ -403,18 +367,14 @@ function back() { router.push('/app/organizations') }
 .modal-field { display: flex; flex-direction: column; gap: 6px; font-size: 0.85rem; }
 .modal-field > span,
 .modal-fieldset > legend { color: var(--ws-text-2); font-weight: 500; }
-/* Inputs/selects — atabai chrome, theme-aware via --ws-* tokens. */
-.modal-input,
+/* Native select — atabai chrome, theme-aware via --ws-* tokens. */
 .modal-select {
     width: 100%;
     padding: 9px 11px; border: 1px solid var(--ws-border); border-radius: 8px; font-size: 0.9rem;
     background: var(--ws-surface); color: var(--ws-text);
     outline: none; transition: border-color 0.15s, box-shadow 0.15s;
 }
-.modal-input::placeholder { color: var(--ws-text-3); }
-.modal-input:hover:not(:focus),
 .modal-select:hover { border-color: rgba(124, 58, 237, 0.25); }
-.modal-input:focus,
 .modal-select:focus { border-color: var(--ws-purple); box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.15); }
 /* Native select: strip the OS arrow, draw our own chevron. */
 .modal-select {
@@ -457,10 +417,4 @@ function back() { router.push('/app/organizations') }
     padding: 8px 10px; background: rgba(245, 101, 101, 0.1);
     color: #c53030; border-radius: 6px; font-size: 0.82rem;
 }
-.modal-footer {
-    display: flex; gap: 8px; justify-content: flex-end;
-    padding: 12px 18px; border-top: 1px solid var(--ws-border);
-}
-.modal-fade-enter-active, .modal-fade-leave-active { transition: opacity 0.15s; }
-.modal-fade-enter-from, .modal-fade-leave-to { opacity: 0; }
 </style>

@@ -17,9 +17,9 @@
                 <h1>{{ $t('bankBatches.title') }}</h1>
                 <p>{{ periodLabel }}</p>
             </div>
-            <button class="btn-primary" :disabled="periodLocked" @click="goUpload">
+            <UiButton variant="primary" :disabled="periodLocked" @click="goUpload">
                 <CloudUpload :size="16" /> {{ $t('bankBatches.upload') }}
-            </button>
+            </UiButton>
         </header>
 
         <div v-if="bank.isLoading && bank.batches.length === 0" class="batches-empty">
@@ -73,6 +73,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { ArrowLeft, ChevronRight, CloudUpload, FileCheck, FileClock } from 'lucide-vue-next'
 import { useBankStore } from '@/stores/bank'
 import { useLedgerStore } from '@/stores/ledger'
+import UiButton from '@/components/ui/UiButton.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -174,13 +175,4 @@ function formatDateTime(d) {
     border-radius: 50%; margin: 0 auto; animation: spin 0.85s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
-
-.btn-primary {
-    background: var(--ws-purple); color: #fff; padding: 9px 16px; border-radius: 8px;
-    border: none; font-weight: 500; cursor: pointer;
-    display: inline-flex; align-items: center; gap: 6px; font-size: 0.9rem;
-    transform: none !important; box-shadow: none !important;
-}
-.btn-primary:hover:not(:disabled) { background: #6D28D9; color: #fff !important; transform: none !important; }
-.btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
 </style>

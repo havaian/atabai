@@ -47,13 +47,13 @@
             </div>
 
             <footer class="upload-view-footer">
-                <button v-if="file" type="button" class="btn-ghost" @click="clearFile" :disabled="isUploading">
+                <UiButton v-if="file" variant="ghost" :disabled="isUploading" @click="clearFile">
                     {{ $t('common.cancel') }}
-                </button>
+                </UiButton>
                 <span class="upload-view-spacer" />
-                <button type="button" class="btn-primary" :disabled="!file || isUploading" @click="submit">
+                <UiButton variant="primary" :disabled="!file" :loading="isUploading" @click="submit">
                     {{ isUploading ? $t('bankUpload.uploading') : $t('bankUpload.submit') }}
-                </button>
+                </UiButton>
             </footer>
         </section>
     </div>
@@ -66,6 +66,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { ArrowLeft, CloudUpload, FileCheck } from 'lucide-vue-next'
 import { useBankStore } from '@/stores/bank'
 import { useLedgerStore } from '@/stores/ledger'
+import UiButton from '@/components/ui/UiButton.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -186,15 +187,4 @@ function formatSize(bytes) {
 @keyframes upload-spin { to { transform: rotate(360deg); } }
 .upload-view-footer { display: flex; align-items: center; gap: 10px; margin-top: 24px; }
 .upload-view-spacer { flex: 1; }
-.btn-primary {
-    background: var(--ws-purple); color: white; padding: 10px 18px; border-radius: 8px;
-    border: none; font-weight: 500; cursor: pointer;
-}
-.btn-primary:hover:not(:disabled) { background: #6D28D9; }
-.btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
-.btn-ghost {
-    background: transparent; color: var(--ws-text); border: 1px solid var(--ws-border);
-    padding: 10px 18px; border-radius: 8px; cursor: pointer;
-}
-.btn-ghost:hover:not(:disabled) { background: var(--ws-surface-2); }
 </style>

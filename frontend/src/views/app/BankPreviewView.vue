@@ -80,95 +80,80 @@
         <footer v-if="!isReadOnly" class="bank-preview-footer">
             <span class="bank-preview-help">{{ $t('bankPreview.commitHelp', { red: countByColor.red }) }}</span>
             <span class="bank-preview-spacer" />
-            <button
-                class="btn-primary"
-                :disabled="bank.isCommitting || bank.drafts.length === 0"
+            <UiButton
+                variant="primary"
+                :loading="bank.isCommitting"
+                :disabled="bank.drafts.length === 0"
                 @click="commit"
             >
                 {{ bank.isCommitting ? $t('bankPreview.committing') : $t('bankPreview.commitButton') }}
-            </button>
+            </UiButton>
         </footer>
 
         <!-- Edit modal -->
-        <Transition name="modal-fade">
-            <div v-if="editing" class="modal-backdrop" @click.self="closeEditor">
-                <div class="modal-card">
-                    <header class="modal-header">
-                        <h2>{{ $t('bankPreview.editor.title') }}</h2>
-                        <button class="modal-close" @click="closeEditor">
-                            <X :size="18" />
-                        </button>
-                    </header>
-                    <div class="modal-body">
-                        <p class="modal-context">
-                            <strong>{{ formatDate(editing.date) }}</strong> ·
-                            {{ formatAmount(editing.totalAmount) }}
-                        </p>
-                        <p class="modal-desc">{{ editing.description }}</p>
+        <UiModal v-model="editorOpen" :title="$t('bankPreview.editor.title')" max-width="480px" @close="closeEditor">
+            <p class="modal-context">
+                <strong>{{ editing && formatDate(editing.date) }}</strong> ·
+                {{ editing && formatAmount(editing.totalAmount) }}
+            </p>
+            <p class="modal-desc">{{ editing && editing.description }}</p>
 
-                        <label class="modal-field">
-                            <span>{{ $t('bankPreview.editor.accountCode') }}</span>
-                            <input v-model.trim="editPatch.accountCode" class="modal-input" placeholder="6010" />
-                            <span class="modal-help">{{ $t('bankPreview.editor.accountCodeHelp') }}</span>
-                        </label>
+            <div class="modal-fields">
+                <UiField
+                    :label="$t('bankPreview.editor.accountCode')"
+                    :hint="$t('bankPreview.editor.accountCodeHelp')"
+                    v-model="editPatch.accountCode"
+                    trim
+                    placeholder="6010"
+                />
+                <UiField
+                    :label="$t('bankPreview.editor.description')"
+                    v-model="editPatch.description"
+                    type="textarea"
+                    :rows="2"
+                />
 
-                        <label class="modal-field">
-                            <span>{{ $t('bankPreview.editor.description') }}</span>
-                            <textarea v-model="editPatch.description" rows="2" class="modal-input" />
-                        </label>
-
-                        <div v-if="modalError" class="modal-error">{{ modalError }}</div>
-                    </div>
-                    <footer class="modal-footer">
-                        <button class="btn-ghost" @click="closeEditor">{{ $t('common.cancel') }}</button>
-                        <button class="btn-secondary" @click="learnRule" :disabled="!editPatch.accountCode">
-                            {{ $t('bankPreview.editor.learnRule') }}
-                        </button>
-                        <button class="btn-primary" @click="saveEdit" :disabled="isSavingEdit">
-                            {{ isSavingEdit ? $t('common.loading') : $t('common.save') }}
-                        </button>
-                    </footer>
-                </div>
+                <div v-if="modalError" class="modal-error">{{ modalError }}</div>
             </div>
-        </Transition>
+
+            <template #footer>
+                <UiButton variant="ghost" @click="closeEditor">{{ $t('common.cancel') }}</UiButton>
+                <UiButton variant="secondary" :disabled="!editPatch.accountCode" @click="learnRule">
+                    {{ $t('bankPreview.editor.learnRule') }}
+                </UiButton>
+                <UiButton variant="primary" :loading="isSavingEdit" @click="saveEdit">
+                    {{ $t('common.save') }}
+                </UiButton>
+            </template>
+        </UiModal>
 
         <!-- Commit result — shown after "Provести выписку". Surfaces how many
              entries posted and how many were skipped (RED rows that still need
              a record account) rather than bouncing silently to the batch list. -->
-        <Transition name="modal-fade">
-            <div v-if="commitResult" class="modal-backdrop" @click.self="goToBatches">
-                <div class="modal-card modal-card--result">
-                    <header class="modal-header">
-                        <h2>{{ $t('bankPreview.result.title') }}</h2>
-                        <button class="modal-close" @click="goToBatches">
-                            <X :size="18" />
-                        </button>
-                    </header>
-                    <div class="modal-body">
-                        <div class="result-stat result-stat--committed">
-                            <CheckCircle2 :size="18" />
-                            <span>{{ $t('bankPreview.result.committed', { n: commitResult.committed }) }}</span>
-                        </div>
-                        <div v-if="commitResult.skipped > 0" class="result-stat result-stat--skipped">
-                            <AlertTriangle :size="18" />
-                            <span>{{ $t('bankPreview.result.skipped', { n: commitResult.skipped }) }}</span>
-                        </div>
-                        <p v-if="commitResult.skipped > 0" class="result-note">
-                            {{ $t('bankPreview.result.skippedNote') }}
-                        </p>
-                        <p v-else class="result-note">{{ $t('bankPreview.result.allDone') }}</p>
-                    </div>
-                    <footer class="modal-footer">
-                        <button v-if="commitResult.skipped > 0" class="btn-secondary" @click="reviewRemaining">
-                            {{ $t('bankPreview.result.reviewRemaining') }}
-                        </button>
-                        <button class="btn-primary" @click="goToBatches">
-                            {{ $t('bankPreview.result.done') }}
-                        </button>
-                    </footer>
+        <UiModal v-model="resultOpen" :title="$t('bankPreview.result.title')" max-width="420px">
+            <template v-if="commitResult">
+                <div class="result-stat result-stat--committed">
+                    <CheckCircle2 :size="18" />
+                    <span>{{ $t('bankPreview.result.committed', { n: commitResult.committed }) }}</span>
                 </div>
-            </div>
-        </Transition>
+                <div v-if="commitResult.skipped > 0" class="result-stat result-stat--skipped">
+                    <AlertTriangle :size="18" />
+                    <span>{{ $t('bankPreview.result.skipped', { n: commitResult.skipped }) }}</span>
+                </div>
+                <p v-if="commitResult.skipped > 0" class="result-note">
+                    {{ $t('bankPreview.result.skippedNote') }}
+                </p>
+                <p v-else class="result-note">{{ $t('bankPreview.result.allDone') }}</p>
+            </template>
+            <template #footer>
+                <UiButton v-if="commitResult && commitResult.skipped > 0" variant="secondary" @click="reviewRemaining">
+                    {{ $t('bankPreview.result.reviewRemaining') }}
+                </UiButton>
+                <UiButton variant="primary" @click="goToBatches">
+                    {{ $t('bankPreview.result.done') }}
+                </UiButton>
+            </template>
+        </UiModal>
     </div>
 </template>
 
@@ -176,8 +161,11 @@
 // @ts-nocheck
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { AlertTriangle, ArrowLeft, CheckCircle2, Pencil, X } from 'lucide-vue-next'
+import { AlertTriangle, ArrowLeft, CheckCircle2, Pencil } from 'lucide-vue-next'
 import { useBankStore } from '@/stores/bank'
+import UiButton from '@/components/ui/UiButton.vue'
+import UiField from '@/components/ui/UiField.vue'
+import UiModal from '@/components/ui/UiModal.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -192,6 +180,13 @@ const editing = ref(null)
 const editPatch = ref({ accountCode: '', description: '' })
 const isSavingEdit = ref(false)
 const modalError = ref('')
+
+// UiModal takes a boolean v-model. Bridge it to the existing `editing` source
+// of truth so Esc / backdrop close routes through closeEditor().
+const editorOpen = computed({
+    get: () => !!editing.value,
+    set: (v) => { if (!v) closeEditor() },
+})
 
 onMounted(async () => {
     await bank.fetchDrafts({
@@ -274,6 +269,13 @@ async function learnRule() {
 // operator gets a confirmation with counts — including how many RED rows were
 // skipped — instead of a silent redirect.
 const commitResult = ref(null)
+
+// Bridge UiModal's boolean v-model; closing (Esc/backdrop) just dismisses the
+// summary and stays on the page — the explicit "Done" button routes away.
+const resultOpen = computed({
+    get: () => !!commitResult.value,
+    set: (v) => { if (!v) commitResult.value = null },
+})
 
 async function commit() {
     try {
@@ -381,80 +383,20 @@ function shortRef(ref) {
 }
 .bank-preview-help { font-size: 0.84rem; color: var(--ws-text-3); }
 .bank-preview-spacer { flex: 1; }
-/* NOTE: global .btn-primary/.btn-ghost/.btn-secondary (App.vue + main.css)
-   are landing-page styles that leak in here via @layer/@apply. We pin the
-   properties they fight over: hover text color (their text-gray-* would go
-   invisible on our dark surfaces) and transform (App.vue's .btn-primary
-   carries hover:scale-105, which we don't want on a modal action button). */
-.btn-primary {
-    background: var(--ws-purple); color: #fff; padding: 10px 18px; border-radius: 8px;
-    border: none; font-weight: 500; cursor: pointer;
-    transform: none !important; box-shadow: none !important;
-}
-.btn-primary:hover:not(:disabled) { background: #6D28D9; color: #fff !important; transform: none !important; }
-.btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
-.btn-ghost {
-    background: transparent; color: var(--ws-text); border: 1px solid var(--ws-border);
-    padding: 10px 18px; border-radius: 8px; cursor: pointer;
-    transform: none !important;
-}
-.btn-ghost:hover { background: var(--ws-surface-2); color: var(--ws-text) !important; }
-.btn-secondary {
-    background: var(--ws-surface); color: var(--ws-purple); border: 1px solid var(--ws-purple);
-    padding: 10px 18px; border-radius: 8px; cursor: pointer;
-    transform: none !important;
-}
-.btn-secondary::after { display: none !important; }
-.btn-secondary:hover:not(:disabled) { background: rgba(124, 58, 237, 0.04); color: var(--ws-purple) !important; }
-.btn-secondary:disabled { opacity: 0.5; cursor: not-allowed; }
 
-/* Modal */
-.modal-backdrop {
-    position: fixed; inset: 0; background: rgba(0, 0, 0, 0.45);
-    display: flex; align-items: center; justify-content: center; z-index: 90;
-}
-.modal-card {
-    background: var(--ws-surface); border-radius: 14px;
-    width: 100%; max-width: 480px; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-}
-.modal-header {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 16px 20px; border-bottom: 1px solid var(--ws-border);
-}
-.modal-header h2 { font-size: 1.05rem; font-weight: 600; }
-.modal-close { background: transparent; border: none; cursor: pointer; color: var(--ws-text-3); }
-.modal-body { padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+/* Edit-modal body bits (scaffolding now provided by UiModal/UiField/UiButton). */
+.modal-fields { display: flex; flex-direction: column; gap: 14px; }
 .modal-context { font-size: 0.85rem; color: var(--ws-text-3); }
 .modal-desc {
     font-size: 0.85rem; color: var(--ws-text); background: var(--ws-surface-2);
     padding: 10px; border-radius: 8px; white-space: pre-wrap; word-break: break-word;
 }
-.modal-field { display: flex; flex-direction: column; gap: 6px; font-size: 0.85rem; }
-.modal-field > span { color: var(--ws-text-2); font-weight: 500; }
-.modal-input {
-    padding: 9px 11px; border: 1px solid var(--ws-border); border-radius: 8px;
-    font-size: 0.9rem;
-    background: var(--ws-surface-2); color: var(--ws-text);
-    outline: none; transition: border-color 0.15s, box-shadow 0.15s;
-    font-family: inherit; resize: vertical;
-}
-.modal-input::placeholder { color: var(--ws-text-3); }
-.modal-input:hover:not(:focus) { border-color: rgba(124, 58, 237, 0.25); }
-.modal-input:focus { border-color: var(--ws-purple); box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.15); }
-.modal-help { font-size: 0.76rem; color: var(--ws-text-3); }
 .modal-error {
     padding: 8px 10px; background: rgba(245, 101, 101, 0.1);
     color: #c53030; border-radius: 6px; font-size: 0.82rem;
 }
-.modal-footer {
-    display: flex; gap: 8px; justify-content: flex-end;
-    padding: 14px 20px; border-top: 1px solid var(--ws-border);
-}
-.modal-fade-enter-active, .modal-fade-leave-active { transition: opacity 0.15s; }
-.modal-fade-enter-from, .modal-fade-leave-to { opacity: 0; }
 
-/* ─── Commit result modal ─────────────────────────────────────────────────── */
-.modal-card--result { max-width: 420px; }
+/* ─── Commit result modal body ────────────────────────────────────────────── */
 .result-stat {
     display: flex; align-items: center; gap: 10px;
     padding: 11px 13px; border-radius: 8px; font-size: 0.92rem; font-weight: 500;

@@ -13,9 +13,9 @@
                 <h1>{{ $t('periods.title') }}</h1>
                 <p>{{ $t('periods.subtitle') }}</p>
             </div>
-            <button v-if="isAdmin" class="btn-primary" @click="openCreate">
+            <UiButton v-if="isAdmin" variant="primary" @click="openCreate">
                 <Plus :size="16" /> {{ $t('periods.createNew') }}
-            </button>
+            </UiButton>
         </header>
 
         <div v-if="ledger.isLoadingPeriods" class="periods-empty"><div class="spinner" /></div>
@@ -65,37 +65,21 @@
         <div v-if="actionError" class="periods-error">{{ actionError }}</div>
 
         <!-- Create regular period modal -->
-        <Transition name="modal-fade">
-            <div v-if="showCreate" class="modal-backdrop" @click.self="closeCreate">
-                <div class="modal-card">
-                    <header class="modal-header">
-                        <h2>{{ $t('periods.createTitle') }}</h2>
-                        <button class="modal-close" @click="closeCreate"><X :size="18" /></button>
-                    </header>
-                    <div class="modal-body">
-                        <label class="modal-field">
-                            <span>{{ $t('periods.fields.label') }}</span>
-                            <input v-model="form.label" :placeholder="$t('periods.fields.labelPlaceholder')" />
-                        </label>
-                        <label class="modal-field">
-                            <span>{{ $t('periods.fields.startDate') }}</span>
-                            <input v-model="form.startDate" type="date" />
-                        </label>
-                        <label class="modal-field">
-                            <span>{{ $t('periods.fields.endDate') }}</span>
-                            <input v-model="form.endDate" type="date" />
-                        </label>
-                        <div v-if="modalError" class="modal-error">{{ modalError }}</div>
-                    </div>
-                    <footer class="modal-footer">
-                        <button class="btn-ghost" @click="closeCreate">{{ $t('common.cancel') }}</button>
-                        <button class="btn-primary" @click="submitCreate" :disabled="!canSubmit || isSubmitting">
-                            {{ isSubmitting ? $t('common.loading') : $t('common.save') }}
-                        </button>
-                    </footer>
-                </div>
+        <UiModal v-model="showCreate" :title="$t('periods.createTitle')" @close="closeCreate">
+            <div class="modal-fields">
+                <UiField :label="$t('periods.fields.label')" v-model="form.label"
+                    :placeholder="$t('periods.fields.labelPlaceholder')" />
+                <UiField :label="$t('periods.fields.startDate')" v-model="form.startDate" type="date" />
+                <UiField :label="$t('periods.fields.endDate')" v-model="form.endDate" type="date" />
+                <div v-if="modalError" class="modal-error">{{ modalError }}</div>
             </div>
-        </Transition>
+            <template #footer>
+                <UiButton variant="ghost" @click="closeCreate">{{ $t('common.cancel') }}</UiButton>
+                <UiButton variant="primary" :loading="isSubmitting" :disabled="!canSubmit" @click="submitCreate">
+                    {{ $t('common.save') }}
+                </UiButton>
+            </template>
+        </UiModal>
     </div>
 </template>
 
@@ -103,10 +87,13 @@
 // @ts-nocheck
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { Banknote, FileSpreadsheet, Layers, Lock, Plus, SlidersHorizontal, Unlock, X } from 'lucide-vue-next'
+import { Banknote, FileSpreadsheet, Layers, Lock, Plus, SlidersHorizontal, Unlock } from 'lucide-vue-next'
 import { useAuthStore } from '@/stores/auth'
 import { useLedgerStore } from '@/stores/ledger'
 import { useOrganizationsStore } from '@/stores/organizations'
+import UiButton from '@/components/ui/UiButton.vue'
+import UiField from '@/components/ui/UiField.vue'
+import UiModal from '@/components/ui/UiModal.vue'
 
 const router = useRouter()
 const ledger = useLedgerStore()
@@ -248,58 +235,11 @@ async function submitCreate() {
     border-radius: 50%; margin: 0 auto; animation: spin 0.85s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
-.btn-primary {
-    background: var(--ws-purple); color: white; padding: 9px 16px; border-radius: 8px;
-    border: none; font-weight: 500; cursor: pointer;
-    display: inline-flex; align-items: center; gap: 6px; font-size: 0.9rem;
-}
-.btn-primary:hover:not(:disabled) { background: #6D28D9; }
-.btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
-.btn-ghost {
-    background: transparent; color: var(--ws-text); border: 1px solid var(--ws-border);
-    padding: 9px 16px; border-radius: 8px; cursor: pointer;
-}
-.btn-ghost:hover { background: var(--ws-surface-2); }
 
-/* Modal */
-.modal-backdrop {
-    position: fixed; inset: 0; background: rgba(0, 0, 0, 0.45);
-    display: flex; align-items: center; justify-content: center; z-index: 90;
-}
-.modal-card {
-    background: var(--ws-surface); border-radius: 14px;
-    width: 100%; max-width: 460px; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-}
-.modal-header {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 14px 18px; border-bottom: 1px solid var(--ws-border);
-}
-.modal-header h2 { font-size: 1.05rem; font-weight: 600; }
-.modal-close { background: transparent; border: none; cursor: pointer; color: var(--ws-text-3); }
-.modal-body { padding: 18px; display: flex; flex-direction: column; gap: 12px; }
-.modal-field { display: flex; flex-direction: column; gap: 6px; font-size: 0.85rem; }
-.modal-field > span { color: var(--ws-text-2); font-weight: 500; }
-.modal-field input {
-    padding: 9px 11px; border: 1px solid var(--ws-border); border-radius: 8px; font-size: 0.9rem;
-    background: var(--ws-surface); color: var(--ws-text);
-    outline: none; transition: border-color 0.15s, box-shadow 0.15s; font-family: inherit;
-}
-.modal-field input::placeholder { color: var(--ws-text-3); }
-.modal-field input:hover:not(:focus) { border-color: rgba(124, 58, 237, 0.25); }
-.modal-field input:focus { border-color: var(--ws-purple); box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.15); }
-/* Tint the native date-picker indicator purple in dark theme (where the
-   default black glyph would vanish against a dark field). */
-[data-theme="dark"] .modal-field input[type="date"]::-webkit-calendar-picker-indicator {
-    filter: invert(0.7) sepia(1) saturate(5) hue-rotate(230deg);
-}
+/* Create-modal body (scaffolding now from UiModal/UiField/UiButton). */
+.modal-fields { display: flex; flex-direction: column; gap: 12px; }
 .modal-error {
     padding: 8px 10px; background: rgba(245, 101, 101, 0.1);
     color: #c53030; border-radius: 6px; font-size: 0.82rem;
 }
-.modal-footer {
-    display: flex; gap: 8px; justify-content: flex-end;
-    padding: 12px 18px; border-top: 1px solid var(--ws-border);
-}
-.modal-fade-enter-active, .modal-fade-leave-active { transition: opacity 0.15s; }
-.modal-fade-enter-from, .modal-fade-leave-to { opacity: 0; }
 </style>
