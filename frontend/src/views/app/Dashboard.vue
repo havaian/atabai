@@ -36,12 +36,14 @@
             <div class="period-card">
                 <div class="period-card-main">
                     <div class="period-card-label">{{ $t('dashboard.workflow.currentPeriod') }}</div>
-                    <div v-if="activePeriod" class="period-card-name">
+                    <div v-if="statusLoading" class="period-card-name period-skel-line"></div>
+                    <div v-else-if="activePeriod" class="period-card-name">
                         {{ activePeriod.label || formatPeriod(activePeriod) }}
                     </div>
                     <div v-else class="period-card-empty">{{ $t('dashboard.workflow.noPeriod') }}</div>
                 </div>
-                <button v-if="activePeriod" class="period-card-action" @click="router.push('/app/ledger/periods')">
+                <div v-if="statusLoading" class="period-card-action period-card-action--skeleton"></div>
+                <button v-else-if="activePeriod" class="period-card-action" @click="router.push('/app/ledger/periods')">
                     {{ $t('dashboard.workflow.switchPeriod') }}
                 </button>
                 <button v-else class="period-card-action period-card-action--primary"
@@ -50,12 +52,26 @@
                 </button>
             </div>
 
+            <!-- Skeleton strip while the workflow reads resolve. Same item
+                 count and fixed heights as the real strip below, so the real
+                 content swaps in without shifting the layout. -->
+            <div v-if="statusLoading" class="wf-status" aria-hidden="true">
+                <div v-for="n in 3" :key="n" class="wf-status-item wf-status-item--skeleton">
+                    <div class="wf-skel-icon"></div>
+                    <div class="wf-status-body">
+                        <div class="wf-skel-line wf-skel-line--label"></div>
+                        <div class="wf-skel-line wf-skel-line--detail"></div>
+                    </div>
+                </div>
+                <div class="wf-status-cta wf-status-cta--skeleton"></div>
+            </div>
+
             <!-- Workflow status strip — answers "how do I check if things
                  work" at a glance for the active period. Each item is a
                  checklist step in the NSBU→IFRS pipeline; ✓ = done, ○ = not
                  yet. Driven by cheap reads done in loadStatus(). Only shown
                  when a period is active. -->
-            <div v-if="activePeriod" class="wf-status">
+            <div v-else-if="activePeriod" class="wf-status">
                 <div class="wf-status-item" :class="{ 'wf-status-item--done': status.chartCount > 0 }">
                     <component :is="status.chartCount > 0 ? CheckCircleIcon : MinusCircleIcon" class="wf-status-icon" />
                     <div class="wf-status-body">
@@ -165,26 +181,37 @@ const status = ref({
     bankPending: 0,
 })
 
+// True while the workflow strip's data is being fetched. Starts true so the
+// first paint shows fixed-size skeletons instead of an empty space that the
+// real strip later pushes into — avoids the layout shift on load.
+const statusLoading = ref(true)
+
 async function loadStatus() {
     if (!orgsStore.currentOrgId || !ledgerStore.activePeriod) {
         status.value = { chartCount: 0, balanceCount: 0, bankBatches: 0, bankPending: 0 }
+        statusLoading.value = false
         return
     }
+    statusLoading.value = true
     const periodId = ledgerStore.activePeriod.id
-    // Run the reads in parallel; tolerate individual failures so one
-    // missing endpoint doesn't blank the whole strip.
-    const [chart, balances, batches] = await Promise.all([
-        ledgerStore.fetchChart().catch(() => []),
-        ledgerStore.fetchBalances({ periodId }).catch(() => []),
-        bankStore.fetchBatches({ periodId }).catch(() => []),
-    ])
-    const batchList = Array.isArray(batches) ? batches : []
-    status.value = {
-        chartCount: Array.isArray(chart) ? chart.length : 0,
-        balanceCount: Array.isArray(balances) ? balances.length : 0,
-        bankBatches: batchList.length,
-        // Batches still carrying draft rows the operator needs to review.
-        bankPending: batchList.filter((b) => b.status === 'draft').length,
+    try {
+        // Run the reads in parallel; tolerate individual failures so one
+        // missing endpoint doesn't blank the whole strip.
+        const [chart, balances, batches] = await Promise.all([
+            ledgerStore.fetchChart().catch(() => []),
+            ledgerStore.fetchBalances({ periodId }).catch(() => []),
+            bankStore.fetchBatches({ periodId }).catch(() => []),
+        ])
+        const batchList = Array.isArray(batches) ? batches : []
+        status.value = {
+            chartCount: Array.isArray(chart) ? chart.length : 0,
+            balanceCount: Array.isArray(balances) ? balances.length : 0,
+            bankBatches: batchList.length,
+            // Batches still carrying draft rows the operator needs to review.
+            bankPending: batchList.filter((b) => b.status === 'draft').length,
+        }
+    } finally {
+        statusLoading.value = false
     }
 }
 
@@ -193,11 +220,15 @@ async function loadStatus() {
 function refreshData() {
     authStore.checkAuth()
     if (orgsStore.currentOrgId) {
+        // Skeleton until both periods AND the status reads resolve.
+        statusLoading.value = true
         // Fetch periods first, then compute the workflow status from the
         // resolved active period. loadStatus is a no-op when no period.
         ledgerStore.fetchPeriods()
             .then(() => loadStatus())
-            .catch(() => { /* tolerated by store */ })
+            .catch(() => { statusLoading.value = false })
+    } else {
+        statusLoading.value = false
     }
 }
 
@@ -213,9 +244,10 @@ watch(() => route.path, (newPath) => {
 // (org switcher in the sidebar).
 watch(() => orgsStore.currentOrgId, (orgId) => {
     if (orgId) {
+        statusLoading.value = true
         ledgerStore.fetchPeriods()
             .then(() => loadStatus())
-            .catch(() => { })
+            .catch(() => { statusLoading.value = false })
     }
 })
 
@@ -411,9 +443,72 @@ function formatPeriod(p) {
     align-items: center;
     gap: 10px;
     padding: 12px 14px;
+    /* Fixed minimum so the skeleton and the loaded content occupy the same
+       height — no reflow when the real strip swaps in. */
+    min-height: 52px;
+    box-sizing: border-box;
     background: var(--ws-surface);
     border: 1px solid var(--ws-border);
     border-radius: 10px;
+}
+
+/* ─── Workflow skeletons (no transform — background-position shimmer) ─────── */
+.wf-skel-line,
+.wf-skel-icon,
+.wf-status-cta--skeleton,
+.period-skel-line,
+.period-card-action--skeleton {
+    background: linear-gradient(
+        90deg,
+        var(--ws-surface-2) 25%,
+        var(--ws-border) 37%,
+        var(--ws-surface-2) 63%
+    );
+    background-size: 400% 100%;
+    animation: wf-shimmer 1.4s ease infinite;
+    border-radius: 6px;
+}
+
+@keyframes wf-shimmer {
+    0% { background-position: 100% 0; }
+    100% { background-position: 0 0; }
+}
+
+.wf-skel-icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    border-radius: 50%;
+}
+
+.wf-skel-line--label {
+    width: 56px;
+    height: 9px;
+    margin-bottom: 6px;
+}
+
+.wf-skel-line--detail {
+    width: 110px;
+    height: 12px;
+}
+
+.wf-status-cta--skeleton {
+    flex: 0 0 auto;
+    width: 132px;
+    align-self: stretch;
+    border: 1px solid var(--ws-border);
+}
+
+.period-skel-line {
+    width: 180px;
+    height: 16px;
+    margin-top: 2px;
+}
+
+.period-card-action--skeleton {
+    width: 110px;
+    height: 36px;
+    border: 1px solid var(--ws-border);
 }
 
 .wf-status-icon {

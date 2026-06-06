@@ -111,7 +111,8 @@
     "/adjustmentNew": "Yangi tuzatish",
     "/adjustmentDetail": "Tuzatish",
     "/members": "Aʼzolar",
-    "/bankBatches": "Bank koʻchirmalari"
+    "/bankBatches": "Bank koʻchirmalari",
+    "/orgProfile": "Tashkilot rekvizitlari"
   },
   "pageDescriptions": {
     "/": "XMHS ni avtomatlashtiring. Su'niy Intellekt bilan.. Murakkab moliyaviy ma'lumotlarni aniq, auditga tayyor XMHS hisobotlariga aylantiring — tezroq, arzonroq va to'liq shaffoflik bilan..",
@@ -1233,7 +1234,8 @@
     "dropTitle": "Koʻchirmani tashlang",
     "dropSub": ".xlsx yoki .xls",
     "uploading": "Yuklanmoqda…",
-    "submit": "Tahlil qilish"
+    "submit": "Tahlil qilish",
+    "processingNote": "Ko'chirma qayta ishlanmoqda — katta fayllar uchun biroz vaqt olishi mumkin. Sahifani yopmasangiz ham bo'ladi."
   },
   "bankPreview": {
     "title": "Koʻrib chiqish",
@@ -1267,7 +1269,16 @@
       "learnRule": "Qoidaga qoʻshish"
     },
     "committedTitle": "Joylangan koʻchirma",
-    "committedSubtitle": "Allaqachon hisobga joylangan — faqat koʻrish."
+    "committedSubtitle": "Allaqachon hisobga joylangan — faqat koʻrish.",
+    "result": {
+      "title": "Ko'chirma kiritildi",
+      "committed": "{n} ta provodka hisobga qo'shildi",
+      "skipped": "{n} ta qator o'tkazib yuborildi",
+      "skippedNote": "O'tkazib yuborilgan qatorlar — hisob raqamisiz tanilmagan g'aznachilik to'lovlari. Ularni tuzating va qaytadan kiriting.",
+      "allDone": "Barcha qatorlar muvaffaqiyatli kiritildi.",
+      "reviewRemaining": "Qolganlarini ko'rib chiqish",
+      "done": "Tayyor"
+    }
   },
   "adjustments": {
     "title": "IFRS tuzatishlari",
@@ -1409,5 +1420,32 @@
       "draft": "Tekshirish kerak",
       "committed": "Joylangan"
     }
+  },
+  "orgProfile": {
+    "title": "Tashkilot rekvizitlari",
+    "subtitle": "Yuridik ma'lumotlar va bank ko'chirmalarini moslashtirish uchun hisob raqamlari",
+    "requisites": "Rekvizitlar",
+    "legalName": "Yuridik nomi",
+    "legalNamePlaceholder": "Ro'yxatdan o'tgan nomi",
+    "inn": "INN",
+    "innPlaceholder": "9 raqamli INN",
+    "innHint": "Tashkilotning o'z INN raqami. Qaysi tashkilotning ko'chirmasi yuklanayotganini aniqlash uchun ishlatiladi.",
+    "baseCurrency": "Asosiy valyuta",
+    "transitionDate": "MHXS ga o'tish sanasi",
+    "transitionDateUnset": "Belgilanmagan",
+    "transitionDateHint": "Birinchi marta qo'llashda belgilanadi. Bu yerda bloklangan, chunki u keyingi barcha qoldiqlarni belgilaydi.",
+    "bankAccounts": "Hisob raqamlari",
+    "bankAccountsDesc": "Tashkilotga tegishli hisoblar. Bank ko'chirmasi uning hisobini ushbu ro'yxat bilan solishtirib, tashkilotga moslashtiriladi.",
+    "addAccount": "Hisob qo'shish",
+    "noAccounts": "Hozircha hisob raqamlari yo'q. Yuklangan ko'chirmalarni moslashtirish uchun tashkilotning o'z hisoblarini qo'shing.",
+    "accountNumber": "Hisob raqami",
+    "accountNumberPlaceholder": "20 raqamli hisob",
+    "bankCode": "Bank kodi",
+    "bankCodePlaceholder": "MFO",
+    "accountLabel": "Yorliq",
+    "accountLabelPlaceholder": "Ixtiyoriy nom",
+    "currency": "Valyuta",
+    "readOnlyNote": "Sizda faqat o'qish huquqi bor. Ushbu rekvizitlarni faqat tashkilot administratori tahrirlashi mumkin.",
+    "saved": "Rekvizitlar saqlandi."
   }
 }

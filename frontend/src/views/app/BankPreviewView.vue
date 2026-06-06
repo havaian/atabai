@@ -131,6 +131,44 @@
                 </div>
             </div>
         </Transition>
+
+        <!-- Commit result — shown after "Provести выписку". Surfaces how many
+             entries posted and how many were skipped (RED rows that still need
+             a record account) rather than bouncing silently to the batch list. -->
+        <Transition name="modal-fade">
+            <div v-if="commitResult" class="modal-backdrop" @click.self="goToBatches">
+                <div class="modal-card modal-card--result">
+                    <header class="modal-header">
+                        <h2>{{ $t('bankPreview.result.title') }}</h2>
+                        <button class="modal-close" @click="goToBatches">
+                            <X :size="18" />
+                        </button>
+                    </header>
+                    <div class="modal-body">
+                        <div class="result-stat result-stat--committed">
+                            <CheckCircle2 :size="18" />
+                            <span>{{ $t('bankPreview.result.committed', { n: commitResult.committed }) }}</span>
+                        </div>
+                        <div v-if="commitResult.skipped > 0" class="result-stat result-stat--skipped">
+                            <AlertTriangle :size="18" />
+                            <span>{{ $t('bankPreview.result.skipped', { n: commitResult.skipped }) }}</span>
+                        </div>
+                        <p v-if="commitResult.skipped > 0" class="result-note">
+                            {{ $t('bankPreview.result.skippedNote') }}
+                        </p>
+                        <p v-else class="result-note">{{ $t('bankPreview.result.allDone') }}</p>
+                    </div>
+                    <footer class="modal-footer">
+                        <button v-if="commitResult.skipped > 0" class="btn-secondary" @click="reviewRemaining">
+                            {{ $t('bankPreview.result.reviewRemaining') }}
+                        </button>
+                        <button class="btn-primary" @click="goToBatches">
+                            {{ $t('bankPreview.result.done') }}
+                        </button>
+                    </footer>
+                </div>
+            </div>
+        </Transition>
     </div>
 </template>
 
@@ -138,7 +176,7 @@
 // @ts-nocheck
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ArrowLeft, Pencil, X } from 'lucide-vue-next'
+import { AlertTriangle, ArrowLeft, CheckCircle2, Pencil, X } from 'lucide-vue-next'
 import { useBankStore } from '@/stores/bank'
 
 const route = useRoute()
@@ -232,13 +270,33 @@ async function learnRule() {
     }
 }
 
+// Holds the commit outcome ({ committed, skipped, rolledUpKeys }) so the
+// operator gets a confirmation with counts — including how many RED rows were
+// skipped — instead of a silent redirect.
+const commitResult = ref(null)
+
 async function commit() {
     try {
-        await bank.commit({ periodId: periodId.value, uploadId: uploadId.value })
-        router.push(`/app/ledger/periods/${periodId.value}/bank-batches`)
+        const result = await bank.commit({ periodId: periodId.value, uploadId: uploadId.value })
+        commitResult.value = {
+            committed: result?.committed ?? 0,
+            skipped: result?.skipped ?? 0,
+            rolledUpKeys: result?.rolledUpKeys ?? 0,
+        }
     } catch (_) {
         // bank.error already populated; renders inline.
     }
+}
+
+function goToBatches() {
+    router.push(`/app/ledger/periods/${periodId.value}/bank-batches`)
+}
+
+// Skipped rows are still drafts (RED, account '000'). Reload the batch so the
+// operator can fix and re-commit them without leaving the screen.
+async function reviewRemaining() {
+    commitResult.value = null
+    await bank.fetchDrafts({ periodId: periodId.value, uploadId: uploadId.value })
 }
 
 function back() { router.push(`/app/ledger/periods/${periodId.value}/bank-batches`) }
@@ -394,4 +452,15 @@ function shortRef(ref) {
 }
 .modal-fade-enter-active, .modal-fade-leave-active { transition: opacity 0.15s; }
 .modal-fade-enter-from, .modal-fade-leave-to { opacity: 0; }
+
+/* ─── Commit result modal ─────────────────────────────────────────────────── */
+.modal-card--result { max-width: 420px; }
+.result-stat {
+    display: flex; align-items: center; gap: 10px;
+    padding: 11px 13px; border-radius: 8px; font-size: 0.92rem; font-weight: 500;
+    margin-bottom: 10px;
+}
+.result-stat--committed { background: rgba(72, 187, 120, 0.12); color: #2f855a; }
+.result-stat--skipped { background: rgba(237, 137, 54, 0.12); color: #b7791f; }
+.result-note { font-size: 0.84rem; color: var(--ws-text-3); margin: 4px 0 0; line-height: 1.5; }
 </style>

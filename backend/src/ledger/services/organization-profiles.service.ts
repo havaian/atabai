@@ -9,12 +9,22 @@ import {
   type OrganizationProfileModel,
 } from '../schemas/organization-profile.schema';
 
+/** One settlement account owned by the org (mirrors the OrgBankAccount sub-schema). */
+export interface OrgBankAccountInput {
+  accountNumber: string;
+  bankCode?: string | null;
+  label?: string | null;
+  currency?: string;
+}
+
 export interface UpsertProfileArgs {
   organizationId: Types.ObjectId | string;
   legalName?: string | null;
   inn?: string | null;
   transitionDate?: Date | null;
   baseCurrency?: string;
+  /** When present, REPLACES the whole bankAccounts list. */
+  bankAccounts?: OrgBankAccountInput[];
 }
 
 /**
@@ -55,6 +65,7 @@ export class OrganizationProfilesService {
     if (args.inn !== undefined) setPayload.inn = args.inn;
     if (args.transitionDate !== undefined) setPayload.transitionDate = args.transitionDate;
     if (args.baseCurrency !== undefined) setPayload.baseCurrency = args.baseCurrency;
+    if (args.bankAccounts !== undefined) setPayload.bankAccounts = args.bankAccounts;
 
     const profile = await this.profileModel.findOneAndUpdate(
       { organizationId: orgId },
@@ -101,5 +112,19 @@ export class OrganizationProfilesService {
         ? new Types.ObjectId(organizationId)
         : organizationId;
     return this.profileModel.findOne({ organizationId: orgId });
+  }
+
+  /**
+   * Read the profile, creating an empty one if the org never went through a
+   * profile-touching flow. Used by the GET endpoint so the admin edit screen
+   * always has a document to populate instead of a 404. Touches no fields on
+   * create beyond the organizationId, so schema defaults apply.
+   */
+  async ensureForOrg(
+    organizationId: Types.ObjectId | string,
+  ): Promise<OrganizationProfileDocument> {
+    const existing = await this.findByOrgId(organizationId);
+    if (existing) return existing;
+    return this.upsert({ organizationId });
   }
 }

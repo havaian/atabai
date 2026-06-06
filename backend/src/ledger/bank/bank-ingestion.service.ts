@@ -28,6 +28,11 @@ import {
   type JournalEntryModel,
   type JournalEntryStatus,
 } from '../schemas/journal-entry.schema';
+import {
+  BankUploadJob,
+  type BankUploadJobDocument,
+  type BankUploadJobModel,
+} from '../schemas/bank-upload-job.schema';
 import { BalanceRollupService } from '../services/balance-rollup.service';
 import { PeriodsService } from '../services/periods.service';
 import { BANK_POSTING_ACCOUNTS } from './bank-accounts';
@@ -51,6 +56,8 @@ interface IngestBankArgs {
   periodId: Types.ObjectId | string;
   filePath: string;
   actor: UserDocument;
+  /** Original upload filename, recorded on the async job for the UI. */
+  fileName?: string | null;
 }
 
 interface CommitDraftsArgs {
@@ -100,6 +107,8 @@ export class BankIngestionService {
     private readonly chartModel: ChartOfAccountModel,
     @InjectModel(Counterparty.name)
     private readonly counterpartyModel: CounterpartyModel,
+    @InjectModel(BankUploadJob.name)
+    private readonly jobModel: BankUploadJobModel,
     private readonly periods: PeriodsService,
     private readonly counterparties: CounterpartyResolverService,
     private readonly treasury: TreasuryResolverService,
@@ -122,7 +131,174 @@ export class BankIngestionService {
 
     await this.periods.assertWritable(orgId, periodId);
 
-    const parsed = parseBankStatement(args.filePath);
+    const uploadId = crypto.randomUUID();
+    const summary = await this.parseAndCreateDrafts(
+      orgId,
+      periodId,
+      uploadId,
+      args.filePath,
+      args.actor,
+    );
+
+    this.logger.logAction('ledger.bank.ingested', {
+      orgId: orgId.toString(),
+      periodId: periodId.toString(),
+      actor: args.actor._id.toString(),
+      ...summary,
+    });
+
+    return summary;
+  }
+
+  /**
+   * Start an asynchronous ingestion. Validates the period synchronously (so a
+   * locked period fails fast with a 4xx), records a `processing` job, kicks
+   * off the work in the background, and returns immediately with the job id
+   * for the client to poll. See BankUploadJob schema for the rationale.
+   */
+  async startIngestion(args: IngestBankArgs): Promise<{
+    uploadId: string;
+    jobId: string;
+    status: 'processing';
+    fileName: string | null;
+  }> {
+    const orgId =
+      typeof args.organizationId === 'string'
+        ? new Types.ObjectId(args.organizationId)
+        : args.organizationId;
+    const periodId =
+      typeof args.periodId === 'string'
+        ? new Types.ObjectId(args.periodId)
+        : args.periodId;
+
+    // Fail fast on a locked period — before creating a job or returning.
+    await this.periods.assertWritable(orgId, periodId);
+
+    const uploadId = crypto.randomUUID();
+    const job = await this.jobModel.create({
+      organizationId: orgId,
+      periodId,
+      uploadId,
+      status: 'processing',
+      fileName: args.fileName ?? null,
+      createdBy: args.actor._id,
+    });
+
+    // Fire-and-forget: the work runs after the response is sent. Any failure
+    // is captured onto the job document inside runIngestion, so the floating
+    // promise never throws unhandled. The extra .catch is a belt-and-braces
+    // guard against an error escaping the job update itself.
+    void this.runIngestion(job._id, orgId, periodId, uploadId, args).catch((err) => {
+      this.logger.error(err, {
+        context: 'BankIngestionService.runIngestion',
+        jobId: job._id.toString(),
+        uploadId,
+      });
+    });
+
+    return {
+      uploadId,
+      jobId: job._id.toString(),
+      status: 'processing',
+      fileName: job.fileName,
+    };
+  }
+
+  /**
+   * Background body for startIngestion. Parses + creates drafts, then writes
+   * the outcome onto the job: `completed` with the summary, or `failed` with a
+   * reason. Never throws to the caller — startIngestion fired this without
+   * awaiting.
+   */
+  private async runIngestion(
+    jobId: Types.ObjectId,
+    orgId: Types.ObjectId,
+    periodId: Types.ObjectId,
+    uploadId: string,
+    args: IngestBankArgs,
+  ): Promise<void> {
+    try {
+      const summary = await this.parseAndCreateDrafts(
+        orgId,
+        periodId,
+        uploadId,
+        args.filePath,
+        args.actor,
+      );
+
+      await this.jobModel.updateOne(
+        { _id: jobId },
+        { $set: { status: 'completed', summary, error: null } },
+      );
+
+      this.logger.logAction('ledger.bank.ingested', {
+        orgId: orgId.toString(),
+        periodId: periodId.toString(),
+        actor: args.actor._id.toString(),
+        jobId: jobId.toString(),
+        ...summary,
+      });
+    } catch (err) {
+      const message =
+        (err as { response?: { message?: string } }).response?.message ||
+        (err as Error).message ||
+        'Bank statement processing failed';
+      await this.jobModel.updateOne(
+        { _id: jobId },
+        { $set: { status: 'failed', error: message } },
+      );
+      this.logger.error(err, {
+        context: 'BankIngestionService.runIngestion',
+        jobId: jobId.toString(),
+        uploadId,
+      });
+    }
+  }
+
+  /**
+   * Fetch a job's status for the polling endpoint. Org-scoped so one tenant
+   * can't read another's job.
+   */
+  async getJob(
+    organizationId: Types.ObjectId | string,
+    jobId: string,
+  ): Promise<BankUploadJobDocument> {
+    const orgId =
+      typeof organizationId === 'string'
+        ? new Types.ObjectId(organizationId)
+        : organizationId;
+    if (!isValidObjectId(jobId)) {
+      throw new NotFoundException({
+        error: 'UPLOAD_JOB_NOT_FOUND',
+        message: 'Upload job not found',
+      });
+    }
+    const job = await this.jobModel.findOne({
+      _id: new Types.ObjectId(jobId),
+      organizationId: orgId,
+    });
+    if (!job) {
+      throw new NotFoundException({
+        error: 'UPLOAD_JOB_NOT_FOUND',
+        message: 'Upload job not found',
+      });
+    }
+    return job;
+  }
+
+  /**
+   * Shared core: parse the file and create a draft per row. No period
+   * validation, no logging, no job bookkeeping — those belong to the callers
+   * (ingestFromFile for the synchronous path, runIngestion for the async one).
+   */
+  private async parseAndCreateDrafts(
+    orgId: Types.ObjectId,
+    periodId: Types.ObjectId,
+    uploadId: string,
+    filePath: string,
+    actor: UserDocument,
+  ): Promise<BankIngestionSummary> {
+    const parsed = parseBankStatement(filePath);
 
     if (parsed.rows.length === 0) {
       throw new BadRequestException({
@@ -131,7 +307,6 @@ export class BankIngestionService {
       });
     }
 
-    const uploadId = crypto.randomUUID();
     const byColor: Record<BankPreviewColor, number> = {
       green: 0,
       yellow: 0,
@@ -146,7 +321,7 @@ export class BankIngestionService {
           periodId,
           uploadId,
           row,
-          actor: args.actor,
+          actor,
         });
         byColor[color]++;
       } catch (err) {
@@ -159,22 +334,13 @@ export class BankIngestionService {
       }
     }
 
-    const summary: BankIngestionSummary = {
+    return {
       uploadId,
       draftsCreated: byColor.green + byColor.yellow + byColor.red,
       byColor,
       parseWarnings: parsed.warnings,
       rowsSkipped,
     };
-
-    this.logger.logAction('ledger.bank.ingested', {
-      orgId: orgId.toString(),
-      periodId: periodId.toString(),
-      actor: args.actor._id.toString(),
-      ...summary,
-    });
-
-    return summary;
   }
 
   // ─── List drafts for a batch (preview screen) ───────────────────────────────

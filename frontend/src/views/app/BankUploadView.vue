@@ -41,6 +41,10 @@
             </div>
 
             <div v-if="errorMessage" class="upload-error">{{ errorMessage }}</div>
+            <div v-if="isUploading" class="upload-processing">
+                <span class="upload-processing-spinner" />
+                {{ $t('bankUpload.processingNote') }}
+            </div>
 
             <footer class="upload-view-footer">
                 <button v-if="file" type="button" class="btn-ghost" @click="clearFile" :disabled="isUploading">
@@ -108,7 +112,7 @@ async function submit() {
     isUploading.value = true
     try {
         const resp = await bank.uploadStatement({ periodId: periodId.value, file: file.value })
-        const uploadId = resp.summary?.uploadId
+        const uploadId = resp.uploadId || resp.summary?.uploadId
         if (uploadId) {
             router.push(`/app/ledger/periods/${periodId.value}/bank-statements/${uploadId}`)
         }
@@ -169,6 +173,17 @@ function formatSize(bytes) {
     background: rgba(245, 101, 101, 0.1); color: #c53030;
     border: 1px solid rgba(245, 101, 101, 0.3); border-radius: 8px; font-size: 0.86rem;
 }
+.upload-processing {
+    margin-top: 16px; padding: 10px 14px; display: flex; align-items: center; gap: 10px;
+    background: var(--ws-surface-2); color: var(--ws-text-2);
+    border-radius: 8px; font-size: 0.86rem;
+}
+.upload-processing-spinner {
+    width: 16px; height: 16px; flex-shrink: 0;
+    border: 2px solid var(--ws-border); border-top-color: var(--ws-purple);
+    border-radius: 50%; animation: upload-spin 0.85s linear infinite;
+}
+@keyframes upload-spin { to { transform: rotate(360deg); } }
 .upload-view-footer { display: flex; align-items: center; gap: 10px; margin-top: 24px; }
 .upload-view-spacer { flex: 1; }
 .btn-primary {

@@ -77,10 +77,11 @@ export class BankStatementsController {
       });
     }
 
-    const summary = await this.bank.ingestFromFile({
+    const result = await this.bank.startIngestion({
       organizationId: orgId,
       periodId,
       filePath: file.path,
+      fileName: Buffer.from(file.originalname, 'latin1').toString('utf8'),
       actor: user,
     });
 
@@ -91,7 +92,30 @@ export class BankStatementsController {
         storedName: file.filename,
         size: file.size,
       },
-      summary,
+      // Processing runs in the background; poll the job endpoint for the
+      // outcome (the green/yellow/red summary) once status leaves 'processing'.
+      job: result,
+    };
+  }
+
+  @Get('bank-statements/jobs/:jobId')
+  @RequireCapability(MEMBERSHIP_CAPABILITIES.NSBU_BASE_READ)
+  async jobStatus(
+    @Param('orgId') orgId: string,
+    @Param('jobId') jobId: string,
+  ) {
+    const job = await this.bank.getJob(orgId, jobId);
+    return {
+      success: true,
+      job: {
+        id: job._id.toString(),
+        uploadId: job.uploadId,
+        status: job.status,
+        fileName: job.fileName,
+        summary: job.summary,
+        error: job.error,
+        createdAt: (job as unknown as { createdAt: Date }).createdAt,
+      },
     };
   }
 

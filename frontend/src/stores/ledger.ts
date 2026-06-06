@@ -21,6 +21,13 @@ export const useLedgerStore = defineStore("ledger", () => {
   const isLoadingChart = ref(false);
   const error = ref(null);
 
+  // Organization requisites (ledger-side profile). canEditProfile mirrors the
+  // backend's admin verdict so the edit form and the API agree.
+  const profile = ref(null);
+  const canEditProfile = ref(false);
+  const isLoadingProfile = ref(false);
+  const isSavingProfile = ref(false);
+
   const periodsByKind = computed(() => {
     const grouped = {
       opening: [],
@@ -48,6 +55,42 @@ export const useLedgerStore = defineStore("ledger", () => {
   function orgScope(path) {
     if (!orgs.currentOrgId) throw new Error("No active organization");
     return `/organizations/${orgs.currentOrgId}/ledger${path}`;
+  }
+
+  async function fetchProfile() {
+    if (!orgs.currentOrgId) return null;
+    isLoadingProfile.value = true;
+    error.value = null;
+    try {
+      const resp = await apiClient.get(orgScope("/profile"));
+      profile.value = resp.data.profile || null;
+      canEditProfile.value = !!resp.data.canEdit;
+      return profile.value;
+    } catch (err) {
+      error.value =
+        err?.response?.data?.message || err?.message || "Failed to load profile";
+      throw err;
+    } finally {
+      isLoadingProfile.value = false;
+    }
+  }
+
+  async function updateProfile(patch) {
+    if (!orgs.currentOrgId) throw new Error("No active organization");
+    isSavingProfile.value = true;
+    error.value = null;
+    try {
+      const resp = await apiClient.patch(orgScope("/profile"), patch);
+      profile.value = resp.data.profile || profile.value;
+      canEditProfile.value = !!resp.data.canEdit;
+      return profile.value;
+    } catch (err) {
+      error.value =
+        err?.response?.data?.message || err?.message || "Failed to save profile";
+      throw err;
+    } finally {
+      isSavingProfile.value = false;
+    }
   }
 
   async function fetchPeriods() {
@@ -156,6 +199,8 @@ export const useLedgerStore = defineStore("ledger", () => {
     () => {
       periods.value = [];
       chart.value = [];
+      profile.value = null;
+      canEditProfile.value = false;
       error.value = null;
     }
   );
@@ -174,12 +219,18 @@ export const useLedgerStore = defineStore("ledger", () => {
     isLoadingPeriods,
     isLoadingChart,
     error,
+    profile,
+    canEditProfile,
+    isLoadingProfile,
+    isSavingProfile,
     fetchPeriods,
     fetchChart,
     fetchBalances,
     createPeriod,
     lockPeriod,
     reopenPeriod,
+    fetchProfile,
+    updateProfile,
     reset,
   };
 });

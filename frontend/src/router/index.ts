@@ -31,6 +31,7 @@ import Settings from '@/views/app/Settings.vue'
 import OnboardingView from '@/views/app/OnboardingView.vue'
 import OrganizationsListView from '@/views/app/OrganizationsListView.vue'
 import OrganizationMembersView from '@/views/app/OrganizationMembersView.vue'
+import OrgProfileView from '@/views/app/OrgProfileView.vue'
 import BankUploadView from '@/views/app/BankUploadView.vue'
 import BankBatchesView from '@/views/app/BankBatchesView.vue'
 import BankPreviewView from '@/views/app/BankPreviewView.vue'
@@ -144,6 +145,12 @@ const appChildren = [
         name: 'OrganizationMembers',
         component: OrganizationMembersView,
         meta: { titleKey: 'pageTitles./members', requiresOrg: true }
+    },
+    {
+        path: 'organizations/profile',
+        name: 'OrgProfile',
+        component: OrgProfileView,
+        meta: { titleKey: 'pageTitles./orgProfile', requiresOrg: true }
     },
 
     // ─── Ledger (per org / period) ─────────────────────────────────────────

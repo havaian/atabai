@@ -111,7 +111,8 @@
     "/adjustmentNew": "New adjustment",
     "/adjustmentDetail": "Adjustment",
     "/members": "Members",
-    "/bankBatches": "Bank statements"
+    "/bankBatches": "Bank statements",
+    "/orgProfile": "Organization requisites"
   },
   "pageDescriptions": {
     "/": "Automate IFRS. Powered by AI.. Turn complex financial data into accurate, audit-ready IFRS reports — faster, cheaper, and with full transparency..",
@@ -1233,7 +1234,8 @@
     "dropTitle": "Drop the statement",
     "dropSub": ".xlsx or .xls",
     "uploading": "Uploading…",
-    "submit": "Parse"
+    "submit": "Parse",
+    "processingNote": "Processing the statement — this can take a moment for large files. You can keep this open."
   },
   "bankPreview": {
     "title": "Posting preview",
@@ -1267,7 +1269,16 @@
       "learnRule": "Add to rules"
     },
     "committedTitle": "Posted statement",
-    "committedSubtitle": "Already committed to the ledger — read-only."
+    "committedSubtitle": "Already committed to the ledger — read-only.",
+    "result": {
+      "title": "Statement posted",
+      "committed": "{n} entries posted to the ledger",
+      "skipped": "{n} rows skipped",
+      "skippedNote": "Skipped rows are unrecognized treasury payments with no record account. Fix them and post again.",
+      "allDone": "All rows posted successfully.",
+      "reviewRemaining": "Review remaining",
+      "done": "Done"
+    }
   },
   "adjustments": {
     "title": "IFRS adjustments",
@@ -1409,5 +1420,32 @@
       "draft": "Needs review",
       "committed": "Posted"
     }
+  },
+  "orgProfile": {
+    "title": "Organization requisites",
+    "subtitle": "Legal details and the settlement accounts used to match bank statements",
+    "requisites": "Requisites",
+    "legalName": "Legal name",
+    "legalNamePlaceholder": "Registered legal name",
+    "inn": "INN",
+    "innPlaceholder": "9-digit INN",
+    "innHint": "The organization's own INN. Used to identify whose bank statement is being uploaded.",
+    "baseCurrency": "Base currency",
+    "transitionDate": "IFRS transition date",
+    "transitionDateUnset": "Not set",
+    "transitionDateHint": "Set during first-time-adoption setup. Locked here because it anchors every downstream balance.",
+    "bankAccounts": "Settlement accounts",
+    "bankAccountsDesc": "Accounts owned by the organization. A bank statement is matched to this organization by comparing its account against this list.",
+    "addAccount": "Add account",
+    "noAccounts": "No settlement accounts yet. Add the organization's own accounts so uploaded statements can be matched.",
+    "accountNumber": "Account number",
+    "accountNumberPlaceholder": "20-digit account",
+    "bankCode": "Bank code",
+    "bankCodePlaceholder": "MFO",
+    "accountLabel": "Label",
+    "accountLabelPlaceholder": "Optional name",
+    "currency": "Currency",
+    "readOnlyNote": "You have read-only access. Only an organization admin can edit these requisites.",
+    "saved": "Requisites saved."
   }
 }

@@ -75,6 +75,9 @@
                     <button v-if="org.id === orgs.currentOrgId" class="orgs-card-members" @click.stop="manageMembers">
                         {{ $t('members.title') }}
                     </button>
+                    <button v-if="org.id === orgs.currentOrgId" class="orgs-card-members" @click.stop="manageProfile">
+                        {{ $t('orgProfile.title') }}
+                    </button>
                     <ChevronRight :size="16" class="orgs-card-chevron" />
                 </li>
             </ul>
@@ -106,6 +109,10 @@ function goToOnboarding() {
 
 function manageMembers() {
     router.push('/app/organizations/members')
+}
+
+function manageProfile() {
+    router.push('/app/organizations/profile')
 }
 
 function select(orgId) {

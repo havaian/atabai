@@ -17,11 +17,16 @@ import { CounterpartyResolverService } from './bank/counterparty-resolver.servic
 import { RunningBalanceService } from './bank/running-balance.service';
 import { TreasuryResolverService } from './bank/treasury-resolver.service';
 import { OnboardingController } from './onboarding.controller';
+import { OrganizationProfileController } from './organization-profile.controller';
 import { AccountBalance, AccountBalanceSchema } from './schemas/account-balance.schema';
 import { ChartOfAccount, ChartOfAccountSchema } from './schemas/chart-of-account.schema';
 import { Counterparty, CounterpartySchema } from './schemas/counterparty.schema';
 import { JournalEntryLine, JournalEntryLineSchema } from './schemas/journal-entry-line.schema';
 import { JournalEntry, JournalEntrySchema } from './schemas/journal-entry.schema';
+import {
+  BankUploadJob,
+  BankUploadJobSchema,
+} from './schemas/bank-upload-job.schema';
 import {
   OrganizationProfile,
   OrganizationProfileSchema,
@@ -62,6 +67,7 @@ import { PeriodsService } from './services/periods.service';
       { name: JournalEntry.name, schema: JournalEntrySchema },
       { name: JournalEntryLine.name, schema: JournalEntryLineSchema },
       { name: TreasuryRule.name, schema: TreasuryRuleSchema },
+      { name: BankUploadJob.name, schema: BankUploadJobSchema },
     ]),
     OrganizationsModule,
     AuthModule,
@@ -79,6 +85,7 @@ import { PeriodsService } from './services/periods.service';
   ],
   controllers: [
     OnboardingController,
+    OrganizationProfileController,
     BankStatementsController,
     PeriodsReadController,
     ChartController,

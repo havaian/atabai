@@ -40,13 +40,61 @@ export const useBankStore = defineStore('bank', () => {
                 fd,
                 { headers: { 'Content-Type': 'multipart/form-data' } },
             )
-            lastUploadSummary.value = resp.data.summary
-            return resp.data
+            // The upload now returns immediately with a background job; the
+            // server keeps processing after the response. Poll the job until
+            // it leaves 'processing', then surface the same summary the
+            // synchronous path used to return.
+            const job = resp.data.job
+            if (!job?.jobId) {
+                // Backward-compat: an older backend returned the summary inline.
+                lastUploadSummary.value = resp.data.summary || null
+                return { uploadId: resp.data.summary?.uploadId, summary: resp.data.summary }
+            }
+            const finished = await waitForJob({ periodId, jobId: job.jobId })
+            if (finished.status === 'failed') {
+                error.value = finished.error || 'Bank statement processing failed'
+                const e = new Error(error.value)
+                e.jobFailed = true
+                throw e
+            }
+            lastUploadSummary.value = finished.summary || null
+            return {
+                uploadId: finished.uploadId || job.uploadId,
+                jobId: job.jobId,
+                summary: finished.summary,
+                status: finished.status,
+            }
         } catch (err) {
-            error.value = err?.response?.data?.message || err?.message || 'Failed to upload'
+            if (!error.value) {
+                error.value = err?.response?.data?.message || err?.message || 'Failed to upload'
+            }
             throw err
         } finally {
             isUploading.value = false
+        }
+    }
+
+    // Single status read for a background ingestion job.
+    async function fetchUploadJob({ periodId, jobId }) {
+        const resp = await apiClient.get(
+            orgScope(`/periods/${periodId}/bank-statements/jobs/${jobId}`),
+        )
+        return resp.data.job
+    }
+
+    // Poll a job until it leaves 'processing'. Each poll is a quick read, so it
+    // stays well under the HTTP timeout regardless of how long the underlying
+    // ingestion takes. Gives up after timeoutMs and surfaces a timeout error.
+    async function waitForJob({ periodId, jobId, intervalMs = 1500, timeoutMs = 600000 }) {
+        const started = Date.now()
+        // eslint-disable-next-line no-constant-condition
+        while (true) {
+            const job = await fetchUploadJob({ periodId, jobId })
+            if (job.status !== 'processing') return job
+            if (Date.now() - started > timeoutMs) {
+                throw new Error('Processing is taking longer than expected. Check the statements list shortly.')
+            }
+            await new Promise((r) => setTimeout(r, intervalMs))
         }
     }
 
@@ -141,6 +189,7 @@ export const useBankStore = defineStore('bank', () => {
         isCommitting,
         error,
         uploadStatement,
+        fetchUploadJob,
         fetchBatches,
         fetchDrafts,
         updateDraft,
