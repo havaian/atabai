@@ -436,11 +436,18 @@ function formatPeriod(p) {
        instead of collapsing into content-sized pills. NOTE: the column
        count is pinned to 4 to match the current 3-items-plus-CTA layout.
        If a status item is ever added or removed, update this count and the
-       skeleton's `v-for="n in 3"` together. */
+       skeleton's `v-for="n in 3"` together.
+       minmax(0, 1fr) (not bare 1fr) is required: a plain 1fr track resolves
+       to minmax(auto, 1fr), whose auto floor lets a cell grow past its share
+       to fit long content (the BANK card's "Uploaded (N) · N need review"
+       text), which pushed the whole strip wider than the period card above.
+       The 0 floor pins every cell to an exact quarter and contains the text. */
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     align-items: stretch;
     gap: 10px;
+    width: 100%;
+    box-sizing: border-box;
     margin-top: 12px;
 }
 
