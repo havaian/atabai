@@ -430,22 +430,28 @@ function formatPeriod(p) {
 
 /* ─── Workflow status strip ──────────────────────────────────────────────── */
 .wf-status {
-    display: flex;
-    flex-wrap: wrap;
+    /* Fixed 4-column grid (3 status items + 1 CTA) so every cell is equal
+       width and equal height in both the skeleton and the loaded state —
+       the loaded strip keeps the same spacious layout the skeleton paints
+       instead of collapsing into content-sized pills. NOTE: the column
+       count is pinned to 4 to match the current 3-items-plus-CTA layout.
+       If a status item is ever added or removed, update this count and the
+       skeleton's `v-for="n in 3"` together. */
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
     align-items: stretch;
     gap: 10px;
     margin-top: 12px;
 }
 
 .wf-status-item {
-    flex: 1 1 180px;
     display: flex;
     align-items: center;
     gap: 10px;
     padding: 12px 14px;
     /* Fixed minimum so the skeleton and the loaded content occupy the same
        height — no reflow when the real strip swaps in. */
-    min-height: 52px;
+    min-height: 70px;
     box-sizing: border-box;
     background: var(--ws-surface);
     border: 1px solid var(--ws-border);
@@ -458,20 +464,23 @@ function formatPeriod(p) {
 .wf-status-cta--skeleton,
 .period-skel-line,
 .period-card-action--skeleton {
-    background: linear-gradient(
-        90deg,
-        var(--ws-surface-2) 25%,
-        var(--ws-border) 37%,
-        var(--ws-surface-2) 63%
-    );
+    background: linear-gradient(90deg,
+            var(--ws-surface-2) 25%,
+            var(--ws-border) 37%,
+            var(--ws-surface-2) 63%);
     background-size: 400% 100%;
     animation: wf-shimmer 1.4s ease infinite;
     border-radius: 6px;
 }
 
 @keyframes wf-shimmer {
-    0% { background-position: 100% 0; }
-    100% { background-position: 0 0; }
+    0% {
+        background-position: 100% 0;
+    }
+
+    100% {
+        background-position: 0 0;
+    }
 }
 
 .wf-skel-icon {
@@ -493,8 +502,7 @@ function formatPeriod(p) {
 }
 
 .wf-status-cta--skeleton {
-    flex: 0 0 auto;
-    width: 132px;
+    width: 100%;
     align-self: stretch;
     border: 1px solid var(--ws-border);
 }
@@ -547,9 +555,9 @@ function formatPeriod(p) {
 }
 
 .wf-status-cta {
-    flex: 0 0 auto;
-    display: inline-flex;
+    display: flex;
     align-items: center;
+    justify-content: center;
     gap: 6px;
     padding: 0 16px;
     background: transparent;
@@ -569,9 +577,15 @@ function formatPeriod(p) {
 }
 
 @media (max-width: 640px) {
+
+    /* The 4-column grid would squash on a phone — collapse to two columns
+       so each cell keeps a readable width, and let the CTA span the full row. */
+    .wf-status {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
     .wf-status-cta {
-        flex: 1 1 100%;
-        justify-content: center;
+        grid-column: 1 / -1;
         padding: 10px 16px;
     }
 }

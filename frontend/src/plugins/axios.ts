@@ -88,7 +88,15 @@ apiClient.interceptors.response.use(
                 // Try to refresh token
                 const refreshToken = localStorage.getItem('refreshToken')
                 if (refreshToken) {
-                    const response = await axios.post('/api/auth/refresh', {
+                    // Use apiClient (not the bare `axios` import) so the call
+                    // resolves against VITE_API_BASE_URL. The bare axios.post
+                    // hit the frontend origin (e.g. :5173/api/auth/refresh in
+                    // dev) which 404s, making every access-token expiry fall
+                    // into the catch below and force a logout/redirect. The
+                    // path is relative ('/auth/refresh', no '/api' prefix)
+                    // because baseURL already includes '/api'. The outer
+                    // request's _retry guard prevents a refresh loop.
+                    const response = await apiClient.post('/auth/refresh', {
                         refreshToken
                     })
 
