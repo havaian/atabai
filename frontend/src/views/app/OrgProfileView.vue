@@ -184,10 +184,10 @@
                             <input type="checkbox" v-model="form.policy.vatPayer" :disabled="!editable" />
                             <span>{{ $t('onboarding.policy.vatPayer') }}</span>
                         </label>
-                        <div v-if="form.policy.vatPayer" class="profile-policy-rate">
+                        <div class="profile-policy-rate">
                             <label>{{ $t('onboarding.policy.vatRate') }}</label>
                             <input v-model.number="form.policy.vatRate" type="number" min="0" max="100"
-                                class="profile-policy-input" :disabled="!editable" />
+                                class="profile-policy-input" :disabled="!editable && !form.policy.vatPayer" />
                         </div>
                     </div>
                     <div class="profile-policy-field">
@@ -512,7 +512,7 @@ watch(() => ledger.profile, () => { if (!dirty.value || !ledger.profile) hydrate
     grid-template-columns: 1fr 1fr;
     gap: 16px;
 }
-.profile-policy-field { display: flex; flex-direction: column; gap: 6px; }
+.profile-policy-field { display: flex; flex-direction: column; gap: 6px; justify-content: flex-end; }
 .profile-policy-field > label {
     font-size: 0.8rem; font-weight: 500; color: var(--ws-text-2);
 }
