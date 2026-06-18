@@ -1182,7 +1182,8 @@
     "subtitle": "A few steps and your accounting workspace is ready.",
     "step1": "Identity",
     "step2": "Transition",
-    "step3": "Review",
+    "step3": "Accounting policy",
+    "step4": "Review",
     "creating": "Creating…",
     "submit": "Create organization",
     "fields": {
@@ -1205,6 +1206,33 @@
     "review": {
       "title": "Verify before creating",
       "note": "On create we seed the NSBU chart of accounts and create three reporting periods (opening, comparative, reporting)."
+    },
+    "policy": {
+      "intro": "Set the accounting policy for this organization. These can be changed later from the organization profile.",
+      "taxes": "Taxes",
+      "taxRegime": "Tax regime",
+      "taxRegimeGeneral": "General (VAT + profit tax)",
+      "taxRegimeSimplified": "Simplified (turnover tax)",
+      "vatPayer": "VAT payer",
+      "vatPayerShort": "VAT",
+      "vatRate": "Default VAT rate (%)",
+      "inventory": "Inventory valuation",
+      "inventoryValuation": "Cost method",
+      "inventoryWeightedAvg": "Weighted average",
+      "inventoryFifo": "FIFO",
+      "operational": "Operational control",
+      "allowNegativeStock": "Allow issuing stock with a negative balance",
+      "settlement": "Counterparty settlements",
+      "settlementDepth": "Settlement depth",
+      "settlementInvoice": "By invoice",
+      "settlementContract": "By contract",
+      "payroll": "Payroll",
+      "payrollDetail": "Cost detail",
+      "payrollCompanyWide": "Company-wide",
+      "payrollByEmployee": "By employee / department",
+      "leaveReserve": "Leave reserve",
+      "leaveAccrueMonthly": "Accrue monthly",
+      "leaveOnActual": "Recognize on actual"
     }
   },
   "osvUpload": {
@@ -1235,7 +1263,12 @@
     "dropSub": ".xlsx or .xls",
     "uploading": "Uploading…",
     "submit": "Parse",
-    "processingNote": "Processing the statement — this can take a moment for large files. You can keep this open."
+    "processingNote": "Processing the statement — this can take a moment for large files. You can keep this open.",
+    "statementAccount": "Statement account",
+    "statementAccountPlaceholder": "Select which account this statement belongs to",
+    "accountRequired": "Select the account this statement belongs to before uploading.",
+    "noAccountsHint": "No settlement accounts are set up. Add them under Organization requisites first.",
+    "accountUnmappedHint": "This account has no NSBU ledger account mapped — internal transfers on it will need manual account selection. Set it under Organization requisites."
   },
   "bankPreview": {
     "title": "Posting preview",
@@ -1278,7 +1311,8 @@
       "allDone": "All rows posted successfully.",
       "reviewRemaining": "Review remaining",
       "done": "Done"
-    }
+    },
+    "internalTransfer": "Internal transfer"
   },
   "adjustments": {
     "title": "IFRS adjustments",
@@ -1446,6 +1480,14 @@
     "accountLabelPlaceholder": "Optional name",
     "currency": "Currency",
     "readOnlyNote": "You have read-only access. Only an organization admin can edit these requisites.",
-    "saved": "Requisites saved."
+    "saved": "Requisites saved.",
+    "ledgerAccount": "Ledger account",
+    "ledgerAccountNone": "Not set",
+    "subAccount": "Sub-account",
+    "subAccountPlaceholder": "Optional",
+    "active": "Active",
+    "inactive": "Closed",
+    "activeHint": "Closed accounts are kept (not deleted) so their postings retain a reference. New postings cannot be made against a closed account.",
+    "accountingPolicy": "Accounting policy"
   }
 }

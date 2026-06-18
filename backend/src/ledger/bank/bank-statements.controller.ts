@@ -69,6 +69,7 @@ export class BankStatementsController {
     @Param('orgId') orgId: string,
     @Param('periodId') periodId: string,
     @UploadedFile() file: Express.Multer.File | undefined,
+    @Body('statementAccountNumber') statementAccountNumber?: string,
   ) {
     if (!file) {
       throw new BadRequestException({
@@ -77,11 +78,24 @@ export class BankStatementsController {
       });
     }
 
+    // Which of the org's own accounts this statement belongs to. Required so
+    // the engine knows the org-side leg of every posting (bank ТЗ §1/§2). The
+    // service validates it against the org's registered accounts.
+    const accountNumber = (statementAccountNumber ?? '').trim();
+    if (!accountNumber) {
+      throw new BadRequestException({
+        error: 'NO_STATEMENT_ACCOUNT',
+        message:
+          'statementAccountNumber is required — pick which of the organization’s accounts this statement belongs to',
+      });
+    }
+
     const result = await this.bank.startIngestion({
       organizationId: orgId,
       periodId,
       filePath: file.path,
       fileName: Buffer.from(file.originalname, 'latin1').toString('utf8'),
+      statementAccountNumber: accountNumber,
       actor: user,
     });
 
@@ -158,7 +172,7 @@ export class BankStatementsController {
 
     const items = enriched
       .filter((d) => !color || d.color === color)
-      .map(({ entry, color: c, reason, recordAccount, direction }) => ({
+      .map(({ entry, color: c, reason, recordAccount, direction, isInternalTransfer }) => ({
         id: entry._id.toString(),
         sourceRef: entry.sourceRef,
         date: entry.date,
@@ -169,6 +183,7 @@ export class BankStatementsController {
         previewReason: reason,
         recordAccount,
         direction,
+        isInternalTransfer,
         createdAt: (entry as unknown as { createdAt: Date }).createdAt,
       }));
 

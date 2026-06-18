@@ -27,9 +27,13 @@
                         <span class="onboarding-step-num">2</span>
                         <span class="onboarding-step-label">{{ $t('onboarding.step2') }}</span>
                     </li>
-                    <li :class="{ active: step === 3 }">
+                    <li :class="{ active: step === 3, done: step > 3 }">
                         <span class="onboarding-step-num">3</span>
                         <span class="onboarding-step-label">{{ $t('onboarding.step3') }}</span>
+                    </li>
+                    <li :class="{ active: step === 4 }">
+                        <span class="onboarding-step-num">4</span>
+                        <span class="onboarding-step-label">{{ $t('onboarding.step4') }}</span>
                     </li>
                 </ol>
 
@@ -113,8 +117,86 @@
                     </label>
                 </section>
 
-                <!-- Step 3: Review -->
+                <!-- Step 3: Accounting policy (methodology §9, 6 blocks) -->
                 <section v-if="step === 3" class="onboarding-section">
+                    <p class="onboarding-policy-intro">{{ $t('onboarding.policy.intro') }}</p>
+
+                    <!-- Block 1: Taxes -->
+                    <div class="onboarding-policy-block">
+                        <span class="onboarding-policy-block-title">{{ $t('onboarding.policy.taxes') }}</span>
+                        <label class="onboarding-field">
+                            <span class="onboarding-label">{{ $t('onboarding.policy.taxRegime') }}</span>
+                            <select v-model="policy.taxRegime" class="onboarding-input">
+                                <option value="general">{{ $t('onboarding.policy.taxRegimeGeneral') }}</option>
+                                <option value="simplified">{{ $t('onboarding.policy.taxRegimeSimplified') }}</option>
+                            </select>
+                        </label>
+                        <label class="onboarding-check">
+                            <input type="checkbox" v-model="policy.vatPayer" />
+                            <span>{{ $t('onboarding.policy.vatPayer') }}</span>
+                        </label>
+                        <label v-if="policy.vatPayer" class="onboarding-field">
+                            <span class="onboarding-label">{{ $t('onboarding.policy.vatRate') }}</span>
+                            <input v-model.number="policy.vatRate" type="number" min="0" max="100"
+                                class="onboarding-input onboarding-input--currency" />
+                        </label>
+                    </div>
+
+                    <!-- Block 2: Inventory valuation -->
+                    <div class="onboarding-policy-block">
+                        <span class="onboarding-policy-block-title">{{ $t('onboarding.policy.inventory') }}</span>
+                        <label class="onboarding-field">
+                            <span class="onboarding-label">{{ $t('onboarding.policy.inventoryValuation') }}</span>
+                            <select v-model="policy.inventoryValuation" class="onboarding-input">
+                                <option value="weighted_average">{{ $t('onboarding.policy.inventoryWeightedAvg') }}</option>
+                                <option value="fifo">{{ $t('onboarding.policy.inventoryFifo') }}</option>
+                            </select>
+                        </label>
+                    </div>
+
+                    <!-- Block 4: Operational control -->
+                    <div class="onboarding-policy-block">
+                        <span class="onboarding-policy-block-title">{{ $t('onboarding.policy.operational') }}</span>
+                        <label class="onboarding-check">
+                            <input type="checkbox" v-model="policy.allowNegativeStock" />
+                            <span>{{ $t('onboarding.policy.allowNegativeStock') }}</span>
+                        </label>
+                    </div>
+
+                    <!-- Block 5: Counterparty settlement depth -->
+                    <div class="onboarding-policy-block">
+                        <span class="onboarding-policy-block-title">{{ $t('onboarding.policy.settlement') }}</span>
+                        <label class="onboarding-field">
+                            <span class="onboarding-label">{{ $t('onboarding.policy.settlementDepth') }}</span>
+                            <select v-model="policy.settlementDepth" class="onboarding-input">
+                                <option value="invoice">{{ $t('onboarding.policy.settlementInvoice') }}</option>
+                                <option value="contract">{{ $t('onboarding.policy.settlementContract') }}</option>
+                            </select>
+                        </label>
+                    </div>
+
+                    <!-- Block 6: Payroll -->
+                    <div class="onboarding-policy-block">
+                        <span class="onboarding-policy-block-title">{{ $t('onboarding.policy.payroll') }}</span>
+                        <label class="onboarding-field">
+                            <span class="onboarding-label">{{ $t('onboarding.policy.payrollDetail') }}</span>
+                            <select v-model="policy.payrollDetail" class="onboarding-input">
+                                <option value="company_wide">{{ $t('onboarding.policy.payrollCompanyWide') }}</option>
+                                <option value="by_employee_department">{{ $t('onboarding.policy.payrollByEmployee') }}</option>
+                            </select>
+                        </label>
+                        <label class="onboarding-field">
+                            <span class="onboarding-label">{{ $t('onboarding.policy.leaveReserve') }}</span>
+                            <select v-model="policy.leaveReserve" class="onboarding-input">
+                                <option value="accrue_monthly">{{ $t('onboarding.policy.leaveAccrueMonthly') }}</option>
+                                <option value="on_actual">{{ $t('onboarding.policy.leaveOnActual') }}</option>
+                            </select>
+                        </label>
+                    </div>
+                </section>
+
+                <!-- Step 4: Review -->
+                <section v-if="step === 4" class="onboarding-section">
                     <h3 class="onboarding-review-title">{{ $t('onboarding.review.title') }}</h3>
                     <dl class="onboarding-review">
                         <dt>{{ $t('onboarding.fields.name') }}</dt>
@@ -129,6 +211,14 @@
                         <dd>{{ form.firstReportingYear || '—' }}</dd>
                         <dt>{{ $t('onboarding.fields.baseCurrency') }}</dt>
                         <dd>{{ form.baseCurrency || 'UZS' }}</dd>
+                        <dt>{{ $t('onboarding.policy.taxRegime') }}</dt>
+                        <dd>{{ policy.taxRegime === 'simplified'
+                            ? $t('onboarding.policy.taxRegimeSimplified')
+                            : $t('onboarding.policy.taxRegimeGeneral') }}{{ policy.vatPayer ? ` · ${$t('onboarding.policy.vatPayerShort')} ${policy.vatRate}%` : '' }}</dd>
+                        <dt>{{ $t('onboarding.policy.settlementDepth') }}</dt>
+                        <dd>{{ policy.settlementDepth === 'contract'
+                            ? $t('onboarding.policy.settlementContract')
+                            : $t('onboarding.policy.settlementInvoice') }}</dd>
                     </dl>
                     <p class="onboarding-note">{{ $t('onboarding.review.note') }}</p>
                 </section>
@@ -145,7 +235,7 @@
                         {{ $t('common.back') }}
                     </button>
                     <span class="onboarding-footer-spacer" />
-                    <button v-if="step < 3" type="button" class="onboarding-btn onboarding-btn--primary"
+                    <button v-if="step < 4" type="button" class="onboarding-btn onboarding-btn--primary"
                         :disabled="!canAdvance" @click="step++">
                         {{ $t('common.next') }}
                     </button>
@@ -185,6 +275,20 @@ const form = ref({
     baseCurrency: 'UZS',
 })
 
+// Accounting policy (methodology §9, 6 blocks). Defaults mirror the backend
+// DEFAULT_ACCOUNTING_POLICY so the wizard opens on the same baseline the
+// server would apply if this step were skipped.
+const policy = ref({
+    taxRegime: 'general',
+    vatPayer: true,
+    vatRate: 12,
+    inventoryValuation: 'weighted_average',
+    allowNegativeStock: false,
+    settlementDepth: 'invoice',
+    payrollDetail: 'company_wide',
+    leaveReserve: 'accrue_monthly',
+})
+
 const canAdvance = computed(() => {
     if (step.value === 1) {
         return form.value.name.trim().length > 0
@@ -211,6 +315,7 @@ async function submit() {
             baseCurrency: (form.value.baseCurrency || 'UZS').toUpperCase(),
             transitionDate: form.value.transitionDate,
             firstReportingYear: form.value.firstReportingYear,
+            accountingPolicy: { ...policy.value },
         })
         // Bootstrap sets the new org active. Send the user to the org landing.
         router.push('/app/dashboard')
@@ -344,6 +449,39 @@ async function submit() {
     text-transform: uppercase;
     max-width: 120px;
 }
+
+/* Accounting-policy step (§9) */
+.onboarding-policy-intro {
+    font-size: 0.85rem;
+    color: var(--ws-text-3);
+    line-height: 1.5;
+    margin: 0 0 4px;
+}
+.onboarding-policy-block {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+    background: var(--ws-surface-2);
+    border: 1px solid var(--ws-border);
+    border-radius: 10px;
+}
+.onboarding-policy-block-title {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--ws-text);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+.onboarding-check {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    color: var(--ws-text);
+    cursor: pointer;
+}
+.onboarding-check input { cursor: pointer; }
 
 .onboarding-help {
     font-size: 0.78rem;

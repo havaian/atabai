@@ -74,6 +74,21 @@ export class BankUploadJob {
   @Prop({ type: String, default: null })
   fileName!: string | null;
 
+  /**
+   * The org's own settlement account this statement belongs to — the account
+   * the file was exported for (bank ТЗ §1/§2). Chosen by the operator at
+   * upload time from the org's registered accounts. It is the org-side leg of
+   * every posting in this batch: for an internal transfer the engine posts
+   * this account's ledgerAccount against the «Счёт»-side account; for a normal
+   * counterparty row it is the 5110-style current-account leg.
+   *
+   * Stored as the raw account number (not an ObjectId) because settlement
+   * accounts are embedded in OrganizationProfile.bankAccounts without their
+   * own ids.
+   */
+  @Prop({ type: String, default: null })
+  statementAccountNumber!: string | null;
+
   // Populated when status === 'completed'. Shape mirrors BankIngestionSummary
   // (draftsCreated, byColor, parseWarnings, rowsSkipped). Stored loosely so the
   // summary shape can evolve without a schema migration.

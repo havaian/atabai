@@ -19,6 +19,10 @@ import {
   type CounterpartyModel,
 } from '../schemas/counterparty.schema';
 import {
+  OrganizationProfile,
+  type OrganizationProfileModel,
+} from '../schemas/organization-profile.schema';
+import {
   JournalEntryLine,
   type JournalEntryLineModel,
 } from '../schemas/journal-entry-line.schema';
@@ -35,13 +39,33 @@ import {
 } from '../schemas/bank-upload-job.schema';
 import { BalanceRollupService } from '../services/balance-rollup.service';
 import { PeriodsService } from '../services/periods.service';
-import { BANK_POSTING_ACCOUNTS } from './bank-accounts';
+import {
+  BANK_POSTING_ACCOUNTS,
+  FX_TRANSIT_ACCOUNTS,
+  UNRESOLVED_ACCOUNT,
+} from './bank-accounts';
 import { parseBankStatement, type ParsedBankRow } from './bank-parser';
 import { CounterpartyResolverService } from './counterparty-resolver.service';
 import { RunningBalanceService } from './running-balance.service';
 import { TreasuryResolverService } from './treasury-resolver.service';
 
 export type BankPreviewColor = 'green' | 'yellow' | 'red';
+
+/**
+ * Everything the per-row engine needs to recognise and post an internal
+ * (own-contour) movement, resolved once per batch from the org profile.
+ */
+interface InternalContourContext {
+  /** The org's own ИНН, lowercased-trimmed for comparison. Null if unset. */
+  ownInn: string | null;
+  /** Set of the org's own settlement account numbers. */
+  ownAccounts: Set<string>;
+  /** account number → its NSBU ledger account (may be null if not mapped). */
+  ledgerByAccount: Map<string, string | null>;
+  /** The statement's own account (chosen at upload) and its ledger account. */
+  statementAccountNumber: string;
+  statementLedgerAccount: string | null;
+}
 
 export interface BankIngestionSummary {
   uploadId: string;
@@ -58,6 +82,12 @@ interface IngestBankArgs {
   actor: UserDocument;
   /** Original upload filename, recorded on the async job for the UI. */
   fileName?: string | null;
+  /**
+   * The org's own settlement account this statement belongs to (bank ТЗ §1).
+   * The org-side leg of every posting in the batch. Required by the controller;
+   * validated against the org's registered accounts before any draft is built.
+   */
+  statementAccountNumber: string;
 }
 
 interface CommitDraftsArgs {
@@ -71,6 +101,12 @@ interface CommitDraftsArgs {
  * Bank-statement ingestion + posting orchestrator — bank ТЗ §3–§7.
  *
  * Per-row sequence:
+ *   0. Internal-contour check (bank ТЗ §1) — BEFORE counterparty resolution.
+ *      If the row's ИНН is the org's own, or the row's «Счёт» is one of the
+ *      org's registered accounts, the row is a movement between two of the
+ *      company's own accounts (internal transfer / fx purchase / card top-up).
+ *      No counterparty is resolved; the posting goes between the statement
+ *      account's ledger account and the «Счёт»-side ledger account.
  *   1. Resolve counterparty by ИНН (find or auto-create).
  *      - Auto-created → YELLOW.
  *   2. Decide direction by which of debitOut / creditIn is non-zero.
@@ -107,6 +143,8 @@ export class BankIngestionService {
     private readonly chartModel: ChartOfAccountModel,
     @InjectModel(Counterparty.name)
     private readonly counterpartyModel: CounterpartyModel,
+    @InjectModel(OrganizationProfile.name)
+    private readonly profileModel: OrganizationProfileModel,
     @InjectModel(BankUploadJob.name)
     private readonly jobModel: BankUploadJobModel,
     private readonly periods: PeriodsService,
@@ -138,6 +176,7 @@ export class BankIngestionService {
       uploadId,
       args.filePath,
       args.actor,
+      args.statementAccountNumber,
     );
 
     this.logger.logAction('ledger.bank.ingested', {
@@ -181,6 +220,7 @@ export class BankIngestionService {
       uploadId,
       status: 'processing',
       fileName: args.fileName ?? null,
+      statementAccountNumber: args.statementAccountNumber,
       createdBy: args.actor._id,
     });
 
@@ -224,6 +264,7 @@ export class BankIngestionService {
         uploadId,
         args.filePath,
         args.actor,
+        args.statementAccountNumber,
       );
 
       await this.jobModel.updateOne(
@@ -290,6 +331,10 @@ export class BankIngestionService {
    * Shared core: parse the file and create a draft per row. No period
    * validation, no logging, no job bookkeeping — those belong to the callers
    * (ingestFromFile for the synchronous path, runIngestion for the async one).
+   *
+   * Loads the org profile ONCE here (not per row) to build the internal-contour
+   * context — the org's own ИНН, its own accounts, and each account's NSBU
+   * ledger account — then hands the same immutable context to every row.
    */
   private async parseAndCreateDrafts(
     orgId: Types.ObjectId,
@@ -297,6 +342,7 @@ export class BankIngestionService {
     uploadId: string,
     filePath: string,
     actor: UserDocument,
+    statementAccountNumber: string,
   ): Promise<BankIngestionSummary> {
     const parsed = parseBankStatement(filePath);
 
@@ -306,6 +352,8 @@ export class BankIngestionService {
         message: 'Bank statement contained no transaction rows',
       });
     }
+
+    const contour = await this.buildContourContext(orgId, statementAccountNumber);
 
     const byColor: Record<BankPreviewColor, number> = {
       green: 0,
@@ -322,6 +370,7 @@ export class BankIngestionService {
           uploadId,
           row,
           actor,
+          contour,
         });
         byColor[color]++;
       } catch (err) {
@@ -340,6 +389,53 @@ export class BankIngestionService {
       byColor,
       parseWarnings: parsed.warnings,
       rowsSkipped,
+    };
+  }
+
+  /**
+   * Resolve the internal-contour context from the org profile (bank ТЗ §1).
+   *
+   * Validates that the chosen statement account is actually one of the org's
+   * registered accounts — a statement can only be attributed to an account the
+   * org owns. Throws a 4xx otherwise so the upload fails clearly rather than
+   * silently posting against an unknown account.
+   *
+   * A missing `ledgerAccount` is NOT fatal here: the row-level posting decides
+   * what to do (it flags the row for manual selection). We only hard-fail when
+   * the statement account itself is unknown to the org.
+   */
+  private async buildContourContext(
+    orgId: Types.ObjectId,
+    statementAccountNumber: string,
+  ): Promise<InternalContourContext> {
+    const profile = await this.profileModel
+      .findOne({ organizationId: orgId })
+      .lean();
+
+    const accounts = profile?.bankAccounts ?? [];
+    const ownAccounts = new Set<string>();
+    const ledgerByAccount = new Map<string, string | null>();
+    for (const acc of accounts) {
+      if (!acc.accountNumber) continue;
+      ownAccounts.add(acc.accountNumber);
+      ledgerByAccount.set(acc.accountNumber, acc.ledgerAccount ?? null);
+    }
+
+    if (!ownAccounts.has(statementAccountNumber)) {
+      throw new BadRequestException({
+        error: 'UNKNOWN_STATEMENT_ACCOUNT',
+        message:
+          'The selected statement account is not one of the organization’s registered accounts. Add it under Organization requisites first.',
+      });
+    }
+
+    return {
+      ownInn: profile?.inn ? profile.inn.trim() : null,
+      ownAccounts,
+      ledgerByAccount,
+      statementAccountNumber,
+      statementLedgerAccount:
+        ledgerByAccount.get(statementAccountNumber) ?? null,
     };
   }
 
@@ -375,6 +471,7 @@ export class BankIngestionService {
     reason: string;
     recordAccount: string | null;
     direction: 'we_pay' | 'we_receive' | null;
+    isInternalTransfer: boolean;
   }>> {
     const orgId =
       typeof args.organizationId === 'string'
@@ -443,16 +540,26 @@ export class BankIngestionService {
         : null;
 
       const hasPlaceholder = lines.some(
-        (l) => l.accountCode === '000',
+        (l) => l.accountCode === UNRESOLVED_ACCOUNT,
       );
+      const hasCounterparty = lines.some((l) => l.counterpartyId);
+      // An internal-contour posting carries no counterparty on either leg
+      // (bank ТЗ §1). A fully-resolved one therefore has no counterparty and
+      // no placeholder; a half-resolved one shows up as RED via the
+      // placeholder branch below, which is the correct "pick the account"
+      // prompt. We compute this flag for labelling regardless of color.
+      const isInternalTransfer = !hasCounterparty && lines.length > 0;
+
       if (hasPlaceholder) {
         return {
           entry,
           color: 'red' as const,
-          reason:
-            'Unrecognized treasury payment — pick the record account before posting',
+          reason: isInternalTransfer
+            ? 'Internal transfer — map the account on both own accounts before posting'
+            : 'Unrecognized treasury payment — pick the record account before posting',
           recordAccount,
           direction,
+          isInternalTransfer,
         };
       }
       const counterpartyId = lines.find((l) => l.counterpartyId)?.counterpartyId;
@@ -465,10 +572,18 @@ export class BankIngestionService {
             reason: 'Counterparty auto-created from this statement — verify',
             recordAccount,
             direction,
+            isInternalTransfer: false,
           };
         }
       }
-      return { entry, color: 'green' as const, reason: '', recordAccount, direction };
+      return {
+        entry,
+        color: 'green' as const,
+        reason: isInternalTransfer ? 'Internal transfer between own accounts' : '',
+        recordAccount,
+        direction,
+        isInternalTransfer,
+      };
     });
   }
 
@@ -509,7 +624,7 @@ export class BankIngestionService {
       // is a follow-up slice; for now we just skip them so the commit
       // doesn't half-fail.
       const lines = await this.lineModel.find({ entryId: draft._id }).lean();
-      if (lines.some((l) => l.accountCode === '000')) {
+      if (lines.some((l) => l.accountCode === UNRESOLVED_ACCOUNT)) {
         skipped++;
         continue;
       }
@@ -663,14 +778,27 @@ export class BankIngestionService {
     }
 
     if (args.patch.counterpartyId !== undefined) {
-      // Both lines reference the counterparty on bank-engine drafts —
-      // update both to keep the audit trail consistent.
-      for (const line of lines) {
-        line.counterpartyId = counterpartyObjectId;
-        line.subconto1Value = counterpartyObjectId
+      // Subconto reshape (methodology §3): the counterparty is an analytic of
+      // the RECORD leg only (6010/4310/4010/6310/treasury). The org-side bank
+      // leg's subconto is its account number and must NOT be overwritten with
+      // a counterparty. So we stamp the counterparty on the record leg alone;
+      // the bank leg is left exactly as the engine wrote it.
+      if (recordLine) {
+        recordLine.counterpartyId = counterpartyObjectId;
+        recordLine.subconto1Value = counterpartyObjectId
           ? counterpartyObjectId.toString()
           : null;
-        await line.save();
+        await recordLine.save();
+      } else {
+        // No identifiable record leg (e.g. an internal transfer, which has no
+        // counterparty by definition). Setting a counterparty here is not a
+        // supported operation — reject rather than silently mis-stamp a bank
+        // leg.
+        throw new BadRequestException({
+          error: 'NO_RECORD_LINE',
+          message:
+            'This draft has no counterparty-bearing leg to set a counterparty on (internal transfers carry no counterparty).',
+        });
       }
     }
 
@@ -696,8 +824,47 @@ export class BankIngestionService {
     uploadId: string;
     row: ParsedBankRow;
     actor: UserDocument;
+    contour: InternalContourContext;
   }): Promise<BankPreviewColor> {
-    const { orgId, periodId, uploadId, row, actor } = args;
+    const { orgId, periodId, uploadId, row, actor, contour } = args;
+
+    // 0. Direction first — both the contour branch and the standard path need it.
+    const direction = this.deriveDirection(row);
+    if (!direction) {
+      // The parser already warned; bail without creating a draft.
+      throw new Error(
+        `Row ${row.sourceRow}: both debitOut and creditIn are zero — cannot derive direction`,
+      );
+    }
+    const amount = direction === 'we_pay' ? row.debitOut : row.creditIn;
+
+    // The org-side leg of the posting. Defaults to the statement account's
+    // own ledger account (usually 5110); for the standard counterparty path
+    // this is the settlement-account leg. Falls back to the legacy 5110
+    // constant when the statement account has no ledgerAccount mapped, so
+    // existing (un-mapped) profiles behave exactly as before.
+    const orgSideAccount =
+      contour.statementLedgerAccount ?? BANK_POSTING_ACCOUNTS.CURRENT_ACCOUNT;
+
+    // 0b. Internal-contour movement? (bank ТЗ §1) — checked BEFORE counterparty
+    // resolution. Either the counterparty ИНН is the org's own, or the row's
+    // «Счёт» is one of the org's own accounts → this is money moving between
+    // two of the company's own accounts (internal transfer / fx purchase /
+    // card top-up), not a third-party settlement. We post between the two
+    // own-account ledger accounts and never resolve/create a counterparty.
+    if (this.isInternalContourRow(row, contour)) {
+      return this.createInternalTransferDraft({
+        orgId,
+        periodId,
+        uploadId,
+        row,
+        actor,
+        direction,
+        amount,
+        orgSideAccount,
+        contour,
+      });
+    }
 
     // 1. Counterparty resolution.
     const resolved = await this.counterparties.resolve({
@@ -715,16 +882,6 @@ export class BankIngestionService {
       autoCreated = resolved.autoCreated;
     }
 
-    // 2. Direction.
-    const direction = this.deriveDirection(row);
-    if (!direction) {
-      // The parser already warned; bail without creating a draft.
-      throw new Error(
-        `Row ${row.sourceRow}: both debitOut and creditIn are zero — cannot derive direction`,
-      );
-    }
-    const amount = direction === 'we_pay' ? row.debitOut : row.creditIn;
-
     // 3. Treasury path?
     let recordAccount: string | null = null;
     let color: BankPreviewColor = 'green';
@@ -741,7 +898,7 @@ export class BankIngestionService {
         treasuryMatchedOn = treasury.matchedOn;
       } else {
         // RED: operator must pick account.
-        recordAccount = '000';
+        recordAccount = UNRESOLVED_ACCOUNT;
         needsManual = true;
         color = 'red';
       }
@@ -756,7 +913,7 @@ export class BankIngestionService {
     } else {
       // No counterparty resolved (no ИНН, no account match) AND not treasury.
       // RED — operator picks counterparty and account.
-      recordAccount = '000';
+      recordAccount = UNRESOLVED_ACCOUNT;
       needsManual = true;
       color = 'red';
     }
@@ -777,9 +934,25 @@ export class BankIngestionService {
     });
 
     const debitAccount =
-      direction === 'we_pay' ? recordAccount : BANK_POSTING_ACCOUNTS.CURRENT_ACCOUNT;
+      direction === 'we_pay' ? recordAccount : orgSideAccount;
     const creditAccount =
-      direction === 'we_pay' ? BANK_POSTING_ACCOUNTS.CURRENT_ACCOUNT : recordAccount;
+      direction === 'we_pay' ? orgSideAccount : recordAccount;
+
+    // Subconto reshape (methodology §3): each leg's analytics depends on which
+    // account it is. The org-side leg is a bank account → its subconto is the
+    // raw statement account number, and it carries NO counterparty (a bank
+    // account's analytic axis is the account, not who we paid). The record
+    // leg (6010/4310/4010/6310, or a treasury record account) keeps the
+    // counterparty as its subconto, exactly as before — that is what the
+    // per-counterparty running-balance check in §6 depends on.
+    //
+    // The statement account number is the org-side bank account's subconto
+    // value; null only if no statement account was carried (shouldn't happen
+    // — the controller requires it — but stays defensive).
+    const orgSideSubconto = contour.statementAccountNumber || null;
+
+    const debitIsOrgSide = direction !== 'we_pay';
+    const creditIsOrgSide = direction === 'we_pay';
 
     await this.lineModel.create([
       {
@@ -790,8 +963,13 @@ export class BankIngestionService {
         accountCode: debitAccount,
         direction: 'debit',
         amount: Types.Decimal128.fromString(amount),
-        counterpartyId,
-        subconto1Value: counterpartyId ? counterpartyId.toString() : null,
+        // Org-side bank leg → no counterparty; record leg → counterparty.
+        counterpartyId: debitIsOrgSide ? null : counterpartyId,
+        subconto1Value: debitIsOrgSide
+          ? orgSideSubconto
+          : counterpartyId
+            ? counterpartyId.toString()
+            : null,
         description: this.lineDescription(row, treasuryMatchedOn, 'debit'),
       },
       {
@@ -802,13 +980,186 @@ export class BankIngestionService {
         accountCode: creditAccount,
         direction: 'credit',
         amount: Types.Decimal128.fromString(amount),
-        counterpartyId,
-        subconto1Value: counterpartyId ? counterpartyId.toString() : null,
+        counterpartyId: creditIsOrgSide ? null : counterpartyId,
+        subconto1Value: creditIsOrgSide
+          ? orgSideSubconto
+          : counterpartyId
+            ? counterpartyId.toString()
+            : null,
         description: this.lineDescription(row, treasuryMatchedOn, 'credit'),
       },
     ]);
 
     return color;
+  }
+
+  /**
+   * True when a row is a movement inside the company's own contour (bank ТЗ §1):
+   * either its counterparty ИНН equals the org's own ИНН, or the row's «Счёт»
+   * is one of the org's own registered accounts. Such a row is a transfer
+   * between two of the company's own accounts, not a third-party settlement.
+   */
+  private isInternalContourRow(
+    row: ParsedBankRow,
+    contour: InternalContourContext,
+  ): boolean {
+    if (contour.ownInn && row.inn && row.inn.trim() === contour.ownInn) {
+      return true;
+    }
+    if (row.counterpartyAccount && contour.ownAccounts.has(row.counterpartyAccount)) {
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Post an internal-contour movement (bank ТЗ §1, methodology June 2026).
+   *
+   * Both legs are the company's own accounts:
+   *   - org-side leg  = the statement account's ledger account (orgSideAccount,
+   *     usually 5110),
+   *   - other leg     = the ledger account mapped to the row's «Счёт».
+   *
+   * FX purchase/sale is a special case: the FX-transit account 22613… maps to
+   * a 5730/5740 pair, resolved by direction (buying vs selling) — see
+   * pickContourOtherAccount.
+   *
+   * Sides follow direction: on a debit-out (sums leaving the statement
+   * account) the other account is debited and the statement account credited;
+   * on a credit-in the reverse. No counterparty is attached.
+   *
+   * If either ledger account is missing (the «Счёт»-side own account isn't
+   * registered, or a registered account has no ledgerAccount yet), the
+   * unresolved leg is stamped with the placeholder account → RED, so the
+   * operator picks it on the preview instead of the engine guessing.
+   */
+  private async createInternalTransferDraft(args: {
+    orgId: Types.ObjectId;
+    periodId: Types.ObjectId;
+    uploadId: string;
+    row: ParsedBankRow;
+    actor: UserDocument;
+    direction: 'we_pay' | 'we_receive';
+    amount: string;
+    orgSideAccount: string;
+    contour: InternalContourContext;
+  }): Promise<BankPreviewColor> {
+    const {
+      orgId,
+      periodId,
+      uploadId,
+      row,
+      actor,
+      direction,
+      amount,
+      orgSideAccount,
+      contour,
+    } = args;
+
+    const otherAccount = this.pickContourOtherAccount(row, direction, contour);
+
+    // RED when we couldn't determine one of the legs — operator fixes it.
+    const hasUnresolved =
+      orgSideAccount === UNRESOLVED_ACCOUNT ||
+      otherAccount === UNRESOLVED_ACCOUNT;
+
+    const entry = await this.entryModel.create({
+      organizationId: orgId,
+      periodId,
+      date: row.date,
+      description: row.purpose.substring(0, 1990),
+      source: 'bank_statement',
+      sourceRef: `bank:${uploadId}:${row.sourceRow}`,
+      status: 'draft',
+      totalAmount: Types.Decimal128.fromString(amount),
+      createdBy: actor._id,
+    });
+
+    // On a debit-out the money leaves the statement account: the OTHER own
+    // account receives it (debit), the statement account is credited. Reverse
+    // on a credit-in.
+    const debitAccount = direction === 'we_pay' ? otherAccount : orgSideAccount;
+    const creditAccount = direction === 'we_pay' ? orgSideAccount : otherAccount;
+
+    // Subconto reshape (methodology §3): both legs are bank accounts, so each
+    // leg's subconto is its OWN raw account number — never a counterparty
+    // (internal transfers have none). The org-side leg's number is the
+    // statement account; the other leg's number is the «Счёт» field (which,
+    // for an internal-contour row, is the company's second own account).
+    const orgSideNumber = contour.statementAccountNumber || null;
+    const otherNumber = row.counterpartyAccount || null;
+    const debitSubconto = direction === 'we_pay' ? otherNumber : orgSideNumber;
+    const creditSubconto = direction === 'we_pay' ? orgSideNumber : otherNumber;
+
+    await this.lineModel.create([
+      {
+        entryId: entry._id,
+        organizationId: orgId,
+        periodId,
+        date: row.date,
+        accountCode: debitAccount,
+        direction: 'debit',
+        amount: Types.Decimal128.fromString(amount),
+        counterpartyId: null,
+        subconto1Value: debitSubconto,
+        description: this.internalLineDescription(row, 'debit'),
+      },
+      {
+        entryId: entry._id,
+        organizationId: orgId,
+        periodId,
+        date: row.date,
+        accountCode: creditAccount,
+        direction: 'credit',
+        amount: Types.Decimal128.fromString(amount),
+        counterpartyId: null,
+        subconto1Value: creditSubconto,
+        description: this.internalLineDescription(row, 'credit'),
+      },
+    ]);
+
+    return hasUnresolved ? 'red' : 'green';
+  }
+
+  /**
+   * The «Счёт»-side ledger account for an internal-contour row.
+   *
+   * Normal case: the row's «Счёт» is a registered own account → use its mapped
+   * ledger account. FX special case: when that mapped account is the FX-transit
+   * account (5730/5740 pair), pick by direction — buying fx (sums leaving,
+   * we_pay) → 5730 «Приобретение», selling (we_receive) → 5740 «Реализация».
+   *
+   * When the «Счёт» isn't a registered own account (e.g. the row landed in the
+   * contour only via the own-ИНН test and the second account isn't on file) or
+   * the registered account has no ledgerAccount, returns the placeholder so the
+   * caller marks the draft RED.
+   */
+  private pickContourOtherAccount(
+    row: ParsedBankRow,
+    direction: 'we_pay' | 'we_receive',
+    contour: InternalContourContext,
+  ): string {
+    const acct = row.counterpartyAccount;
+    if (!acct || !contour.ownAccounts.has(acct)) {
+      return UNRESOLVED_ACCOUNT;
+    }
+    const mapped = contour.ledgerByAccount.get(acct) ?? null;
+    if (!mapped) return UNRESOLVED_ACCOUNT;
+
+    // FX-transit pair resolves by direction.
+    if (mapped === FX_TRANSIT_ACCOUNTS.PURCHASE || mapped === FX_TRANSIT_ACCOUNTS.SALE) {
+      return direction === 'we_pay'
+        ? FX_TRANSIT_ACCOUNTS.PURCHASE
+        : FX_TRANSIT_ACCOUNTS.SALE;
+    }
+    return mapped;
+  }
+
+  private internalLineDescription(
+    row: ParsedBankRow,
+    side: 'debit' | 'credit',
+  ): string {
+    return `Bank row ${row.sourceRow} — internal transfer [${side}]`;
   }
 
   private deriveDirection(row: ParsedBankRow): 'we_pay' | 'we_receive' | null {
@@ -919,7 +1270,7 @@ export class BankIngestionService {
     // Map entryId → has a '000' placeholder line (RED). One bulk query.
     const entryIds = entries.map((e) => e._id);
     const placeholderLines = await this.lineModel
-      .find({ entryId: { $in: entryIds }, accountCode: '000' })
+      .find({ entryId: { $in: entryIds }, accountCode: UNRESOLVED_ACCOUNT })
       .select('entryId')
       .lean();
     const redEntryIds = new Set(placeholderLines.map((l) => l.entryId.toString()));

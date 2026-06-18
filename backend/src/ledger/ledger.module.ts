@@ -16,11 +16,15 @@ import { BankStatementsController } from './bank/bank-statements.controller';
 import { CounterpartyResolverService } from './bank/counterparty-resolver.service';
 import { RunningBalanceService } from './bank/running-balance.service';
 import { TreasuryResolverService } from './bank/treasury-resolver.service';
+import { DocumentsController } from './documents/documents.controller';
+import { DocumentsService } from './documents/documents.service';
 import { OnboardingController } from './onboarding.controller';
 import { OrganizationProfileController } from './organization-profile.controller';
 import { AccountBalance, AccountBalanceSchema } from './schemas/account-balance.schema';
 import { ChartOfAccount, ChartOfAccountSchema } from './schemas/chart-of-account.schema';
+import { Contract, ContractSchema } from './schemas/contract.schema';
 import { Counterparty, CounterpartySchema } from './schemas/counterparty.schema';
+import { Invoice, InvoiceSchema } from './schemas/invoice.schema';
 import { JournalEntryLine, JournalEntryLineSchema } from './schemas/journal-entry-line.schema';
 import { JournalEntry, JournalEntrySchema } from './schemas/journal-entry.schema';
 import {
@@ -63,6 +67,8 @@ import { PeriodsService } from './services/periods.service';
       { name: ReportingPeriod.name, schema: ReportingPeriodSchema },
       { name: ChartOfAccount.name, schema: ChartOfAccountSchema },
       { name: Counterparty.name, schema: CounterpartySchema },
+      { name: Contract.name, schema: ContractSchema },
+      { name: Invoice.name, schema: InvoiceSchema },
       { name: AccountBalance.name, schema: AccountBalanceSchema },
       { name: JournalEntry.name, schema: JournalEntrySchema },
       { name: JournalEntryLine.name, schema: JournalEntryLineSchema },
@@ -90,6 +96,7 @@ import { PeriodsService } from './services/periods.service';
     PeriodsReadController,
     ChartController,
     BalancesController,
+    DocumentsController,
   ],
   providers: [
     ChartSeedService,
@@ -100,6 +107,7 @@ import { PeriodsService } from './services/periods.service';
     CounterpartyResolverService,
     TreasuryResolverService,
     RunningBalanceService,
+    DocumentsService,
     BankIngestionService,
   ],
   exports: [
@@ -109,6 +117,7 @@ import { PeriodsService } from './services/periods.service';
     OrganizationProfilesService,
     BalanceRollupService,
     LedgerBootstrapService,
+    DocumentsService,
     BankIngestionService,
   ],
 })

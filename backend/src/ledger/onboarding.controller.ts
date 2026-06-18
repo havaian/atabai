@@ -37,6 +37,7 @@ export class OnboardingController {
       baseCurrency: body.baseCurrency,
       transitionDate: body.transitionDate,
       firstReportingYear: body.firstReportingYear,
+      accountingPolicy: body.accountingPolicy,
     });
 
     return {
@@ -58,6 +59,7 @@ export class OnboardingController {
         inn: result.profile.inn,
         transitionDate: result.profile.transitionDate,
         baseCurrency: result.profile.baseCurrency,
+        accountingPolicy: result.profile.accountingPolicy,
       },
       periods: result.periods.map((p) => ({
         id: p._id.toString(),

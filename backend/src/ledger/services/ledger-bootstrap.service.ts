@@ -2,6 +2,10 @@ import { Injectable } from '@nestjs/common';
 
 import { AppLoggerService } from '../../common/logger/app-logger.service';
 import { OrganizationsService } from '../../organizations/organizations.service';
+import {
+  DEFAULT_ACCOUNTING_POLICY,
+  type AccountingPolicyShape,
+} from '../constants/accounting-policy';
 import type { MembershipDocument } from '../../organizations/schemas/membership.schema';
 import type { OrganizationDocument } from '../../organizations/schemas/organization.schema';
 import type { UserDocument } from '../../users/schemas/user.schema';
@@ -32,6 +36,13 @@ export interface BootstrapNewOrganizationArgs {
 
   /** Calendar year of the first FULL reporting period. */
   firstReportingYear: number;
+
+  /**
+   * Accounting policy chosen in onboarding (methodology §9). Partial — any
+   * fields the client set; the rest fall back to DEFAULT_ACCOUNTING_POLICY so
+   * the stored policy is always complete.
+   */
+  accountingPolicy?: Partial<AccountingPolicyShape>;
 }
 
 export interface BootstrapResult {
@@ -100,13 +111,20 @@ export class LedgerBootstrapService {
     let periods: ReportingPeriodDocument[];
 
     try {
-      // 2. Ledger profile — transition date, requisites, baseline currency.
+      // 2. Ledger profile — transition date, requisites, baseline currency,
+      // and the 6-block accounting policy. Merge client overrides onto the
+      // defaults so the inserted profile always carries a COMPLETE policy
+      // (avoids the dotted-path partial-insert edge in the upsert).
       profile = await this.profiles.upsert({
         organizationId: organization._id,
         legalName: args.legalName ?? name,
         inn: args.inn ?? null,
         transitionDate,
         baseCurrency: args.baseCurrency ?? 'UZS',
+        accountingPolicy: {
+          ...DEFAULT_ACCOUNTING_POLICY,
+          ...(args.accountingPolicy ?? {}),
+        },
       });
 
       // 3. Chart of accounts — 507 NSBU accounts, idempotent.

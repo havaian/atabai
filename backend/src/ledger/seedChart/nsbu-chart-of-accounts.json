@@ -3702,8 +3702,8 @@
     {
       "code": "5730",
       "name": "Приобретение иностранной валюты",
-      "subconto1Name": "Контрагенты",
-      "subconto2Name": "Договоры",
+      "subconto1Name": "Банковские счета",
+      "subconto2Name": null,
       "subconto3Name": null,
       "vid": "А",
       "isCurrencyTracked": false,
@@ -3716,8 +3716,8 @@
     {
       "code": "5740",
       "name": "Реализация иностранной валюты",
-      "subconto1Name": "Контрагенты",
-      "subconto2Name": "Договоры",
+      "subconto1Name": "Банковские счета",
+      "subconto2Name": null,
       "subconto3Name": null,
       "vid": "А",
       "isCurrencyTracked": true,

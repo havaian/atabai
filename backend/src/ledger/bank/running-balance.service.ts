@@ -28,6 +28,24 @@ export interface RunningBalanceArgs {
   counterpartyId: Types.ObjectId;
 }
 
+/**
+ * Document-scoped position lookup args (methodology §6.3). Sums BOTH accounts
+ * of a counterparty position (e.g. payable 6010 + advance 4310) for ONE
+ * document, since Filipp ruled settlement is strict per document: "да, строго
+ * по тому документу по которому платеж/операция". The net across the two
+ * accounts for that single document decides whether an incoming/outgoing
+ * payment settles an open debt or lands as an advance.
+ */
+export interface DocumentPositionArgs {
+  organizationId: Types.ObjectId;
+  periodId: Types.ObjectId;
+  counterpartyId: Types.ObjectId;
+  /** The two accounts of the position, e.g. [6010, 4310] or [4010, 6310]. */
+  accountCodes: [string, string];
+  documentType: 'contract' | 'invoice';
+  documentId: Types.ObjectId;
+}
+
 export interface RunningBalanceResult {
   /** Net amount on the debit side (positive). */
   debit: string;
@@ -169,5 +187,70 @@ export class RunningBalanceService {
   async hasOpenReceivable(args: RunningBalanceArgs): Promise<boolean> {
     const bal = await this.getBalance(args);
     return compareDecimals(bal.debit, bal.credit) > 0;
+  }
+
+  /**
+   * Combined position across BOTH accounts of a counterparty position for ONE
+   * document (methodology §6.3). Sums committed postings on the two accounts
+   * (e.g. payable + advance) filtered to a single (counterparty, document),
+   * plus the materialized balance rows for the same key. Returns net debit /
+   * credit as decimal strings.
+   *
+   * Drafts are excluded for the same reason as getBalance — the engine must
+   * read the position "before the statement is posted".
+   *
+   * Note: this narrows on documentType+documentId, so only postings already
+   * tagged with that document count. A brand-new document therefore starts at
+   * a zero position (no debt, no advance), which is the correct behavior for
+   * Filipp's per-document rule — a payment against a new document lands as an
+   * advance unless that document already carries an opposing balance.
+   */
+  async getDocumentPosition(args: DocumentPositionArgs): Promise<RunningBalanceResult> {
+    const { organizationId, periodId, counterpartyId, accountCodes, documentType, documentId } =
+      args;
+
+    // NOTE: AccountBalance is materialized at (account, subconto) grain and does
+    // NOT carry documentType/documentId, so a document-scoped position cannot
+    // read opening/period totals from it. We therefore sum COMMITTED LINES only
+    // — which is authoritative for the in-period bank flow: every posting that
+    // touches a document is a line tagged with it. Document-level OPENING
+    // balances (carried across periods) would require the rollup to group by
+    // document too; that is deferred and belongs with the §7.3 depth-migration
+    // work, out of this pass's scope. For a new document the position is zero,
+    // which is the correct per-document behavior (Filipp §6.3).
+    const committedEntries = await this.entryModel
+      .find({ organizationId, periodId, status: 'committed' })
+      .select('_id')
+      .lean();
+    const committedEntryIds = committedEntries.map((e) => e._id);
+
+    const postingAgg = await this.lineModel.aggregate<{
+      _id: 'debit' | 'credit';
+      total: Types.Decimal128;
+    }>([
+      {
+        $match: {
+          organizationId,
+          periodId,
+          counterpartyId,
+          accountCode: { $in: accountCodes },
+          documentType,
+          documentId,
+          entryId: { $in: committedEntryIds },
+        },
+      },
+      { $group: { _id: '$direction', total: { $sum: '$amount' } } },
+    ]);
+    const postingsDebit = postingAgg.find((g) => g._id === 'debit')?.total;
+    const postingsCredit = postingAgg.find((g) => g._id === 'credit')?.total;
+
+    const debitTotal = addDecimals(postingsDebit);
+    const creditTotal = addDecimals(postingsCredit);
+
+    return {
+      debit: debitTotal,
+      credit: creditTotal,
+      net: subtractDecimals(debitTotal, creditTotal),
+    };
   }
 }

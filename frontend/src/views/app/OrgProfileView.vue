@@ -90,14 +90,24 @@
                     {{ $t('orgProfile.noAccounts') }}
                 </div>
 
-                <div v-for="(acc, i) in form.bankAccounts" :key="i" class="profile-account-row">
+                <div v-for="(acc, i) in form.bankAccounts" :key="i"
+                    class="profile-account-row"
+                    :class="{ 'profile-account-row--inactive': acc.isActive === false }">
                     <div class="profile-account-grid">
                         <UiField
                             :label="$t('orgProfile.accountNumber')"
-                            v-model="acc.accountNumber"
+                            :model-value="acc.accountNumber"
+                            @update:model-value="(v) => onAccountNumberInput(acc, v)"
                             trim
                             :disabled="!editable"
                             :placeholder="$t('orgProfile.accountNumberPlaceholder')"
+                        />
+                        <UiField
+                            :label="$t('orgProfile.subAccount')"
+                            v-model="acc.subAccount"
+                            trim
+                            :disabled="!editable"
+                            :placeholder="$t('orgProfile.subAccountPlaceholder')"
                         />
                         <UiField
                             :label="$t('orgProfile.bankCode')"
@@ -121,11 +131,99 @@
                             :disabled="!editable"
                             placeholder="UZS"
                         />
+                        <div class="profile-ledger-field">
+                            <label class="profile-ledger-label">{{ $t('orgProfile.ledgerAccount') }}</label>
+                            <select
+                                v-model="acc.ledgerAccount"
+                                class="profile-ledger-select"
+                                :disabled="!editable"
+                            >
+                                <option value="">{{ $t('orgProfile.ledgerAccountNone') }}</option>
+                                <option v-for="c in chartAccounts" :key="c.code" :value="c.code">
+                                    {{ c.code }} — {{ c.name }}
+                                </option>
+                            </select>
+                        </div>
                     </div>
-                    <UiButton v-if="editable" variant="danger" size="sm" class="profile-remove-btn"
-                        :title="$t('common.delete')" @click="removeAccount(i)">
-                        <Trash2 :size="15" />
-                    </UiButton>
+                    <div class="profile-account-controls">
+                        <!-- Close ≠ delete (methodology §3.5): an account in use is
+                             deactivated, not removed, so its postings keep their ref.
+                             A never-saved blank row can still be dropped outright. -->
+                        <label class="profile-active-toggle" :title="$t('orgProfile.activeHint')">
+                            <input
+                                type="checkbox"
+                                :checked="acc.isActive !== false"
+                                :disabled="!editable"
+                                @change="acc.isActive = $event.target.checked"
+                            />
+                            <span>{{ acc.isActive === false ? $t('orgProfile.inactive') : $t('orgProfile.active') }}</span>
+                        </label>
+                        <UiButton v-if="editable" variant="danger" size="sm" class="profile-remove-btn"
+                            :title="$t('common.delete')" @click="removeAccount(i)">
+                            <Trash2 :size="15" />
+                        </UiButton>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Accounting policy (methodology §9, 6 blocks) -->
+            <section class="profile-card">
+                <h2 class="profile-card-title">{{ $t('orgProfile.accountingPolicy') }}</h2>
+                <p class="profile-card-desc">{{ $t('onboarding.policy.intro') }}</p>
+
+                <div class="profile-policy-grid">
+                    <div class="profile-policy-field">
+                        <label>{{ $t('onboarding.policy.taxRegime') }}</label>
+                        <select v-model="form.policy.taxRegime" class="profile-ledger-select" :disabled="!editable">
+                            <option value="general">{{ $t('onboarding.policy.taxRegimeGeneral') }}</option>
+                            <option value="simplified">{{ $t('onboarding.policy.taxRegimeSimplified') }}</option>
+                        </select>
+                    </div>
+                    <div class="profile-policy-field">
+                        <label class="profile-policy-check">
+                            <input type="checkbox" v-model="form.policy.vatPayer" :disabled="!editable" />
+                            <span>{{ $t('onboarding.policy.vatPayer') }}</span>
+                        </label>
+                        <div v-if="form.policy.vatPayer" class="profile-policy-rate">
+                            <label>{{ $t('onboarding.policy.vatRate') }}</label>
+                            <input v-model.number="form.policy.vatRate" type="number" min="0" max="100"
+                                class="profile-policy-input" :disabled="!editable" />
+                        </div>
+                    </div>
+                    <div class="profile-policy-field">
+                        <label>{{ $t('onboarding.policy.inventoryValuation') }}</label>
+                        <select v-model="form.policy.inventoryValuation" class="profile-ledger-select" :disabled="!editable">
+                            <option value="weighted_average">{{ $t('onboarding.policy.inventoryWeightedAvg') }}</option>
+                            <option value="fifo">{{ $t('onboarding.policy.inventoryFifo') }}</option>
+                        </select>
+                    </div>
+                    <div class="profile-policy-field">
+                        <label>{{ $t('onboarding.policy.settlementDepth') }}</label>
+                        <select v-model="form.policy.settlementDepth" class="profile-ledger-select" :disabled="!editable">
+                            <option value="invoice">{{ $t('onboarding.policy.settlementInvoice') }}</option>
+                            <option value="contract">{{ $t('onboarding.policy.settlementContract') }}</option>
+                        </select>
+                    </div>
+                    <div class="profile-policy-field">
+                        <label>{{ $t('onboarding.policy.payrollDetail') }}</label>
+                        <select v-model="form.policy.payrollDetail" class="profile-ledger-select" :disabled="!editable">
+                            <option value="company_wide">{{ $t('onboarding.policy.payrollCompanyWide') }}</option>
+                            <option value="by_employee_department">{{ $t('onboarding.policy.payrollByEmployee') }}</option>
+                        </select>
+                    </div>
+                    <div class="profile-policy-field">
+                        <label>{{ $t('onboarding.policy.leaveReserve') }}</label>
+                        <select v-model="form.policy.leaveReserve" class="profile-ledger-select" :disabled="!editable">
+                            <option value="accrue_monthly">{{ $t('onboarding.policy.leaveAccrueMonthly') }}</option>
+                            <option value="on_actual">{{ $t('onboarding.policy.leaveOnActual') }}</option>
+                        </select>
+                    </div>
+                    <div class="profile-policy-field">
+                        <label class="profile-policy-check">
+                            <input type="checkbox" v-model="form.policy.allowNegativeStock" :disabled="!editable" />
+                            <span>{{ $t('onboarding.policy.allowNegativeStock') }}</span>
+                        </label>
+                    </div>
                 </div>
             </section>
 
@@ -163,9 +261,49 @@ const form = reactive({
     inn: '',
     baseCurrency: 'UZS',
     bankAccounts: [],
+    policy: {
+        taxRegime: 'general',
+        vatPayer: true,
+        vatRate: 12,
+        inventoryValuation: 'weighted_average',
+        allowNegativeStock: false,
+        settlementDepth: 'invoice',
+        payrollDetail: 'company_wide',
+        leaveReserve: 'accrue_monthly',
+    },
 })
 
 const editable = computed(() => ledger.canEditProfile)
+
+// Chart accounts for the per-settlement-account "ledger account" dropdown.
+// Sorted by code so the list is scannable.
+const chartAccounts = computed(() =>
+    [...(ledger.chart || [])].sort((a, b) =>
+        String(a.code || '').localeCompare(String(b.code || ''))
+    )
+)
+
+// §3.4 account-number mask: currency sits at digits 6-8 (000 = сумы). Only the
+// confirmed codes are mapped; anything else leaves currency for manual entry.
+// Mirror of backend bank/account-number-mask.ts — kept in sync by hand since
+// the frontend can't import server modules.
+const CURRENCY_BY_MASK_CODE = { '000': 'UZS', '840': 'USD', '978': 'EUR', '643': 'RUB' }
+function deriveCurrencyFromAccountNumber(raw) {
+    const n = String(raw || '').replace(/\s+/g, '')
+    if (!/^\d{20}$/.test(n)) return null
+    return CURRENCY_BY_MASK_CODE[n.slice(5, 8)] || null
+}
+
+// On account-number entry, auto-fill currency from the mask when we can derive
+// it AND the user hasn't already typed something else. Never overwrites a
+// value the user set by hand — only fills a blank/default.
+function onAccountNumberInput(acc, v) {
+    acc.accountNumber = (v || '').trim()
+    const derived = deriveCurrencyFromAccountNumber(acc.accountNumber)
+    if (derived && (!acc.currency || acc.currency === 'UZS')) {
+        acc.currency = derived
+    }
+}
 
 function hydrate() {
     const p = ledger.profile
@@ -177,7 +315,21 @@ function hydrate() {
         bankCode: a.bankCode || '',
         label: a.label || '',
         currency: a.currency || 'UZS',
+        ledgerAccount: a.ledgerAccount || '',
+        subAccount: a.subAccount || '',
+        isActive: a.isActive !== false,
     }))
+    const pol = p?.accountingPolicy || {}
+    form.policy = {
+        taxRegime: pol.taxRegime || 'general',
+        vatPayer: pol.vatPayer !== false,
+        vatRate: typeof pol.vatRate === 'number' ? pol.vatRate : 12,
+        inventoryValuation: pol.inventoryValuation || 'weighted_average',
+        allowNegativeStock: pol.allowNegativeStock === true,
+        settlementDepth: pol.settlementDepth || 'invoice',
+        payrollDetail: pol.payrollDetail || 'company_wide',
+        leaveReserve: pol.leaveReserve || 'accrue_monthly',
+    }
 }
 
 // dirty = the form differs from the loaded profile. Drives the Save/Cancel
@@ -197,14 +349,28 @@ const dirty = computed(() => {
         if ((a.bankCode || '') !== (b.bankCode || '')) return true
         if ((a.label || '') !== (b.label || '')) return true
         if ((a.currency || 'UZS') !== (b.currency || 'UZS')) return true
+        if ((a.ledgerAccount || '') !== (b.ledgerAccount || '')) return true
+        if ((a.subAccount || '') !== (b.subAccount || '')) return true
+        if ((a.isActive !== false) !== (b.isActive !== false)) return true
     }
+    // Policy: compare each block field against the stored policy.
+    const pol = p.accountingPolicy || {}
+    const fp = form.policy
+    if ((pol.taxRegime || 'general') !== fp.taxRegime) return true
+    if ((pol.vatPayer !== false) !== fp.vatPayer) return true
+    if ((typeof pol.vatRate === 'number' ? pol.vatRate : 12) !== fp.vatRate) return true
+    if ((pol.inventoryValuation || 'weighted_average') !== fp.inventoryValuation) return true
+    if ((pol.allowNegativeStock === true) !== fp.allowNegativeStock) return true
+    if ((pol.settlementDepth || 'invoice') !== fp.settlementDepth) return true
+    if ((pol.payrollDetail || 'company_wide') !== fp.payrollDetail) return true
+    if ((pol.leaveReserve || 'accrue_monthly') !== fp.leaveReserve) return true
     return false
 })
 
 watch(() => savedOk.value, (v) => { if (v) setTimeout(() => { savedOk.value = false }, 2500) })
 
 function addAccount() {
-    form.bankAccounts.push({ accountNumber: '', bankCode: '', label: '', currency: 'UZS' })
+    form.bankAccounts.push({ accountNumber: '', bankCode: '', label: '', currency: 'UZS', ledgerAccount: '', subAccount: '', isActive: true })
 }
 function removeAccount(i) { form.bankAccounts.splice(i, 1) }
 function resetForm() { hydrate() }
@@ -223,7 +389,11 @@ async function save() {
                 bankCode: a.bankCode || null,
                 label: a.label || null,
                 currency: a.currency || 'UZS',
+                ledgerAccount: a.ledgerAccount || null,
+                subAccount: a.subAccount || null,
+                isActive: a.isActive !== false,
             })),
+        accountingPolicy: { ...form.policy },
     }
     try {
         await ledger.updateProfile(patch)
@@ -241,6 +411,10 @@ onMounted(async () => {
     try {
         await ledger.fetchProfile()
     } catch (_) { /* inline error */ }
+    // Chart powers the per-account "ledger account" dropdown (bank ТЗ §1
+    // internal-transfer mapping). Non-fatal if it fails — the field just
+    // falls back to a free-text-less empty list.
+    await ledger.fetchChart().catch(() => {})
     hydrate()
 })
 
@@ -299,11 +473,63 @@ watch(() => ledger.profile, () => { if (!dirty.value || !ledger.profile) hydrate
     display: flex; align-items: flex-end; gap: 10px; padding: 14px 0;
     border-top: 1px solid var(--ws-border);
 }
+/* Closed accounts are dimmed but kept visible — never removed (§3.5). */
+.profile-account-row--inactive { opacity: 0.55; }
 .profile-account-grid {
-    flex: 1; display: grid; grid-template-columns: 1.4fr 0.8fr 1fr 0.6fr; gap: 10px;
+    flex: 1; display: grid; grid-template-columns: 1.4fr 0.7fr 0.8fr 1fr 0.6fr 1.2fr; gap: 10px;
 }
+/* Right-hand controls: active toggle stacked over the remove button, kept
+   aligned with the bottom edge of the grid inputs. */
+.profile-account-controls {
+    flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-end; gap: 8px;
+}
+.profile-active-toggle {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 0.78rem; color: var(--ws-text-2); cursor: pointer; white-space: nowrap;
+}
+.profile-active-toggle input { cursor: pointer; }
 /* Keep the remove button aligned with the bottom edge of the grid inputs. */
 .profile-remove-btn { flex-shrink: 0; }
+
+/* Ledger-account dropdown, styled to sit level with the UiField inputs in
+   the same row (UiField renders label + input; we mirror that here). */
+.profile-ledger-field { display: flex; flex-direction: column; gap: 6px; }
+.profile-ledger-label {
+    font-size: 0.8rem; font-weight: 500; color: var(--ws-text-2);
+}
+.profile-ledger-select {
+    width: 100%; box-sizing: border-box; padding: 9px 10px;
+    background: var(--ws-surface); border: 1px solid var(--ws-border);
+    border-radius: 8px; color: var(--ws-text); font-size: 0.9rem; font-family: inherit;
+    cursor: pointer; height: 38px;
+}
+.profile-ledger-select:focus { outline: none; border-color: var(--ws-purple); }
+.profile-ledger-select:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* Accounting-policy grid (§9) */
+.profile-policy-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+.profile-policy-field { display: flex; flex-direction: column; gap: 6px; }
+.profile-policy-field > label {
+    font-size: 0.8rem; font-weight: 500; color: var(--ws-text-2);
+}
+.profile-policy-check {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 0.88rem; color: var(--ws-text); cursor: pointer;
+}
+.profile-policy-check input { cursor: pointer; }
+.profile-policy-rate { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+.profile-policy-rate label { font-size: 0.8rem; font-weight: 500; color: var(--ws-text-2); }
+.profile-policy-input {
+    width: 100%; box-sizing: border-box; padding: 9px 10px;
+    background: var(--ws-surface); border: 1px solid var(--ws-border);
+    border-radius: 8px; color: var(--ws-text); font-size: 0.9rem; font-family: inherit; height: 38px;
+}
+.profile-policy-input:focus { outline: none; border-color: var(--ws-purple); }
+.profile-policy-input:disabled { opacity: 0.6; cursor: not-allowed; }
 
 .profile-error {
     margin-bottom: 12px; padding: 10px 14px; background: rgba(245, 101, 101, 0.1);
@@ -327,6 +553,7 @@ watch(() => ledger.profile, () => { if (!dirty.value || !ledger.profile) hydrate
 
 @media (max-width: 640px) {
     .profile-account-grid { grid-template-columns: 1fr 1fr; }
+    .profile-ledger-field { grid-column: 1 / -1; }
     .profile-narrow { max-width: none; }
 }
 </style>

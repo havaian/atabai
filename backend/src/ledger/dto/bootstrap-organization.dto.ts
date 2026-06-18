@@ -1,4 +1,4 @@
-import { Transform } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import {
   IsDate,
   IsInt,
@@ -8,7 +8,10 @@ import {
   Max,
   Min,
   Matches,
+  ValidateNested,
 } from 'class-validator';
+
+import { AccountingPolicyDto } from './update-organization-profile.dto';
 
 /**
  * Payload for the one-shot ledger bootstrap (LedgerBootstrapService).
@@ -54,4 +57,11 @@ export class BootstrapOrganizationDto {
   @Min(1900, { message: 'firstReportingYear must be at or after 1900' })
   @Max(2100, { message: 'firstReportingYear must be at or before 2100' })
   firstReportingYear!: number;
+
+  // Accounting policy chosen in onboarding (methodology §9). Optional — any
+  // blocks the client set; the rest default in the bootstrap service.
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => AccountingPolicyDto)
+  accountingPolicy?: AccountingPolicyDto;
 }

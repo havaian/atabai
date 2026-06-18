@@ -50,7 +50,12 @@
                     <tr v-for="draft in bank.drafts" :key="draft.id" :class="`bank-preview-row bank-preview-row--${rowColor(draft)}`">
                         <td class="bank-preview-row-id">{{ shortRef(draft.sourceRef) }}</td>
                         <td>{{ formatDate(draft.date) }}</td>
-                        <td class="bank-preview-desc">{{ draft.description }}</td>
+                        <td class="bank-preview-desc">
+                            <span v-if="draft.isInternalTransfer" class="bank-preview-badge">
+                                {{ $t('bankPreview.internalTransfer') }}
+                            </span>
+                            {{ draft.description }}
+                        </td>
                         <td class="bank-preview-account">{{ draft.recordAccount || '—' }}</td>
                         <td class="bank-preview-num">{{ formatAmount(draft.totalAmount) }}</td>
                         <td>
@@ -357,6 +362,11 @@ function shortRef(ref) {
 .bank-preview-row-id { font-family: monospace; font-size: 0.78rem; color: var(--ws-text-3); }
 .bank-preview-desc {
     max-width: 380px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.bank-preview-badge {
+    display: inline-block; padding: 1px 7px; margin-right: 6px; border-radius: 999px;
+    font-size: 0.68rem; font-weight: 600; white-space: nowrap;
+    background: rgba(124, 58, 237, 0.15); color: var(--ws-purple);
 }
 .bank-preview-pill {
     padding: 2px 8px; border-radius: 999px; font-size: 0.74rem; font-weight: 600;

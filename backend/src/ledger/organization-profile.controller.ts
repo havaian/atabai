@@ -67,12 +67,17 @@ export class OrganizationProfileController {
       legalName: body.legalName,
       inn: body.inn,
       baseCurrency: body.baseCurrency,
+      accountingPolicy: body.accountingPolicy,
       // Normalize optional sub-fields so the stored shape is consistent.
       bankAccounts: body.bankAccounts?.map((a) => ({
         accountNumber: a.accountNumber,
         bankCode: a.bankCode ?? null,
         label: a.label ?? null,
         currency: (a.currency ?? 'UZS').toUpperCase(),
+        ledgerAccount: a.ledgerAccount ? a.ledgerAccount.trim() : null,
+        subAccount: a.subAccount ? a.subAccount.trim() : null,
+        // Absent → active (a fresh row from the form is active by default).
+        isActive: a.isActive ?? true,
       })),
     });
 
@@ -90,11 +95,15 @@ export class OrganizationProfileController {
       inn: profile.inn,
       transitionDate: profile.transitionDate,
       baseCurrency: profile.baseCurrency,
+      accountingPolicy: profile.accountingPolicy,
       bankAccounts: (profile.bankAccounts ?? []).map((a) => ({
         accountNumber: a.accountNumber,
         bankCode: a.bankCode ?? null,
         label: a.label ?? null,
         currency: a.currency,
+        ledgerAccount: a.ledgerAccount ?? null,
+        subAccount: a.subAccount ?? null,
+        isActive: a.isActive ?? true,
       })),
     };
   }

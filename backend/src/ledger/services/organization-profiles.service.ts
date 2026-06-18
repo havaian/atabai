@@ -1,8 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Types } from 'mongoose';
 
 import { AppLoggerService } from '../../common/logger/app-logger.service';
+import type { AccountingPolicyShape } from '../constants/accounting-policy';
 import {
   OrganizationProfile,
   type OrganizationProfileDocument,
@@ -15,6 +16,12 @@ export interface OrgBankAccountInput {
   bankCode?: string | null;
   label?: string | null;
   currency?: string;
+  /** NSBU ledger account this settlement account posts to (e.g. 5110, 5730). */
+  ledgerAccount?: string | null;
+  /** Sub-account as its own field (methodology §3.5). */
+  subAccount?: string | null;
+  /** Closed accounts are flagged inactive, never deleted (methodology §3.5). */
+  isActive?: boolean;
 }
 
 export interface UpsertProfileArgs {
@@ -25,6 +32,12 @@ export interface UpsertProfileArgs {
   baseCurrency?: string;
   /** When present, REPLACES the whole bankAccounts list. */
   bankAccounts?: OrgBankAccountInput[];
+  /**
+   * Accounting policy (methodology §9). Partial — only the provided fields are
+   * merged onto the existing policy, so a PATCH can change one block without
+   * resubmitting all six. `undefined` leaves the stored policy untouched.
+   */
+  accountingPolicy?: Partial<AccountingPolicyShape>;
 }
 
 /**
@@ -65,7 +78,49 @@ export class OrganizationProfilesService {
     if (args.inn !== undefined) setPayload.inn = args.inn;
     if (args.transitionDate !== undefined) setPayload.transitionDate = args.transitionDate;
     if (args.baseCurrency !== undefined) setPayload.baseCurrency = args.baseCurrency;
-    if (args.bankAccounts !== undefined) setPayload.bankAccounts = args.bankAccounts;
+    if (args.bankAccounts !== undefined) {
+      // §3.5: account-number uniqueness is validated on the FULL number
+      // ("по всем знакам целиком"), not a prefix. The PATCH replaces the
+      // whole list, so a duplicate here would mean the same physical account
+      // entered twice — reject the whole write rather than silently storing
+      // both. Comparison is on the trimmed accountNumber exactly as the
+      // schema stores it.
+      const seen = new Set<string>();
+      for (const acc of args.bankAccounts) {
+        const num = (acc.accountNumber ?? '').trim();
+        if (!num) continue; // shape is enforced by the DTO; skip blanks defensively.
+        if (seen.has(num)) {
+          throw new BadRequestException({
+            error: 'DUPLICATE_BANK_ACCOUNT',
+            message: `Settlement account ${num} is listed more than once. Each account number must be unique.`,
+          });
+        }
+        seen.add(num);
+      }
+      setPayload.bankAccounts = args.bankAccounts;
+    }
+    if (args.accountingPolicy !== undefined) {
+      // Partial merge: set only the provided block fields via dotted paths so
+      // an edit to one block leaves the others intact. Schema enums validate
+      // the values on save. Keys are whitelisted against the known policy
+      // shape so an unexpected field can't write an arbitrary path.
+      const policy = args.accountingPolicy;
+      const allowed: Array<keyof typeof policy> = [
+        'taxRegime',
+        'vatPayer',
+        'vatRate',
+        'inventoryValuation',
+        'allowNegativeStock',
+        'settlementDepth',
+        'payrollDetail',
+        'leaveReserve',
+      ];
+      for (const key of allowed) {
+        if (policy[key] !== undefined) {
+          setPayload[`accountingPolicy.${key}`] = policy[key];
+        }
+      }
+    }
 
     const profile = await this.profileModel.findOneAndUpdate(
       { organizationId: orgId },

@@ -1182,7 +1182,8 @@
     "subtitle": "Bir necha qadam — va sizning hisobot maydoningiz tayyor.",
     "step1": "Maʼlumotlar",
     "step2": "Oʻtish davri",
-    "step3": "Tasdiqlash",
+    "step3": "Hisob siyosati",
+    "step4": "Tasdiqlash",
     "creating": "Yaratilmoqda…",
     "submit": "Yaratish",
     "fields": {
@@ -1205,6 +1206,33 @@
     "review": {
       "title": "Tekshirib chiqing",
       "note": "NSBU hisoblar rejasi va uch davr (kirish, solishtirma, hisobot) avtomatik yaratiladi."
+    },
+    "policy": {
+      "intro": "Tashkilot uchun hisob siyosatini belgilang. Ularni keyinroq tashkilot profilidan oʻzgartirish mumkin.",
+      "taxes": "Soliqlar",
+      "taxRegime": "Soliq rejimi",
+      "taxRegimeGeneral": "Umumiy (QQS + foyda soligʻi)",
+      "taxRegimeSimplified": "Soddalashtirilgan (aylanma soligʻi)",
+      "vatPayer": "QQS toʻlovchisi",
+      "vatPayerShort": "QQS",
+      "vatRate": "Standart QQS stavkasi (%)",
+      "inventory": "Zaxiralarni baholash",
+      "inventoryValuation": "Baholash usuli",
+      "inventoryWeightedAvg": "Oʻrtacha qiymat boʻyicha",
+      "inventoryFifo": "FIFO",
+      "operational": "Operatsion nazorat",
+      "allowNegativeStock": "Manfiy qoldiqda zaxirani hisobdan chiqarishga ruxsat berish",
+      "settlement": "Kontragentlar bilan hisob-kitoblar",
+      "settlementDepth": "Hisob chuqurligi",
+      "settlementInvoice": "Invoys boʻyicha",
+      "settlementContract": "Shartnoma boʻyicha",
+      "payroll": "Ish haqi",
+      "payrollDetail": "Xarajatlar tafsiloti",
+      "payrollCompanyWide": "Kompaniya boʻyicha jamlab",
+      "payrollByEmployee": "Xodimlar / boʻlimlar boʻyicha",
+      "leaveReserve": "Taʼtil zaxirasi",
+      "leaveAccrueMonthly": "Har oy hisoblash",
+      "leaveOnActual": "Faktik boʻyicha tan olish"
     }
   },
   "osvUpload": {
@@ -1235,7 +1263,12 @@
     "dropSub": ".xlsx yoki .xls",
     "uploading": "Yuklanmoqda…",
     "submit": "Tahlil qilish",
-    "processingNote": "Ko'chirma qayta ishlanmoqda — katta fayllar uchun biroz vaqt olishi mumkin. Sahifani yopmasangiz ham bo'ladi."
+    "processingNote": "Ko'chirma qayta ishlanmoqda — katta fayllar uchun biroz vaqt olishi mumkin. Sahifani yopmasangiz ham bo'ladi.",
+    "statementAccount": "Koʻchirma hisobi",
+    "statementAccountPlaceholder": "Ushbu koʻchirma qaysi hisobga tegishli ekanini tanlang",
+    "accountRequired": "Yuklashdan oldin ushbu koʻchirma qaysi hisobga tegishli ekanini tanlang.",
+    "noAccountsHint": "Hisob-kitob hisoblari kiritilmagan. Avval ularni tashkilot rekvizitlarida qoʻshing.",
+    "accountUnmappedHint": "Bu hisob uchun NSBU hisob raqami koʻrsatilmagan — undagi ichki koʻchirishlar uchun hisobni qoʻlda tanlash kerak boʻladi. Uni tashkilot rekvizitlarida koʻrsating."
   },
   "bankPreview": {
     "title": "Koʻrib chiqish",
@@ -1278,7 +1311,8 @@
       "allDone": "Barcha qatorlar muvaffaqiyatli kiritildi.",
       "reviewRemaining": "Qolganlarini ko'rib chiqish",
       "done": "Tayyor"
-    }
+    },
+    "internalTransfer": "Ichki koʻchirish"
   },
   "adjustments": {
     "title": "IFRS tuzatishlari",
@@ -1446,6 +1480,14 @@
     "accountLabelPlaceholder": "Ixtiyoriy nom",
     "currency": "Valyuta",
     "readOnlyNote": "Sizda faqat o'qish huquqi bor. Ushbu rekvizitlarni faqat tashkilot administratori tahrirlashi mumkin.",
-    "saved": "Rekvizitlar saqlandi."
+    "saved": "Rekvizitlar saqlandi.",
+    "ledgerAccount": "Hisob raqami",
+    "ledgerAccountNone": "Belgilanmagan",
+    "subAccount": "Subhisob",
+    "subAccountPlaceholder": "Ixtiyoriy",
+    "active": "Faol",
+    "inactive": "Yopilgan",
+    "activeHint": "Yopilgan hisoblar oʻchirilmaydi, ularning provodkalari havolani saqlab qoladi. Yopilgan hisobga yangi provodka kiritib boʻlmaydi.",
+    "accountingPolicy": "Hisob siyosati"
   }
 }

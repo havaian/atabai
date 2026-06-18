@@ -29,12 +29,17 @@ export const useBankStore = defineStore('bank', () => {
         return `/organizations/${orgs.currentOrgId}/ledger${path}`
     }
 
-    async function uploadStatement({ periodId, file }) {
+    async function uploadStatement({ periodId, file, statementAccountNumber }) {
         isUploading.value = true
         error.value = null
         try {
             const fd = new FormData()
             fd.append('file', file)
+            // The org's own account this statement belongs to (bank ТЗ §1) —
+            // the org-side leg of every posting in the batch.
+            if (statementAccountNumber) {
+                fd.append('statementAccountNumber', statementAccountNumber)
+            }
             const resp = await apiClient.post(
                 orgScope(`/periods/${periodId}/bank-statements`),
                 fd,

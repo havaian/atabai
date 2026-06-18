@@ -1,13 +1,31 @@
 import { Type } from 'class-transformer';
 import {
   IsArray,
+  IsBoolean,
+  IsIn,
+  IsNumber,
   IsOptional,
   IsString,
   Length,
   Matches,
+  Max,
   MaxLength,
+  Min,
   ValidateNested,
 } from 'class-validator';
+
+import {
+  ALL_INVENTORY_VALUATIONS,
+  ALL_LEAVE_RESERVES,
+  ALL_PAYROLL_DETAILS,
+  ALL_SETTLEMENT_DEPTHS,
+  ALL_TAX_REGIMES,
+  type InventoryValuation,
+  type LeaveReserve,
+  type PayrollDetail,
+  type SettlementDepth,
+  type TaxRegime,
+} from '../constants/accounting-policy';
 
 /**
  * One settlement account owned by the organization (mirrors the
@@ -39,6 +57,69 @@ export class OrgBankAccountDto {
     message: 'currency must be a 3-letter code (e.g. UZS)',
   })
   currency?: string;
+
+  // NSBU ledger account this settlement account posts to (e.g. 5110, 5210,
+  // 5730, 5530). Optional; the bank engine needs it to post internal-contour
+  // transfers but a profile may be saved before it's filled in.
+  @IsOptional()
+  @IsString()
+  @MaxLength(20)
+  ledgerAccount?: string | null;
+
+  // Sub-account as its own field (methodology §3.5) — not concatenated into
+  // accountNumber. Optional; null/absent means the account has no sub-account.
+  @IsOptional()
+  @IsString()
+  @MaxLength(20)
+  subAccount?: string | null;
+
+  // Closed accounts are flagged inactive rather than removed (methodology
+  // §3.5). Optional on the wire; defaults to active in the service when absent.
+  @IsOptional()
+  @IsBoolean()
+  isActive?: boolean;
+}
+
+/**
+ * Accounting-policy block edits (methodology §9). All fields optional — a
+ * PATCH merges only the blocks it carries onto the stored policy, so changing
+ * one setting doesn't require resubmitting all six. Enum values are validated
+ * against the same constants the schema uses.
+ */
+export class AccountingPolicyDto {
+  @IsOptional()
+  @IsIn(ALL_TAX_REGIMES)
+  taxRegime?: TaxRegime;
+
+  @IsOptional()
+  @IsBoolean()
+  vatPayer?: boolean;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @Max(100)
+  vatRate?: number;
+
+  @IsOptional()
+  @IsIn(ALL_INVENTORY_VALUATIONS)
+  inventoryValuation?: InventoryValuation;
+
+  @IsOptional()
+  @IsBoolean()
+  allowNegativeStock?: boolean;
+
+  @IsOptional()
+  @IsIn(ALL_SETTLEMENT_DEPTHS)
+  settlementDepth?: SettlementDepth;
+
+  @IsOptional()
+  @IsIn(ALL_PAYROLL_DETAILS)
+  payrollDetail?: PayrollDetail;
+
+  @IsOptional()
+  @IsIn(ALL_LEAVE_RESERVES)
+  leaveReserve?: LeaveReserve;
 }
 
 /**
@@ -49,7 +130,8 @@ export class OrgBankAccountDto {
  * OrganizationProfilesService docblock). Everything else an admin sees on the
  * profile is editable. All fields optional — a PATCH only touches what it
  * carries; `bankAccounts`, when present, REPLACES the whole list (the edit
- * form submits the full set).
+ * form submits the full set). `accountingPolicy`, when present, MERGES the
+ * provided blocks onto the stored policy.
  */
 export class UpdateOrganizationProfileDto {
   @IsOptional()
@@ -76,4 +158,9 @@ export class UpdateOrganizationProfileDto {
   @ValidateNested({ each: true })
   @Type(() => OrgBankAccountDto)
   bankAccounts?: OrgBankAccountDto[];
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => AccountingPolicyDto)
+  accountingPolicy?: AccountingPolicyDto;
 }

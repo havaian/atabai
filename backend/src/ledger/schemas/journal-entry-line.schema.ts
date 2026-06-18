@@ -89,6 +89,19 @@ export class JournalEntryLine {
   })
   counterpartyId!: Types.ObjectId | null;
 
+  // ─── Settlement document (methodology §6.3, §7) ────────────────────────────
+  // Which contract/invoice this leg settles. Filipp: settlement is strict per
+  // document — "да, строго по тому документу по которому платеж/операция" — so
+  // the document the leg gashes is recorded on the leg, and the running-balance
+  // search narrows to it. Null on legs with no document (e.g. bank-account
+  // legs, internal transfers). `documentType` says which collection
+  // `documentId` points at, since contracts and invoices are separate.
+  @Prop({ type: String, enum: ['contract', 'invoice'], default: null })
+  documentType!: 'contract' | 'invoice' | null;
+
+  @Prop({ type: Types.ObjectId, default: null, index: true })
+  documentId!: Types.ObjectId | null;
+
   // ─── Multi-currency + quantity ─────────────────────────────────────────────
 
   @Prop({ type: String, default: null, uppercase: true, trim: true })
@@ -127,6 +140,22 @@ JournalEntryLineSchema.index(
 JournalEntryLineSchema.index(
   { organizationId: 1, periodId: 1, accountCode: 1, counterpartyId: 1, date: 1 },
   { name: 'line_by_counterparty_timeline' },
+);
+
+// Per-document settlement (methodology §6.3): "all lines settling document D
+// for counterparty X across the 43/63 (or 40/63) accounts". Gashing is strict
+// per document, so the running-balance search narrows on (counterparty,
+// document) and sums the relevant accounts.
+JournalEntryLineSchema.index(
+  {
+    organizationId: 1,
+    periodId: 1,
+    counterpartyId: 1,
+    documentType: 1,
+    documentId: 1,
+    accountCode: 1,
+  },
+  { name: 'line_by_document_settlement' },
 );
 
 // Audit drill-down from a UI balance row back to the lines that produced it.

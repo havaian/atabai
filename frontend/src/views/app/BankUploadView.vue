@@ -18,6 +18,32 @@
                 <strong>{{ periodLabel }}</strong>
             </div>
 
+            <!-- Which of the org's own accounts this statement belongs to
+                 (bank ТЗ §1). Required — it's the org-side leg of every posting. -->
+            <div class="upload-account">
+                <label class="upload-account-label" for="stmt-account">
+                    {{ $t('bankUpload.statementAccount') }}
+                </label>
+                <select
+                    id="stmt-account"
+                    v-model="selectedAccount"
+                    class="upload-account-select"
+                    :disabled="isUploading || accounts.length === 0"
+                >
+                    <option value="" disabled>{{ $t('bankUpload.statementAccountPlaceholder') }}</option>
+                    <option v-for="acc in accounts" :key="acc.accountNumber" :value="acc.accountNumber">
+                        {{ acc.label ? `${acc.label} — ${acc.accountNumber}` : acc.accountNumber }}
+                        <template v-if="acc.currency">({{ acc.currency }})</template>
+                    </option>
+                </select>
+                <p v-if="accounts.length === 0" class="upload-account-hint upload-account-hint--warn">
+                    {{ $t('bankUpload.noAccountsHint') }}
+                </p>
+                <p v-else-if="selectedAccountUnmapped" class="upload-account-hint upload-account-hint--warn">
+                    {{ $t('bankUpload.accountUnmappedHint') }}
+                </p>
+            </div>
+
             <div
                 class="upload-drop"
                 :class="{ 'upload-drop--dragging': isDragOver, 'upload-drop--filled': !!file }"
@@ -63,10 +89,13 @@
 // @ts-nocheck
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { ArrowLeft, CloudUpload, FileCheck } from 'lucide-vue-next'
 import { useBankStore } from '@/stores/bank'
 import { useLedgerStore } from '@/stores/ledger'
 import UiButton from '@/components/ui/UiButton.vue'
+
+const { t } = useI18n()
 
 const route = useRoute()
 const router = useRouter()
@@ -85,8 +114,29 @@ const periodLabel = computed(() => {
     return p?.label || periodId.value
 })
 
+// The org's own settlement accounts (from the ledger profile). The operator
+// must pick which one this statement belongs to (bank ТЗ §1) so the engine
+// knows the org-side leg of every posting.
+const accounts = computed(() => ledger.profile?.bankAccounts || [])
+const selectedAccount = ref('')
+
+// Warn when the chosen account has no NSBU ledger account mapped yet — internal
+// transfers on it will land RED until it's set under Organization requisites.
+const selectedAccountUnmapped = computed(() => {
+    if (!selectedAccount.value) return false
+    const acc = accounts.value.find((a) => a.accountNumber === selectedAccount.value)
+    return !!acc && !acc.ledgerAccount
+})
+
 onMounted(async () => {
-    await ledger.fetchPeriods().catch(() => {})
+    await Promise.all([
+        ledger.fetchPeriods().catch(() => {}),
+        ledger.fetchProfile().catch(() => {}),
+    ])
+    // Preselect when there's exactly one account — nothing to choose.
+    if (accounts.value.length === 1) {
+        selectedAccount.value = accounts.value[0].accountNumber
+    }
 })
 
 function pickFile() {
@@ -110,9 +160,17 @@ function clearFile() {
 async function submit() {
     if (!file.value || !periodId.value) return
     errorMessage.value = ''
+    if (!selectedAccount.value) {
+        errorMessage.value = t('bankUpload.accountRequired')
+        return
+    }
     isUploading.value = true
     try {
-        const resp = await bank.uploadStatement({ periodId: periodId.value, file: file.value })
+        const resp = await bank.uploadStatement({
+            periodId: periodId.value,
+            file: file.value,
+            statementAccountNumber: selectedAccount.value,
+        })
         const uploadId = resp.uploadId || resp.summary?.uploadId
         if (uploadId) {
             router.push(`/app/ledger/periods/${periodId.value}/bank-statements/${uploadId}`)
@@ -156,6 +214,20 @@ function formatSize(bytes) {
 .upload-view-period-label {
     font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ws-text-3);
 }
+.upload-account { margin-bottom: 20px; display: flex; flex-direction: column; gap: 6px; }
+.upload-account-label {
+    font-size: 0.82rem; font-weight: 500; color: var(--ws-text-2);
+}
+.upload-account-select {
+    width: 100%; box-sizing: border-box; padding: 10px 12px;
+    background: var(--ws-surface); border: 1px solid var(--ws-border);
+    border-radius: 8px; color: var(--ws-text); font-size: 0.9rem; font-family: inherit;
+    cursor: pointer;
+}
+.upload-account-select:focus { outline: none; border-color: var(--ws-purple); }
+.upload-account-select:disabled { opacity: 0.6; cursor: not-allowed; }
+.upload-account-hint { font-size: 0.78rem; color: var(--ws-text-3); margin: 0; }
+.upload-account-hint--warn { color: var(--warning, #d9883b); }
 .upload-drop {
     border: 2px dashed var(--ws-border); border-radius: 12px; padding: 36px 16px;
     text-align: center; cursor: pointer; transition: background 0.15s, border-color 0.15s;

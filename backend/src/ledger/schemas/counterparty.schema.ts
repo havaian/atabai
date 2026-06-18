@@ -1,6 +1,12 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Model, Types } from 'mongoose';
 
+import {
+  ALL_COUNTERPARTY_SETTLEMENT_DEPTHS,
+  COUNTERPARTY_SETTLEMENT_DEPTH,
+  type CounterpartySettlementDepth,
+} from '../constants/accounting-policy';
+
 export type CounterpartyDocument = HydratedDocument<Counterparty>;
 export type CounterpartyModel = Model<Counterparty>;
 
@@ -80,6 +86,20 @@ export class Counterparty {
   // Marks a counterparty as no longer transacted with; soft-delete equivalent.
   @Prop({ type: Boolean, default: true, index: true })
   isActive!: boolean;
+
+  /**
+   * Per-counterparty settlement depth (methodology §7.1 + Filipp's §5 ruling).
+   * `inherit` (the default) means follow the company policy-level
+   * `accountingPolicy.settlementDepth`. Never read this inline — resolve the
+   * effective depth via resolveSettlementDepth() so the inherit fallback is
+   * applied uniformly.
+   */
+  @Prop({
+    type: String,
+    enum: ALL_COUNTERPARTY_SETTLEMENT_DEPTHS,
+    default: COUNTERPARTY_SETTLEMENT_DEPTH.INHERIT,
+  })
+  settlementDepth!: CounterpartySettlementDepth;
 }
 
 export const CounterpartySchema = SchemaFactory.createForClass(Counterparty);
