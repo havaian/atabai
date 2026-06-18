@@ -82,12 +82,22 @@ export class DocumentsService {
     counterpartyId: Types.ObjectId,
     kind: DocumentKind,
   ): Promise<DocumentRef[]> {
-    const model = kind === 'contract' ? this.contractModel : this.invoiceModel;
-    const docs = await model
+    // Branch on kind rather than collapsing the two models into a union
+    // variable: ContractModel | InvoiceModel is not callable because the two
+    // models' query overloads don't unify. Each branch keeps a concrete model
+    // type so .find() resolves.
+    if (kind === 'contract') {
+      const docs = await this.contractModel
+        .find({ organizationId, counterpartyId })
+        .sort({ isActive: -1, number: 1 })
+        .lean();
+      return docs.map((d) => this.toRef(d, 'contract'));
+    }
+    const docs = await this.invoiceModel
       .find({ organizationId, counterpartyId })
       .sort({ isActive: -1, number: 1 })
       .lean();
-    return docs.map((d) => this.toRef(d, kind));
+    return docs.map((d) => this.toRef(d, 'invoice'));
   }
 
   /**
@@ -101,14 +111,23 @@ export class DocumentsService {
     kind: DocumentKind,
     number: string,
   ): Promise<DocumentRef | null> {
-    const model = kind === 'contract' ? this.contractModel : this.invoiceModel;
     const target = normalizeDocumentNumber(number);
     // Numbers are stored verbatim; normalize both sides for the compare. The
     // candidate set per counterparty is small, so an in-memory match is fine
-    // and avoids storing a duplicate normalized column.
-    const docs = await model.find({ organizationId, counterpartyId }).lean();
+    // and avoids storing a duplicate normalized column. Branch on kind so the
+    // model type stays concrete (the union of both models isn't callable).
+    if (kind === 'contract') {
+      const docs = await this.contractModel
+        .find({ organizationId, counterpartyId })
+        .lean();
+      const hit = docs.find((d) => normalizeDocumentNumber(d.number) === target);
+      return hit ? this.toRef(hit, 'contract') : null;
+    }
+    const docs = await this.invoiceModel
+      .find({ organizationId, counterpartyId })
+      .lean();
     const hit = docs.find((d) => normalizeDocumentNumber(d.number) === target);
-    return hit ? this.toRef(hit, kind) : null;
+    return hit ? this.toRef(hit, 'invoice') : null;
   }
 
   /**
@@ -208,8 +227,11 @@ export class DocumentsService {
     documentId: Types.ObjectId,
     counterpartyId?: Types.ObjectId,
   ): Promise<DocumentRef> {
-    const model = kind === 'contract' ? this.contractModel : this.invoiceModel;
-    const doc = await model.findOne({ _id: documentId, organizationId }).lean();
+    // Branch on kind so the model type stays concrete (union isn't callable).
+    const doc =
+      kind === 'contract'
+        ? await this.contractModel.findOne({ _id: documentId, organizationId }).lean()
+        : await this.invoiceModel.findOne({ _id: documentId, organizationId }).lean();
     if (!doc) {
       throw new NotFoundException({
         error: 'DOCUMENT_NOT_FOUND',
