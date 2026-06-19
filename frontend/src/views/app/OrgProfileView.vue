@@ -149,15 +149,14 @@
                         <!-- Close ≠ delete (methodology §3.5): an account in use is
                              deactivated, not removed, so its postings keep their ref.
                              A never-saved blank row can still be dropped outright. -->
-                        <label class="profile-active-toggle" :title="$t('orgProfile.activeHint')">
-                            <input
-                                type="checkbox"
-                                :checked="acc.isActive !== false"
-                                :disabled="!editable"
-                                @change="acc.isActive = $event.target.checked"
-                            />
-                            <span>{{ acc.isActive === false ? $t('orgProfile.inactive') : $t('orgProfile.active') }}</span>
-                        </label>
+                        <UiCheckbox
+                            :title="$t('orgProfile.activeHint')"
+                            :model-value="acc.isActive !== false"
+                            :disabled="!editable"
+                            @update:model-value="(v) => acc.isActive = v"
+                        >
+                            {{ acc.isActive === false ? $t('orgProfile.inactive') : $t('orgProfile.active') }}
+                        </UiCheckbox>
                         <UiButton v-if="editable" variant="danger" size="sm" class="profile-remove-btn"
                             :title="$t('common.delete')" @click="removeAccount(i)">
                             <Trash2 :size="15" />
@@ -180,10 +179,9 @@
                         </select>
                     </div>
                     <div class="profile-policy-field">
-                        <label class="profile-policy-check">
-                            <input type="checkbox" v-model="form.policy.vatPayer" :disabled="!editable" />
-                            <span>{{ $t('onboarding.policy.vatPayer') }}</span>
-                        </label>
+                        <UiCheckbox v-model="form.policy.vatPayer" :disabled="!editable">
+                            {{ $t('onboarding.policy.vatPayer') }}
+                        </UiCheckbox>
                         <div class="profile-policy-rate">
                             <label>{{ $t('onboarding.policy.vatRate') }}</label>
                             <input v-model.number="form.policy.vatRate" type="number" min="0" max="100"
@@ -219,10 +217,9 @@
                         </select>
                     </div>
                     <div class="profile-policy-field">
-                        <label class="profile-policy-check">
-                            <input type="checkbox" v-model="form.policy.allowNegativeStock" :disabled="!editable" />
-                            <span>{{ $t('onboarding.policy.allowNegativeStock') }}</span>
-                        </label>
+                        <UiCheckbox v-model="form.policy.allowNegativeStock" :disabled="!editable">
+                            {{ $t('onboarding.policy.allowNegativeStock') }}
+                        </UiCheckbox>
                     </div>
                 </div>
             </section>
@@ -250,6 +247,7 @@ import { ArrowLeft, Lock, Plus, Trash2 } from 'lucide-vue-next'
 import { useLedgerStore } from '@/stores/ledger'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiField from '@/components/ui/UiField.vue'
+import UiCheckbox from '@/components/ui/UiCheckbox.vue'
 
 const router = useRouter()
 const ledger = useLedgerStore()
@@ -502,6 +500,14 @@ watch(() => ledger.profile, () => { if (!dirty.value || !ledger.profile) hydrate
     background: var(--ws-surface); border: 1px solid var(--ws-border);
     border-radius: 8px; color: var(--ws-text); font-size: 0.9rem; font-family: inherit;
     cursor: pointer; height: 38px;
+}
+/* Match the custom chevron used by the other selects instead of the OS arrow. */
+.profile-ledger-select {
+    appearance: none; -webkit-appearance: none; -moz-appearance: none;
+    padding-right: 32px;
+    background-image: var(--ws-select-chevron);
+    background-repeat: no-repeat;
+    background-position: right 11px center;
 }
 .profile-ledger-select:focus { outline: none; border-color: var(--ws-purple); }
 .profile-ledger-select:disabled { opacity: 0.6; cursor: not-allowed; }

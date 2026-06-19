@@ -131,10 +131,9 @@
                                 <option value="simplified">{{ $t('onboarding.policy.taxRegimeSimplified') }}</option>
                             </select>
                         </label>
-                        <label class="onboarding-check">
-                            <input type="checkbox" v-model="policy.vatPayer" />
-                            <span>{{ $t('onboarding.policy.vatPayer') }}</span>
-                        </label>
+                        <UiCheckbox v-model="policy.vatPayer">
+                            {{ $t('onboarding.policy.vatPayer') }}
+                        </UiCheckbox>
                         <label v-if="policy.vatPayer" class="onboarding-field">
                             <span class="onboarding-label">{{ $t('onboarding.policy.vatRate') }}</span>
                             <input v-model.number="policy.vatRate" type="number" min="0" max="100"
@@ -157,10 +156,9 @@
                     <!-- Block 4: Operational control -->
                     <div class="onboarding-policy-block">
                         <span class="onboarding-policy-block-title">{{ $t('onboarding.policy.operational') }}</span>
-                        <label class="onboarding-check">
-                            <input type="checkbox" v-model="policy.allowNegativeStock" />
-                            <span>{{ $t('onboarding.policy.allowNegativeStock') }}</span>
-                        </label>
+                        <UiCheckbox v-model="policy.allowNegativeStock">
+                            {{ $t('onboarding.policy.allowNegativeStock') }}
+                        </UiCheckbox>
                     </div>
 
                     <!-- Block 5: Counterparty settlement depth -->
@@ -254,6 +252,7 @@
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useOrganizationsStore } from '@/stores/organizations'
+import UiCheckbox from '@/components/ui/UiCheckbox.vue'
 
 const router = useRouter()
 const orgs = useOrganizationsStore()
@@ -448,6 +447,19 @@ async function submit() {
 .onboarding-input--currency {
     text-transform: uppercase;
     max-width: 120px;
+}
+
+/* Only <select> gets the chevron - plain inputs sharing this class must not.
+   Element-qualified so it beats the base .onboarding-input padding. */
+select.onboarding-input {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    padding-right: 32px;
+    cursor: pointer;
+    background-image: var(--ws-select-chevron);
+    background-repeat: no-repeat;
+    background-position: right 11px center;
 }
 
 /* Accounting-policy step (§9) */

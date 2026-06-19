@@ -26,6 +26,16 @@
         @apply transition-none;
     }
 
+    /* Native <select> must not inherit the global `transition: all`: on hover the
+       browser re-renders the control and `all` animates its internal layout, so
+       the displayed value jumps down-then-up (the flicker). Restrict to colour
+       props only - focus/hover still fade, but nothing shifts. Selects whose own
+       class sets a transition (more specific) keep theirs. */
+    select {
+        transition-property: color, background-color, border-color, box-shadow;
+        transition-duration: 0.15s;
+    }
+
     a {
         text-decoration: none;
     }

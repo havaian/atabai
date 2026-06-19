@@ -255,6 +255,20 @@
     font-family: monospace;
 }
 
+/* Selects draw the shared chevron instead of the OS arrow, to match the app
+   surface. Covers .adm-select and the few selects that reuse .adm-input. */
+.adm-select,
+select.adm-input {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    padding-right: 30px;
+    cursor: pointer;
+    background-image: var(--ws-select-chevron);
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+}
+
 .adm-field {
     margin-bottom: 12px;
 }

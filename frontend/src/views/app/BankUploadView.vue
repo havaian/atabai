@@ -224,6 +224,14 @@ function formatSize(bytes) {
     border-radius: 8px; color: var(--ws-text); font-size: 0.9rem; font-family: inherit;
     cursor: pointer;
 }
+/* Match the custom chevron used by the other selects instead of the OS arrow. */
+.upload-account-select {
+    appearance: none; -webkit-appearance: none; -moz-appearance: none;
+    padding-right: 32px;
+    background-image: var(--ws-select-chevron);
+    background-repeat: no-repeat;
+    background-position: right 11px center;
+}
 .upload-account-select:focus { outline: none; border-color: var(--ws-purple); }
 .upload-account-select:disabled { opacity: 0.6; cursor: not-allowed; }
 .upload-account-hint { font-size: 0.78rem; color: var(--ws-text-3); margin: 0; }
