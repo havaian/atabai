@@ -40,7 +40,7 @@ defineEmits(['update:modelValue'])
 }
 .ui-checkbox--disabled {
     cursor: not-allowed;
-    opacity: 1;
+    opacity: 0.6;
 }
 
 /* Native input hidden but kept in flow for accessibility + keyboard focus. */
@@ -70,7 +70,7 @@ defineEmits(['update:modelValue'])
     transition: opacity 0.12s;
 }
 
-.ui-checkbox:not(.ui-checkbox--disabled):hover .ui-checkbox-box {
+.ui-checkbox:not(.ui-checkbox--disabled) .ui-checkbox-box {
     border-color: rgba(124, 58, 237, 0.45);
 }
 .ui-checkbox input[type="checkbox"]:checked + .ui-checkbox-box {
