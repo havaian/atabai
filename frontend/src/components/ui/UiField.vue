@@ -61,7 +61,7 @@ function onInput(e) {
 </script>
 
 <style scoped>
-.ui-field { display: flex; flex-direction: column; gap: 5px; }
+.ui-field { display: flex; flex-direction: column; gap: 5px; justify-content: end; }
 .ui-field-label { font-size: 0.8rem; font-weight: 500; color: var(--ws-text-2); }
 .ui-field-control {
     width: 100%;

@@ -40,7 +40,7 @@ defineEmits(['update:modelValue'])
 }
 .ui-checkbox--disabled {
     cursor: not-allowed;
-    opacity: 0.6;
+    opacity: 1;
 }
 
 /* Native input hidden but kept in flow for accessibility + keyboard focus. */

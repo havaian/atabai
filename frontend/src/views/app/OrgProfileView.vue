@@ -479,7 +479,7 @@ watch(() => ledger.profile, () => { if (!dirty.value || !ledger.profile) hydrate
 /* Right-hand controls: active toggle stacked over the remove button, kept
    aligned with the bottom edge of the grid inputs. */
 .profile-account-controls {
-    flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-end; gap: 8px;
+    flex-shrink: 0; display: flex; flex-direction: column; gap: 8px;
 }
 .profile-active-toggle {
     display: inline-flex; align-items: center; gap: 6px;
@@ -491,7 +491,7 @@ watch(() => ledger.profile, () => { if (!dirty.value || !ledger.profile) hydrate
 
 /* Ledger-account dropdown, styled to sit level with the UiField inputs in
    the same row (UiField renders label + input; we mirror that here). */
-.profile-ledger-field { display: flex; flex-direction: column; gap: 6px; }
+.profile-ledger-field { display: flex; flex-direction: column; gap: 6px; justify-content: end; }
 .profile-ledger-label {
     font-size: 0.8rem; font-weight: 500; color: var(--ws-text-2);
 }
