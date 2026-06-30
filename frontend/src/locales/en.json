@@ -112,7 +112,10 @@
     "/adjustmentDetail": "Adjustment",
     "/members": "Members",
     "/bankBatches": "Bank statements",
-    "/orgProfile": "Organization requisites"
+    "/orgProfile": "Organization requisites",
+    "/invoiceUpload": "Invoice registry upload",
+    "/invoicePreview": "Invoice preview",
+    "/invoiceBatches": "Invoices"
   },
   "pageDescriptions": {
     "/": "Automate IFRS. Powered by AI.. Turn complex financial data into accurate, audit-ready IFRS reports — faster, cheaper, and with full transparency..",
@@ -1376,7 +1379,8 @@
       "adjustment": "New adjustment",
       "lock": "Lock",
       "reopen": "Reopen",
-      "bankBatches": "Statements"
+      "bankBatches": "Statements",
+      "invoices": "Invoices"
     },
     "createNew": "New period",
     "createTitle": "Create regular period",
@@ -1489,5 +1493,87 @@
     "inactive": "Closed",
     "activeHint": "Closed accounts are kept (not deleted) so their postings retain a reference. New postings cannot be made against a closed account.",
     "accountingPolicy": "Accounting policy"
+  },
+  "invoiceUpload": {
+    "title": "Invoice registry upload",
+    "subtitle": "Load a Didox registry export; review the postings before committing.",
+    "targetPeriod": "Target period",
+    "direction": "Registry",
+    "incoming": "Incoming",
+    "incomingHint": "Supplier invoices — payable",
+    "outgoing": "Outgoing",
+    "outgoingHint": "Your invoices — receivable",
+    "dropTitle": "Drop the registry export",
+    "dropSub": ".xlsx or .xls",
+    "uploading": "Uploading…",
+    "submit": "Parse",
+    "processingNote": "Parsing the registry — this can take a moment for large files."
+  },
+  "invoicePreview": {
+    "title": "Posting preview",
+    "subtitle": "Green: ready. Yellow: verify. Red: pick line accounts.",
+    "committedTitle": "Posted invoices",
+    "committedSubtitle": "Already committed to the ledger — read-only.",
+    "colors": {
+      "green": "recognized",
+      "yellow": "verify",
+      "red": "needs input"
+    },
+    "cols": {
+      "row": "Row",
+      "date": "Date",
+      "invoice": "Invoice",
+      "direction": "Type",
+      "lines": "Lines",
+      "amount": "Amount",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "direction": {
+      "incoming": "Purchase",
+      "outgoing": "Sale"
+    },
+    "actions": {
+      "fix": "Fix"
+    },
+    "empty": "No drafts for this upload.",
+    "commitHelp": "Red invoices ({red}) will be skipped — set their line accounts first.",
+    "commitButton": "Post invoices",
+    "committing": "Posting…",
+    "editor": {
+      "title": "Set line accounts",
+      "hint": "Pick the account for each line — expense, inventory or asset (purchase) or revenue (sale).",
+      "accountPlaceholder": "e.g. 2910",
+      "applyAll": "Apply the first account to all lines",
+      "lineFallback": "Line {n}"
+    },
+    "result": {
+      "title": "Invoices posted",
+      "committed": "{n} invoices posted to the ledger",
+      "skipped": "{n} invoices skipped",
+      "skippedNote": "Skipped invoices still have lines without an account. Set them and post again.",
+      "allDone": "All invoices posted successfully.",
+      "reviewRemaining": "Review remaining",
+      "done": "Done",
+      "reversed": "{n} original postings reversed and replaced"
+    },
+    "subtype": {
+      "additional": "Additional",
+      "corrected": "Corrected"
+    },
+    "locked": "Locked",
+    "lockedHint": "Posts into {period}, which is locked — reopen that period to post.",
+    "repostsInto": "Reverses and reposts into {period}",
+    "reopenToEdit": "Reopen period to edit"
+  },
+  "invoiceBatches": {
+    "title": "Invoices",
+    "upload": "Upload registry",
+    "empty": "No invoice registries uploaded for this period yet.",
+    "invoices": "{n} invoices",
+    "status": {
+      "draft": "Needs review",
+      "committed": "Posted"
+    }
   }
 }

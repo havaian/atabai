@@ -112,7 +112,10 @@
     "/adjustmentDetail": "Tuzatish",
     "/members": "Aʼzolar",
     "/bankBatches": "Bank koʻchirmalari",
-    "/orgProfile": "Tashkilot rekvizitlari"
+    "/orgProfile": "Tashkilot rekvizitlari",
+    "/invoiceUpload": "Hisob-fakturalar reestrini yuklash",
+    "/invoicePreview": "Hisob-fakturalarni ko'rib chiqish",
+    "/invoiceBatches": "Hisob-fakturalar"
   },
   "pageDescriptions": {
     "/": "XMHS ni avtomatlashtiring. Su'niy Intellekt bilan.. Murakkab moliyaviy ma'lumotlarni aniq, auditga tayyor XMHS hisobotlariga aylantiring — tezroq, arzonroq va to'liq shaffoflik bilan..",
@@ -1376,7 +1379,8 @@
       "adjustment": "Tuzatish",
       "lock": "Yopish",
       "reopen": "Qayta ochish",
-      "bankBatches": "Koʻchirmalar"
+      "bankBatches": "Koʻchirmalar",
+      "invoices": "Hisob-fakturalar"
     },
     "createNew": "Yangi davr",
     "createTitle": "Yangi davr yaratish",
@@ -1489,5 +1493,87 @@
     "inactive": "Yopilgan",
     "activeHint": "Yopilgan hisoblar oʻchirilmaydi, ularning provodkalari havolani saqlab qoladi. Yopilgan hisobga yangi provodka kiritib boʻlmaydi.",
     "accountingPolicy": "Hisob siyosati"
+  },
+  "invoiceUpload": {
+    "title": "Hisob-fakturalar reestrini yuklash",
+    "subtitle": "Didox eksportini yuklang; o'tkazishdan oldin provodkalarni tekshiring.",
+    "targetPeriod": "Davr",
+    "direction": "Reestr",
+    "incoming": "Kiruvchi",
+    "incomingHint": "Yetkazib beruvchi hisob-fakturalari — kreditorlik qarzi",
+    "outgoing": "Chiquvchi",
+    "outgoingHint": "Sizning hisob-fakturalaringiz — debitorlik qarzi",
+    "dropTitle": "Reestr faylini tashlang",
+    "dropSub": ".xlsx yoki .xls",
+    "uploading": "Yuklanmoqda…",
+    "submit": "Tahlil qilish",
+    "processingNote": "Reestr tahlil qilinmoqda — katta fayllar uchun biroz vaqt olishi mumkin."
+  },
+  "invoicePreview": {
+    "title": "O'tkazmalarni ko'rib chiqish",
+    "subtitle": "Yashil: tayyor. Sariq: tekshiring. Qizil: satr hisoblarini tanlang.",
+    "committedTitle": "O'tkazilgan hisob-fakturalar",
+    "committedSubtitle": "Hisobga allaqachon o'tkazilgan — faqat ko'rish.",
+    "colors": {
+      "green": "aniqlandi",
+      "yellow": "tekshiring",
+      "red": "kiritish kerak"
+    },
+    "cols": {
+      "row": "Satr",
+      "date": "Sana",
+      "invoice": "Hisob-faktura",
+      "direction": "Turi",
+      "lines": "Satrlar",
+      "amount": "Summa",
+      "status": "Holat",
+      "actions": "Amallar"
+    },
+    "direction": {
+      "incoming": "Xarid",
+      "outgoing": "Sotuv"
+    },
+    "actions": {
+      "fix": "Tuzatish"
+    },
+    "empty": "Bu yuklama uchun qoralamalar yo'q.",
+    "commitHelp": "Qizil hisob-fakturalar ({red}) o'tkazib yuboriladi — avval satr hisoblarini belgilang.",
+    "commitButton": "Hisob-fakturalarni o'tkazish",
+    "committing": "O'tkazilmoqda…",
+    "editor": {
+      "title": "Satr hisoblarini belgilang",
+      "hint": "Har bir satr uchun hisobni tanlang — xarajat, zaxira yoki aktiv (xarid) yoki daromad (sotuv).",
+      "accountPlaceholder": "masalan 2910",
+      "applyAll": "Birinchi hisobni barcha satrlarga qo'llash",
+      "lineFallback": "{n}-satr"
+    },
+    "result": {
+      "title": "Hisob-fakturalar o'tkazildi",
+      "committed": "{n} ta hisob-faktura hisobga o'tkazildi",
+      "skipped": "{n} ta hisob-faktura o'tkazib yuborildi",
+      "skippedNote": "O'tkazib yuborilgan hisob-fakturalarda hisobi yo'q satrlar bor. Ularni belgilab, qayta o'tkazing.",
+      "allDone": "Barcha hisob-fakturalar muvaffaqiyatli o'tkazildi.",
+      "reviewRemaining": "Qolganlarini ko'rib chiqish",
+      "done": "Tayyor",
+      "reversed": "{n} ta asl provodka storno qilindi va almashtirildi"
+    },
+    "subtype": {
+      "additional": "Qo'shimcha",
+      "corrected": "Tuzatilgan"
+    },
+    "locked": "Yopilgan",
+    "lockedHint": "{period} davriga kiritiladi, lekin u yopilgan — kiritish uchun davrni qayta oching.",
+    "repostsInto": "{period} davriga storno qilib qayta kiritadi",
+    "reopenToEdit": "Davrni qayta oching"
+  },
+  "invoiceBatches": {
+    "title": "Hisob-fakturalar",
+    "upload": "Reestrni yuklash",
+    "empty": "Bu davr uchun hisob-faktura reestrlari hali yuklanmagan.",
+    "invoices": "{n} ta hisob-faktura",
+    "status": {
+      "draft": "Tekshirish kerak",
+      "committed": "O'tkazilgan"
+    }
   }
 }

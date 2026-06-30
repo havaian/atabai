@@ -122,6 +122,14 @@ export class JournalEntry {
   // itself is a new entry (sign-flipped lines) so adjustments stay append-only.
   @Prop({ type: Types.ObjectId, ref: 'JournalEntry', default: null, index: true })
   reversesEntryId!: Types.ObjectId | null;
+
+  // For a corrected-invoice repost DRAFT (methodology §7.5, build phase 4):
+  // points at the ORIGINAL committed entry this repost replaces. On commit, the
+  // engine reverses that original (append-only reversing entry) and then
+  // commits this repost, both in the original entry's period. Null for every
+  // other entry (standard/additional invoices, bank entries, etc.).
+  @Prop({ type: Types.ObjectId, ref: 'JournalEntry', default: null, index: true })
+  correctsEntryId!: Types.ObjectId | null;
 }
 
 export const JournalEntrySchema = SchemaFactory.createForClass(JournalEntry);
