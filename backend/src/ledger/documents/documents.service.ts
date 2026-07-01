@@ -217,6 +217,32 @@ export class DocumentsService {
   }
 
   /**
+   * Find a document by (counterparty, number), or create it if absent. Used by
+   * the invoice-registry ingestion to auto-link / create the Contract off the
+   * registry's contract columns (methodology §7.6): an existing contract is
+   * reused, a new number is created. `wasCreated` tells the caller which.
+   */
+  async findOrCreate(args: {
+    organizationId: Types.ObjectId;
+    counterpartyId: Types.ObjectId;
+    kind: DocumentKind;
+    number: string;
+    date?: Date | null;
+    description?: string | null;
+    amount?: string | null;
+  }): Promise<{ ref: DocumentRef; wasCreated: boolean }> {
+    const existing = await this.findByNumber(
+      args.organizationId,
+      args.counterpartyId,
+      args.kind,
+      args.number,
+    );
+    if (existing) return { ref: existing, wasCreated: false };
+    const ref = await this.create(args);
+    return { ref, wasCreated: true };
+  }
+
+  /**
    * Resolve a document by id + kind, asserting it belongs to the org (and,
    * when given, the counterparty). Used by the posting path to validate the
    * document a preview row points at before committing.

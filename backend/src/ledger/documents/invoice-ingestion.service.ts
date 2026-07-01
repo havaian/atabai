@@ -207,7 +207,6 @@ export class InvoiceIngestionService {
     this.logger.logAction('ledger.invoice.ingested', {
       orgId: orgId.toString(),
       periodId: periodId.toString(),
-      direction: args.direction,
       actor: args.actor._id.toString(),
       ...summary,
     });
