@@ -432,7 +432,10 @@ export class InvoiceIngestionService {
     //   (Filipp: the дополнительная delta posts to the current period, dated to
     //   the additional СФ; the additional invoice carries the delta itself, so
     //   it posts exactly like a standard invoice — its own amount, its own
-    //   document, same counterparty — and surfaces as a new open position).
+    //   document, same counterparty — and surfaces as a new open position). A
+    //   NEGATIVE дополнительная (a reduction — Filipp confirmed these occur) is
+    //   handled inside createDraftForInvoice: the legs flip Дт↔Кт and post the
+    //   absolute amount, reducing the same positions instead of raising them.
     //
     //   CORRECTED — replaces a prior invoice (Filipp, variant a): on commit,
     //   reverse the original (dated to the original СФ) and repost the corrected
@@ -550,7 +553,27 @@ export class InvoiceIngestionService {
     const entryPeriodId = args.targetPeriodId ?? periodId;
     const date = args.entryDate ?? inv.date ?? new Date();
     const isIncoming = inv.direction === INVOICE_DIRECTION.INCOMING;
-    const hasVat = compareDecimals(vatTotal, '0') > 0;
+    const hasVat = compareDecimals(vatTotal, '0') !== 0; // non-zero, either sign
+
+    // A negative дополнительная (a reduction — Filipp confirmed these occur:
+    // «может быть с минусом») posts the SAME legs as a positive invoice but with
+    // each Дт↔Кт flipped and the ABSOLUTE amount, so it REDUCES the
+    // receivable/revenue/output-VAT (outgoing) or payable/expense/input-VAT
+    // (incoming) a positive one would raise — without breaking the line
+    // amount-≥-0 invariant. Only an additional is ever negative; standard and
+    // corrected carry positive figures, so a negative gross is the signal.
+    //
+    // Filipp confirmed (01.07.26): the reduction books against the
+    // receivable/payable (4010/6010), symmetric with the positive additional —
+    // NOT advances (6310/4310). Booking to advances would depend on settlement
+    // state (зачёт), which is a phase-6 concern.
+    const isReduction = compareDecimals(grossTotal, '0') < 0;
+    const absDecimal = (s: string): string => {
+      const t = s.trim();
+      return t.startsWith('-') ? t.slice(1) : t;
+    };
+    const legDir = (natural: 'debit' | 'credit'): 'debit' | 'credit' =>
+      isReduction ? (natural === 'debit' ? 'credit' : 'debit') : natural;
 
     const entry = await this.entryModel.create({
       organizationId: orgId,
@@ -560,7 +583,7 @@ export class InvoiceIngestionService {
       source: 'manual', // invoices are operator-sourced documents (not bank rows)
       sourceRef: `invoice:${uploadId}:${inv.sourceRow}`,
       status: 'draft',
-      totalAmount: toDecimal128(grossTotal),
+      totalAmount: toDecimal128(absDecimal(grossTotal)),
       createdBy: actor._id,
       correctsEntryId: args.correctsEntryId ?? null,
     });
@@ -593,8 +616,8 @@ export class InvoiceIngestionService {
         periodId: entryPeriodId,
         date,
         accountCode: UNRESOLVED_ACCOUNT,
-        direction: isIncoming ? 'debit' : 'credit',
-        amount: toDecimal128(item.netAmount),
+        direction: legDir(isIncoming ? 'debit' : 'credit'),
+        amount: toDecimal128(absDecimal(item.netAmount)),
         counterpartyId: null,
         subconto1Value: null,
         description: this.lineLabel(item.ikpuCode, item.ikpuName),
@@ -610,8 +633,8 @@ export class InvoiceIngestionService {
         periodId: entryPeriodId,
         date,
         accountCode: isIncoming ? INVOICE_VAT_ACCOUNTS.INPUT : INVOICE_VAT_ACCOUNTS.OUTPUT,
-        direction: isIncoming ? 'debit' : 'credit',
-        amount: toDecimal128(vatTotal),
+        direction: legDir(isIncoming ? 'debit' : 'credit'),
+        amount: toDecimal128(absDecimal(vatTotal)),
         counterpartyId: null,
         subconto1Value: null,
         description: `${inv.number} — ${isIncoming ? 'input' : 'output'} VAT`,
@@ -628,8 +651,8 @@ export class InvoiceIngestionService {
       accountCode: isIncoming
         ? BANK_POSTING_ACCOUNTS.ACCOUNTS_PAYABLE
         : BANK_POSTING_ACCOUNTS.ACCOUNTS_RECEIVABLE,
-      direction: isIncoming ? 'credit' : 'debit',
-      amount: toDecimal128(grossTotal),
+      direction: legDir(isIncoming ? 'credit' : 'debit'),
+      amount: toDecimal128(absDecimal(grossTotal)),
       ...counterpartyLeg,
       description: `${inv.number} — ${inv.counterpartyName}`,
     });
