@@ -115,7 +115,8 @@
     "/orgProfile": "Organization requisites",
     "/invoiceUpload": "Invoice registry upload",
     "/invoicePreview": "Invoice preview",
-    "/invoiceBatches": "Invoices"
+    "/invoiceBatches": "Invoices",
+    "/openingBalances": "Opening balances"
   },
   "pageDescriptions": {
     "/": "Automate IFRS. Powered by AI.. Turn complex financial data into accurate, audit-ready IFRS reports — faster, cheaper, and with full transparency..",
@@ -197,7 +198,11 @@
       "adjustDesc": "IFRS-standard journal adjustments",
       "catImport": "Import",
       "catReview": "Review",
-      "catOverlay": "Overlay"
+      "catOverlay": "Overlay",
+      "openingTitle": "Opening balances",
+      "openingDesc": "Enter incoming counterparty debts per document when migrating in.",
+      "openingBadge": "OPENING",
+      "catSetup": "Setup"
     },
     "status": {
       "title": "Period status",
@@ -1574,6 +1579,56 @@
     "status": {
       "draft": "Needs review",
       "committed": "Posted"
+    }
+  },
+  "openingBalances": {
+    "title": "Opening balances",
+    "subtitle": "Enter incoming counterparty balances as you migrate onto ATABAI - one open document per row, so later payments settle each debt per document.",
+    "period": "Period",
+    "noPeriod": "No period selected. Open a period first, then enter its opening balances.",
+    "goPeriods": "Go to periods",
+    "noCounterparties": "No counterparties yet. Counterparties are created from your bank statements and invoices - add some first, then return here to enter their opening balances.",
+    "entryTitle": "Enter opening balances",
+    "addRow": "Add row",
+    "selectCounterparty": "Select counterparty",
+    "documentNumberPh": "Document no.",
+    "remove": "Remove row",
+    "noRows": "No rows yet. Add one to start entering opening balances.",
+    "totalDebit": "Total debit",
+    "totalCredit": "Total credit",
+    "offset": "Offset (0000)",
+    "offsetNote": "Each document leg is balanced against auxiliary account 0000. The server re-checks the balance before saving.",
+    "asOfDate": "As-of date",
+    "submit": "Post opening balances",
+    "submitting": "Posting…",
+    "posted": "Posted {n} opening balance(s).",
+    "postFailed": "Could not post opening balances.",
+    "enteredTitle": "Already entered",
+    "refresh": "Refresh",
+    "noneEntered": "No opening balances entered for this period yet.",
+    "debit": "Debit",
+    "credit": "Credit",
+    "col": {
+      "counterparty": "Counterparty",
+      "position": "Position",
+      "documentType": "Document",
+      "documentNumber": "Document no.",
+      "documentDate": "Document date",
+      "amount": "Amount",
+      "date": "Date",
+      "account": "Account",
+      "side": "Side",
+      "document": "Document"
+    },
+    "pos": {
+      "receivable": "Receivable - customer owes us (4010)",
+      "payable": "Payable - we owe supplier (6010)",
+      "advanceIssued": "Advance issued - we prepaid supplier (4310)",
+      "advanceReceived": "Advance received - customer prepaid us (6310)"
+    },
+    "docType": {
+      "contract": "Contract",
+      "invoice": "Invoice"
     }
   }
 }

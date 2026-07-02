@@ -205,6 +205,52 @@ export const useLedgerStore = defineStore("ledger", () => {
     }
   );
 
+  // ─── Counterparties (picker source) ────────────────────────────────────────
+  // Read-only list used by the opening-balance form. Counterparties themselves
+  // are created by the bank/invoice ingestion paths, not here.
+  async function fetchCounterparties() {
+    if (!orgs.currentOrgId) return [];
+    try {
+      const resp = await apiClient.get(orgScope("/counterparties"));
+      return resp.data.counterparties || [];
+    } catch (err) {
+      error.value =
+        err?.response?.data?.message ||
+        err?.message ||
+        "Failed to load counterparties";
+      throw err;
+    }
+  }
+
+  // ─── Opening balances (per-document entry) ──────────────────────────────────
+  // Post a batch of per-document opening balances into a period. The backend
+  // records them as one balanced `opening_balance` journal entry and rolls up
+  // the affected balances.
+  async function createOpeningBalances({ periodId, items, asOfDate, description }) {
+    if (!orgs.currentOrgId) throw new Error("No active organization");
+    const resp = await apiClient.post(
+      orgScope(`/periods/${periodId}/opening-balances`),
+      { items, asOfDate, description }
+    );
+    return resp.data;
+  }
+
+  async function listOpeningBalances({ periodId }) {
+    if (!orgs.currentOrgId) return [];
+    try {
+      const resp = await apiClient.get(
+        orgScope(`/periods/${periodId}/opening-balances`)
+      );
+      return resp.data.entries || [];
+    } catch (err) {
+      error.value =
+        err?.response?.data?.message ||
+        err?.message ||
+        "Failed to load opening balances";
+      throw err;
+    }
+  }
+
   function reset() {
     periods.value = [];
     chart.value = [];
@@ -231,6 +277,9 @@ export const useLedgerStore = defineStore("ledger", () => {
     reopenPeriod,
     fetchProfile,
     updateProfile,
+    fetchCounterparties,
+    createOpeningBalances,
+    listOpeningBalances,
     reset,
   };
 });

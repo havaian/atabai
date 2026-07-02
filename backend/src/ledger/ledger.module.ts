@@ -9,6 +9,9 @@ import { buildMulterOptions } from '../common/upload/multer-config';
 import { OrganizationsModule } from '../organizations/organizations.module';
 import { UsersModule } from '../users/users.module';
 import { BalancesController } from './balances/balances.controller';
+import { OpeningBalancesController } from './balances/opening-balances.controller';
+import { OpeningBalancesService } from './balances/opening-balances.service';
+import { CounterpartiesController } from './counterparties/counterparties.controller';
 import { BankIngestionService } from './bank/bank-ingestion.service';
 import { ChartController } from './chart/chart.controller';
 import { PeriodsReadController } from './periods/periods.controller';
@@ -96,6 +99,8 @@ import { PeriodsService } from './services/periods.service';
     PeriodsReadController,
     ChartController,
     BalancesController,
+    OpeningBalancesController,
+    CounterpartiesController,
     DocumentsController,
   ],
   providers: [
@@ -109,6 +114,7 @@ import { PeriodsService } from './services/periods.service';
     RunningBalanceService,
     DocumentsService,
     BankIngestionService,
+    OpeningBalancesService,
   ],
   exports: [
     MongooseModule,

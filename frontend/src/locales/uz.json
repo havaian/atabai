@@ -115,7 +115,8 @@
     "/orgProfile": "Tashkilot rekvizitlari",
     "/invoiceUpload": "Hisob-fakturalar reestrini yuklash",
     "/invoicePreview": "Hisob-fakturalarni ko'rib chiqish",
-    "/invoiceBatches": "Hisob-fakturalar"
+    "/invoiceBatches": "Hisob-fakturalar",
+    "/openingBalances": "Boshlang'ich qoldiqlar"
   },
   "pageDescriptions": {
     "/": "XMHS ni avtomatlashtiring. Su'niy Intellekt bilan.. Murakkab moliyaviy ma'lumotlarni aniq, auditga tayyor XMHS hisobotlariga aylantiring — tezroq, arzonroq va to'liq shaffoflik bilan..",
@@ -197,7 +198,11 @@
       "adjustDesc": "MHXS standartlari boʻyicha tuzatish jurnali",
       "catImport": "Import",
       "catReview": "Koʻrish",
-      "catOverlay": "Qoplama"
+      "catOverlay": "Qoplama",
+      "openingTitle": "Boshlang'ich qoldiqlar",
+      "openingDesc": "O'tishda kontragent qarzlarini hujjat kesimida kiriting.",
+      "openingBadge": "QOLDIQ",
+      "catSetup": "Sozlash"
     },
     "status": {
       "title": "Davr holati",
@@ -1574,6 +1579,56 @@
     "status": {
       "draft": "Tekshirish kerak",
       "committed": "O'tkazilgan"
+    }
+  },
+  "openingBalances": {
+    "title": "Boshlang'ich qoldiqlar",
+    "subtitle": "ATABAI ga o'tishda kontragentlar bo'yicha kiruvchi qoldiqlarni kiriting - har bir qatorda bitta ochiq hujjat, shunda keyingi to'lovlar har bir qarzni hujjat kesimida yopadi.",
+    "period": "Davr",
+    "noPeriod": "Davr tanlanmagan. Avval davrni oching, so'ng uning boshlang'ich qoldiqlarini kiriting.",
+    "goPeriods": "Davrlarga o'tish",
+    "noCounterparties": "Hozircha kontragentlar yo'q. Kontragentlar bank ko'chirmalari va hisob-fakturalardan yaratiladi - avval ularni qo'shing, so'ng bu yerga qaytib boshlang'ich qoldiqlarni kiriting.",
+    "entryTitle": "Boshlang'ich qoldiqlarni kiritish",
+    "addRow": "Qator qo'shish",
+    "selectCounterparty": "Kontragentni tanlang",
+    "documentNumberPh": "Hujjat №",
+    "remove": "Qatorni o'chirish",
+    "noRows": "Hozircha qatorlar yo'q. Boshlang'ich qoldiqlarni kiritish uchun qator qo'shing.",
+    "totalDebit": "Jami debet",
+    "totalCredit": "Jami kredit",
+    "offset": "Balanslash (0000)",
+    "offsetNote": "Har bir hujjat provodkasi 0000 yordamchi hisobga balanslanadi. Saqlashdan oldin server balansni qayta tekshiradi.",
+    "asOfDate": "Sana holatiga",
+    "submit": "Qoldiqlarni kiritish",
+    "submitting": "Bajarilmoqda…",
+    "posted": "Boshlang'ich qoldiqlar kiritildi: {n}.",
+    "postFailed": "Boshlang'ich qoldiqlarni kiritib bo'lmadi.",
+    "enteredTitle": "Allaqachon kiritilgan",
+    "refresh": "Yangilash",
+    "noneEntered": "Bu davr uchun boshlang'ich qoldiqlar hali kiritilmagan.",
+    "debit": "Debet",
+    "credit": "Kredit",
+    "col": {
+      "counterparty": "Kontragent",
+      "position": "Pozitsiya",
+      "documentType": "Hujjat",
+      "documentNumber": "Hujjat №",
+      "documentDate": "Hujjat sanasi",
+      "amount": "Summa",
+      "date": "Sana",
+      "account": "Hisob",
+      "side": "Tomon",
+      "document": "Hujjat"
+    },
+    "pos": {
+      "receivable": "Debitorlik - xaridor bizga qarzdor (4010)",
+      "payable": "Kreditorlik - biz yetkazib beruvchiga qarzdormiz (6010)",
+      "advanceIssued": "Berilgan avans - yetkazib beruvchiga oldindan to'lov (4310)",
+      "advanceReceived": "Olingan avans - xaridordan oldindan to'lov (6310)"
+    },
+    "docType": {
+      "contract": "Shartnoma",
+      "invoice": "Hisob-faktura"
     }
   }
 }

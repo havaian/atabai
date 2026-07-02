@@ -141,6 +141,22 @@
                         <ArrowRightIcon class="template-arrow w-4 h-4" />
                     </div>
                 </div>
+                <div class="template-card" @click="goPeriod('opening-balances')">
+                    <div class="template-card-top">
+                        <div class="template-icon">
+                            <Scale :size="18" />
+                        </div>
+                        <span class="template-badge">{{ $t('dashboard.workflow.openingBadge') }}</span>
+                    </div>
+                    <div class="template-card-body">
+                        <h3 class="template-name">{{ $t('dashboard.workflow.openingTitle') }}</h3>
+                        <p class="template-desc">{{ $t('dashboard.workflow.openingDesc') }}</p>
+                    </div>
+                    <div class="template-card-footer">
+                        <span class="template-cat">{{ $t('dashboard.workflow.catSetup') }}</span>
+                        <ArrowRightIcon class="template-arrow w-4 h-4" />
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -160,6 +176,7 @@ import {
 } from '@heroicons/vue/24/outline'
 import {
     Landmark,
+    Scale,
 } from 'lucide-vue-next'
 
 const router = useRouter()

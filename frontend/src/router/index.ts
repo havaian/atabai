@@ -37,6 +37,7 @@ import BankBatchesView from '@/views/app/BankBatchesView.vue'
 import BankPreviewView from '@/views/app/BankPreviewView.vue'
 import PeriodsView from '@/views/app/PeriodsView.vue'
 import ChartOfAccountsView from '@/views/app/ChartOfAccountsView.vue'
+import OpeningBalancesView from '@/views/app/OpeningBalancesView.vue'
 
 // ─── Admin ────────────────────────────────────────────────────────────────────
 import AdminLayout from '@/layouts/AdminLayout.vue'
@@ -184,6 +185,12 @@ const appChildren = [
         name: 'BankPreview',
         component: BankPreviewView,
         meta: { titleKey: 'pageTitles./bankPreview', requiresOrg: true }
+    },
+    {
+        path: 'ledger/periods/:periodId/opening-balances',
+        name: 'OpeningBalances',
+        component: OpeningBalancesView,
+        meta: { titleKey: 'pageTitles./openingBalances', requiresOrg: true }
     }
 ]
 
