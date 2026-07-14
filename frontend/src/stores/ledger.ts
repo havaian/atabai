@@ -93,6 +93,16 @@ export const useLedgerStore = defineStore("ledger", () => {
     }
   }
 
+  // Orginfo lookup by INN for the requisites form (name/address/phone/email).
+  // Returns { configured, suggestion } — the view decides whether to apply it.
+  async function fetchOrgInfoByInn(inn) {
+    if (!orgs.currentOrgId) throw new Error("No active organization");
+    const resp = await apiClient.get(
+      orgScope(`/profile/lookup/${encodeURIComponent(inn)}`),
+    );
+    return resp.data;
+  }
+
   async function fetchPeriods() {
     if (!orgs.currentOrgId) return [];
     isLoadingPeriods.value = true;
@@ -277,6 +287,7 @@ export const useLedgerStore = defineStore("ledger", () => {
     reopenPeriod,
     fetchProfile,
     updateProfile,
+    fetchOrgInfoByInn,
     fetchCounterparties,
     createOpeningBalances,
     listOpeningBalances,

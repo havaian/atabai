@@ -192,6 +192,8 @@
       "osvDesc": "1C dan aylanma-saldolar vedomostini import qilish",
       "bankTitle": "Bank koʻchirmasi",
       "bankDesc": "Bank operatsiyalarini aniqlash va oʻtkazish",
+      "invoiceTitle": "Hisob-fakturalar reestri",
+      "invoiceDesc": "Yetkazib beruvchi va xaridor fakturalarini aniqlash va oʻtkazish",
       "matrixTitle": "Transformatsiya matritsasi",
       "matrixDesc": "MHXSU → reklassifikatsiya → tuzatishlar → MHXS",
       "adjustTitle": "Tuzatish yozuvlari",
@@ -1293,7 +1295,8 @@
       "amount": "Summa",
       "status": "Holat",
       "actions": "Amallar",
-      "account": "Hisob"
+      "account": "Hisob",
+      "document": "Hujjat"
     },
     "actions": {
       "fix": "Tuzatish"
@@ -1320,7 +1323,32 @@
       "reviewRemaining": "Qolganlarini ko'rib chiqish",
       "done": "Tayyor"
     },
-    "internalTransfer": "Ichki koʻchirish"
+    "internalTransfer": "Ichki koʻchirish",
+    "needsInput": "Kiritish kerak",
+    "ready": "Tayyor",
+    "pickAccount": "Hisobni tanlang",
+    "commitSelected": "Oʻtkazishga tanlangan: {n}",
+    "summary": {
+      "selected": "{total} dan {n} tanlandi",
+      "needInput": "Kiritish kerak: {n}"
+    },
+    "doc": {
+      "title": "Hisob-kitob hujjatlari",
+      "required": "Hujjat kerak",
+      "count": "{n} hujjat",
+      "pick": "Hujjatni tanlang",
+      "amount": "Summa",
+      "addRow": "Hujjat qoʻshish",
+      "sum": "{total} dan {sum} taqsimlandi",
+      "recognized": "Toʻlov maqsadida aniqlangan:",
+      "newNumber": "Yangi hujjat raqami",
+      "create": "Yaratish",
+      "apply": "Qoʻllash",
+      "kind": {
+        "contract": "Shartnoma boʻyicha hisob-kitob",
+        "invoice": "Invoys boʻyicha hisob-kitob"
+      }
+    }
   },
   "adjustments": {
     "title": "IFRS tuzatishlari",
@@ -1472,6 +1500,17 @@
     "legalNamePlaceholder": "Ro'yxatdan o'tgan nomi",
     "inn": "INN",
     "innPlaceholder": "9 raqamli INN",
+    "address": "Manzil",
+    "addressPlaceholder": "Yuridik manzil",
+    "phone": "Telefon",
+    "phonePlaceholder": "+998 ...",
+    "email": "Email",
+    "emailPlaceholder": "name@company.uz",
+    "orginfoFetch": "INN boʻyicha toʻldirish",
+    "orginfoFilled": "Rekvizitlar Orginfo'dan toʻldirildi",
+    "orginfoNotFound": "Bu INN boʻyicha tashkilot topilmadi",
+    "orginfoNotConfigured": "Orginfo qidiruvi sozlanmagan",
+    "orginfoError": "Orginfo qidiruvida xatolik",
     "innHint": "Tashkilotning o'z INN raqami. Qaysi tashkilotning ko'chirmasi yuklanayotganini aniqlash uchun ishlatiladi.",
     "baseCurrency": "Asosiy valyuta",
     "transitionDate": "MHXS ga o'tish sanasi",
@@ -1483,6 +1522,7 @@
     "noAccounts": "Hozircha hisob raqamlari yo'q. Yuklangan ko'chirmalarni moslashtirish uchun tashkilotning o'z hisoblarini qo'shing.",
     "accountNumber": "Hisob raqami",
     "accountNumberPlaceholder": "20 raqamli hisob",
+    "duplicateAccount": "Hisob raqami takrorlangan - har biri noyob boʻlishi kerak",
     "bankCode": "Bank kodi",
     "bankCodePlaceholder": "MFO",
     "accountLabel": "Yorliq",

@@ -41,16 +41,59 @@
                         :placeholder="$t('orgProfile.legalNamePlaceholder')"
                     />
 
+                    <div class="profile-inn-row">
+                        <UiField
+                            class="profile-inn-field"
+                            :label="$t('orgProfile.inn')"
+                            :hint="$t('orgProfile.innHint')"
+                            v-model="form.inn"
+                            trim
+                            inputmode="numeric"
+                            maxlength="9"
+                            :disabled="!editable"
+                            :placeholder="$t('orgProfile.innPlaceholder')"
+                        />
+                        <UiButton
+                            v-if="editable"
+                            class="profile-inn-fetch"
+                            variant="secondary"
+                            :loading="orginfoLoading"
+                            :disabled="!innValid || orginfoLoading"
+                            @click="fetchFromOrginfo"
+                        >
+                            {{ $t('orgProfile.orginfoFetch') }}
+                        </UiButton>
+                    </div>
+                    <p
+                        v-if="orginfoMsg"
+                        class="profile-orginfo-msg"
+                        :class="{ 'profile-orginfo-msg--warn': orginfoMsgWarn }"
+                    >{{ $t(orginfoMsg) }}</p>
+
                     <UiField
-                        :label="$t('orgProfile.inn')"
-                        :hint="$t('orgProfile.innHint')"
-                        v-model="form.inn"
+                        :label="$t('orgProfile.address')"
+                        v-model="form.address"
                         trim
-                        inputmode="numeric"
-                        maxlength="9"
                         :disabled="!editable"
-                        :placeholder="$t('orgProfile.innPlaceholder')"
+                        :placeholder="$t('orgProfile.addressPlaceholder')"
                     />
+
+                    <div class="profile-fields-2col">
+                        <UiField
+                            :label="$t('orgProfile.phone')"
+                            v-model="form.phone"
+                            trim
+                            :disabled="!editable"
+                            :placeholder="$t('orgProfile.phonePlaceholder')"
+                        />
+                        <UiField
+                            :label="$t('orgProfile.email')"
+                            v-model="form.email"
+                            trim
+                            :disabled="!editable"
+                            :placeholder="$t('orgProfile.emailPlaceholder')"
+                        />
+                    </div>
 
                     <div class="profile-narrow">
                         <UiField
@@ -100,6 +143,7 @@
                             @update:model-value="(v) => onAccountNumberInput(acc, v)"
                             trim
                             :disabled="!editable"
+                            :error="isDuplicate(acc) ? $t('orgProfile.duplicateAccount') : ''"
                             :placeholder="$t('orgProfile.accountNumberPlaceholder')"
                         />
                         <UiField
@@ -228,7 +272,7 @@
             <div v-if="savedOk" class="profile-saved">{{ $t('orgProfile.saved') }}</div>
 
             <div v-if="editable" class="profile-actions">
-                <UiButton variant="primary" :loading="ledger.isSavingProfile" :disabled="!dirty" @click="save">
+                <UiButton variant="primary" :loading="ledger.isSavingProfile" :disabled="!dirty || hasDuplicates" @click="save">
                     {{ $t('common.save') }}
                 </UiButton>
                 <UiButton variant="ghost" :disabled="ledger.isSavingProfile || !dirty" @click="resetForm">
@@ -257,6 +301,9 @@ const savedOk = ref(false)
 const form = reactive({
     legalName: '',
     inn: '',
+    address: '',
+    phone: '',
+    email: '',
     baseCurrency: 'UZS',
     bankAccounts: [],
     policy: {
@@ -307,6 +354,9 @@ function hydrate() {
     const p = ledger.profile
     form.legalName = p?.legalName || ''
     form.inn = p?.inn || ''
+    form.address = p?.address || ''
+    form.phone = p?.phone || ''
+    form.email = p?.email || ''
     form.baseCurrency = p?.baseCurrency || 'UZS'
     form.bankAccounts = (p?.bankAccounts || []).map((a) => ({
         accountNumber: a.accountNumber || '',
@@ -337,6 +387,9 @@ const dirty = computed(() => {
     if (!p) return true
     if ((p.legalName || '') !== form.legalName) return true
     if ((p.inn || '') !== form.inn) return true
+    if ((p.address || '') !== form.address) return true
+    if ((p.phone || '') !== form.phone) return true
+    if ((p.email || '') !== form.email) return true
     if ((p.baseCurrency || 'UZS') !== form.baseCurrency) return true
     const orig = p.bankAccounts || []
     if (orig.length !== form.bankAccounts.length) return true
@@ -371,13 +424,77 @@ function addAccount() {
     form.bankAccounts.push({ accountNumber: '', bankCode: '', label: '', currency: 'UZS', ledgerAccount: '', subAccount: '', isActive: true })
 }
 function removeAccount(i) { form.bankAccounts.splice(i, 1) }
+
+// Client-side uniqueness (methodology §5.5 - full number, «по всем знакам»):
+// flag any account number entered on more than one row so the operator sees it
+// before saving. The backend enforces the same rule and stays the source of
+// truth; this just avoids a round-trip and points at the offending rows.
+const duplicateNumbers = computed(() => {
+    const counts = new Map()
+    for (const a of form.bankAccounts) {
+        const n = (a.accountNumber || '').trim()
+        if (!n) continue
+        counts.set(n, (counts.get(n) || 0) + 1)
+    }
+    const dups = new Set()
+    for (const [n, c] of counts) if (c > 1) dups.add(n)
+    return dups
+})
+const hasDuplicates = computed(() => duplicateNumbers.value.size > 0)
+function isDuplicate(acc) {
+    const n = (acc.accountNumber || '').trim()
+    return !!n && duplicateNumbers.value.has(n)
+}
 function resetForm() { hydrate() }
+
+// ─── Orginfo requisites auto-fill (INN → name/address/phone/email) ──────────
+// Filipp: entering the INN fills the requisites so the accountant doesn't
+// retype them and can't mistype the name. р/с is not returned (it comes from
+// the bank statement). orginfoMsg holds an i18n key resolved in the template.
+const orginfoLoading = ref(false)
+const orginfoMsg = ref('')
+const orginfoMsgWarn = ref(false)
+const innValid = computed(() => /^\d{9}$/.test(form.inn || ''))
+
+async function fetchFromOrginfo() {
+    if (!innValid.value) return
+    orginfoMsg.value = ''
+    orginfoMsgWarn.value = false
+    orginfoLoading.value = true
+    try {
+        const res = await ledger.fetchOrgInfoByInn(form.inn)
+        if (!res || res.configured === false) {
+            orginfoMsgWarn.value = true
+            orginfoMsg.value = 'orgProfile.orginfoNotConfigured'
+            return
+        }
+        if (!res.suggestion) {
+            orginfoMsgWarn.value = true
+            orginfoMsg.value = 'orgProfile.orginfoNotFound'
+            return
+        }
+        const sug = res.suggestion
+        if (sug.legalName) form.legalName = sug.legalName
+        if (sug.address) form.address = sug.address
+        if (sug.phone) form.phone = sug.phone
+        if (sug.email) form.email = sug.email
+        orginfoMsg.value = 'orgProfile.orginfoFilled'
+    } catch (e) {
+        orginfoMsgWarn.value = true
+        orginfoMsg.value = 'orgProfile.orginfoError'
+    } finally {
+        orginfoLoading.value = false
+    }
+}
 
 async function save() {
     savedOk.value = false
     const patch = {
         legalName: form.legalName || null,
         inn: form.inn || null,
+        address: form.address || null,
+        phone: form.phone || null,
+        email: form.email || null,
         baseCurrency: form.baseCurrency || 'UZS',
         bankAccounts: form.bankAccounts
             // Drop fully-empty rows so an accidental blank line doesn't fail validation.
@@ -450,6 +567,19 @@ watch(() => ledger.profile, () => { if (!dirty.value || !ledger.profile) hydrate
 /* Spacing for the requisite fields (UiField children spaced by gap). */
 .profile-fields { display: flex; flex-direction: column; gap: 14px; }
 .profile-narrow { max-width: 140px; }
+.profile-inn-row { display: flex; align-items: flex-end; gap: 10px; }
+.profile-inn-field { flex: 1; min-width: 0; }
+.profile-inn-fetch { flex-shrink: 0; white-space: nowrap; }
+.profile-orginfo-msg {
+    margin: -6px 0 0; font-size: 0.82rem; color: #2f855a;
+}
+.profile-orginfo-msg--warn { color: #b7791f; }
+.profile-fields-2col {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
+}
+@media (max-width: 640px) {
+    .profile-fields-2col { grid-template-columns: 1fr; }
+}
 
 /* Locked transition-date block (display only — not a UiField). */
 .profile-field { display: flex; flex-direction: column; gap: 5px; }

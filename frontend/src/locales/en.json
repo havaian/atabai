@@ -192,6 +192,8 @@
       "osvDesc": "Import trial balance from 1C",
       "bankTitle": "Bank statement",
       "bankDesc": "Recognise and post bank transactions",
+      "invoiceTitle": "Invoice registry",
+      "invoiceDesc": "Recognise and post supplier and customer invoices",
       "matrixTitle": "Transformation matrix",
       "matrixDesc": "NSBU → reclassification → adjustments → IFRS",
       "adjustTitle": "Adjustment entries",
@@ -1293,7 +1295,8 @@
       "amount": "Amount",
       "status": "Status",
       "actions": "Actions",
-      "account": "Account"
+      "account": "Account",
+      "document": "Document"
     },
     "actions": {
       "fix": "Fix"
@@ -1320,7 +1323,32 @@
       "reviewRemaining": "Review remaining",
       "done": "Done"
     },
-    "internalTransfer": "Internal transfer"
+    "internalTransfer": "Internal transfer",
+    "needsInput": "Needs input",
+    "ready": "Ready",
+    "pickAccount": "Pick account",
+    "commitSelected": "{n} selected to post",
+    "summary": {
+      "selected": "{n} of {total} selected",
+      "needInput": "{n} need input"
+    },
+    "doc": {
+      "title": "Settlement documents",
+      "required": "Document required",
+      "count": "{n} doc(s)",
+      "pick": "Pick a document",
+      "amount": "Amount",
+      "addRow": "Add document",
+      "sum": "Allocated {sum} of {total}",
+      "recognized": "Recognized in purpose:",
+      "newNumber": "New document number",
+      "create": "Create",
+      "apply": "Apply",
+      "kind": {
+        "contract": "Settles by contract",
+        "invoice": "Settles by invoice"
+      }
+    }
   },
   "adjustments": {
     "title": "IFRS adjustments",
@@ -1472,6 +1500,17 @@
     "legalNamePlaceholder": "Registered legal name",
     "inn": "INN",
     "innPlaceholder": "9-digit INN",
+    "address": "Address",
+    "addressPlaceholder": "Legal address",
+    "phone": "Phone",
+    "phonePlaceholder": "+998 ...",
+    "email": "Email",
+    "emailPlaceholder": "name@company.uz",
+    "orginfoFetch": "Fill from INN",
+    "orginfoFilled": "Requisites filled from Orginfo",
+    "orginfoNotFound": "No organization found for this INN",
+    "orginfoNotConfigured": "Orginfo lookup is not configured",
+    "orginfoError": "Orginfo lookup failed",
     "innHint": "The organization's own INN. Used to identify whose bank statement is being uploaded.",
     "baseCurrency": "Base currency",
     "transitionDate": "IFRS transition date",
@@ -1483,6 +1522,7 @@
     "noAccounts": "No settlement accounts yet. Add the organization's own accounts so uploaded statements can be matched.",
     "accountNumber": "Account number",
     "accountNumberPlaceholder": "20-digit account",
+    "duplicateAccount": "Duplicate account number - each must be unique",
     "bankCode": "Bank code",
     "bankCodePlaceholder": "MFO",
     "accountLabel": "Label",

@@ -192,6 +192,8 @@
       "osvDesc": "Импорт оборотно-сальдовой ведомости из 1С",
       "bankTitle": "Банковская выписка",
       "bankDesc": "Распознавание и проводка банковских операций",
+      "invoiceTitle": "Реестр счетов-фактур",
+      "invoiceDesc": "Распознавание и проводка счетов-фактур поставщиков и покупателей",
       "matrixTitle": "Матрица трансформации",
       "matrixDesc": "НСБУ → реклассификация → корректировки → МСФО",
       "adjustTitle": "Корректировочные записи",
@@ -1293,7 +1295,8 @@
       "amount": "Сумма",
       "status": "Статус",
       "actions": "Действия",
-      "account": "Счёт"
+      "account": "Счёт",
+      "document": "Документ"
     },
     "actions": {
       "fix": "Исправить"
@@ -1320,7 +1323,32 @@
       "reviewRemaining": "Проверить остальные",
       "done": "Готово"
     },
-    "internalTransfer": "Внутреннее перемещение"
+    "internalTransfer": "Внутреннее перемещение",
+    "needsInput": "Нужен ввод",
+    "ready": "Готово",
+    "pickAccount": "Выберите счёт",
+    "commitSelected": "Выбрано к проводке: {n}",
+    "summary": {
+      "selected": "Выбрано {n} из {total}",
+      "needInput": "Требуют ввода: {n}"
+    },
+    "doc": {
+      "title": "Документы расчёта",
+      "required": "Нужен документ",
+      "count": "{n} док.",
+      "pick": "Выберите документ",
+      "amount": "Сумма",
+      "addRow": "Добавить документ",
+      "sum": "Распределено {sum} из {total}",
+      "recognized": "Распознано в назначении:",
+      "newNumber": "Номер нового документа",
+      "create": "Создать",
+      "apply": "Применить",
+      "kind": {
+        "contract": "Расчёты по договору",
+        "invoice": "Расчёты по инвойсу"
+      }
+    }
   },
   "adjustments": {
     "title": "Корректировки МСФО",
@@ -1472,6 +1500,17 @@
     "legalNamePlaceholder": "Зарегистрированное наименование",
     "inn": "ИНН",
     "innPlaceholder": "9-значный ИНН",
+    "address": "Адрес",
+    "addressPlaceholder": "Юридический адрес",
+    "phone": "Телефон",
+    "phonePlaceholder": "+998 ...",
+    "email": "Эл. почта",
+    "emailPlaceholder": "name@company.uz",
+    "orginfoFetch": "Заполнить по ИНН",
+    "orginfoFilled": "Реквизиты заполнены из Orginfo",
+    "orginfoNotFound": "Организация по этому ИНН не найдена",
+    "orginfoNotConfigured": "Поиск Orginfo не настроен",
+    "orginfoError": "Ошибка поиска Orginfo",
     "innHint": "Собственный ИНН организации. Используется для определения, чья банковская выписка загружается.",
     "baseCurrency": "Базовая валюта",
     "transitionDate": "Дата перехода на МСФО",
@@ -1483,6 +1522,7 @@
     "noAccounts": "Расчётных счетов пока нет. Добавьте собственные счета организации, чтобы загруженные выписки можно было сопоставить.",
     "accountNumber": "Номер счёта",
     "accountNumberPlaceholder": "20-значный счёт",
+    "duplicateAccount": "Дубликат номера счёта - каждый должен быть уникальным",
     "bankCode": "Код банка",
     "bankCodePlaceholder": "МФО",
     "accountLabel": "Метка",
