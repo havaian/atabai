@@ -12,6 +12,8 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
+import { AuthModule } from '../../auth/auth.module';
+import { UsersModule } from '../../users/users.module';
 import { CbuClient } from './cbu.client';
 import { CurrenciesController } from './currencies.controller';
 import { CurrenciesRefreshScheduler } from './currencies.cron';
@@ -23,6 +25,13 @@ import { CurrencyRate, CurrencyRateSchema } from './schemas/currency-rate.schema
     MongooseModule.forFeature([
       { name: CurrencyRate.name, schema: CurrencyRateSchema },
     ]),
+    // CurrenciesController is guarded by JwtAuthGuard, which injects
+    // UsersService + JwtTokenService at construction. AuthModule re-exports the
+    // guard and JwtTokenService; UsersModule provides UsersService (AuthModule
+    // pulls it via forwardRef, so it must be imported here too — same pattern
+    // as LedgerModule). Without these the guard can't be built in this scope.
+    AuthModule,
+    UsersModule,
   ],
   controllers: [CurrenciesController],
   providers: [CbuClient, CurrenciesService, CurrenciesRefreshScheduler],
