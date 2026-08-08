@@ -3,7 +3,7 @@
  *
  * Normalized organization-info shape returned by any Orginfo provider, plus the
  * provider interface and its DI token. Consumers depend only on OrgInfo and
- * OrginfoService — never on a specific provider — so the gateway can be swapped
+ * OrginfoService - never on a specific provider - so the gateway can be swapped
  * (iHamkor today, something else later) without touching call sites.
  */
 

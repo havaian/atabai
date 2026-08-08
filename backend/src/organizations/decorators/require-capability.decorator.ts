@@ -10,7 +10,7 @@ export const REQUIRE_CAPABILITY_KEY = 'org.requireCapability';
  * OrgMembershipGuard.
  *
  * If a route is org-scoped but doesn't need a specific capability beyond
- * "active member of this org," omit this decorator — the guard still resolves
+ * "active member of this org," omit this decorator - the guard still resolves
  * and attaches `req.membership`.
  */
 export const RequireCapability = (

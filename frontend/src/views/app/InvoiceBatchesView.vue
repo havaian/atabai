@@ -105,9 +105,9 @@ function back() {
 }
 
 function formatDateTime(d: string | null) {
-    if (!d) return '—'
+    if (!d) return '-'
     const dt = new Date(d)
-    if (Number.isNaN(dt.getTime())) return '—'
+    if (Number.isNaN(dt.getTime())) return '-'
     return dt.toLocaleString(undefined, {
         year: 'numeric', month: 'short', day: 'numeric',
         hour: '2-digit', minute: '2-digit',

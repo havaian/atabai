@@ -5,7 +5,7 @@
       "titlePre": "XMHS",
       "titleHighlight": "avtomatlashtirish",
       "titlePost": "Su'niy intellekt yordamida",
-      "subtitle": "Moliyaviy ma'lumotlarni aniq, audit uchun tayyor XMHS hisobotlariga aylantiring — tezroq, arzonroq va to'liq shaffoflik bilan.",
+      "subtitle": "Moliyaviy ma'lumotlarni aniq, audit uchun tayyor XMHS hisobotlariga aylantiring - tezroq, arzonroq va to'liq shaffoflik bilan.",
       "bookDemo": "Demo buyurtma qilish",
       "howItWorks": "Bu qanday ishlaydi"
     },
@@ -58,7 +58,7 @@
       "auditReady": "Auditga tayyor",
       "cloud": {
         "title": "24/7 kirish",
-        "desc": "Bulutli platforma — qulay vaqtda, istalgan joydan, o'rnatmasdan ishlang."
+        "desc": "Bulutli platforma - qulay vaqtda, istalgan joydan, o'rnatmasdan ishlang."
       }
     }
   },
@@ -101,7 +101,7 @@
     "/login": "Kirish"
   },
   "pageDescriptions": {
-    "/": "XMHS ni avtomatlashtiring. Su'niy Intellekt bilan.. Murakkab moliyaviy ma'lumotlarni aniq, auditga tayyor XMHS hisobotlariga aylantiring — tezroq, arzonroq va to'liq shaffoflik bilan..",
+    "/": "XMHS ni avtomatlashtiring. Su'niy Intellekt bilan.. Murakkab moliyaviy ma'lumotlarni aniq, auditga tayyor XMHS hisobotlariga aylantiring - tezroq, arzonroq va to'liq shaffoflik bilan..",
     "/dashboard": "ATABAI boshqaruv paneli - fayllar, XMHS shablonlari va moliyaviy hujjatlar qayta ishlashini boshqaring.",
     "/templates": "Amortizatsiya, chegirmalar, aktivlar qadrsizlanishi va moliyaviy hisobotlar hisob-kitoblarini avtomatlashtirish uchun XMHS shablonlari.",
     "/profile": "ATABAI foydalanuvchi profili sozlamalari - obuna, afzalliklar va shaxsiy ma'lumotlarni boshqaring.",
@@ -162,7 +162,7 @@
   },
   "hero": {
     "title": "XMHS ni avtomatlashtiring. Su'niy Intellekt bilan.",
-    "subtitle": "Murakkab moliyaviy ma'lumotlarni aniq, auditga tayyor XMHS hisobotlariga aylantiring — tezroq, arzonroq va to'liq shaffoflik bilan.",
+    "subtitle": "Murakkab moliyaviy ma'lumotlarni aniq, auditga tayyor XMHS hisobotlariga aylantiring - tezroq, arzonroq va to'liq shaffoflik bilan.",
     "tryFree": "Bepul sinab ko'ring",
     "bookDemo": "Demo bron qilish",
     "loginGoogle": "Google orqali kirish"
@@ -174,15 +174,15 @@
     "nsbu": {
       "colItem": "Modda",
       "colAmount": "Summa (soʻm)",
-      "row1": "010 — Asosiy vositalar",
-      "row2": "020 — Amortizatsiya",
+      "row1": "010 - Asosiy vositalar",
+      "row2": "020 - Amortizatsiya",
       "errorRow": "Qoʻlda hisoblash",
       "errorValue": "±12% xato"
     },
     "ifrs": {
       "colItem": "Modda",
       "colAmount": "Summa (UZS)",
-      "row1": "AV — Tannarx",
+      "row1": "AV - Tannarx",
       "row2": "Toʻplangan amort.",
       "successRow": "IAS 16 ga muvofiq",
       "successValue": "Tasdiqlangan"
@@ -555,7 +555,7 @@
       "profitLoss": {
         "1": "NSBU formatidagi foyda va zararlar hisobotini (PnL byudjeti) yuklang",
         "2": "Kutilayotgan bo'limlar: ДОХОДЫ (Daromad), РАСХОДЫ / ПРЯМЫЕ РАСХОДЫ (Xarajatlar), loyiha qatorlari",
-        "3": "Oylik ustunlar (yan–dek) avtomatik aniqlanadi — choraklik va yillik formatlar qo'llab-quvvatlanadi",
+        "3": "Oylik ustunlar (yan–dek) avtomatik aniqlanadi - choraklik va yillik formatlar qo'llab-quvvatlanadi",
         "4": "Sodda tuzilmalar ham, murakkab loyiha ierarxiyalari ham avtomatik ishlaydi"
       },
       "profitLossForm2": [
@@ -565,8 +565,8 @@
         "Tizim kod ustuni va davr sarlavhalarini avtomatik aniqlaydi"
       ],
       "equity": [
-        "A varianti — Balans (1-shakl): kapitalning ochilish va yopilish qoldig'i",
-        "B varianti — 4-shakl: kapital harakatlarining to'liq tafsiloti",
+        "A varianti - Balans (1-shakl): kapitalning ochilish va yopilish qoldig'i",
+        "B varianti - 4-shakl: kapital harakatlarining to'liq tafsiloti",
         "Ustun sarlavhalari: Ustav kapitali, Taqsimlanmagan foyda, Jami",
         "Tizim yuklangan fayl turini avtomatik aniqlaydi"
       ]

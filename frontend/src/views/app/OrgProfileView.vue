@@ -184,7 +184,7 @@
                             >
                                 <option value="">{{ $t('orgProfile.ledgerAccountNone') }}</option>
                                 <option v-for="c in chartAccounts" :key="c.code" :value="c.code">
-                                    {{ c.code }} — {{ c.name }}
+                                    {{ c.code }} - {{ c.name }}
                                 </option>
                             </select>
                         </div>
@@ -330,7 +330,7 @@ const chartAccounts = computed(() =>
 
 // §3.4 account-number mask: currency sits at digits 6-8 (000 = сумы). Only the
 // confirmed codes are mapped; anything else leaves currency for manual entry.
-// Mirror of backend bank/account-number-mask.ts — kept in sync by hand since
+// Mirror of backend bank/account-number-mask.ts - kept in sync by hand since
 // the frontend can't import server modules.
 const CURRENCY_BY_MASK_CODE = { '000': 'UZS', '840': 'USD', '978': 'EUR', '643': 'RUB' }
 function deriveCurrencyFromAccountNumber(raw) {
@@ -341,7 +341,7 @@ function deriveCurrencyFromAccountNumber(raw) {
 
 // On account-number entry, auto-fill currency from the mask when we can derive
 // it AND the user hasn't already typed something else. Never overwrites a
-// value the user set by hand — only fills a blank/default.
+// value the user set by hand - only fills a blank/default.
 function onAccountNumberInput(acc, v) {
     acc.accountNumber = (v || '').trim()
     const derived = deriveCurrencyFromAccountNumber(acc.accountNumber)
@@ -527,7 +527,7 @@ onMounted(async () => {
         await ledger.fetchProfile()
     } catch (_) { /* inline error */ }
     // Chart powers the per-account "ledger account" dropdown (bank ТЗ §1
-    // internal-transfer mapping). Non-fatal if it fails — the field just
+    // internal-transfer mapping). Non-fatal if it fails - the field just
     // falls back to a free-text-less empty list.
     await ledger.fetchChart().catch(() => {})
     hydrate()
@@ -581,7 +581,7 @@ watch(() => ledger.profile, () => { if (!dirty.value || !ledger.profile) hydrate
     .profile-fields-2col { grid-template-columns: 1fr; }
 }
 
-/* Locked transition-date block (display only — not a UiField). */
+/* Locked transition-date block (display only - not a UiField). */
 .profile-field { display: flex; flex-direction: column; gap: 5px; }
 .profile-field label { font-size: 0.8rem; font-weight: 500; color: var(--ws-text-2); }
 .profile-hint { font-size: 0.76rem; color: var(--ws-text-3); }
@@ -601,7 +601,7 @@ watch(() => ledger.profile, () => { if (!dirty.value || !ledger.profile) hydrate
     display: flex; align-items: flex-end; gap: 10px; padding: 14px 0;
     border-top: 1px solid var(--ws-border);
 }
-/* Closed accounts are dimmed but kept visible — never removed (§3.5). */
+/* Closed accounts are dimmed but kept visible - never removed (§3.5). */
 .profile-account-row--inactive { opacity: 0.55; }
 .profile-account-grid {
     flex: 1; display: grid; grid-template-columns: 1.4fr 0.7fr 0.8fr 1fr 0.6fr 1.2fr; gap: 10px;

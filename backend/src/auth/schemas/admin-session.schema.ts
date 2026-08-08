@@ -5,7 +5,7 @@ export type AdminSessionDocument = HydratedDocument<AdminSession>;
 
 /**
  * Short-lived record proving an admin has passed TOTP verification.
- * Ported from backend/src/admin/models/adminSession.model.js — TTL index +
+ * Ported from backend/src/admin/models/adminSession.model.js - TTL index +
  * field names preserved exactly so the existing collection is reused.
  */
 @Schema({ timestamps: { createdAt: true, updatedAt: false } })
@@ -34,5 +34,5 @@ export class AdminSession {
 
 export const AdminSessionSchema = SchemaFactory.createForClass(AdminSession);
 
-// TTL index — Mongo auto-deletes once expiresAt passes.
+// TTL index - Mongo auto-deletes once expiresAt passes.
 AdminSessionSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });

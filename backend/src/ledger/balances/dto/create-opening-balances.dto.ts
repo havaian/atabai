@@ -20,7 +20,7 @@ import { ALL_OPENING_BALANCE_ACCOUNTS } from '../../constants/opening-balance';
  * the four settlement positions the balance sits on (4010/4310/6010/6310); the
  * posting side is derived from the account, so no direction is sent. The
  * document is referenced by `documentId` (an existing contract/invoice) OR
- * created from `documentNumber` (+ optional `documentDate`) — the latter also
+ * created from `documentNumber` (+ optional `documentDate`) - the latter also
  * covers the rare dummy-document fallback (just a placeholder number). A
  * document is always required: an opening debt with no document could not be
  * settled per §6.3.
@@ -35,7 +35,7 @@ export class OpeningBalanceItemDto {
   account!: string;
 
   // Positive decimal string (no sign). Non-zero-and-positive is enforced in the
-  // service against Decimal128 — the regex only rejects malformed / negative
+  // service against Decimal128 - the regex only rejects malformed / negative
   // input early with a friendly message.
   @IsString()
   @Matches(/^\d+(?:\.\d+)?$/, {
@@ -68,7 +68,7 @@ export class OpeningBalanceItemDto {
 }
 
 /**
- * Payload for POST .../opening-balances — a batch of per-document opening
+ * Payload for POST .../opening-balances - a batch of per-document opening
  * balances entered against the period in the path. `asOfDate` defaults to the
  * period's start date in the service. The batch posts as ONE balanced journal
  * entry (source `opening_balance`), each item a counterparty leg plus a single

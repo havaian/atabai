@@ -12,7 +12,7 @@ import type { LocaleApp } from './schemas/locale-key.schema';
 const ALLOWED_APPS: readonly LocaleApp[] = ['user', 'admin'];
 
 /**
- * Mounted at /api/locales — public (unauthenticated) endpoints used by the
+ * Mounted at /api/locales - public (unauthenticated) endpoints used by the
  * frontend i18n loader. Polled every 30s for version changes; cache hit ratio
  * is high so server load is minimal.
  *

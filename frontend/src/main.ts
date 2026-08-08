@@ -10,9 +10,9 @@ import globalComponents from './plugins/globalComponents';
 import './assets/main.css';
 import './assets/theme.css';
 import './assets/admin.css';
-import './assets/mobile-overrides.css'; // Must be last — wins specificity battles.
+import './assets/mobile-overrides.css'; // Must be last - wins specificity battles.
 
-// ── Theme init — sync, before Vue mounts, prevents flash of unstyled content ──
+// ── Theme init - sync, before Vue mounts, prevents flash of unstyled content ──
 // Ported verbatim from the legacy main.js. Reads atabai-theme from localStorage
 // and applies CSS custom properties + `data-theme` attribute + `.dark` class
 // to <html> so the first paint reflects the user's preference.
@@ -104,7 +104,7 @@ async function initializeApp(): Promise<void> {
     app.mount('#app');
   } catch (error) {
     console.error('Failed to initialize app:', error);
-    // Fallback path — still try to mount so the user sees something even if
+    // Fallback path - still try to mount so the user sees something even if
     // i18n bootstrap fails. Matches the legacy behavior.
     const pinia = createPinia();
     const app = createApp(App);

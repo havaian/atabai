@@ -22,7 +22,7 @@ export interface CreateTransitionPeriodsArgs {
   /**
    * The boundary day for first-time IFRS adoption. Per methodology §1: if the
    * first reporting year is 2026, this is 01.01.2025 (the start of the
-   * comparative year — equivalently the "Входящий баланс на 01.01.2025 / на
+   * comparative year - equivalently the "Входящий баланс на 01.01.2025 / на
    * 31.12.2024" point in time).
    */
   transitionDate: Date;
@@ -33,7 +33,7 @@ export interface CreateTransitionPeriodsArgs {
    * comparative covers 2025-01-01 .. 2025-12-31, reporting covers 2026.
    */
   firstReportingYear: number;
-  /** User initiating the bootstrap — audit trail only. */
+  /** User initiating the bootstrap - audit trail only. */
   actor: UserDocument;
 }
 
@@ -46,11 +46,11 @@ export interface CreateRegularPeriodArgs {
 }
 
 /**
- * Manages ReportingPeriod lifecycle — architecture doc §7.3.
+ * Manages ReportingPeriod lifecycle - architecture doc §7.3.
  *
  * Three things this service guarantees that downstream services rely on:
  *   1. First-time-adoption seeds exactly three periods (opening, comparative,
- *      reporting) atomically — partial state never reaches the database.
+ *      reporting) atomically - partial state never reaches the database.
  *   2. `assertWritable(periodId)` throws on locked or missing periods. The
  *      bank engine, ОСВ ingestion and adjustment engine all call this before
  *      mutating balances/journal entries in a period's scope.
@@ -59,7 +59,7 @@ export interface CreateRegularPeriodArgs {
  *      a period is normal; reopening it is not.
  *
  * Authorization (admin/super_admin checks against the access spine) lives in
- * the controller — this service trusts its caller. The audit metadata
+ * the controller - this service trusts its caller. The audit metadata
  * (`actor`) is for the log, not enforcement.
  */
 @Injectable()
@@ -72,7 +72,7 @@ export class PeriodsService {
 
   /**
    * Seed the three first-time-adoption periods. Rejects if an `opening`
-   * period already exists for the org — re-running this would be the kind
+   * period already exists for the org - re-running this would be the kind
    * of action that quietly destroys ledger state and should never be
    * allowed to succeed accidentally. To redo first-time adoption, the
    * operator must explicitly delete the existing periods (no API for that
@@ -91,7 +91,7 @@ export class PeriodsService {
       throw new ConflictException({
         error: 'TRANSITION_ALREADY_SEEDED',
         message:
-          'This organization already has an opening period — first-time adoption can only be run once',
+          'This organization already has an opening period - first-time adoption can only be run once',
       });
     }
 
@@ -110,7 +110,7 @@ export class PeriodsService {
     }
 
     const comparativeYear = firstReportingYear - 1;
-    // UTC dates throughout — operator-facing labels use the calendar-year
+    // UTC dates throughout - operator-facing labels use the calendar-year
     // ambiguity-free `FY YYYY` form rather than time-zone-sensitive ISO strings.
     const startOfYear = (year: number): Date =>
       new Date(Date.UTC(year, 0, 1));
@@ -121,7 +121,7 @@ export class PeriodsService {
       {
         organizationId: orgId,
         kind: 'opening' as ReportingPeriodKind,
-        label: `Opening — ${this.formatDmy(transitionDate)}`,
+        label: `Opening - ${this.formatDmy(transitionDate)}`,
         startDate: transitionDate,
         endDate: transitionDate,
         status: 'open' as const,
@@ -148,7 +148,7 @@ export class PeriodsService {
     try {
       created = await this.periodModel.create(docs);
     } catch (err) {
-      // E11000 on the (org, label) unique index — leaks if a prior partial
+      // E11000 on the (org, label) unique index - leaks if a prior partial
       // run created some but not all. Surface a clearer error.
       const e = err as { code?: number; message?: string };
       if (e.code === 11000) {
@@ -266,7 +266,7 @@ export class PeriodsService {
   /**
    * Reopen is super_admin-only. Service trusts the caller to have enforced
    * that (controller layer) but logs the action via `logSecurity` regardless
-   * — the doc §7.5 recovery-not-backdoor rule means every reopen is audited.
+   * - the doc §7.5 recovery-not-backdoor rule means every reopen is audited.
    */
   async reopenPeriod(
     orgId: Types.ObjectId | string,

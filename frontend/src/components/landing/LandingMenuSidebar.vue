@@ -1,7 +1,7 @@
 <!-- frontend/src/components/landing/LandingMenuSidebar.vue -->
 
 <template>
-    <!-- Teleport to body — renders as sibling of #app, unaffected by #app's pusher transform -->
+    <!-- Teleport to body - renders as sibling of #app, unaffected by #app's pusher transform -->
     <Teleport to="body">
 
         <!-- Backdrop: invisible click-catcher -->
@@ -130,12 +130,12 @@ function handleNavClick() {
     position: fixed;
     inset: 0;
     z-index: 998;
-    /* Transparent on desktop — the receded #app signals open state */
+    /* Transparent on desktop - the receded #app signals open state */
     background: transparent;
     cursor: pointer;
 }
 
-/* On mobile where #app doesn't move — show a dim overlay */
+/* On mobile where #app doesn't move - show a dim overlay */
 @media (max-width: 768px) {
     .lsb-backdrop {
         background: rgba(0, 0, 0, 0.45);

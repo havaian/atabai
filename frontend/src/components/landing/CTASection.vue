@@ -28,7 +28,7 @@ const themeStore = useThemeStore()
 const cardRef = ref(null)
 const canvasRef = ref(null)
 
-// Animation state — kept outside reactive system; refs would add Vue overhead on every frame
+// Animation state - kept outside reactive system; refs would add Vue overhead on every frame
 let ctx = null
 let rafId = null
 let dots = null          // Float32Array: [ax, ay, x, y, ax, ay, x, y, ...]
@@ -39,7 +39,7 @@ let height = 0
 let mouseX = -9999
 let mouseY = -9999
 let mouseInside = false
-let idleFrames = 0       // counts frames where nothing moved — used to stop the RAF
+let idleFrames = 0       // counts frames where nothing moved - used to stop the RAF
 let isAnimated = false   // false on touch / reduced-motion / small viewport
 
 // Tuning constants
@@ -72,7 +72,7 @@ function setupDots() {
     }
 }
 
-// Resize handler — accounts for device pixel ratio (capped at 2 for perf)
+// Resize handler - accounts for device pixel ratio (capped at 2 for perf)
 function resize() {
     if (!canvasRef.value || !cardRef.value) return
     const rect = cardRef.value.getBoundingClientRect()
@@ -90,12 +90,12 @@ function resize() {
     drawFrame()  // immediate paint so the user never sees an empty card
 }
 
-// Single frame draw — batched into one path for GPU efficiency
+// Single frame draw - batched into one path for GPU efficiency
 function drawFrame() {
     ctx.clearRect(0, 0, width, height)
 
     // Adaptive dot color: white on dark theme, purple-tinted on light theme
-    // — pure white would be invisible on the light theme's tinted-purple card
+    // - pure white would be invisible on the light theme's tinted-purple card
     const dotColor = themeStore.isDark
         ? 'rgba(255, 255, 255, 0.42)'
         : 'rgba(149, 0, 255, 0.32)'
@@ -109,7 +109,7 @@ function drawFrame() {
     ctx.fill()
 }
 
-// Frame step — physics + draw
+// Frame step - physics + draw
 function tick() {
     let anyMotion = false
 
@@ -134,13 +134,13 @@ function tick() {
                 y += (targetY - y) * RETURN_EASING * 2
                 anyMotion = true
             } else {
-                // Outside influence — ease back to anchor
+                // Outside influence - ease back to anchor
                 x += (ax - x) * RETURN_EASING
                 y += (ay - y) * RETURN_EASING
                 if (Math.abs(ax - x) > 0.05 || Math.abs(ay - y) > 0.05) anyMotion = true
             }
         } else {
-            // Cursor left the card — ease everything back home
+            // Cursor left the card - ease everything back home
             x += (ax - x) * RETURN_EASING
             y += (ay - y) * RETURN_EASING
             if (Math.abs(ax - x) > 0.05 || Math.abs(ay - y) > 0.05) anyMotion = true
@@ -152,7 +152,7 @@ function tick() {
 
     drawFrame()
 
-    // Stop RAF once nothing's moving and cursor is gone — saves battery on idle pages
+    // Stop RAF once nothing's moving and cursor is gone - saves battery on idle pages
     if (anyMotion || mouseInside) {
         idleFrames = 0
         rafId = requestAnimationFrame(tick)
@@ -193,7 +193,7 @@ onMounted(() => {
     ctx = canvasRef.value.getContext('2d', { alpha: true })
     if (!ctx) return
 
-    // Decide whether to animate — touch devices, reduced-motion, narrow viewport → static
+    // Decide whether to animate - touch devices, reduced-motion, narrow viewport → static
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     const hasHover = window.matchMedia('(hover: hover)').matches
     const wideEnough = window.innerWidth >= 768
@@ -208,7 +208,7 @@ onMounted(() => {
 
     resizeObserver = new ResizeObserver(() => {
         resize()
-        // Single redraw is enough — if cursor's outside, no further frames needed
+        // Single redraw is enough - if cursor's outside, no further frames needed
     })
     resizeObserver.observe(cardRef.value)
 })

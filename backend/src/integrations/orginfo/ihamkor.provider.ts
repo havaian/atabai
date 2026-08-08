@@ -5,7 +5,7 @@
  * contract isn't pinned, so URL construction and auth are config-driven and the
  * response mapping is best-effort (tries common field-name variants, keeps the
  * raw payload). When the real contract is known, adjust `map()` and the URL
- * shape — no call sites change.
+ * shape - no call sites change.
  */
 import { Injectable } from '@nestjs/common';
 import axios from 'axios';

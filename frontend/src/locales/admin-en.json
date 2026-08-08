@@ -203,7 +203,7 @@
       "newUserSpecific": "+ Custom set",
       "newUserSpecificHint": "Create a mapping for specific users",
       "newUserSpecificTitle": "New custom mapping set",
-      "newUserSpecificDesc": "Creates a draft for specific users in the '{reportType}' category. Once configured, publish it — assigned users will use it instead of the global mapping.",
+      "newUserSpecificDesc": "Creates a draft for specific users in the '{reportType}' category. Once configured, publish it - assigned users will use it instead of the global mapping.",
       "newUserSpecificSource": "Start from",
       "newUserSpecificSourceFork": "A copy of the global mapping",
       "newUserSpecificSourceBlank": "An empty set",
@@ -257,7 +257,7 @@
       "equityMovementRows": "Movement rows",
       "equityRowPatterns": "Form 4 row patterns",
       "equityColumnPatterns": "Form 4 column patterns",
-      "equityEditNote": "Equity editing in this MVP is done via PUT API directly — UI editor will come later.",
+      "equityEditNote": "Equity editing in this MVP is done via PUT API directly - UI editor will come later.",
       "equityJsonEditorTitle": "JSON configuration editor",
       "equityEditBtn": "Edit JSON",
       "equityJsonHint": "Edit the configuration structure directly as JSON. columns, movementRows, rowPatterns, columnPatterns are arrays; bsRowToEquityColumn is an object.",
@@ -276,7 +276,7 @@
       "fieldFlagNegative": "Value is stored with a negative sign",
       "fieldFlagNegativeHint": "Check this if the NSBU value is represented as negative (e.g. for contra-accounts).",
       "fieldFlagCalculated": "Field is computed from a formula",
-      "fieldFlagCalculatedHint": "The value isn't extracted from NSBU directly — it's calculated from other fields using the formula below.",
+      "fieldFlagCalculatedHint": "The value isn't extracted from NSBU directly - it's calculated from other fields using the formula below.",
       "fieldFormula": "Formula",
       "fieldDescription": "NSBU description",
       "fieldNotes": "Notes",
@@ -307,12 +307,12 @@
       "fieldEnabledAt": "Activated",
       "fieldEncryption": "Encryption configured",
       "encryptionYes": "Yes",
-      "encryptionNo": "No — set TOTP_ENCRYPTION_KEY",
+      "encryptionNo": "No - set TOTP_ENCRYPTION_KEY",
       "fieldSessionExpires": "Current session expires",
       "backupSection": "Backup codes",
-      "backupDescription": "Backup codes let you sign in without your authenticator app (one code = one sign-in). Regeneration invalidates all old codes and creates 10 new ones — old codes will stop working.",
+      "backupDescription": "Backup codes let you sign in without your authenticator app (one code = one sign-in). Regeneration invalidates all old codes and creates 10 new ones - old codes will stop working.",
       "newCodesTitle": "New backup codes",
-      "newCodesDescription": " — save them now, they won't be shown again:",
+      "newCodesDescription": " - save them now, they won't be shown again:",
       "copyAll": "Copy all",
       "saved": "I saved the codes",
       "currentTotpLabel": "Current TOTP code for confirmation",
@@ -428,7 +428,7 @@
       "areas": {
         "organizations": {
           "title": "Organizations",
-          "desc": "Oversight of every organization on the platform — drill into periods, balances and the matrix for support and debugging."
+          "desc": "Oversight of every organization on the platform - drill into periods, balances and the matrix for support and debugging."
         },
         "ownership": {
           "title": "Ownership transfer",

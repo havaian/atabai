@@ -110,7 +110,7 @@ export class JwtTokenService {
     }
   }
 
-  /** Decode without verifying — used to extract userId before we know which secret to use. */
+  /** Decode without verifying - used to extract userId before we know which secret to use. */
   decode(token: string): { userId?: string; type?: string; exp?: number } | null {
     try {
       const decoded = jwt.decode(token);
@@ -128,7 +128,7 @@ export class JwtTokenService {
     return parts[1];
   }
 
-  // Placeholder for Redis-backed token blacklist — preserved from legacy stub.
+  // Placeholder for Redis-backed token blacklist - preserved from legacy stub.
   async isTokenBlacklisted(_token: string): Promise<boolean> {
     return false;
   }

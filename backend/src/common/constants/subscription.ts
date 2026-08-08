@@ -1,6 +1,6 @@
 /**
  * Subscription tiers and per-tier monthly file processing limits.
- * Ported from backend/src/config/subscription.js — values preserved.
+ * Ported from backend/src/config/subscription.js - values preserved.
  */
 export type SubscriptionType = 'basic' | 'premium' | 'enterprise';
 

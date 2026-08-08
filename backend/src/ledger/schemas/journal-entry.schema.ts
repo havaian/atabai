@@ -11,7 +11,7 @@ export type JournalEntryModel = Model<JournalEntry>;
 
 /**
  * Where an entry originated. Drives both the human label in the audit trail
- * and the staging workflow — bank-engine entries land in 'draft' status, etc.
+ * and the staging workflow - bank-engine entries land in 'draft' status, etc.
  *
  * `reclassification` and `adjustment` are DEPRECATED (architecture doc §4.2):
  * the transformation pipeline that produced them is removed, and the
@@ -22,8 +22,8 @@ export type JournalEntryModel = Model<JournalEntry>;
 export type JournalEntrySource =
   | 'bank_statement'   // Produced by the bank engine from a parsed statement row.
   | 'opening_balance'  // Seeded during first-time-adoption period creation.
-  | 'reclassification' // DEPRECATED — transformation reclass; pipeline removed.
-  | 'adjustment'       // DEPRECATED — reframed as 'manual' (doc §4.2).
+  | 'reclassification' // DEPRECATED - transformation reclass; pipeline removed.
+  | 'adjustment'       // DEPRECATED - reframed as 'manual' (doc §4.2).
   | 'manual';          // Accountant-entered free-form posting.
 
 export const JOURNAL_ENTRY_SOURCES: readonly JournalEntrySource[] = [
@@ -72,7 +72,7 @@ export class JournalEntry {
   @Prop({ type: Types.ObjectId, ref: 'ReportingPeriod', required: true, index: true })
   periodId!: Types.ObjectId;
 
-  // Business date the entry represents (not creation time — that's timestamps.createdAt).
+  // Business date the entry represents (not creation time - that's timestamps.createdAt).
   @Prop({ type: Date, required: true, index: true })
   date!: Date;
 
@@ -97,12 +97,12 @@ export class JournalEntry {
   })
   status!: JournalEntryStatus;
 
-  // Sum of debits (== sum of credits — invariant the service must enforce
+  // Sum of debits (== sum of credits - invariant the service must enforce
   // before flipping to 'committed'). Stored for query convenience.
   @Prop({ type: MongooseSchema.Types.Decimal128, default: decimalZero })
   totalAmount!: Types.Decimal128;
 
-  // Audit pointers — who drafted, committed, reversed.
+  // Audit pointers - who drafted, committed, reversed.
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
   createdBy!: Types.ObjectId;
 
@@ -118,7 +118,7 @@ export class JournalEntry {
   @Prop({ type: Types.ObjectId, ref: 'User', default: null })
   reversedBy!: Types.ObjectId | null;
 
-  // For reversal entries — points at the entry being reversed. The reversal
+  // For reversal entries - points at the entry being reversed. The reversal
   // itself is a new entry (sign-flipped lines) so adjustments stay append-only.
   @Prop({ type: Types.ObjectId, ref: 'JournalEntry', default: null, index: true })
   reversesEntryId!: Types.ObjectId | null;

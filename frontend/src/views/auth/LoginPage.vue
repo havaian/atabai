@@ -39,7 +39,7 @@ import { useAuthStore } from '@/stores/auth'
 
 const authStore = useAuthStore()
 
-// Capture redirect state at mount time — sessionStorage value is set by the
+// Capture redirect state at mount time - sessionStorage value is set by the
 // router guard before navigating here, and we don't want to flicker between
 // the two subtitle variants if it gets cleared mid-flow.
 const wasRedirected = ref(false)
@@ -107,7 +107,7 @@ onMounted(() => {
     line-height: 1.5;
 }
 
-/* Google button — matches the landing sidebar's primary auth button */
+/* Google button - matches the landing sidebar's primary auth button */
 .login-google-btn {
     display: flex;
     align-items: center;

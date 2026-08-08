@@ -29,7 +29,7 @@ import { OrganizationsModule } from './organizations/organizations.module';
       envFilePath: ['.env', '../.env'],
     }),
 
-    // Global rate limiter — matches legacy: 600 req / 15min per IP
+    // Global rate limiter - matches legacy: 600 req / 15min per IP
     // Auth routes get a stricter override applied at the controller level (30 / 15min, skipSuccessfulRequests)
     ThrottlerModule.forRoot({
       throttlers: [

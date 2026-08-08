@@ -14,7 +14,7 @@ export interface ResolveCounterpartyInput {
   inn: string | null;
   /** Falls into the new counterparty's `name`. */
   fallbackName: string;
-  /** Optional account observed on the bank row — recorded on first sight. */
+  /** Optional account observed on the bank row - recorded on first sight. */
   accountNumber: string | null;
   /** Optional bank code from the row. */
   bankCode: string | null;
@@ -27,7 +27,7 @@ export interface ResolveCounterpartyResult {
 }
 
 /**
- * Counterparty registry lookup with auto-create — bank ТЗ §3.
+ * Counterparty registry lookup with auto-create - bank ТЗ §3.
  *
  * Algorithm (matches the spec's flowchart):
  *   1. ИНН present and registered? → return existing, autoCreated=false.
@@ -37,7 +37,7 @@ export interface ResolveCounterpartyResult {
  *      `createdFromBankRow: true`. Surfaces as YELLOW on the preview UI.
  *   4. ИНН absent and `accountNumber` matches a known counterparty's account?
  *      → return that counterparty.
- *   5. Neither — caller decides (typically RED on preview).
+ *   5. Neither - caller decides (typically RED on preview).
  *
  * Account observations: every successful resolve appends the row's
  * `accountNumber` to the counterparty's `accounts[]` if not already present.
@@ -74,7 +74,7 @@ export class CounterpartyResolverService {
         accounts: this.accountSeed(accountNumber, bankCode),
         isTreasury,
         // Treasury created by the bank engine should NOT carry the
-        // createdFromBankRow yellow flag — it's the well-known treasury
+        // createdFromBankRow yellow flag - it's the well-known treasury
         // counterparty, not a stranger. Same outcome for any future
         // hard-coded known counterparty types.
         createdFromBankRow: !isTreasury,
@@ -83,7 +83,7 @@ export class CounterpartyResolverService {
       return { counterparty: created, autoCreated: !isTreasury };
     }
 
-    // ИНН absent — fall back to account lookup. Rare; most bank rows have ИНН.
+    // ИНН absent - fall back to account lookup. Rare; most bank rows have ИНН.
     if (accountNumber) {
       const byAccount = await this.counterpartyModel.findOne({
         organizationId,
@@ -99,7 +99,7 @@ export class CounterpartyResolverService {
 
   /**
    * Append an observed bank-row account to the counterparty's `accounts[]`
-   * iff not already present. Idempotent — the array index covers the
+   * iff not already present. Idempotent - the array index covers the
    * exists check.
    */
   private async observeAccount(

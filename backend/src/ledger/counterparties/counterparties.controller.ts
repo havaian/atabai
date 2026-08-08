@@ -17,8 +17,8 @@ import {
  * future screen that needs to choose a counterparty). Counterparties are
  * created by the bank/invoice ingestion paths; this surface only lists them.
  *
- *   GET .../counterparties            — active counterparties (name-sorted).
- *   GET .../counterparties?activeOnly=false — include archived ones too.
+ *   GET .../counterparties            - active counterparties (name-sorted).
+ *   GET .../counterparties?activeOnly=false - include archived ones too.
  *
  * `settlementDepth` is returned as a soft hint so a picker can default the
  * document-type toggle; posting logic still resolves the effective depth via

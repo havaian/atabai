@@ -24,12 +24,12 @@ import {
 
 /**
  * Read-only chart-of-accounts surface. 507 NSBU rows is small enough that
- * the whole filtered set returns in one response — no pagination here.
+ * the whole filtered set returns in one response - no pagination here.
  *
  * Query params:
  *   ?vid=А|П|КА|КП|Т (optional, exact)
  *   ?search=...      (optional, case-insensitive substring on code / name / quickPick)
- *   ?includeInactive=true|false (defaults to false — only active rows)
+ *   ?includeInactive=true|false (defaults to false - only active rows)
  */
 @Controller('organizations/:orgId/ledger')
 @UseGuards(JwtAuthGuard, OrgMembershipGuard)

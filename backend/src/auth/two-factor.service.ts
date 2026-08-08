@@ -25,7 +25,7 @@ export interface AdminSessionInfo {
 
 /**
  * Service that owns the TOTP enrollment / verification flow and the
- * AdminSession lifecycle. The HTTP controller is thin — all the crypto
+ * AdminSession lifecycle. The HTTP controller is thin - all the crypto
  * choreography lives here.
  */
 @Injectable()

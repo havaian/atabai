@@ -52,7 +52,7 @@ export interface RunningBalanceResult {
   /** Net amount on the credit side (positive). */
   credit: string;
   /**
-   * Net signed balance — debit-natural for active accounts, credit-natural
+   * Net signed balance - debit-natural for active accounts, credit-natural
    * for passive ones. Positive = the natural side carries that much.
    * Caller decides how to interpret given the account's Вид.
    */
@@ -68,13 +68,13 @@ export interface RunningBalanceResult {
  *     materialized by the rollup).
  *   - All COMMITTED JournalEntryLine rows for that key in this period.
  *
- * Draft entries are deliberately excluded — the bank engine processes a
+ * Draft entries are deliberately excluded - the bank engine processes a
  * statement row by row and creates drafts as it goes. Including drafts in
  * its own running-balance lookup would mean each new row sees the postings
  * of the prior rows in the same batch, which is wrong: the algorithm
  * (bank ТЗ §6) refers to the balance "before the statement is posted."
  *
- * Returns the result as decimal strings — never JS numbers. Same precision
+ * Returns the result as decimal strings - never JS numbers. Same precision
  * discipline as elsewhere on the ledger spine; arithmetic that needs more
  * than this read-only summing should use a Decimal library at the call site.
  */
@@ -91,7 +91,7 @@ export class RunningBalanceService {
 
   async getBalance(args: RunningBalanceArgs): Promise<RunningBalanceResult> {
     // 1. Existing opening + period values from the materialized balance row.
-    //    Aggregated across all subconto slots for this counterparty — the bank
+    //    Aggregated across all subconto slots for this counterparty - the bank
     //    engine treats the counterparty as the primary subconto.
     const importedAgg = await this.balanceModel.aggregate<{
       _id: null;
@@ -121,7 +121,7 @@ export class RunningBalanceService {
     const imported = importedAgg[0];
 
     // 2. Postings landed on this key from COMMITTED journal entries only.
-    //    Drafts in flight don't count — see service docblock.
+    //    Drafts in flight don't count - see service docblock.
     const committedEntries = await this.entryModel
       .find({
         organizationId: args.organizationId,
@@ -181,7 +181,7 @@ export class RunningBalanceService {
   }
 
   /**
-   * "Does this counterparty have an open receivable?" — true if running
+   * "Does this counterparty have an open receivable?" - true if running
    * debit exceeds running credit. For Scenario B in bank ТЗ §6.
    */
   async hasOpenReceivable(args: RunningBalanceArgs): Promise<boolean> {
@@ -196,13 +196,13 @@ export class RunningBalanceService {
    * plus the materialized balance rows for the same key. Returns net debit /
    * credit as decimal strings.
    *
-   * Drafts are excluded for the same reason as getBalance — the engine must
+   * Drafts are excluded for the same reason as getBalance - the engine must
    * read the position "before the statement is posted".
    *
    * Note: this narrows on documentType+documentId, so only postings already
    * tagged with that document count. A brand-new document therefore starts at
    * a zero position (no debt, no advance), which is the correct behavior for
-   * Filipp's per-document rule — a payment against a new document lands as an
+   * Filipp's per-document rule - a payment against a new document lands as an
    * advance unless that document already carries an opposing balance.
    */
   async getDocumentPosition(args: DocumentPositionArgs): Promise<RunningBalanceResult> {
@@ -212,7 +212,7 @@ export class RunningBalanceService {
     // NOTE: AccountBalance is materialized at (account, subconto) grain and does
     // NOT carry documentType/documentId, so a document-scoped position cannot
     // read opening/period totals from it. We therefore sum COMMITTED LINES only
-    // — which is authoritative for the in-period bank flow: every posting that
+    // - which is authoritative for the in-period bank flow: every posting that
     // touches a document is a line tagged with it. Document-level OPENING
     // balances (carried across periods) would require the rollup to group by
     // document too; that is deferred and belongs with the §7.3 depth-migration

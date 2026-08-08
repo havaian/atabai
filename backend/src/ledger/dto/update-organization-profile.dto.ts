@@ -32,7 +32,7 @@ import {
  * OrgBankAccount sub-schema on OrganizationProfile). The bank engine matches
  * an uploaded statement to the org by comparing the statement's account
  * against this list (bank ТЗ §2), so the admin needs to be able to maintain
- * it after onboarding — which is what the PATCH endpoint exists for.
+ * it after onboarding - which is what the PATCH endpoint exists for.
  */
 export class OrgBankAccountDto {
   @IsString()
@@ -66,7 +66,7 @@ export class OrgBankAccountDto {
   @MaxLength(20)
   ledgerAccount?: string | null;
 
-  // Sub-account as its own field (methodology §3.5) — not concatenated into
+  // Sub-account as its own field (methodology §3.5) - not concatenated into
   // accountNumber. Optional; null/absent means the account has no sub-account.
   @IsOptional()
   @IsString()
@@ -81,7 +81,7 @@ export class OrgBankAccountDto {
 }
 
 /**
- * Accounting-policy block edits (methodology §9). All fields optional — a
+ * Accounting-policy block edits (methodology §9). All fields optional - a
  * PATCH merges only the blocks it carries onto the stored policy, so changing
  * one setting doesn't require resubmitting all six. Enum values are validated
  * against the same constants the schema uses.
@@ -140,7 +140,7 @@ export class AccountingPolicyDto {
  * Deliberately omits `transitionDate`: once the first-time-adoption date is
  * set it anchors every downstream balance, so it is not editable here (see
  * OrganizationProfilesService docblock). Everything else an admin sees on the
- * profile is editable. All fields optional — a PATCH only touches what it
+ * profile is editable. All fields optional - a PATCH only touches what it
  * carries; `bankAccounts`, when present, REPLACES the whole list (the edit
  * form submits the full set). `accountingPolicy`, when present, MERGES the
  * provided blocks onto the stored policy.

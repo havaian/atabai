@@ -17,11 +17,11 @@
                 :placeholder="$t('chart.searchPlaceholder')" />
             <select v-model="vidFilter" class="chart-select">
                 <option value="">{{ $t('chart.allVids') }}</option>
-                <option value="А">А — {{ $t('chart.vid.active') }}</option>
-                <option value="П">П — {{ $t('chart.vid.passive') }}</option>
-                <option value="КА">КА — {{ $t('chart.vid.contraActive') }}</option>
-                <option value="КП">КП — {{ $t('chart.vid.contraPassive') }}</option>
-                <option value="Т">Т — {{ $t('chart.vid.technical') }}</option>
+                <option value="А">А - {{ $t('chart.vid.active') }}</option>
+                <option value="П">П - {{ $t('chart.vid.passive') }}</option>
+                <option value="КА">КА - {{ $t('chart.vid.contraActive') }}</option>
+                <option value="КП">КП - {{ $t('chart.vid.contraPassive') }}</option>
+                <option value="Т">Т - {{ $t('chart.vid.technical') }}</option>
             </select>
         </section>
 
@@ -88,7 +88,7 @@ function vidClass(vid) {
 }
 
 function subcontoSummary(a) {
-    return [a.subconto1Name, a.subconto2Name, a.subconto3Name].filter(Boolean).join(' / ') || '—'
+    return [a.subconto1Name, a.subconto2Name, a.subconto3Name].filter(Boolean).join(' / ') || '-'
 }
 </script>
 

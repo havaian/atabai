@@ -13,7 +13,7 @@ import type { SubscriptionType } from '../../common/constants/subscription';
 import type { UserDocument } from '../../users/schemas/user.schema';
 
 /**
- * Mixin guard factory — yields a guard that requires a specific subscription
+ * Mixin guard factory - yields a guard that requires a specific subscription
  * tier. Use as `@UseGuards(RequireSubscription('premium'))`. Ported from the
  * legacy `requireSubscription` middleware.
  */

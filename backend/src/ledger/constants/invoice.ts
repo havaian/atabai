@@ -1,17 +1,17 @@
 /**
- * Invoice-registry constants (methodology §7, build phases 1–4) — the enums and
+ * Invoice-registry constants (methodology §7, build phases 1–4) - the enums and
  * the fixed NSBU accounts the Didox registry ingestion posts against. Kept
  * beside the accounting-policy constants: structure/enums only, no posting
  * logic. The posting itself lives in InvoiceIngestionService.
  */
 
-// ─── Direction — which registry file ─────────────────────────────────────────
+// ─── Direction - which registry file ─────────────────────────────────────────
 
 /**
  * Registry direction. Входящие (incoming) = supplier invoices we receive (we
  * buy → payable 6010); Исходящие (outgoing) = customer invoices we issue (we
  * sell → receivable 4010). The direction is NOT in the file, so the operator
- * picks it at upload — the same shape as the bank module picking the statement
+ * picks it at upload - the same shape as the bank module picking the statement
  * account.
  */
 export const INVOICE_DIRECTION = {
@@ -32,11 +32,11 @@ export function isInvoiceDirection(value: string): value is InvoiceDirection {
 
 /**
  * Invoice subtype as reported by the Didox registry:
- *   - STANDARD   (Обычная)        — a normal invoice, posted as-is.
- *   - ADDITIONAL (Дополнительная) — a delta against an earlier invoice, posted
+ *   - STANDARD   (Обычная)        - a normal invoice, posted as-is.
+ *   - ADDITIONAL (Дополнительная) - a delta against an earlier invoice, posted
  *     to the current (ingestion) period as a NEW open position; the additional
  *     СФ carries the delta itself, so it posts exactly like a standard invoice.
- *   - CORRECTED  (Исправленная)   — a full replacement of an earlier invoice;
+ *   - CORRECTED  (Исправленная)   - a full replacement of an earlier invoice;
  *     on commit the original is reversed and the corrected version reposted,
  *     BOTH in the original's period, so that period nets to the corrected
  *     figures (§7.5, Filipp variant a).
@@ -67,8 +67,8 @@ export function isInvoiceSubtype(value: string): value is InvoiceSubtype {
  * стоимость»).
  */
 export const INVOICE_VAT_ACCOUNTS = {
-  INPUT: '4410', // Дт — input (recoverable) VAT on purchases.
-  OUTPUT: '6410', // Кт — output VAT on sales.
+  INPUT: '4410', // Дт - input (recoverable) VAT on purchases.
+  OUTPUT: '6410', // Кт - output VAT on sales.
 } as const;
 export type InvoiceVatAccount =
   (typeof INVOICE_VAT_ACCOUNTS)[keyof typeof INVOICE_VAT_ACCOUNTS];

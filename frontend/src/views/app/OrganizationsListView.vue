@@ -3,7 +3,7 @@
      invites they can accept. Entry point for the "switch organization"
      flow and for "create another organization".
 
-     Most users will have one org and never visit this page — they'll hit
+     Most users will have one org and never visit this page - they'll hit
      the dashboard for their single active org instead. This page exists
      for the IFRS-specialist B2B2B use case (one specialist serving many
      client companies) where org switching is the daily workflow. -->
@@ -20,7 +20,7 @@
             </button>
         </header>
 
-        <!-- Pending invites — surface above the org list since they're action items. -->
+        <!-- Pending invites - surface above the org list since they're action items. -->
         <section v-if="orgs.hasInvites" class="orgs-section">
             <h2 class="orgs-section-title">{{ $t('organizations.invites.title') }}</h2>
             <ul class="orgs-invite-list">

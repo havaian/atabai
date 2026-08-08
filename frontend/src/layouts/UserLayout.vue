@@ -1,5 +1,5 @@
 <!-- frontend/src/layouts/UserLayout.vue
-     Thin wrapper around AppLayout — provides user-side specific content
+     Thin wrapper around AppLayout - provides user-side specific content
      (New Project CTA, recent files list, admin entry, profile menu) via
      slots. All shared chrome (sidebar shell, mobile drawer, theme/lang
      pickers) is owned by AppLayout. -->
@@ -90,7 +90,7 @@ import { useOrganizationsStore } from '@/stores/organizations'
 import {
     LayoutDashboard, Archive, Plus,
     ShieldCheck, Settings, LogOut,
-    // Ledger-spine nav icons (Task 5 — surfacing new architecture).
+    // Ledger-spine nav icons (Task 5 - surfacing new architecture).
     // OSV and Bank entry-points live on Dashboard, not in the sidebar,
     // because they're period-scoped actions rather than top-level views.
     CalendarDays, BookOpen, Grid3x3, Sliders,
@@ -104,17 +104,17 @@ const orgsStore = useOrganizationsStore()
 const isProfileMenuOpen = ref(false)
 const profileRef = ref(null)
 
-// Named routes — works regardless of locale prefix in URL.
+// Named routes - works regardless of locale prefix in URL.
 //
 // Two-tier nav (Task 5):
-//   - Top tier: Dashboard, History, Settings — visible always.
+//   - Top tier: Dashboard, History, Settings - visible always.
 //   - Ledger-spine tier: surfaces the new architecture (periods, chart,
 //     ledger matrix, adjustments). Visibility is driven by the SERVER's
-//     view of the session — orgsStore.isOrgAdmin and orgsStore.capabilities
+//     view of the session - orgsStore.isOrgAdmin and orgsStore.capabilities
 //     are populated from GET /api/organizations/session, which validates
 //     the X-Active-Org-Id claim against the membership table and returns
 //     the authoritative cap set. Local "currentOrgId" alone is not enough
-//     — that's a client-side breadcrumb, not an authorization check.
+//     - that's a client-side breadcrumb, not an authorization check.
 //
 // Capability map:
 //   - Periods / Chart / Matrix → read-only views of the ledger.
@@ -131,7 +131,7 @@ const navItems = computed(() => {
         // the empty state at the router level.
         return [
             { name: 'Dashboard', label: t('nav.dashboard'), icon: LayoutDashboard },
-            // Settings omitted — available in the profile dropdown.
+            // Settings omitted - available in the profile dropdown.
         ]
     }
     // Server-blessed capabilities for the active org. Admins receive the
@@ -147,7 +147,7 @@ const navItems = computed(() => {
                 { name: 'ChartOfAccounts', label: t('nav.chart'), icon: BookOpen },
             ]
             : []),
-        // Settings intentionally omitted from the nav — it's reachable from
+        // Settings intentionally omitted from the nav - it's reachable from
         // the profile dropdown at the bottom of the sidebar, so duplicating
         // it here would be redundant.
     ]

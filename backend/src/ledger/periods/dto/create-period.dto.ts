@@ -4,7 +4,7 @@ import { IsDate, IsString, Length } from 'class-validator';
 /**
  * Payload for creating a regular reporting period after first-time adoption.
  * The opening / comparative / reporting triple comes from the bootstrap
- * flow — this DTO is for adding subsequent fiscal periods.
+ * flow - this DTO is for adding subsequent fiscal periods.
  */
 export class CreatePeriodDto {
   @IsString()

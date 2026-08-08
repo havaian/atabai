@@ -7,7 +7,7 @@ import type { MembershipDocument } from '../schemas/membership.schema';
  * Pulls the active membership resolved by OrgMembershipGuard off the request.
  * Use as `@CurrentMembership() membership: MembershipDocument`.
  *
- * Throws at request time if used on a route the guard did not run for —
+ * Throws at request time if used on a route the guard did not run for -
  * indicates a wiring mistake rather than an auth failure.
  */
 export const CurrentMembership = createParamDecorator(

@@ -16,7 +16,7 @@ import {
 } from '../schemas/chart-of-account.schema';
 
 // __dirname resolves to src/ledger/services/ in dev (ts-node) and
-// dist/ledger/services/ in prod — both layouts carry the seed JSON one level
+// dist/ledger/services/ in prod - both layouts carry the seed JSON one level
 // up under seedChart/ thanks to copy-assets.mjs.
 const SEED_DIR = path.join(__dirname, '..', 'seedChart');
 const SEED_FILE = 'nsbu-chart-of-accounts.json';
@@ -87,7 +87,7 @@ export class ChartSeedService {
   /**
    * Bootstrap one org's chart from the canonical seed. Returns counts.
    * Service-layer guard: caller must ensure the actor has admin role on the
-   * org — this method does NOT enforce authorization.
+   * org - this method does NOT enforce authorization.
    */
   async seedForOrganization(
     organizationId: Types.ObjectId | string,
@@ -172,7 +172,7 @@ export class ChartSeedService {
       seen.add(a.code);
       if (!isAccountVid(a.vid)) {
         throw new Error(
-          `Seed account ${a.code} has invalid vid "${a.vid}" — expected one of ${ALL_ACCOUNT_VIDS.join(', ')}`,
+          `Seed account ${a.code} has invalid vid "${a.vid}" - expected one of ${ALL_ACCOUNT_VIDS.join(', ')}`,
         );
       }
     }

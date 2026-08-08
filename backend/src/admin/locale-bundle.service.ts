@@ -15,7 +15,7 @@ export const ALLOWED_APPS = ['user', 'admin'] as const;
  * `GET /api/locales/bundle/:app/:lang`. Any mutation to a locale key bumps
  * the version for the affected app, which busts the cache automatically.
  *
- * Cache key: `${app}:${lang}:${version}` — only one version is kept per
+ * Cache key: `${app}:${lang}:${version}` - only one version is kept per
  * (app, lang) tuple at a time.
  */
 @Injectable()

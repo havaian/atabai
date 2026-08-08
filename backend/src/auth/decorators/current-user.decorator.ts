@@ -4,7 +4,7 @@ import type { Request } from 'express';
 import type { UserDocument } from '../../users/schemas/user.schema';
 
 /**
- * Pulls the authenticated user off the request — the JwtAuthGuard puts it there.
+ * Pulls the authenticated user off the request - the JwtAuthGuard puts it there.
  * Use as `@CurrentUser() user: UserDocument` in controller methods.
  */
 export const CurrentUser = createParamDecorator(

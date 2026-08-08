@@ -1,7 +1,7 @@
 // @ts-nocheck
 /* eslint-disable */
 /**
- * Organizations store — front-end side of the access spine + ledger bootstrap
+ * Organizations store - front-end side of the access spine + ledger bootstrap
  * (architecture doc §7.6, §8.3).
  *
  * Single source of truth for:
@@ -13,7 +13,7 @@
  * same context. When the active org disappears from the list (revoked,
  * left, etc.) the store falls back to the first available org or null.
  *
- * Auth integration: this store doesn't touch authentication itself — it
+ * Auth integration: this store doesn't touch authentication itself - it
  * just reads accessToken via the existing apiClient interceptor. Callers
  * MUST call `bootstrap()` after auth succeeds (typically from App.vue or
  * a router guard) to populate the initial state.
@@ -34,20 +34,20 @@ export const useOrganizationsStore = defineStore('organizations', () => {
     /**
      * Currently-active org id. Initially read from localStorage so the first
      * /session call carries it in the header, but the SERVER is the source
-     * of truth — the response either echoes our claim (valid) or replaces
+     * of truth - the response either echoes our claim (valid) or replaces
      * it (stale / revoked / never-valid). On every /session response we
      * overwrite from `session.activeOrgId`, not the other way around.
      */
     const currentOrgId = ref(readActiveOrgId())
     const isLoading = ref(false)
     const error = ref(null)
-    /** True after the first successful list fetch — controls onboarding redirect. */
+    /** True after the first successful list fetch - controls onboarding redirect. */
     const isInitialized = ref(false)
 
     /**
      * Authoritative capability set for the active membership, as resolved by
-     * the backend's /session endpoint. UI gates on this — NOT on local
-     * inference from items[].membership — because the backend is the only
+     * the backend's /session endpoint. UI gates on this - NOT on local
+     * inference from items[].membership - because the backend is the only
      * place that can honestly say "you are an admin here" or "you have
      * cap X". Empty when there is no active org.
      */
@@ -66,7 +66,7 @@ export const useOrganizationsStore = defineStore('organizations', () => {
     /**
      * The decision flag the auth bootstrap uses to decide where to send a
      * just-logged-in user. True iff they have no active orgs AND no pending
-     * invites — the only state where the onboarding wizard is the natural
+     * invites - the only state where the onboarding wizard is the natural
      * landing page.
      */
     const needsOnboarding = computed(
@@ -86,7 +86,7 @@ export const useOrganizationsStore = defineStore('organizations', () => {
      * Single round-trip on bootstrap, single round-trip on org switch.
      * Anything else (gating sidebar nav off localStorage) re-introduces
      * the divergence between the UI's idea of "current org" and the
-     * server's idea of what the user can do — the exact bug we are
+     * server's idea of what the user can do - the exact bug we are
      * avoiding by going through this endpoint.
      */
     async function fetchSession() {
@@ -94,7 +94,7 @@ export const useOrganizationsStore = defineStore('organizations', () => {
         error.value = null
         try {
             // apiClient axios interceptor attaches X-Active-Org-Id from
-            // currentOrgId.value on every request — the backend uses it
+            // currentOrgId.value on every request - the backend uses it
             // to either honour or replace our claim.
             const resp = await apiClient.get('/organizations/session')
             const session = resp.data.session || {}
@@ -120,12 +120,12 @@ export const useOrganizationsStore = defineStore('organizations', () => {
         }
     }
 
-    /** Back-compat alias — older call sites still reference fetchAll. */
+    /** Back-compat alias - older call sites still reference fetchAll. */
     const fetchAll = fetchSession
 
     /**
      * Convenience: call this once after auth bootstrap. No-op if already
-     * initialized — multiple call sites (App.vue mount, router guard, org
+     * initialized - multiple call sites (App.vue mount, router guard, org
      * switcher mount) can all call it safely.
      */
     async function ensureInitialized(force = false) {
@@ -140,7 +140,7 @@ export const useOrganizationsStore = defineStore('organizations', () => {
      * + the new capability set. If the backend rejects the claim (revoked
      * mid-session, etc.) fetchSession will overwrite back to a valid org.
      *
-     * Throws if the id isn't in the user's known active list — silently
+     * Throws if the id isn't in the user's known active list - silently
      * switching to an org the user can't access is the kind of bug that
      * causes "why are my balances empty?" support tickets.
      */
@@ -166,7 +166,7 @@ export const useOrganizationsStore = defineStore('organizations', () => {
 
     /**
      * Bootstrap a new organization through the ledger-side onboarding endpoint
-     * — atomically creates the access-spine Organization + admin Membership +
+     * - atomically creates the access-spine Organization + admin Membership +
      * OrganizationProfile + seeds the 507-account NSBU chart + creates the
      * three first-time-adoption ReportingPeriods. See LedgerBootstrapService
      * on the backend.
@@ -180,7 +180,7 @@ export const useOrganizationsStore = defineStore('organizations', () => {
             // call, so the X-Active-Org-Id header sent by the axios
             // interceptor on that call is already the new org id. This is
             // what causes the server's /session response to return the new
-            // org as activeOrgId — without it, the server would default to
+            // org as activeOrgId - without it, the server would default to
             // whichever org was first in the sorted list (which, for a
             // brand-new tenant, may be a different one).
             const newOrgId = resp.data.organization?.id
@@ -272,7 +272,7 @@ export const useOrganizationsStore = defineStore('organizations', () => {
         return resp.data.membership
     }
 
-    /** Clear all state — for sign-out. */
+    /** Clear all state - for sign-out. */
     function reset() {
         items.value = []
         pendingInvites.value = []
@@ -287,7 +287,7 @@ export const useOrganizationsStore = defineStore('organizations', () => {
     // ─── Internal helpers ───────────────────────────────────────────────────
     //
     // Note: the previous `reconcileActiveOrg()` helper has been removed.
-    // Reconciliation is now the backend's job — /session decides which org
+    // Reconciliation is now the backend's job - /session decides which org
     // is active given the client's claim and the membership table. Doing
     // it locally would re-introduce the divergence between UI state and
     // authorization state.
@@ -305,7 +305,7 @@ export const useOrganizationsStore = defineStore('organizations', () => {
             if (value) localStorage.setItem(ACTIVE_ORG_KEY, value)
             else localStorage.removeItem(ACTIVE_ORG_KEY)
         } catch (_) {
-            // localStorage unavailable — non-fatal, just won't persist.
+            // localStorage unavailable - non-fatal, just won't persist.
         }
     }
 

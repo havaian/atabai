@@ -18,7 +18,7 @@
           surfaced below.
         -->
 
-        <!-- Workflow section — current period + action cards.
+        <!-- Workflow section - current period + action cards.
              Only shown when the caller has an active org AND that org has
              at least one reporting period. Onboarding handles the empty
              case at the router level (needsOnboarding redirect). -->
@@ -32,7 +32,7 @@
             </div>
 
             <!-- Current period summary card. Soft fallback when no period is
-                 set yet — Periods view is the recovery path. -->
+                 set yet - Periods view is the recovery path. -->
             <div class="period-card">
                 <div class="period-card-main">
                     <div class="period-card-label">{{ $t('dashboard.workflow.currentPeriod') }}</div>
@@ -66,7 +66,7 @@
                 <div class="wf-status-cta wf-status-cta--skeleton"></div>
             </div>
 
-            <!-- Workflow status strip — answers "how do I check if things
+            <!-- Workflow status strip - answers "how do I check if things
                  work" at a glance for the active period. Each item is a
                  checklist step in the NSBU→IFRS pipeline; ✓ = done, ○ = not
                  yet. Driven by cheap reads done in loadStatus(). Only shown
@@ -122,7 +122,7 @@
 
             <!-- Workflow action grid. Reuses .template-grid + .template-card
                  chrome so the visual rhythm matches Dashboard's earlier
-                 design — swapping intent (templates → actions), not chrome.
+                 design - swapping intent (templates → actions), not chrome.
                  Each card routes into a period-scoped page. -->
             <div class="template-grid">
                 <div class="template-card" @click="goPeriod('bank-batches')">
@@ -217,7 +217,7 @@ const status = ref({
 
 // True while the workflow strip's data is being fetched. Starts true so the
 // first paint shows fixed-size skeletons instead of an empty space that the
-// real strip later pushes into — avoids the layout shift on load.
+// real strip later pushes into - avoids the layout shift on load.
 const statusLoading = ref(true)
 
 async function loadStatus() {
@@ -304,7 +304,7 @@ function goPeriod(leaf) {
 }
 
 function formatPeriod(p) {
-    // Soft fallback if the period has no precomputed label — synthesise one
+    // Soft fallback if the period has no precomputed label - synthesise one
     // from kind + start/end. The backend usually provides `label` directly.
     if (!p) return ''
     const kind = p.kind ? p.kind.charAt(0).toUpperCase() + p.kind.slice(1) : ''
@@ -465,7 +465,7 @@ function formatPeriod(p) {
 /* ─── Workflow status strip ──────────────────────────────────────────────── */
 .wf-status {
     /* Fixed 4-column grid (3 status items + 1 CTA) so every cell is equal
-       width and equal height in both the skeleton and the loaded state —
+       width and equal height in both the skeleton and the loaded state -
        the loaded strip keeps the same spacious layout the skeleton paints
        instead of collapsing into content-sized pills. NOTE: the column
        count is pinned to 4 to match the current 3-items-plus-CTA layout.
@@ -491,7 +491,7 @@ function formatPeriod(p) {
     gap: 10px;
     padding: 12px 14px;
     /* Fixed minimum so the skeleton and the loaded content occupy the same
-       height — no reflow when the real strip swaps in. */
+       height - no reflow when the real strip swaps in. */
     min-height: 70px;
     box-sizing: border-box;
     background: var(--ws-surface);
@@ -499,7 +499,7 @@ function formatPeriod(p) {
     border-radius: 10px;
 }
 
-/* ─── Workflow skeletons (no transform — background-position shimmer) ─────── */
+/* ─── Workflow skeletons (no transform - background-position shimmer) ─────── */
 .wf-skel-line,
 .wf-skel-icon,
 .wf-status-cta--skeleton,
@@ -619,7 +619,7 @@ function formatPeriod(p) {
 
 @media (max-width: 640px) {
 
-    /* The 4-column grid would squash on a phone — collapse to two columns
+    /* The 4-column grid would squash on a phone - collapse to two columns
        so each cell keeps a readable width, and let the CTA span the full row. */
     .wf-status {
         grid-template-columns: repeat(2, 1fr);

@@ -7,7 +7,7 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import type { UserDocument } from '../users/schemas/user.schema';
 
 /**
- * /api/admin — admin self info endpoint.
+ * /api/admin - admin self info endpoint.
  *
  * Mounted at base of /api/admin (NOT behind AdminVerifiedGuard) so the
  * frontend can detect whether the user has admin role + whether 2FA enrollment

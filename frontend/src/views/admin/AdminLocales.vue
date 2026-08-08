@@ -88,7 +88,7 @@
                             </template>
                             <template v-else>
                                 <span v-if="k.values?.[lang]" class="adm-locale-value">{{ k.values[lang] }}</span>
-                                <span v-else class="adm-locale-empty adm-muted">—</span>
+                                <span v-else class="adm-locale-empty adm-muted">-</span>
                             </template>
                         </td>
                         <td>
@@ -181,14 +181,14 @@ const error = ref(null)
 
 const filters = reactive({
     q: '',
-    app: 'admin',     // start on admin namespace — most likely target for translators
+    app: 'admin',     // start on admin namespace - most likely target for translators
     namespace: '',
     missing: ''
 })
 
 const isSuperAdmin = computed(() => adminStore.isSuperAdmin)
 
-// Inline edit state — only one cell can be in edit mode at a time
+// Inline edit state - only one cell can be in edit mode at a time
 const editing = reactive({
     keyId: null,
     lang: null,
@@ -254,7 +254,7 @@ async function loadNamespaces() {
 }
 
 function onAppChange() {
-    // Reset namespace filter when switching apps — namespaces are per-app
+    // Reset namespace filter when switching apps - namespaces are per-app
     filters.namespace = ''
     loadNamespaces()
     loadKeys(1)
@@ -293,7 +293,7 @@ async function saveEdit() {
     // Clear edit state immediately so the textarea doesn't re-trigger blur
     cancelEdit()
 
-    // No change — skip server call
+    // No change - skip server call
     if (newValue === original) return
 
     try {
@@ -427,12 +427,12 @@ onMounted(async () => {
 
 .adm-locale-edit-textarea:focus {
     border-color: var(--adm-input-border-focus);
-    /* Subtle focus halo — uses the focus border color at low opacity so
+    /* Subtle focus halo - uses the focus border color at low opacity so
        it harmonises with both themes. */
     box-shadow: 0 0 0 2px var(--adm-nav-bg-active);
 }
 
-/* Source badge — distinguishes keys hot-overlaid from the DB vs those
+/* Source badge - distinguishes keys hot-overlaid from the DB vs those
    bundled from the per-locale JSON files. Replaces a former inline
    :style="..." conditional which hardcoded dark-theme colors. */
 .adm-badge--source-db {
@@ -446,7 +446,7 @@ onMounted(async () => {
 
 /* Note: an override here would conflict with the shared admin.css
    .adm-badge--role-user (neutral grey). Earlier this file redefined
-   .adm-badge--role-user to a blue tint — that was an accidental
+   .adm-badge--role-user to a blue tint - that was an accidental
    collision with the shared "user" role styling. The block is removed
    in favour of the canonical definition in admin.css. */
 

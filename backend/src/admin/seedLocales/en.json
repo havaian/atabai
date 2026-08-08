@@ -5,7 +5,7 @@
       "titlePre": "Automate",
       "titleHighlight": "IFRS",
       "titlePost": "Integrated with AI",
-      "subtitle": "Turn complex financial data into accurate, audit-ready IFRS reports — faster, cheaper, and with full transparency.",
+      "subtitle": "Turn complex financial data into accurate, audit-ready IFRS reports - faster, cheaper, and with full transparency.",
       "bookDemo": "Book a demo",
       "howItWorks": "How it works"
     },
@@ -58,7 +58,7 @@
       "auditReady": "Audit-ready",
       "cloud": {
         "title": "24/7 Access",
-        "desc": "Cloud platform — work whenever convenient, from anywhere, no installation needed."
+        "desc": "Cloud platform - work whenever convenient, from anywhere, no installation needed."
       }
     }
   },
@@ -101,7 +101,7 @@
     "/login": "Sign in"
   },
   "pageDescriptions": {
-    "/": "Automate IFRS. Powered by AI.. Turn complex financial data into accurate, audit-ready IFRS reports — faster, cheaper, and with full transparency..",
+    "/": "Automate IFRS. Powered by AI.. Turn complex financial data into accurate, audit-ready IFRS reports - faster, cheaper, and with full transparency..",
     "/dashboard": "ATABAI Dashboard - manage files, IFRS templates and monitor the processing of financial documents.",
     "/templates": "IFRS templates for automating depreciation calculations, discounts, asset impairment and financial reports.",
     "/profile": "ATABAI user profile settings - manage subscription, preferences and personal data.",
@@ -162,7 +162,7 @@
   },
   "hero": {
     "title": "Automate IFRS. Powered by AI.",
-    "subtitle": "Turn complex financial data into accurate, audit-ready IFRS reports — faster, cheaper, and with full transparency.",
+    "subtitle": "Turn complex financial data into accurate, audit-ready IFRS reports - faster, cheaper, and with full transparency.",
     "tryFree": "Try for free",
     "bookDemo": "Book Demo",
     "loginGoogle": "Sign in with Google"
@@ -174,15 +174,15 @@
     "nsbu": {
       "colItem": "Item",
       "colAmount": "Amount (UZS)",
-      "row1": "010 — Fixed Assets",
-      "row2": "020 — Depreciation",
+      "row1": "010 - Fixed Assets",
+      "row2": "020 - Depreciation",
       "errorRow": "Manual calculation",
       "errorValue": "±12% error"
     },
     "ifrs": {
       "colItem": "Line Item",
       "colAmount": "Amount (UZS)",
-      "row1": "PPE — Cost",
+      "row1": "PPE - Cost",
       "row2": "Accum. Depr.",
       "successRow": "IAS 16 compliant",
       "successValue": "Validated"
@@ -555,7 +555,7 @@
       "profitLoss": {
         "1": "Upload your NSBU profit & loss (PnL budget) report in Excel format",
         "2": "Expected sections: ДОХОДЫ (Revenue), РАСХОДЫ/ПРЯМЫЕ РАСХОДЫ (Expenses), project-level line items",
-        "3": "Monthly columns (Jan–Dec) are detected automatically — both quarterly and annual layouts supported",
+        "3": "Monthly columns (Jan–Dec) are detected automatically - both quarterly and annual layouts supported",
         "4": "Both simple structures and nested project hierarchies are handled automatically"
       },
       "profitLossForm2": [
@@ -565,8 +565,8 @@
         "The system auto-detects code column and period headers"
       ],
       "equity": [
-        "Option A — Balance sheet (Form 1): uploads opening/closing equity balances",
-        "Option B — Form 4 (Statement of Changes in Equity): full movement breakdown",
+        "Option A - Balance sheet (Form 1): uploads opening/closing equity balances",
+        "Option B - Form 4 (Statement of Changes in Equity): full movement breakdown",
         "Column headers must include: Уставный капитал, Нераспределённая прибыль, Итого",
         "The system auto-detects which file type you uploaded"
       ]

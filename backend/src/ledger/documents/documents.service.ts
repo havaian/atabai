@@ -32,7 +32,7 @@ export interface DocumentRef {
  * and equal a recognized number; `recognizedUnmatched` carries numbers parsed
  * from the purpose text that have NO stored document yet (the accountant can
  * one-click create them). When both are empty the accountant picks from the
- * full list or creates manually — a payment is never posted without a
+ * full list or creates manually - a payment is never posted without a
  * document (Filipp: "без документа расчета … проводить не разрешаем").
  */
 export interface DocumentSuggestion {
@@ -46,7 +46,7 @@ export interface DocumentSuggestion {
  *
  * Documents are flat and counterparty-bound; a counterparty is tracked by
  * contracts OR invoices (the effective kind comes from resolveSettlementDepth
- * at the call site — this service is told which kind to work with). Records are
+ * at the call site - this service is told which kind to work with). Records are
  * created explicitly (preview create/pick), never silently auto-created.
  */
 @Injectable()

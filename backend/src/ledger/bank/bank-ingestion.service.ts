@@ -113,10 +113,10 @@ interface CommitDraftsArgs {
 }
 
 /**
- * Bank-statement ingestion + posting orchestrator — bank ТЗ §3–§7.
+ * Bank-statement ingestion + posting orchestrator - bank ТЗ §3–§7.
  *
  * Per-row sequence:
- *   0. Internal-contour check (bank ТЗ §1) — BEFORE counterparty resolution.
+ *   0. Internal-contour check (bank ТЗ §1) - BEFORE counterparty resolution.
  *      If the row's ИНН is the org's own, or the row's «Счёт» is one of the
  *      org's registered accounts, the row is a movement between two of the
  *      company's own accounts (internal transfer / fx purchase / card top-up).
@@ -134,16 +134,16 @@ interface CommitDraftsArgs {
  *      - B (credit in): receivable open? Дт 5110 / Кт 4010. Else Дт 5110 / Кт 6310.
  *   5. Create a draft JournalEntry with two JournalEntryLines.
  *
- * The whole batch shares one `uploadId` — captured in `JournalEntry.sourceRef`
+ * The whole batch shares one `uploadId` - captured in `JournalEntry.sourceRef`
  * as `bank:{uploadId}:{rowIndex}` so a single statement's drafts can be listed
  * or rejected as a group.
  *
  * The running-balance lookup at step 4 excludes draft entries (see
  * RunningBalanceService docblock). This means processing the same statement
- * row-by-row produces consistent results — each row sees the "before" state,
+ * row-by-row produces consistent results - each row sees the "before" state,
  * not the partial in-flight state of preceding rows in the same batch.
  *
- * If a statement legitimately needs sequential balance dependence (rare —
+ * If a statement legitimately needs sequential balance dependence (rare -
  * usually each row clears a distinct payable / receivable), the operator
  * commits in batches: parse → review → commit subset → re-upload remaining.
  */
@@ -177,7 +177,7 @@ export class BankIngestionService {
    * Reject an upload booked onto an inactive statement account (methodology
    * §3.5 / дополнение §1.4). Closed accounts are flagged inactive and kept so
    * existing postings keep their reference, but new statements must not land
-   * on them. Only blocks when the account is registered AND inactive — an
+   * on them. Only blocks when the account is registered AND inactive - an
    * unregistered number is out of scope here (the upload selector only offers
    * registered active accounts; this is the server-side backstop).
    */
@@ -256,7 +256,7 @@ export class BankIngestionService {
         ? new Types.ObjectId(args.periodId)
         : args.periodId;
 
-    // Fail fast on a locked period — before creating a job or returning.
+    // Fail fast on a locked period - before creating a job or returning.
     await this.periods.assertWritable(orgId, periodId);
     await this.assertStatementAccountActive(orgId, args.statementAccountNumber);
 
@@ -294,7 +294,7 @@ export class BankIngestionService {
   /**
    * Background body for startIngestion. Parses + creates drafts, then writes
    * the outcome onto the job: `completed` with the summary, or `failed` with a
-   * reason. Never throws to the caller — startIngestion fired this without
+   * reason. Never throws to the caller - startIngestion fired this without
    * awaiting.
    */
   private async runIngestion(
@@ -376,12 +376,12 @@ export class BankIngestionService {
 
   /**
    * Shared core: parse the file and create a draft per row. No period
-   * validation, no logging, no job bookkeeping — those belong to the callers
+   * validation, no logging, no job bookkeeping - those belong to the callers
    * (ingestFromFile for the synchronous path, runIngestion for the async one).
    *
    * Loads the org profile ONCE here (not per row) to build the internal-contour
-   * context — the org's own ИНН, its own accounts, and each account's NSBU
-   * ledger account — then hands the same immutable context to every row.
+   * context - the org's own ИНН, its own accounts, and each account's NSBU
+   * ledger account - then hands the same immutable context to every row.
    */
   private async parseAndCreateDrafts(
     orgId: Types.ObjectId,
@@ -443,7 +443,7 @@ export class BankIngestionService {
    * Resolve the internal-contour context from the org profile (bank ТЗ §1).
    *
    * Validates that the chosen statement account is actually one of the org's
-   * registered accounts — a statement can only be attributed to an account the
+   * registered accounts - a statement can only be attributed to an account the
    * org owns. Throws a 4xx otherwise so the upload fails clearly rather than
    * silently posting against an unknown account.
    *
@@ -492,16 +492,16 @@ export class BankIngestionService {
    * Enriched draft listing for the bank-preview screen (bank ТЗ §7).
    *
    * Each draft is returned with server-derived readiness flags (methodology
-   * дополнение §1.3 — the green/yellow/red traffic light is replaced by an
+   * дополнение §1.3 - the green/yellow/red traffic light is replaced by an
    * explicit "commit-ready" signal + soft flags the operator selects against):
-   *   - needsAccount            — a line carries the placeholder '000'; the
+   *   - needsAccount            - a line carries the placeholder '000'; the
    *                               operator must pick the record account.
-   *   - needsDocument           — reserved for the settlement-document epic
+   *   - needsDocument           - reserved for the settlement-document epic
    *                               (§1.2); always false until that ships.
-   *   - autoCreatedCounterparty — the counterparty was auto-created from a bank
+   *   - autoCreatedCounterparty - the counterparty was auto-created from a bank
    *                               row and hasn't been verified (was "yellow").
    *                               Does NOT block commit.
-   *   - commitReady             — !needsAccount && !needsDocument. Rows that are
+   *   - commitReady             - !needsAccount && !needsDocument. Rows that are
    *                               commit-ready are pre-selected in the preview;
    *                               the operator ticks/unticks and posts the
    *                               selected set.
@@ -587,7 +587,7 @@ export class BankIngestionService {
     );
 
     // The org's settlement depth decides which document kind external rows
-    // must gash by (methodology §7.1: contract or invoice — a document is
+    // must gash by (methodology §7.1: contract or invoice - a document is
     // always required; the counterparty is only the base cut). Loaded once.
     const profile = await this.profileModel
       .findOne({ organizationId: orgId })
@@ -657,12 +657,12 @@ export class BankIngestionService {
       let reason = '';
       if (needsAccount) {
         reason = isInternalTransfer
-          ? 'Internal transfer — map the account on both own accounts before posting'
-          : 'Unrecognized treasury payment — pick the record account before posting';
+          ? 'Internal transfer - map the account on both own accounts before posting'
+          : 'Unrecognized treasury payment - pick the record account before posting';
       } else if (needsDocument) {
         reason = 'Attach the settlement document (contract/invoice) before posting';
       } else if (autoCreatedCounterparty) {
-        reason = 'Counterparty auto-created from this statement — verify';
+        reason = 'Counterparty auto-created from this statement - verify';
       } else if (isInternalTransfer) {
         reason = 'Internal transfer between own accounts';
       }
@@ -749,7 +749,7 @@ export class BankIngestionService {
 
     // Materialize AccountBalance rows for every key the committed batch
     // touched. Without this, the journal entries are stored but
-    // downstream balance queries don't see them — which is exactly the
+    // downstream balance queries don't see them - which is exactly the
     // "spine proves end-to-end" claim §9 makes for the bank engine.
     const rollup = await this.balanceRollup.rollupForEntries(committedEntries);
 
@@ -866,7 +866,7 @@ export class BankIngestionService {
       }
     }
 
-    // Apply patch — entry first, then lines.
+    // Apply patch - entry first, then lines.
     if (args.patch.description !== undefined) {
       entry.description = args.patch.description.substring(0, 1990);
       await entry.save();
@@ -885,7 +885,7 @@ export class BankIngestionService {
       throw new BadRequestException({
         error: 'NO_RECORD_LINE',
         message:
-          'Could not identify the record-side line on this draft — entry may have been hand-edited into an unsupported shape',
+          'Could not identify the record-side line on this draft - entry may have been hand-edited into an unsupported shape',
       });
     }
 
@@ -909,7 +909,7 @@ export class BankIngestionService {
       } else {
         // No identifiable record leg (e.g. an internal transfer, which has no
         // counterparty by definition). Setting a counterparty here is not a
-        // supported operation — reject rather than silently mis-stamp a bank
+        // supported operation - reject rather than silently mis-stamp a bank
         // leg.
         throw new BadRequestException({
           error: 'NO_RECORD_LINE',
@@ -922,7 +922,7 @@ export class BankIngestionService {
     // Settlement documents (§6.3 / §7.2). Attaching document(s) rebuilds the
     // record leg: one document settles the whole payment; several split it
     // (operator-entered amounts that must sum to the payment). The org-side
-    // (5110) leg is never touched — only the record leg is re-expressed as one
+    // (5110) leg is never touched - only the record leg is re-expressed as one
     // line per document, each tagged with its document so the per-document
     // running-balance search (getDocumentPosition) can narrow on it.
     if (args.patch.documents !== undefined) {
@@ -1071,12 +1071,12 @@ export class BankIngestionService {
   }): Promise<BankPreviewColor> {
     const { orgId, periodId, uploadId, row, actor, contour } = args;
 
-    // 0. Direction first — both the contour branch and the standard path need it.
+    // 0. Direction first - both the contour branch and the standard path need it.
     const direction = this.deriveDirection(row);
     if (!direction) {
       // The parser already warned; bail without creating a draft.
       throw new Error(
-        `Row ${row.sourceRow}: both debitOut and creditIn are zero — cannot derive direction`,
+        `Row ${row.sourceRow}: both debitOut and creditIn are zero - cannot derive direction`,
       );
     }
     const amount = direction === 'we_pay' ? row.debitOut : row.creditIn;
@@ -1089,7 +1089,7 @@ export class BankIngestionService {
     const orgSideAccount =
       contour.statementLedgerAccount ?? BANK_POSTING_ACCOUNTS.CURRENT_ACCOUNT;
 
-    // 0b. Internal-contour movement? (bank ТЗ §1) — checked BEFORE counterparty
+    // 0b. Internal-contour movement? (bank ТЗ §1) - checked BEFORE counterparty
     // resolution. Either the counterparty ИНН is the org's own, or the row's
     // «Счёт» is one of the org's own accounts → this is money moving between
     // two of the company's own accounts (internal transfer / fx purchase /
@@ -1155,7 +1155,7 @@ export class BankIngestionService {
       });
     } else {
       // No counterparty resolved (no ИНН, no account match) AND not treasury.
-      // RED — operator picks counterparty and account.
+      // RED - operator picks counterparty and account.
       recordAccount = UNRESOLVED_ACCOUNT;
       needsManual = true;
       color = 'red';
@@ -1186,12 +1186,12 @@ export class BankIngestionService {
     // raw statement account number, and it carries NO counterparty (a bank
     // account's analytic axis is the account, not who we paid). The record
     // leg (6010/4310/4010/6310, or a treasury record account) keeps the
-    // counterparty as its subconto, exactly as before — that is what the
+    // counterparty as its subconto, exactly as before - that is what the
     // per-counterparty running-balance check in §6 depends on.
     //
     // The statement account number is the org-side bank account's subconto
     // value; null only if no statement account was carried (shouldn't happen
-    // — the controller requires it — but stays defensive).
+    // - the controller requires it - but stays defensive).
     const orgSideSubconto = contour.statementAccountNumber || null;
 
     const debitIsOrgSide = direction !== 'we_pay';
@@ -1264,7 +1264,7 @@ export class BankIngestionService {
    *   - other leg     = the ledger account mapped to the row's «Счёт».
    *
    * FX purchase/sale is a special case: the FX-transit account 22613… maps to
-   * a 5730/5740 pair, resolved by direction (buying vs selling) — see
+   * a 5730/5740 pair, resolved by direction (buying vs selling) - see
    * pickContourOtherAccount.
    *
    * Sides follow direction: on a debit-out (sums leaving the statement
@@ -1301,7 +1301,7 @@ export class BankIngestionService {
 
     const otherAccount = this.pickContourOtherAccount(row, direction, contour);
 
-    // RED when we couldn't determine one of the legs — operator fixes it.
+    // RED when we couldn't determine one of the legs - operator fixes it.
     const hasUnresolved =
       orgSideAccount === UNRESOLVED_ACCOUNT ||
       otherAccount === UNRESOLVED_ACCOUNT;
@@ -1325,7 +1325,7 @@ export class BankIngestionService {
     const creditAccount = direction === 'we_pay' ? orgSideAccount : otherAccount;
 
     // Subconto reshape (methodology §3): both legs are bank accounts, so each
-    // leg's subconto is its OWN raw account number — never a counterparty
+    // leg's subconto is its OWN raw account number - never a counterparty
     // (internal transfers have none). The org-side leg's number is the
     // statement account; the other leg's number is the «Счёт» field (which,
     // for an internal-contour row, is the company's second own account).
@@ -1369,7 +1369,7 @@ export class BankIngestionService {
    *
    * Normal case: the row's «Счёт» is a registered own account → use its mapped
    * ledger account. FX special case: when that mapped account is the FX-transit
-   * account (5730/5740 pair), pick by direction — buying fx (sums leaving,
+   * account (5730/5740 pair), pick by direction - buying fx (sums leaving,
    * we_pay) → 5730 «Приобретение», selling (we_receive) → 5740 «Реализация».
    *
    * When the «Счёт» isn't a registered own account (e.g. the row landed in the
@@ -1402,7 +1402,7 @@ export class BankIngestionService {
     row: ParsedBankRow,
     side: 'debit' | 'credit',
   ): string {
-    return `Bank row ${row.sourceRow} — internal transfer [${side}]`;
+    return `Bank row ${row.sourceRow} - internal transfer [${side}]`;
   }
 
   private deriveDirection(row: ParsedBankRow): 'we_pay' | 'we_receive' | null {
@@ -1415,7 +1415,7 @@ export class BankIngestionService {
 
   /**
    * Re-derive the settlement account for a payment leg against ONE document
-   * (methodology §6.3 — "гасим по документу"). Mirrors the counterparty-level
+   * (methodology §6.3 - "гасим по документу"). Mirrors the counterparty-level
    * hasOpenPayable / hasOpenReceivable logic but scopes the position to the
    * single document via getDocumentPosition:
    *   - pay side (Дт): the document has an open payable (credit-heavy across
@@ -1423,9 +1423,9 @@ export class BankIngestionService {
    *   - receive side (Кт): open receivable (debit-heavy across 4010+6310) →
    *     4010; otherwise advance received → 6310.
    * A brand-new document has a zero position, so a payment against it lands as
-   * an advance — exactly Filipp's per-document rule. Non-settlement accounts
+   * an advance - exactly Filipp's per-document rule. Non-settlement accounts
    * (treasury record accounts, or an account the operator picked by hand) are
-   * left untouched — only the standard Scenario A/B accounts are re-derived.
+   * left untouched - only the standard Scenario A/B accounts are re-derived.
    */
   private async deriveDocumentSettlementAccount(args: {
     orgId: Types.ObjectId;
@@ -1485,7 +1485,7 @@ export class BankIngestionService {
     const { orgId, periodId, counterpartyId, direction } = args;
 
     if (direction === 'we_pay') {
-      // Scenario A — bank ТЗ §6.
+      // Scenario A - bank ТЗ §6.
       const hasPayable = await this.runningBalance.hasOpenPayable({
         organizationId: orgId,
         periodId,
@@ -1514,7 +1514,7 @@ export class BankIngestionService {
     treasuryMatchedOn: string | null,
     side: 'debit' | 'credit',
   ): string {
-    const base = `Bank row ${row.sourceRow} — ${row.counterpartyName}`;
+    const base = `Bank row ${row.sourceRow} - ${row.counterpartyName}`;
     if (treasuryMatchedOn) {
       return `${base} (treasury rule matched on ${treasuryMatchedOn}) [${side}]`;
     }
@@ -1525,7 +1525,7 @@ export class BankIngestionService {
 
   /**
    * Aggregate every bank-statement entry in a period into one row per upload
-   * batch. There is no separate "upload" collection — each upload's identity
+   * batch. There is no separate "upload" collection - each upload's identity
    * lives only in the `sourceRef` (`bank:{uploadId}:{rowIndex}`), so we group
    * by the embedded uploadId here.
    *
@@ -1534,7 +1534,7 @@ export class BankIngestionService {
    * left to fix), and the earliest createdAt as the batch's "uploaded at".
    *
    * This is what makes a batch reachable again after the operator closes the
-   * preview tab — the uploadId is otherwise lost (it only ever lived in the
+   * preview tab - the uploadId is otherwise lost (it only ever lived in the
    * preview URL).
    */
   async listBatchesForPeriod(args: {

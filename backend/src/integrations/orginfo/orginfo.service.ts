@@ -4,7 +4,7 @@
  * Public API of the Orginfo integration: look up an organization by INN,
  * cache-first. Serves from the org_info_cache collection and only calls the
  * provider on a miss or when the cached row is older than the configured TTL.
- * Provider-agnostic — depends on the ORG_INFO_PROVIDER token, not iHamkor
+ * Provider-agnostic - depends on the ORG_INFO_PROVIDER token, not iHamkor
  * directly.
  */
 import { Inject, Injectable } from '@nestjs/common';
@@ -68,7 +68,7 @@ export class OrginfoService {
     }
 
     if (!info) {
-      // Provider had nothing (or is unconfigured) — fall back to any cached row.
+      // Provider had nothing (or is unconfigured) - fall back to any cached row.
       const cached = await this.cacheModel.findOne({ inn: normalized });
       return cached?.data ?? null;
     }

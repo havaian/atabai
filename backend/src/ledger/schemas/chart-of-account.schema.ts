@@ -7,7 +7,7 @@ export type ChartOfAccountDocument = HydratedDocument<ChartOfAccount>;
 export type ChartOfAccountModel = Model<ChartOfAccount>;
 
 /**
- * NSBU chart of accounts row — per-organization. Seeded from the canonical
+ * NSBU chart of accounts row - per-organization. Seeded from the canonical
  * 1C "УЗ" export (507 accounts) but each org may carry custom sub-account
  * codes that 1C lets users add (e.g. 0130.2 "Рабочие машины и оборудование").
  *
@@ -15,11 +15,11 @@ export type ChartOfAccountModel = Model<ChartOfAccount>;
  * doc §4.3 and the analyst's `Chart of accounts.xlsx`):
  *   Код счета | Наименование счета | Субконто 1/2/3 | Вид | Вал. | Кол. | Подр. | НУ | Заб. | Быстрый выбор
  *
- * The Вид column carries the type+sign semantics — see constants/account-vid.ts
+ * The Вид column carries the type+sign semantics - see constants/account-vid.ts
  * for the А/П/КА/КП/Т enum and the `naturalSide` / `reducesParent` helpers
  * that retire the legacy per-row `isNegative` flag.
  *
- * Subconto dimensions live as named strings (`subconto1Name`, etc.) — the
+ * Subconto dimensions live as named strings (`subconto1Name`, etc.) - the
  * NAME of the dimension (e.g. "Контрагенты"), not the value. Values live on
  * AccountBalance / JournalEntryLine. Service code SHOULD reference the
  * constants in `subconto-dimensions.ts` rather than literal strings.
@@ -43,7 +43,7 @@ export class ChartOfAccount {
   organizationId!: Types.ObjectId;
 
   // Hierarchical code (e.g. "0100", "0130", "0130.2"). The dot suffix encodes
-  // parentage — string-prefix matching gives the hierarchy.
+  // parentage - string-prefix matching gives the hierarchy.
   @Prop({ type: String, required: true, trim: true })
   code!: string;
 
@@ -52,7 +52,7 @@ export class ChartOfAccount {
 
   // Subconto dimension NAMES declared on this account (e.g. "Контрагенты",
   // "Договоры", "Банковские счета"). At most three slots per the 1C model;
-  // unused slots are null. Order matters — slot 1 vs slot 2 distinguishes
+  // unused slots are null. Order matters - slot 1 vs slot 2 distinguishes
   // primary from secondary analytics on a balance row.
   @Prop({ type: String, default: null, trim: true })
   subconto1Name!: string | null;
@@ -75,12 +75,12 @@ export class ChartOfAccount {
   @Prop({ type: Boolean, default: false }) isTaxAccount!: boolean;
   @Prop({ type: Boolean, default: false }) isOffBalance!: boolean;
 
-  // 1C "Быстрый выбор" — handy for fuzzy account lookup in the UI (e.g. "01202"
+  // 1C "Быстрый выбор" - handy for fuzzy account lookup in the UI (e.g. "01202"
   // for "0120.2"). Dots stripped relative to `code`.
   @Prop({ type: String, default: null, trim: true })
   quickPick!: string | null;
 
-  // True for accounts that exist in our seed but are not enabled for the org —
+  // True for accounts that exist in our seed but are not enabled for the org -
   // lets us preserve the canonical NSBU template while a client only uses a
   // subset of the chart.
   @Prop({ type: Boolean, default: true, index: true })
@@ -93,7 +93,7 @@ export const ChartOfAccountSchema = SchemaFactory.createForClass(ChartOfAccount)
 // codes (every NSBU shop has a "0100").
 ChartOfAccountSchema.index({ organizationId: 1, code: 1 }, { unique: true });
 
-// Fuzzy quick-pick search — case-insensitive prefix queries.
+// Fuzzy quick-pick search - case-insensitive prefix queries.
 ChartOfAccountSchema.index({ organizationId: 1, quickPick: 1 });
 
 // Vid-grouped scans (e.g. "give me all contra-active accounts in this org" for

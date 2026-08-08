@@ -25,7 +25,7 @@ export interface ResolveTreasuryResult {
 }
 
 /**
- * Treasury record-account resolver — bank ТЗ §4.
+ * Treasury record-account resolver - bank ТЗ §4.
  *
  * Search order (deterministic):
  *   1. EXACT rules first, ordered by priority desc. For each rule, find an
@@ -36,7 +36,7 @@ export interface ResolveTreasuryResult {
  *      as a substring match too (lowercased on both sides). Reserved for
  *      ambiguous "wording-based" rules the operator adds for edge cases.
  *
- * First match wins. Returns `null` when no rule fires — the caller paints
+ * First match wins. Returns `null` when no rule fires - the caller paints
  * the row RED in the preview UI and the operator picks the record account
  * manually (and can click "Добавить в правила" to teach the next pass).
  */
@@ -73,7 +73,7 @@ export class TreasuryResolverService {
   }
 
   /**
-   * Persist a new rule — the "Добавить в правила" learning loop from bank ТЗ §7.
+   * Persist a new rule - the "Добавить в правила" learning loop from bank ТЗ §7.
    *
    * Set `learnedFromBankReview: true` when the call originated from the
    * bank-preview "fix RED row" flow, false for operator-curated rules added
@@ -81,7 +81,7 @@ export class TreasuryResolverService {
    *
    * Conflicts: the (org, kind, pattern) unique index rejects duplicates.
    * Surface this as a clean 409 so the UI can fall through to "this rule
-   * already exists — edit its priority or record account instead."
+   * already exists - edit its priority or record account instead."
    */
   async createRule(args: {
     organizationId: Types.ObjectId | string;

@@ -54,7 +54,7 @@ import AdminAccess from '@/views/admin/AdminAccess.vue'
 // ─── i18n URL routing ─────────────────────────────────────────────────────────
 // All non-prefixed paths are auto-redirected to a prefixed equivalent by the
 // guard below. The list of valid locales must stay in sync with utils/i18n.js
-// — kept duplicated rather than importing because the router needs it during
+// - kept duplicated rather than importing because the router needs it during
 // route definition (before i18n is fully initialized).
 const SUPPORTED_LOCALES = ['ru', 'en', 'uz']
 const DEFAULT_LOCALE = 'ru'
@@ -76,7 +76,7 @@ function getBootstrapLocale() {
         const stored = localStorage.getItem(LOCALE_STORAGE_KEY)
         if (stored && SUPPORTED_LOCALES.includes(stored)) return stored
     } catch (_) {
-        // localStorage unavailable — fall through to default
+        // localStorage unavailable - fall through to default
     }
     return DEFAULT_LOCALE
 }
@@ -158,7 +158,7 @@ const appChildren = [
     },
 
     // ─── Ledger (per org / period) ─────────────────────────────────────────
-    // All org-scoped — guarded by requiresOrg below.
+    // All org-scoped - guarded by requiresOrg below.
     {
         path: 'ledger/periods',
         name: 'Periods',
@@ -339,7 +339,7 @@ const routes = [
                 children: adminChildren
             },
 
-            // Legacy redirects inside the locale tree — kept so bookmarks of
+            // Legacy redirects inside the locale tree - kept so bookmarks of
             // the pre-i18n URLs (/dashboard, /upload) still resolve after
             // the locale guard prepends the prefix.
             {
@@ -403,7 +403,7 @@ function updateMetaDescription(description) {
  * on the language they last chose) with DEFAULT_LOCALE as the fallback.
  *
  * This is what makes every existing `router.push('/app/dashboard')` and
- * `<router-link to="/app/foo">` keep working without modification — they
+ * `<router-link to="/app/foo">` keep working without modification - they
  * land on the catch-all and get rewritten transparently.
  */
 router.beforeEach((to, from, next) => {
@@ -412,7 +412,7 @@ router.beforeEach((to, from, next) => {
         // Build the prefixed path WITHOUT query/hash, and pass query/hash
         // through as separate fields. Passing a single string to next()
         // works for path-only redirects but is fragile when there's a
-        // query string — the parser doesn't always reattach it. Using the
+        // query string - the parser doesn't always reattach it. Using the
         // structured form guarantees `?template=balanceSheet` survives.
         const prefixed = to.path === '/' ? `/${locale}/` : `/${locale}${to.path}`
         return next({
@@ -431,7 +431,7 @@ router.beforeEach((to, from, next) => {
  * Whenever the URL's locale differs from i18n's current locale, switch
  * i18n (and persist the choice to localStorage via setLocale). This is
  * what allows direct visits to /en/app/dashboard to render in English
- * even when localStorage said "ru" — the URL is the source of truth
+ * even when localStorage said "ru" - the URL is the source of truth
  * during a session.
  */
 router.beforeEach(async (to, from, next) => {
@@ -464,7 +464,7 @@ router.beforeEach(async (to, from, next) => {
 
 /**
  * Guard pass 3: auth gating. Kept separate from pass 1 (locale enforcement)
- * because the locale guard MUST run first — if we redirected to /login from
+ * because the locale guard MUST run first - if we redirected to /login from
  * a path without a locale prefix, the redirect target would itself be
  * unprefixed and bounce back through pass 1 anyway.
  */
@@ -496,7 +496,7 @@ router.beforeEach(async (to, from, next) => {
  *
  *   - Just-logged-in users with no orgs and no pending invites are funneled
  *     into the onboarding wizard. Architecture doc §8.3: "IA shifts from
- *     file-centric to org+period-centric" — an empty workspace IS the
+ *     file-centric to org+period-centric" - an empty workspace IS the
  *     onboarding workspace.
  *   - Routes marked `requiresOrg: true` redirect to /app/organizations when
  *     the user has no active org selected.
@@ -512,7 +512,7 @@ router.beforeEach(async (to, from, next) => {
     if (!to.path.includes('/app/')) return next()
 
     const orgsStore = useOrganizationsStore()
-    // Best-effort init — failures (network, 401 during refresh) shouldn't
+    // Best-effort init - failures (network, 401 during refresh) shouldn't
     // block routing entirely. The store surfaces the error; the user sees it.
     try {
         await orgsStore.ensureInitialized()
@@ -530,7 +530,7 @@ router.beforeEach(async (to, from, next) => {
     }
 
     // requiresOrg routes need an active org. List + onboarding are exempt by
-    // design — they're how the user GETS an active org in the first place.
+    // design - they're how the user GETS an active org in the first place.
     if (to.meta?.requiresOrg && !orgsStore.currentOrgId && !onOnboarding && !onOrgsList) {
         return next(`/${locale}/app/organizations`)
     }

@@ -14,7 +14,7 @@ export const LINE_DIRECTIONS: readonly LineDirection[] = ['debit', 'credit'];
 
 /**
  * One leg of a double-entry posting. Lives in its own collection rather than
- * embedded on JournalEntry — see [[journal-entry]] for the rationale.
+ * embedded on JournalEntry - see [[journal-entry]] for the rationale.
  *
  * The subconto/counterparty fields mirror those on AccountBalance so a
  * rollup is a straight group-by-(account, subconto1/2/3) aggregation with no
@@ -43,14 +43,14 @@ export class JournalEntryLine {
   })
   entryId!: Types.ObjectId;
 
-  // Denormalized from JournalEntry — copied at create time, never changed.
+  // Denormalized from JournalEntry - copied at create time, never changed.
   @Prop({ type: Types.ObjectId, ref: 'Organization', required: true, index: true })
   organizationId!: Types.ObjectId;
 
   @Prop({ type: Types.ObjectId, ref: 'ReportingPeriod', required: true, index: true })
   periodId!: Types.ObjectId;
 
-  // Business date — usually === JournalEntry.date but explicit for line-level
+  // Business date - usually === JournalEntry.date but explicit for line-level
   // aggregations that scan without joining the parent.
   @Prop({ type: Date, required: true, index: true })
   date!: Date;
@@ -91,7 +91,7 @@ export class JournalEntryLine {
 
   // ─── Settlement document (methodology §6.3, §7) ────────────────────────────
   // Which contract/invoice this leg settles. Filipp: settlement is strict per
-  // document — "да, строго по тому документу по которому платеж/операция" — so
+  // document - "да, строго по тому документу по которому платеж/операция" - so
   // the document the leg gashes is recorded on the leg, and the running-balance
   // search narrows to it. Null on legs with no document (e.g. bank-account
   // legs, internal transfers). `documentType` says which collection
@@ -110,14 +110,14 @@ export class JournalEntryLine {
   @Prop({ type: MongooseSchema.Types.Decimal128, default: null })
   quantity!: Types.Decimal128 | null;
 
-  // ─── Free-text description (per line — separate from entry description) ────
+  // ─── Free-text description (per line - separate from entry description) ────
   @Prop({ type: String, default: '', trim: true, maxlength: 1000 })
   description!: string;
 }
 
 export const JournalEntryLineSchema = SchemaFactory.createForClass(JournalEntryLine);
 
-// THE rollup index — exactly the group key for recomputing AccountBalance.
+// THE rollup index - exactly the group key for recomputing AccountBalance.
 // Scanned with $match on (org, period) and $group on the rest.
 //
 // MIGRATION NOTE: the previous line_rollup_key included `layer`. As with
@@ -135,7 +135,7 @@ JournalEntryLineSchema.index(
   { name: 'line_rollup_key' },
 );
 
-// Bank engine: "all lines on account 6010 for counterparty X" — used during
+// Bank engine: "all lines on account 6010 for counterparty X" - used during
 // the running-balance check to decide between payable vs. advance.
 JournalEntryLineSchema.index(
   { organizationId: 1, periodId: 1, accountCode: 1, counterpartyId: 1, date: 1 },

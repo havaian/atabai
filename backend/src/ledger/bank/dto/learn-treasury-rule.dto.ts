@@ -15,7 +15,7 @@ import {
 } from '../../schemas/treasury-rule.schema';
 
 /**
- * Payload for the bank-engine learning loop (bank ТЗ §7 — "Добавить в правила").
+ * Payload for the bank-engine learning loop (bank ТЗ §7 - "Добавить в правила").
  *
  * The operator fixed a RED treasury draft manually; this endpoint
  * teaches the engine to match the same pattern automatically next time.

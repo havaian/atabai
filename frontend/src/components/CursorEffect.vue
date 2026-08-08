@@ -1,12 +1,12 @@
 <!-- frontend/src/components/CursorEffect.vue -->
-<!-- Teleport to body — renders above everything, pointer-events: none -->
+<!-- Teleport to body - renders above everything, pointer-events: none -->
 
 <template>
     <Teleport to="body">
         <!-- Canvas for wave ripples (desktop mousemove + mobile touch) -->
         <canvas ref="canvasEl" class="cursor-canvas" aria-hidden="true" />
 
-        <!-- Custom cursor — desktop only, hidden on touch devices -->
+        <!-- Custom cursor - desktop only, hidden on touch devices -->
         <template v-if="!isTouch">
             <div class="cursor-dot" ref="dotEl" aria-hidden="true" />
             <div class="cursor-ring" ref="ringEl" aria-hidden="true"
@@ -86,7 +86,7 @@ function drawRipples() {
         rp.r += rp.speed
         rp.alpha *= 0.92
 
-        // White ripples — mix-blend-mode: difference on canvas inverts bg
+        // White ripples - mix-blend-mode: difference on canvas inverts bg
         ctx.beginPath()
         ctx.arc(rp.x, rp.y, rp.r, 0, Math.PI * 2)
         ctx.strokeStyle = `rgba(149, 0, 255, ${rp.alpha})`
@@ -191,7 +191,7 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-/* Canvas — white ripples with difference blend = always inverts bg */
+/* Canvas - white ripples with difference blend = always inverts bg */
 .cursor-canvas {
     position: fixed;
     inset: 0;
@@ -202,7 +202,7 @@ onUnmounted(() => {
     mix-blend-mode: difference;
 }
 
-/* Dot — solid white, difference blends against whatever is below */
+/* Dot - solid white, difference blends against whatever is below */
 .cursor-dot {
     position: fixed;
     top: 0;
@@ -216,7 +216,7 @@ onUnmounted(() => {
     mix-blend-mode: difference;
 }
 
-/* Ring — white outline, difference blend */
+/* Ring - white outline, difference blend */
 .cursor-ring {
     position: fixed;
     top: 0;

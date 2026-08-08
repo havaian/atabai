@@ -11,15 +11,15 @@ import { CreateOpeningBalancesDto } from './dto/create-opening-balances.dto';
 import { OpeningBalancesService } from './opening-balances.service';
 
 /**
- * Opening-balance entry surface (methodology §6.2 — «ввод начальных остатков»).
+ * Opening-balance entry surface (methodology §6.2 - «ввод начальных остатков»).
  *
- *   POST .../opening-balances — post a batch of per-document opening balances
+ *   POST .../opening-balances - post a batch of per-document opening balances
  *                               against the period in the path (one balanced
  *                               `opening_balance` entry, rolled up immediately).
- *   GET  .../opening-balances — list the opening-balance entries already posted
+ *   GET  .../opening-balances - list the opening-balance entries already posted
  *                               in the period, with their counterparty legs.
  *
- * Capability gate: `nsbu.base.write` to post, `nsbu.base.read` to list —
+ * Capability gate: `nsbu.base.write` to post, `nsbu.base.read` to list -
  * identical to the bank and invoice engines. Admin implies all. Shares the
  * period-scoped prefix with the read-only balances surface; the sub-paths
  * ('balances' vs 'opening-balances') keep the two controllers distinct.

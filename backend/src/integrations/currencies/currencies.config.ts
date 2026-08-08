@@ -26,7 +26,7 @@ export interface CurrenciesConfig {
   cronTimezone: string;
   /**
    * Master switch for the scheduled refresh. Off by default so importing this
-   * module never starts fetching on its own — turn it on once the pipeline
+   * module never starts fetching on its own - turn it on once the pipeline
    * placement is decided.
    */
   cronEnabled: boolean;

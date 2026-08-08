@@ -9,7 +9,7 @@ import { UsersService } from './users.service';
 /**
  * Owns the User Mongoose model + the /api/users HTTP surface.
  * AuthModule is forwardRef'd because Auth depends on Users (for JwtAuthGuard)
- * and Users depends on Auth (for that guard's symbol) — classic circular.
+ * and Users depends on Auth (for that guard's symbol) - classic circular.
  */
 @Module({
   imports: [

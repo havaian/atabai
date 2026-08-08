@@ -1,5 +1,5 @@
 /**
- * Subconto dimension names — the analytical axes declared on a ChartOfAccount
+ * Subconto dimension names - the analytical axes declared on a ChartOfAccount
  * row (Субконто 1/2/3 column in the 1C export).
  *
  * Reference distribution (507-account NSBU chart per architecture doc §4.3):
@@ -8,7 +8,7 @@
  *   - 40 accounts carry BUDGET_PAYMENT_TYPE
  *
  * The bank engine's per-counterparty running-balance logic (architecture doc
- * §4.2) is what makes the subconto axis mandatory rather than optional —
+ * §4.2) is what makes the subconto axis mandatory rather than optional -
  * "account balance" alone cannot answer "do we owe this supplier?".
  *
  * The list grows as new dimensions surface in real client charts. Schemas

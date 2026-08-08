@@ -7,7 +7,7 @@ import type { Request } from 'express';
  * Why a header (vs. a URL segment)?
  *   - The legacy /api/files/* routes don't carry an :orgId. Re-shaping them
  *     to /organizations/:orgId/files/* would break every existing frontend
- *     call site. The header is additive — pre-org clients send nothing,
+ *     call site. The header is additive - pre-org clients send nothing,
  *     org-aware clients send the active org id.
  *   - The frontend orgs store already exposes `currentOrgId`; an axios
  *     interceptor attaches it as `X-Active-Org-Id` on every request.

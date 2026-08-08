@@ -40,7 +40,7 @@ services:
     command: redis-server --requirepass ${REDIS_PASSWORD:-password} --appendonly yes
     volumes:
       - redis_data:/data
-    # No `ports:` — redis is only reachable from inside the compose network.
+    # No `ports:` - redis is only reachable from inside the compose network.
     # To connect from the host for debugging, run a one-shot client in the
     # same network:
     #   docker compose exec redis redis-cli -a "$REDIS_PASSWORD"
@@ -85,7 +85,7 @@ services:
     networks:
       - atabai-network
     healthcheck:
-      # Hit the same port the app actually listens on — BACKEND_PORT from .env.
+      # Hit the same port the app actually listens on - BACKEND_PORT from .env.
       # The previous value (3000) was hard-coded and didn't match the .env's
       # 7770, which is why this container kept reporting "unhealthy" even when
       # it was serving fine. Using wget because curl isn't in the node:alpine

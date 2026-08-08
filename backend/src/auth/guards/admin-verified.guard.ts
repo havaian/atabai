@@ -17,8 +17,8 @@ import { TwoFactorService } from '../two-factor.service';
  * Ports the legacy `requireAdminVerified` middleware verbatim, including the
  * error codes the frontend admin store keys off:
  *
- *   - 2FA_REQUIRED_SETUP — admin hasn't enrolled yet
- *   - 2FA_REQUIRED_VERIFY — enrolled but no/expired/mismatched session
+ *   - 2FA_REQUIRED_SETUP - admin hasn't enrolled yet
+ *   - 2FA_REQUIRED_VERIFY - enrolled but no/expired/mismatched session
  *
  * The session id arrives in the `X-Admin-Session` header.
  */

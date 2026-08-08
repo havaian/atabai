@@ -149,7 +149,7 @@ function openUser(userId) {
 }
 
 function formatDate(d) {
-    if (!d) return '—'
+    if (!d) return '-'
     // Map vue-i18n locale → Intl locale tag
     const localeMap = { ru: 'ru-RU', en: 'en-GB', uz: 'uz-UZ' }
     return new Date(d).toLocaleString(localeMap[locale.value] || 'ru-RU', {

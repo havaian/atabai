@@ -18,7 +18,7 @@ import { PublicLocalesController } from './public-locales.controller';
 import { LocaleKey, LocaleKeySchema } from './schemas/locale-key.schema';
 
 /**
- * Admin domain — gathers admin-only HTTP surface (users, whitelist, locales)
+ * Admin domain - gathers admin-only HTTP surface (users, whitelist, locales)
  * and the public locale bundle endpoints. AuthModule supplies the guards we
  * apply to every controller.
  *
@@ -62,7 +62,7 @@ export class AdminModule implements OnApplicationBootstrap {
   constructor(private readonly localeSeed: LocaleSeedService) {}
 
   /**
-   * Idempotent startup seed — locale keys. Best-effort: errors log but don't
+   * Idempotent startup seed - locale keys. Best-effort: errors log but don't
    * block startup. (The mapping seed was removed with the mappings module.)
    */
   async onApplicationBootstrap(): Promise<void> {

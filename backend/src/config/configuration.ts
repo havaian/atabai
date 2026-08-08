@@ -3,7 +3,7 @@ import { z } from 'zod';
 /**
  * Strongly-typed application configuration.
  *
- * Env vars are validated via Zod at boot — invalid envs fail-fast with a useful
+ * Env vars are validated via Zod at boot - invalid envs fail-fast with a useful
  * error rather than crashing later from `undefined`. The resulting shape is
  * registered with @nestjs/config and exposed as `AppConfig`.
  *
@@ -223,7 +223,7 @@ function buildMongoUri(env: EnvVars): string {
 
 function buildRedisUri(env: EnvVars): string {
   if (env.REDIS_URI) return env.REDIS_URI;
-  // Redis URLs use the password-only form (`:password@`) — no username before
+  // Redis URLs use the password-only form (`:password@`) - no username before
   // the colon, unlike MongoDB. ACL usernames go after `redis://` only when ACLs
   // are configured, which we don't use here.
   const auth = env.REDIS_PASSWORD ? `:${encodeURIComponent(env.REDIS_PASSWORD)}@` : '';

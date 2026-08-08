@@ -198,15 +198,15 @@
                     <h3 class="onboarding-review-title">{{ $t('onboarding.review.title') }}</h3>
                     <dl class="onboarding-review">
                         <dt>{{ $t('onboarding.fields.name') }}</dt>
-                        <dd>{{ form.name || '—' }}</dd>
+                        <dd>{{ form.name || '-' }}</dd>
                         <dt>{{ $t('onboarding.fields.legalName') }}</dt>
-                        <dd>{{ form.legalName || form.name || '—' }}</dd>
+                        <dd>{{ form.legalName || form.name || '-' }}</dd>
                         <dt>{{ $t('onboarding.fields.inn') }}</dt>
-                        <dd>{{ form.inn || '—' }}</dd>
+                        <dd>{{ form.inn || '-' }}</dd>
                         <dt>{{ $t('onboarding.fields.transitionDate') }}</dt>
-                        <dd>{{ form.transitionDate || '—' }}</dd>
+                        <dd>{{ form.transitionDate || '-' }}</dd>
                         <dt>{{ $t('onboarding.fields.firstReportingYear') }}</dt>
-                        <dd>{{ form.firstReportingYear || '—' }}</dd>
+                        <dd>{{ form.firstReportingYear || '-' }}</dd>
                         <dt>{{ $t('onboarding.fields.baseCurrency') }}</dt>
                         <dd>{{ form.baseCurrency || 'UZS' }}</dd>
                         <dt>{{ $t('onboarding.policy.taxRegime') }}</dt>

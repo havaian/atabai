@@ -3,8 +3,8 @@ import { HydratedDocument, Model, Types } from 'mongoose';
 
 export type ReportingPeriodKind =
   | 'opening'       // Zero-length anchor period at the transition date (architecture doc §7.3).
-  | 'comparative'   // The year prior to reporting — needs full statements per IFRS 1.
-  | 'reporting'     // The current period that triggered transition — full statements.
+  | 'comparative'   // The year prior to reporting - needs full statements per IFRS 1.
+  | 'reporting'     // The current period that triggered transition - full statements.
   | 'regular';      // Subsequent periods after first-time adoption.
 
 export const REPORTING_PERIOD_KINDS: readonly ReportingPeriodKind[] = [
@@ -24,7 +24,7 @@ export type ReportingPeriodDocument = HydratedDocument<ReportingPeriod>;
 export type ReportingPeriodModel = Model<ReportingPeriod>;
 
 /**
- * A keyed period dimension — architecture doc §7.3 calls this out as a "real
+ * A keyed period dimension - architecture doc §7.3 calls this out as a "real
  * dimension from day one." Two snapshots (start/end) can't express opening +
  * comparative + reporting, and retrofitting periods after balances and
  * adjustments are stacked on top is exactly the rewrite-twice risk the doc
@@ -32,11 +32,11 @@ export type ReportingPeriodModel = Model<ReportingPeriod>;
  *
  * Every AccountBalance, JournalEntry and Adjustment row is keyed by `periodId`.
  *
- * Opening periods are degenerate (startDate === endDate === transitionDate) —
+ * Opening periods are degenerate (startDate === endDate === transitionDate) -
  * modeled as same-day rather than as a distinct entity type so all the
  * period-keyed lookups stay uniform.
  *
- * Status is locked once the period is closed in IFRS terms — once locked, no
+ * Status is locked once the period is closed in IFRS terms - once locked, no
  * writes to NSBU_BASE / RECLASSIFICATION / ADJUSTMENT layers. Service-layer
  * rule, not schema-enforced (we still want admin/super_admin reopen paths).
  */
@@ -61,7 +61,7 @@ export class ReportingPeriod {
   @Prop({ type: String, enum: REPORTING_PERIOD_KINDS, required: true, index: true })
   kind!: ReportingPeriodKind;
 
-  // Human-readable label, e.g. "Q1 2026" or "Opening — 01.01.2025".
+  // Human-readable label, e.g. "Q1 2026" or "Opening - 01.01.2025".
   @Prop({ type: String, required: true, trim: true, maxlength: 100 })
   label!: string;
 
@@ -83,7 +83,7 @@ export class ReportingPeriod {
   })
   status!: ReportingPeriodStatus;
 
-  // When status transitioned to 'locked' — null while open.
+  // When status transitioned to 'locked' - null while open.
   @Prop({ type: Date, default: null })
   lockedAt!: Date | null;
 

@@ -35,15 +35,15 @@ type RequestWithMembership = Request & {
  * Org-scoped authorization, parallel to RolesGuard (architecture doc §7.6).
  *
  * Order of operations:
- *   1. Verify JwtAuthGuard ran (req.user populated) — else 401.
+ *   1. Verify JwtAuthGuard ran (req.user populated) - else 401.
  *   2. Resolve org id from :orgId / :organizationId / body.organizationId.
  *   3. super_admin: audit the access, attach a synthetic membership, allow.
- *   4. Find an active Membership for (orgId, userId) — else 403.
+ *   4. Find an active Membership for (orgId, userId) - else 403.
  *   5. Attach req.membership. If @RequireCapability(...) is present, allow
  *      when role === 'admin' OR the cap intersection is non-empty; else 403.
  *
  * Inline ownership checks (`org.createdBy.equals(user._id)`) are NOT
- * permitted anywhere in the codebase — they would re-couple authorization
+ * permitted anywhere in the codebase - they would re-couple authorization
  * to a single grantee shape and block the future Firm layer.
  */
 @Injectable()
@@ -166,7 +166,7 @@ export class OrgMembershipGuard implements CanActivate {
   /**
    * Synthetic, unsaved membership doc for the super_admin bypass path. Carries
    * admin role + full capability set so downstream `@CurrentMembership` users
-   * see a consistent shape. Never persisted — `.isNew` will be true if anyone
+   * see a consistent shape. Never persisted - `.isNew` will be true if anyone
    * needs to distinguish a real membership from a recovery-path one.
    */
   private syntheticSuperAdminMembership(orgId: string, user: UserDocument): MembershipDocument {

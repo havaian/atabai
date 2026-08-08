@@ -23,7 +23,7 @@ export type OrganizationProfileModel = Model<OrganizationProfile>;
  * One bank settlement account owned by the organization. Used by the bank
  * engine to identify whose statement is being uploaded (bank ТЗ §2). Some
  * banks encode movement direction by which of the org's accounts appears
- * in the row rather than by Dt/Cr — the engine must know our accounts to
+ * in the row rather than by Dt/Cr - the engine must know our accounts to
  * resolve that.
  */
 @Schema({ _id: false })
@@ -58,7 +58,7 @@ class OrgBankAccount {
 
   /**
    * Sub-account kept as its own field rather than baked into accountNumber
-   * (bank ТЗ / methodology §3.5 — "субсчёт лучше вести отдельным полем …
+   * (bank ТЗ / methodology §3.5 - "субсчёт лучше вести отдельным полем …
    * чтобы на последующих шагах было легче разделять"). Free-form for now;
    * the subconto epic decides how it maps onto the synthetic-account
    * subconto value. Null when the account has no sub-account.
@@ -67,7 +67,7 @@ class OrgBankAccount {
   subAccount!: string | null;
 
   /**
-   * Closed accounts are flagged inactive, never deleted (methodology §3.5 —
+   * Closed accounts are flagged inactive, never deleted (methodology §3.5 -
    * "закрытие счёта = пометка «неактивный» … запись не удаляется, старые
    * проводки сохраняют ссылку"). New postings must not be made against an
    * inactive account; existing postings keep referencing it. Defaults to
@@ -79,17 +79,17 @@ class OrgBankAccount {
 const OrgBankAccountSchema = SchemaFactory.createForClass(OrgBankAccount);
 
 /**
- * Accounting policy — the 6-block ruleset set at registration (methodology §9).
+ * Accounting policy - the 6-block ruleset set at registration (methodology §9).
  * Structure + chosen options only; the posting-logic effect of each block is
- * later work (§9: "Логика влияния каждого блока на проводки — отдельно,
+ * later work (§9: "Логика влияния каждого блока на проводки - отдельно,
  * позже"). Enums + defaults live in constants/accounting-policy.ts.
  *
- * Block 3 (accounting currency) is intentionally NOT duplicated here — the
+ * Block 3 (accounting currency) is intentionally NOT duplicated here - the
  * base reporting currency already lives on the profile as `baseCurrency`.
  */
 @Schema({ _id: false })
 class AccountingPolicy {
-  // Block 1 — taxes.
+  // Block 1 - taxes.
   @Prop({ type: String, enum: ALL_TAX_REGIMES, default: DEFAULT_ACCOUNTING_POLICY.taxRegime })
   taxRegime!: TaxRegime;
 
@@ -101,7 +101,7 @@ class AccountingPolicy {
   @Prop({ type: Number, default: DEFAULT_ACCOUNTING_POLICY.vatRate })
   vatRate!: number;
 
-  // Block 2 — inventory valuation.
+  // Block 2 - inventory valuation.
   @Prop({
     type: String,
     enum: ALL_INVENTORY_VALUATIONS,
@@ -109,11 +109,11 @@ class AccountingPolicy {
   })
   inventoryValuation!: InventoryValuation;
 
-  // Block 4 — operational control: allow issuing stock into a negative balance.
+  // Block 4 - operational control: allow issuing stock into a negative balance.
   @Prop({ type: Boolean, default: DEFAULT_ACCOUNTING_POLICY.allowNegativeStock })
   allowNegativeStock!: boolean;
 
-  // Block 5 — counterparty settlement depth (contract / invoice; §7.1).
+  // Block 5 - counterparty settlement depth (contract / invoice; §7.1).
   @Prop({
     type: String,
     enum: ALL_SETTLEMENT_DEPTHS,
@@ -121,7 +121,7 @@ class AccountingPolicy {
   })
   settlementDepth!: SettlementDepth;
 
-  // Block 6 — payroll.
+  // Block 6 - payroll.
   @Prop({
     type: String,
     enum: ALL_PAYROLL_DETAILS,
@@ -137,7 +137,7 @@ class AccountingPolicy {
   leaveReserve!: LeaveReserve;
 
   /**
-   * Accounts the org treats as non-monetary — excluded from FX revaluation
+   * Accounts the org treats as non-monetary - excluded from FX revaluation
    * (methodology дополнение §1.2 / §6). Manual per Filipp; seeded from the
    * default. The factory copies the default array so profiles don't share one
    * mutable instance.
@@ -148,12 +148,12 @@ class AccountingPolicy {
 const AccountingPolicySchema = SchemaFactory.createForClass(AccountingPolicy);
 
 /**
- * Ledger-side profile for an Organization — architecture doc §8.1.
+ * Ledger-side profile for an Organization - architecture doc §8.1.
  *
  * Deliberately separate from the access-spine [[Organization]]: that one owns
  * tenancy, this one owns the ledger settings (transition date, base currency,
  * bank requisites). Doc §8.1 calls it "Organization requisites" and notes
- * they "attach here too — deliberately left off the access-spine Organization
+ * they "attach here too - deliberately left off the access-spine Organization
  * to avoid scope creep."
  *
  * 1:1 with Organization, lazily created on first ledger interaction (or
@@ -178,13 +178,13 @@ export class OrganizationProfile {
   })
   organizationId!: Types.ObjectId;
 
-  // Legal name as registered (e.g. ""ODTI" Mas'uliyati Cheklangan Jamiyat") —
+  // Legal name as registered (e.g. ""ODTI" Mas'uliyati Cheklangan Jamiyat") -
   // may differ from the access-spine Organization.name which is the user-facing
   // display name. Surfaced on rendered statements.
   @Prop({ type: String, default: null, trim: true, maxlength: 500 })
   legalName!: string | null;
 
-  // The org's own ИНН — used to identify ownership of bank statements during
+  // The org's own ИНН - used to identify ownership of bank statements during
   // upload (bank ТЗ §2). Indexed for the statement-attribution lookup.
   @Prop({ type: String, default: null, trim: true, index: true })
   inn!: string | null;
@@ -193,7 +193,7 @@ export class OrganizationProfile {
    * First-time IFRS adoption transition date (architecture doc §7.3).
    *
    * Per the methodology: if the first reporting period is 2026, transitionDate
-   * is 01.01.2025 (i.e. the start of the comparative year — equivalently the
+   * is 01.01.2025 (i.e. the start of the comparative year - equivalently the
    * "Входящий баланс на 01.01.2025 / на 31.12.2024" point). Null until the
    * org goes through the first-time-adoption setup.
    *
@@ -209,8 +209,8 @@ export class OrganizationProfile {
   baseCurrency!: string;
 
   // Contact requisites. Auto-filled from the orginfo lookup by ИНН
-  // (methodology дополнение §2 — "наименование / адрес / телефон / имейл"),
-  // editable afterwards. The р/с is deliberately NOT sourced here — it comes
+  // (methodology дополнение §2 - "наименование / адрес / телефон / имейл"),
+  // editable afterwards. The р/с is deliberately NOT sourced here - it comes
   // from the bank statement. Null until filled.
   @Prop({ type: String, default: null, trim: true, maxlength: 500 })
   address!: string | null;
@@ -227,7 +227,7 @@ export class OrganizationProfile {
   bankAccounts!: OrgBankAccount[];
 
   /**
-   * Accounting policy — the 6-block ruleset set at registration (methodology
+   * Accounting policy - the 6-block ruleset set at registration (methodology
    * §9). Defaults to DEFAULT_ACCOUNTING_POLICY so every profile carries a
    * complete, valid policy even if the onboarding step is skipped; the client
    * adjusts it in onboarding or later on the profile screen.

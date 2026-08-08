@@ -10,7 +10,7 @@
             </span>
         </div>
 
-        <!-- Search input — filters loaded users by email/name substring. -->
+        <!-- Search input - filters loaded users by email/name substring. -->
         <input
             v-model="searchQuery"
             type="text"
@@ -43,7 +43,7 @@
 <script setup lang="ts">
 // @ts-nocheck
 /**
- * UserMultiSelect — pick one or more users by email.
+ * UserMultiSelect - pick one or more users by email.
  *
  * Loads all users once via adminStore.listUsers (paginated; we fetch up to
  * 500 to cover realistic enterprise scale). Filtering is client-side by
@@ -88,7 +88,7 @@ const filteredUsers = computed(() => {
             const name = (u.name || '').toLowerCase()
             return email.includes(q) || name.includes(q)
         })
-        // Cap dropdown size — 20 rows is enough for human scanning.
+        // Cap dropdown size - 20 rows is enough for human scanning.
         .slice(0, 20)
 })
 

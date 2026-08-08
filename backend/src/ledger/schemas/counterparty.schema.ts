@@ -31,14 +31,14 @@ class CounterpartyAccount {
 const CounterpartyAccountSchema = SchemaFactory.createForClass(CounterpartyAccount);
 
 /**
- * Counterparty registry — bank ТЗ §1, §3.
+ * Counterparty registry - bank ТЗ §1, §3.
  *
  * Per-organization (each org maintains its own counterparty list). Auto-created
  * by the bank engine when a statement row carries an unknown ИНН. The bank
  * engine flags those rows YELLOW in the accountant preview screen so the
  * accountant verifies the auto-fill before committing.
  *
- * The treasury counterparty (ИНН 201122919) is special — see constants/treasury.ts.
+ * The treasury counterparty (ИНН 201122919) is special - see constants/treasury.ts.
  * It carries `isTreasury: true`, and statement rows joining to it route through
  * TreasuryRule's long-account-number lookup instead of the standard
  * payable/receivable algorithm.
@@ -62,7 +62,7 @@ export class Counterparty {
   organizationId!: Types.ObjectId;
 
   // Primary join key into bank statements. Treasury == TREASURY_INN constant.
-  // May be null for synthetic counterparties (rare) — partial-unique index below.
+  // May be null for synthetic counterparties (rare) - partial-unique index below.
   @Prop({ type: String, default: null, trim: true, index: true })
   inn!: string | null;
 
@@ -90,7 +90,7 @@ export class Counterparty {
   /**
    * Per-counterparty settlement depth (methodology §7.1 + Filipp's §5 ruling).
    * `inherit` (the default) means follow the company policy-level
-   * `accountingPolicy.settlementDepth`. Never read this inline — resolve the
+   * `accountingPolicy.settlementDepth`. Never read this inline - resolve the
    * effective depth via resolveSettlementDepth() so the inherit fallback is
    * applied uniformly.
    */
@@ -104,7 +104,7 @@ export class Counterparty {
 
 export const CounterpartySchema = SchemaFactory.createForClass(Counterparty);
 
-// (org, inn) is unique when inn is set — handles the "two ИНН-bearing
+// (org, inn) is unique when inn is set - handles the "two ИНН-bearing
 // counterparties in same org" duplicate prevention.
 CounterpartySchema.index(
   { organizationId: 1, inn: 1 },

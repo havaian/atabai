@@ -11,7 +11,7 @@ export type MembershipDocument = HydratedDocument<Membership>;
 export type MembershipModel = Model<Membership>;
 
 /**
- * The user ⋈ organization join carrying role, capabilities and lifecycle —
+ * The user ⋈ organization join carrying role, capabilities and lifecycle -
  * architecture doc §7.6.
  *
  * Either `userId` OR `invitedEmail` is set (never both null, never both set
@@ -20,7 +20,7 @@ export type MembershipModel = Model<Membership>;
  * the invitee's first login the service resolves it to `{ userId, invitedEmail: null }`
  * and (typically) flips status to 'active' once they accept.
  *
- * Authorization MUST resolve through OrgMembershipGuard — never inline
+ * Authorization MUST resolve through OrgMembershipGuard - never inline
  * `org.createdBy.equals(user._id)` checks. That keeps the future Firm grantee
  * type additive (architecture doc §7.5).
  */
@@ -87,7 +87,7 @@ MembershipSchema.index(
   },
 );
 
-// (org, invited-email) uniqueness while the invite is unresolved — prevents
+// (org, invited-email) uniqueness while the invite is unresolved - prevents
 // double-inviting the same address.
 MembershipSchema.index(
   { organizationId: 1, invitedEmail: 1 },

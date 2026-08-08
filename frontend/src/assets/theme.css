@@ -1,5 +1,5 @@
 /* ================================================================
-   ATABAI — Global theme CSS custom properties
+   ATABAI - Global theme CSS custom properties
    Applied via [data-theme] attribute on <html>
    Also sets/removes .dark class for Tailwind compat (landing page)
    ================================================================ */
@@ -100,7 +100,7 @@
     --adm-bg: var(--ws-bg);
     --adm-surface: var(--ws-surface);
     --adm-surface-2: var(--ws-surface-2);
-    --adm-surface-elev: #FFFFFF; /* Modals / popovers — fully opaque */
+    --adm-surface-elev: #FFFFFF; /* Modals / popovers - fully opaque */
     --adm-border: var(--ws-border);
     --adm-border-soft: var(--ws-border-2);
     --adm-text: var(--ws-text);
@@ -134,14 +134,14 @@
     --adm-btn-danger-bg-hover: rgba(220, 38, 38, 0.18);
     --adm-btn-danger-text: #b91c1c;
 
-    /* Input chrome — light surfaces on light theme, dark on dark. */
+    /* Input chrome - light surfaces on light theme, dark on dark. */
     --adm-input-bg: #FFFFFF;
     --adm-input-border: var(--ws-border);
     --adm-input-border-focus: #7C3AED;
     --adm-input-placeholder: rgba(17, 16, 24, 0.4);
 
     /* Inline message colors (used in raw <div> error/warn/success blocks,
-       NOT in badges — badges use --adm-badge-*-* token pairs above). */
+       NOT in badges - badges use --adm-badge-*-* token pairs above). */
     --adm-danger-text: #b91c1c;
     --adm-success-text: #15803d;
     --adm-warn-text: #a16207;
@@ -230,14 +230,14 @@ html.dark {
     --toggle-icon-active: #ffffff;
 
     /* ── Admin panel ────────────────────────────────────────────────
-       Dark variant — preserves the historical near-black surfaces with
+       Dark variant - preserves the historical near-black surfaces with
        purple-tinted borders the admin originally shipped with. Same
        token names as light so the .adm-* CSS only references --adm-*
        and gets the right values per [data-theme]. */
     --adm-bg: var(--ws-bg);
     --adm-surface: rgba(20, 14, 32, 0.6);
     --adm-surface-2: rgba(20, 14, 32, 0.7);
-    --adm-surface-elev: rgb(20, 14, 32); /* Modals / popovers — opaque */
+    --adm-surface-elev: rgb(20, 14, 32); /* Modals / popovers - opaque */
     --adm-border: rgba(149, 0, 255, 0.12);
     --adm-border-soft: rgba(149, 0, 255, 0.08);
     --adm-text: rgba(240, 236, 246, 0.85);
@@ -247,7 +247,7 @@ html.dark {
     --adm-nav-text-active: #C084FC;
     --adm-row-hover: rgba(149, 0, 255, 0.04);
 
-    /* Badge color pairs — bright text on dark muted backgrounds. */
+    /* Badge color pairs - bright text on dark muted backgrounds. */
     --adm-badge-neutral-bg: rgba(100, 116, 139, 0.2);
     --adm-badge-neutral-text: #94a3b8;
     --adm-badge-info-bg: rgba(59, 130, 246, 0.18);
@@ -261,7 +261,7 @@ html.dark {
     --adm-badge-danger-bg: rgba(220, 38, 38, 0.2);
     --adm-badge-danger-text: #fca5a5;
 
-    /* Buttons — primary is the same purple; danger keeps red-on-dark. */
+    /* Buttons - primary is the same purple; danger keeps red-on-dark. */
     --adm-btn-primary-bg: #9333ea;
     --adm-btn-primary-bg-hover: #a855f7;
     --adm-btn-primary-text: #ffffff;
@@ -269,13 +269,13 @@ html.dark {
     --adm-btn-danger-bg-hover: rgba(220, 38, 38, 0.32);
     --adm-btn-danger-text: #fca5a5;
 
-    /* Input chrome — dark surfaces, light placeholder. */
+    /* Input chrome - dark surfaces, light placeholder. */
     --adm-input-bg: rgba(15, 10, 26, 0.6);
     --adm-input-border: rgba(149, 0, 255, 0.18);
     --adm-input-border-focus: #9333ea;
     --adm-input-placeholder: rgba(240, 236, 246, 0.35);
 
-    /* Inline message colors — bright variants for dark backdrops. */
+    /* Inline message colors - bright variants for dark backdrops. */
     --adm-danger-text: #fca5a5;
     --adm-success-text: #4ade80;
     --adm-warn-text: #fbbf24;

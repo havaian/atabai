@@ -8,7 +8,7 @@ import { UpdatePreferencesDto } from './dto/update-preferences.dto';
 import type { IUserMethods, UserDocument } from './schemas/user.schema';
 
 /**
- * Mounted at /api/users. Ports backend/src/user/routes.js — `/me`, `/stats`,
+ * Mounted at /api/users. Ports backend/src/user/routes.js - `/me`, `/stats`,
  * and `PATCH /preferences`.
  */
 @Controller('users')

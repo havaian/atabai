@@ -24,18 +24,18 @@ import {
  *     therefore grouped into invoices: a row with a document number/ID starts a
  *     new invoice; a header-less row with line data continues the current one.
  *   - Only «Подписан» invoices are loaded. The real files also carry «Удален»,
- *     «Недействительный», «Ожидает …подписи», «Отказ от подписи» — all excluded.
+ *     «Недействительный», «Ожидает …подписи», «Отказ от подписи» - all excluded.
  *   - Subtype is «Подтип документа» (Стандартный / Исправленный / Дополнительный)
- *     — distinct from «Тип документа» (the doc KIND, e.g. «Счет-фактура без
+ *     - distinct from «Тип документа» (the doc KIND, e.g. «Счет-фактура без
  *     акта»), which is intentionally not mapped.
  *
  * Column resolution is by header NAME (position-independent): all header
  * strings live in COLUMN_ALIASES, matched exact-first then by substring. If a
  * required column (invoice number, counterparty ИНН) can't be found, the parser
  * throws a diagnostic listing the headers it saw. Money values are decimal
- * strings — the same precision discipline as the bank/OSV parsers.
+ * strings - the same precision discipline as the bank/OSV parsers.
  *
- * NOTE (phase 5): «Код ИКПУ» is exported inconsistently by Didox — a text cell
+ * NOTE (phase 5): «Код ИКПУ» is exported inconsistently by Didox - a text cell
  * with a leading zero in one file, a 17-digit number in the other. It is
  * captured here for the line label; exact ИКПУ-directory matching (phase 5)
  * should treat it as text, as a 17-digit numeric code can lose its last digit
@@ -78,7 +78,7 @@ export interface ParsedRegistryInvoice {
 
 export interface InvoiceRegistryParseResult {
   invoices: ParsedRegistryInvoice[];
-  /** Invoices whose status was not «Подписан» — counted, not loaded. */
+  /** Invoices whose status was not «Подписан» - counted, not loaded. */
   skippedUnsigned: number;
   warnings: string[];
 }
@@ -93,18 +93,18 @@ export class InvoiceRegistryParseError extends Error {
   }
 }
 
-// ─── Column aliases — THE single place Didox header names live ────────────────
+// ─── Column aliases - THE single place Didox header names live ────────────────
 // Normalized (lowercase, ё→е, punctuation→space, collapsed whitespace) header
 // fragments; the matcher normalizes both sides. Exact matches win over
 // substring matches (so «Цена» beats «Базовая цена», «Сумма с НДС» beats a
-// broader match). To retarget a future export, edit here — nothing else changes.
+// broader match). To retarget a future export, edit here - nothing else changes.
 const COLUMN_ALIASES: Record<string, string[]> = {
   status: ['статус документа', 'статус'],
   roumingId: ['id у роуминга', 'роуминг'],
   didoxId: ['id didox', 'didox'],
   oldInvoiceDidoxId: ['id старой счет фактуры', 'старой счет фактуры', 'старой'],
   // «Подтип документа» = Стандартный/Исправленный/Дополнительный. NOT «Тип
-  // документа» (the doc kind) — that would collide, so it is left unmapped.
+  // документа» (the doc kind) - that would collide, so it is left unmapped.
   subtype: ['подтип документа', 'подтип'],
   number: ['номер документа', 'номер счет', 'номер эсф', 'номер сф', 'номер фактур'],
   date: ['дата документа', 'дата счет', 'дата эсф', 'дата фактур'],
@@ -126,7 +126,7 @@ const COLUMN_ALIASES: Record<string, string[]> = {
 
 type FieldKey = keyof typeof COLUMN_ALIASES;
 
-// Resolution order — distinctive «…договора» columns before the invoice
+// Resolution order - distinctive «…договора» columns before the invoice
 // number/date; ИНН/name before the line-item «наименование» columns.
 const RESOLUTION_ORDER: FieldKey[] = [
   'status', 'roumingId', 'didoxId', 'oldInvoiceDidoxId', 'subtype',
@@ -138,7 +138,7 @@ const RESOLUTION_ORDER: FieldKey[] = [
 // Without these a row can't be booked to a counterparty position/document.
 const REQUIRED_FIELDS: FieldKey[] = ['number', 'inn'];
 
-// Line-item columns — used to tell a continuation row (blank header, line data)
+// Line-item columns - used to tell a continuation row (blank header, line data)
 // from a truly blank row.
 const LINE_FIELDS: FieldKey[] = [
   'ikpuCode', 'ikpuName', 'quantity', 'price', 'netAmount', 'vatAmount', 'grossAmount',
@@ -168,7 +168,7 @@ const textOrNull = (cell: XLSX.CellObject | undefined): string | null => {
   return t === '' ? null : t;
 };
 
-// Decimal string, "0" when blank — same IEEE-754 discipline as bank/OSV parsers.
+// Decimal string, "0" when blank - same IEEE-754 discipline as bank/OSV parsers.
 const moneyStr = (cell: XLSX.CellObject | undefined): string => {
   if (!cell || cell.v === undefined || cell.v === null) return '0';
   if (typeof cell.v === 'number') {
@@ -196,7 +196,7 @@ const parseRate = (cell: XLSX.CellObject | undefined): number | null => {
   const raw = String(cell.v).trim();
   if (raw === '') return null;
   const m = /-?\d+(?:[.,]\d+)?/.exec(raw.replace(/\s/g, ''));
-  if (!m) return null; // e.g. «Без НДС» textual — no numeric rate.
+  if (!m) return null; // e.g. «Без НДС» textual - no numeric rate.
   const n = Number(m[0].replace(',', '.'));
   return Number.isFinite(n) ? n : null;
 };
@@ -230,7 +230,7 @@ const parseDate = (cell: XLSX.CellObject | undefined): Date | null => {
 };
 
 // ИКПУ code reader. Didox exports it inconsistently: a TEXT cell (leading zero
-// preserved) in one file, a NUMBER in another — where SheetJS's formatted text
+// preserved) in one file, a NUMBER in another - where SheetJS's formatted text
 // is scientific ("1.0103E+16"). For a numeric cell, render the full integer;
 // for a text cell, keep it verbatim. NOTE (phase 5): a 17-digit numeric code can
 // already have lost its last digit to float storage in the source; exact
@@ -292,7 +292,7 @@ const resolveColumns = (headerCells: string[]): ColumnMap => {
 
 /**
  * Parse a Didox invoice-registry Excel export (Входящие or Исходящие). Pure
- * function — reads the workbook only. `direction` is the operator-picked upload
+ * function - reads the workbook only. `direction` is the operator-picked upload
  * direction (stamped on every invoice; the counterparty column is a single
  * «ИНН/Наименование контрагента», so direction is not needed to pick it).
  *
@@ -366,11 +366,11 @@ export function parseInvoiceRegistry(
   const warnings: string[] = [];
   if (columns.status === undefined) {
     warnings.push(
-      'No status column found — every row was loaded WITHOUT the «Подписан» filter.',
+      'No status column found - every row was loaded WITHOUT the «Подписан» filter.',
     );
   }
   if (columns.netAmount === undefined && columns.grossAmount === undefined) {
-    warnings.push('No net/gross amount column matched — invoice amounts may parse as 0.');
+    warnings.push('No net/gross amount column matched - invoice amounts may parse as 0.');
   }
 
   const at = (r: number, f: FieldKey): XLSX.CellObject | undefined =>
@@ -406,7 +406,7 @@ export function parseInvoiceRegistry(
     if (startsInvoice) {
       consecutiveBlanks = 0;
       if (!number) {
-        // Has an id but no number — can't dedup/post it; skip the whole invoice.
+        // Has an id but no number - can't dedup/post it; skip the whole invoice.
         warnings.push(`Row ${r + 1}: invoice row has no number, skipped`);
         current = null;
         continue;
@@ -436,7 +436,7 @@ export function parseInvoiceRegistry(
       if (current) current.lineItems.push(buildLine(r));
       else warnings.push(`Row ${r + 1}: line data with no preceding invoice header, skipped`);
     } else {
-      // Truly blank — end the sheet after two in a row (tolerates a trailing
+      // Truly blank - end the sheet after two in a row (tolerates a trailing
       // block / the row-3 sub-header).
       consecutiveBlanks++;
       if (consecutiveBlanks >= 2) break;

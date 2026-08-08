@@ -23,7 +23,7 @@ export type TreasuryRuleModel = Model<TreasuryRule>;
  *   - `EXACT`: full-string equality with `longAccountNumber` against an
  *      occurrence inside Назначение платежа. The ТЗ explicitly demands this.
  *   - `KEYWORD`: substring/regex fallback for ambiguous payments. Lower
- *     priority — only consulted when no EXACT match fires.
+ *     priority - only consulted when no EXACT match fires.
  *
  * Priority is integer: higher value wins on ties. Lets the accountant
  * disambiguate when several rules could apply.
@@ -86,7 +86,7 @@ export class TreasuryRule {
   @Prop({ type: Boolean, default: true, index: true })
   isActive!: boolean;
 
-  // Audit pointers — who introduced the rule (manual entry vs. learning loop).
+  // Audit pointers - who introduced the rule (manual entry vs. learning loop).
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
   createdBy!: Types.ObjectId;
 
@@ -99,7 +99,7 @@ export class TreasuryRule {
 
 export const TreasuryRuleSchema = SchemaFactory.createForClass(TreasuryRule);
 
-// Same pattern can't be registered twice for the same org+kind — the
+// Same pattern can't be registered twice for the same org+kind - the
 // learning loop must update an existing rule, not duplicate it.
 TreasuryRuleSchema.index(
   { organizationId: 1, kind: 1, pattern: 1 },

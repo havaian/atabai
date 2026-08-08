@@ -1,5 +1,5 @@
 <!-- frontend/src/views/app/BankPreviewView.vue
-     The signature UX of the bank engine — bank ТЗ §7's "Экран
+     The signature UX of the bank engine - bank ТЗ §7's "Экран
      предпросмотра". Per Filipp (methodology дополнение §1.3) the green/yellow/
      red traffic light is gone: every draft carries a server-derived
      `commitReady` flag plus soft flags, and the operator ticks which rows to
@@ -76,7 +76,7 @@
                             </span>
                             {{ draft.description }}
                         </td>
-                        <td class="bank-preview-account">{{ draft.recordAccount || '—' }}</td>
+                        <td class="bank-preview-account">{{ draft.recordAccount || '-' }}</td>
                         <td class="bank-preview-doc">
                             <button
                                 v-if="!isReadOnly && draft.needsDocument"
@@ -98,7 +98,7 @@
                             >
                                 {{ $t('bankPreview.doc.count', { n: draft.documents.length }) }}
                             </span>
-                            <span v-else class="bank-preview-doc-na">—</span>
+                            <span v-else class="bank-preview-doc-na">-</span>
                         </td>
                         <td class="bank-preview-num">{{ formatAmount(draft.totalAmount) }}</td>
                         <td>
@@ -217,7 +217,7 @@
             <div class="doc-pick">
                 <label class="doc-pick-label">{{ $t('bankPreview.doc.pick') }}</label>
                 <select class="doc-select" @change="onPickExisting">
-                    <option value="">—</option>
+                    <option value="">-</option>
                     <option v-for="d in docList" :key="d.id" :value="d.id">{{ d.number }}</option>
                 </select>
             </div>
@@ -268,7 +268,7 @@
             </template>
         </UiModal>
 
-        <!-- Commit result — shown after posting. Surfaces how many entries
+        <!-- Commit result - shown after posting. Surfaces how many entries
              posted and how many were skipped (rows that still need a record
              account) rather than bouncing silently to the batch list. -->
         <UiModal v-model="resultOpen" :title="$t('bankPreview.result.title')" max-width="420px">
@@ -362,7 +362,7 @@ const selectedCount = computed(() => {
 const allReadySelected = computed(() => readyCount.value > 0 && selectedCount.value === readyCount.value)
 const someReadySelected = computed(() => selectedCount.value > 0)
 
-// Why a row can't be ticked — reused as the checkbox tooltip.
+// Why a row can't be ticked - reused as the checkbox tooltip.
 function rowHint(draft) {
     return draft?.needsAccount ? 'bankPreview.pickAccount' : 'bankPreview.needsInput'
 }
@@ -567,12 +567,12 @@ async function applyDocs() {
 }
 
 // Holds the commit outcome ({ committed, skipped, rolledUpKeys }) so the
-// operator gets a confirmation with counts — including how many rows were
-// skipped — instead of a silent redirect.
+// operator gets a confirmation with counts - including how many rows were
+// skipped - instead of a silent redirect.
 const commitResult = ref(null)
 
 // Bridge UiModal's boolean v-model; closing (Esc/backdrop) just dismisses the
-// summary and stays on the page — the explicit "Done" button routes away.
+// summary and stays on the page - the explicit "Done" button routes away.
 const resultOpen = computed({
     get: () => !!commitResult.value,
     set: (v) => { if (!v) commitResult.value = null },

@@ -5,7 +5,7 @@ export type ContractDocument = HydratedDocument<Contract>;
 export type ContractModel = Model<Contract>;
 
 /**
- * Contract — one of the two settlement-document types (methodology §7.1,
+ * Contract - one of the two settlement-document types (methodology §7.1,
  * "Контрагент → Контракт", the CIS model). A contract belongs to exactly one
  * counterparty and is the unit against which payments are matched and debt is
  * settled when the counterparty's settlement depth resolves to `contract`.
@@ -15,7 +15,7 @@ export type ContractModel = Model<Contract>;
  * договорам"). The two document types are independent; a counterparty is
  * tracked by one or the other, never both at once.
  *
- * Records are created on the bank preview screen — either picked from existing
+ * Records are created on the bank preview screen - either picked from existing
  * contracts or created new there (methodology §7.2 as confirmed by Filipp:
  * "если программа не находит, она на превью листе должна предложить создать
  * или выбрать из списка"). They are never auto-created silently.
@@ -39,7 +39,7 @@ export class Contract {
   organizationId!: Types.ObjectId;
 
   // The counterparty this contract belongs to. Counterparty is always the base
-  // axis (methodology §7.1) — every document hangs off one.
+  // axis (methodology §7.1) - every document hangs off one.
   @Prop({
     type: Types.ObjectId,
     ref: 'Counterparty',
@@ -53,7 +53,7 @@ export class Contract {
   @Prop({ type: String, required: true, trim: true, maxlength: 200 })
   number!: string;
 
-  // Contract date. Optional — a payment purpose may carry a number without a
+  // Contract date. Optional - a payment purpose may carry a number without a
   // parseable date, and the accountant can fill it later.
   @Prop({ type: Date, default: null })
   date!: Date | null;
@@ -62,7 +62,7 @@ export class Contract {
   @Prop({ type: String, default: null, trim: true, maxlength: 1000 })
   description!: string | null;
 
-  // Soft-delete equivalent — a contract no longer transacted against is marked
+  // Soft-delete equivalent - a contract no longer transacted against is marked
   // inactive rather than removed, so historical postings keep their reference
   // (same discipline as bank accounts §3.5 and counterparties).
   @Prop({ type: Boolean, default: true, index: true })

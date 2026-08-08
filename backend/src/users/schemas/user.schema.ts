@@ -34,7 +34,7 @@ class UserPreferences {
 const UserPreferencesSchema = SchemaFactory.createForClass(UserPreferences);
 
 /**
- * Mongoose User schema — preserves every field, virtual, method and static
+ * Mongoose User schema - preserves every field, virtual, method and static
  * from the legacy backend/src/user/model.js, including the per-user JWT secret
  * rotation, TOTP fields, monthly counters, and Google profile sync.
  *
@@ -103,7 +103,7 @@ export class User {
   @Prop({ type: Date, default: Date.now })
   lastLoginAt!: Date;
 
-  // Per-user JWT secret — never exposed.
+  // Per-user JWT secret - never exposed.
   @Prop({ type: String, required: false, select: false })
   refreshTokenSecret?: string;
 
@@ -255,7 +255,7 @@ const findOrCreateFromGoogleImpl = async function (
 ): Promise<UserDocument> {
   const incomingEmail = profile.emails?.[0]?.value;
 
-  // Whitelist gate — preserved from legacy logic, including super_admin failsafe.
+  // Whitelist gate - preserved from legacy logic, including super_admin failsafe.
   if (whitelistEnabled && incomingEmail) {
     const allowed = await isEmailAllowed(incomingEmail);
     if (!allowed) {

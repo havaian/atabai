@@ -10,11 +10,11 @@ import { RolesGuard } from './guards/roles.guard';
 import { TwoFactorService } from './two-factor.service';
 
 /**
- * /api/admin/2fa/* — TOTP enrollment, verification, disable, backup-code mgmt.
+ * /api/admin/2fa/* - TOTP enrollment, verification, disable, backup-code mgmt.
  *
  * Mounted at /admin/2fa so the URL surface matches the legacy backend (the
  * frontend admin store keys off these exact paths). Only admin / super_admin
- * roles can hit these — but the AdminVerifiedGuard is NOT applied because
+ * roles can hit these - but the AdminVerifiedGuard is NOT applied because
  * these endpoints are precisely what creates the session that guard requires.
  */
 @Controller('admin/2fa')

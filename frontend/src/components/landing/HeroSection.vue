@@ -72,7 +72,7 @@ function scrollToHowItWorks() {
     -webkit-mask-image: radial-gradient(ellipse 60% 50% at 50% 40%, black 10%, transparent 60%);
 }
 
-/* Glow orb — hidden in light, visible in dark */
+/* Glow orb - hidden in light, visible in dark */
 .hero-glow-orb {
     position: absolute;
     width: 600px;
@@ -97,7 +97,7 @@ function scrollToHowItWorks() {
     }
 }
 
-/* Particles — hidden in light, visible in dark */
+/* Particles - hidden in light, visible in dark */
 .hero-particles {
     display: none;
 }

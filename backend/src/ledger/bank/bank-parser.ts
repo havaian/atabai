@@ -3,7 +3,7 @@ import * as XLSX from 'xlsx';
 /**
  * One parsed row out of a bank-statement Excel export.
  *
- * Money values are decimal strings — same precision discipline as the OSV
+ * Money values are decimal strings - same precision discipline as the OSV
  * parser (see osv-parser.ts for the IEEE 754 hazard rationale). Either
  * `debitOut` (we paid) OR `creditIn` (we received) is non-zero, never both;
  * a row with both zero gets returned but flagged in `warnings`.
@@ -15,24 +15,24 @@ import * as XLSX from 'xlsx';
  * surfaces whichever of debitOut/creditIn carries the amount.
  */
 export interface ParsedBankRow {
-  /** Document date — YYYY-MM-DD string preserved verbatim from XLSX. */
+  /** Document date - YYYY-MM-DD string preserved verbatim from XLSX. */
   date: Date;
-  /** Counterparty account ("Счёт") — 20-digit string in Uzbek banks. */
+  /** Counterparty account ("Счёт") - 20-digit string in Uzbek banks. */
   counterpartyAccount: string | null;
   /** Counterparty display name ("Наименование"). */
   counterpartyName: string;
   documentNumber: string | null;
   documentType: string | null;
   bankCode: string | null;
-  /** Оборот Дебет — money paid OUT. "0" when blank. */
+  /** Оборот Дебет - money paid OUT. "0" when blank. */
   debitOut: string;
-  /** Оборот кредит — money received. "0" when blank. */
+  /** Оборот кредит - money received. "0" when blank. */
   creditIn: string;
-  /** Free-text Назначение платежа — treasury rule lookup operates on this. */
+  /** Free-text Назначение платежа - treasury rule lookup operates on this. */
   purpose: string;
-  /** Кассовый символ — Описание sheet flags it as unimportant; preserved for audit. */
+  /** Кассовый символ - Описание sheet flags it as unimportant; preserved for audit. */
   cashSymbol: string | null;
-  /** Counterparty ИНН — the registry join key. May be null on malformed rows. */
+  /** Counterparty ИНН - the registry join key. May be null on malformed rows. */
   inn: string | null;
   /** 1-indexed source row. */
   sourceRow: number;
@@ -69,7 +69,7 @@ const HEADER: Record<number, string> = {
   10: 'ИНН',
 };
 
-// Same money helper as OSV parser — see there for the IEEE 754 / toFixed(6)
+// Same money helper as OSV parser - see there for the IEEE 754 / toFixed(6)
 // rationale. Duplicated rather than shared because the public shape (cell vs.
 // raw value) might diverge as the bank parser evolves.
 const moneyStr = (cell: XLSX.CellObject | undefined): string => {
@@ -95,7 +95,7 @@ const parseDate = (cell: XLSX.CellObject | undefined): Date | null => {
   if (!cell || cell.v === undefined || cell.v === null) return null;
   if (cell.v instanceof Date) return cell.v;
   if (typeof cell.v === 'number') {
-    // Excel serial date — convert via XLSX utility for accuracy.
+    // Excel serial date - convert via XLSX utility for accuracy.
     const parsed = XLSX.SSF.parse_date_code(cell.v);
     if (!parsed) return null;
     return new Date(Date.UTC(parsed.y, parsed.m - 1, parsed.d));
@@ -114,7 +114,7 @@ const parseDate = (cell: XLSX.CellObject | undefined): Date | null => {
 };
 
 /**
- * Parse a bank statement Excel export (xlsx or xls). Pure function — no I/O
+ * Parse a bank statement Excel export (xlsx or xls). Pure function - no I/O
  * beyond reading the workbook, no database access, no logging.
  *
  * The caller (BankIngestionService) is responsible for resolving counterparties,
@@ -124,7 +124,7 @@ const parseDate = (cell: XLSX.CellObject | undefined): Date | null => {
  *
  * Workbooks with multiple sheets: the first sheet is parsed. The analyst's
  * Bank statements.xlsx puts the data on the FIRST sheet ("Bank statement
- * KDB" or similar bank-specific name) — we don't hard-pin the name because
+ * KDB" or similar bank-specific name) - we don't hard-pin the name because
  * each bank's export uses its own.
  */
 export function parseBankStatement(input: string | Buffer): BankParseResult {
@@ -146,7 +146,7 @@ export function parseBankStatement(input: string | Buffer): BankParseResult {
   const cell = (r: number, c: number): XLSX.CellObject | undefined =>
     ws[XLSX.utils.encode_cell({ r, c })] as XLSX.CellObject | undefined;
 
-  // Header validation — confirm we're looking at a recognized layout. The
+  // Header validation - confirm we're looking at a recognized layout. The
   // bank ТЗ Описание sheet pins the column names; if a future bank surfaces
   // a different layout, this throws here rather than producing garbage.
   for (const [colStr, expected] of Object.entries(HEADER)) {
@@ -193,7 +193,7 @@ export function parseBankStatement(input: string | Buffer): BankParseResult {
     }
     if (debitOut !== '0' && creditIn !== '0') {
       warnings.push(
-        `Row ${r + 1}: both Оборот Дебет (${debitOut}) and Оборот кредит (${creditIn}) carry value — ` +
+        `Row ${r + 1}: both Оборот Дебет (${debitOut}) and Оборот кредит (${creditIn}) carry value - ` +
           `ambiguous direction, included as-is for operator review`,
       );
     }

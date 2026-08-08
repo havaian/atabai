@@ -4,12 +4,12 @@ import { Types } from 'mongoose';
  * Self-contained decimal arithmetic over Mongoose's `Types.Decimal128`.
  *
  * Why not a library: the operations we actually need on the ledger spine
- * today are sum, subtract, compare, and `toString` — all expressible by
+ * today are sum, subtract, compare, and `toString` - all expressible by
  * parsing into (BigInt mantissa, integer scale) and re-formatting. Pulling
  * in `decimal.js` (~100KB) would be premature.
  *
  * If/when adjustments + deferred-tax derivation arrive and we need
- * multiplication / division, swap to a real library — the surface here is
+ * multiplication / division, swap to a real library - the surface here is
  * narrow enough that the rename is the only call-site change.
  *
  * Precision discipline: every input passes through `parseDec` which is
@@ -90,7 +90,7 @@ export function isNegative(value: Decimalish): boolean {
  * Given gross sums `grossDebit` and `grossCredit` (e.g. opening + period
  * on each side), returns `(closingDebit, closingCredit)` where one side
  * is the absolute net difference and the other is zero. Caller decides
- * which side is "natural" for the account by interpreting the result —
+ * which side is "natural" for the account by interpreting the result -
  * the function itself is vid-agnostic.
  *
  * Result invariant: `closingDebit > 0` XOR `closingCredit > 0` (or both 0).

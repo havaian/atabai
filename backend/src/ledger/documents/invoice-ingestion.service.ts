@@ -81,11 +81,11 @@ export interface InvoiceIngestionSummary {
   byColor: Record<InvoicePreviewColor, number>;
   /** Corrected/Additional invoices: records captured, posting deferred (phase 4). */
   deferredSubtype: number;
-  /** Invoices already loaded in a prior upload (same number) — skipped. */
+  /** Invoices already loaded in a prior upload (same number) - skipped. */
   alreadyLoaded: number;
   /** Contracts auto-created from the registry's contract columns. */
   contractsCreated: number;
-  /** Invoices whose status was not «Подписан» — counted by the parser, not loaded. */
+  /** Invoices whose status was not «Подписан» - counted by the parser, not loaded. */
   skippedUnsigned: number;
   parseWarnings: string[];
   rowsSkipped: number;
@@ -113,34 +113,34 @@ interface InvoiceBatchContext {
 }
 
 /**
- * Invoice-registry ingestion + posting orchestrator — methodology §7,
+ * Invoice-registry ingestion + posting orchestrator - methodology §7,
  * status_and_build_plan §7.3–§7.6 (build phases 1–3).
  *
  * Per invoice (one «Подписан» registry invoice, grouped from its line rows):
- *   1. Resolve the counterparty by ИНН (find or auto-create — exactly as the
+ *   1. Resolve the counterparty by ИНН (find or auto-create - exactly as the
  *      bank engine does; an auto-created one paints the row YELLOW).
  *   2. Auto-link / create the Contract from the «Номер/Дата договора» columns
  *      (methodology §7.6 phase 1). Always done when a contract number is
  *      present, regardless of settlement depth.
  *   3. Post per the template (status_and_build_plan §7.3), summed across lines:
  *
- *      INCOMING (Входящие — supplier, we buy → payable 6010):
+ *      INCOMING (Входящие - supplier, we buy → payable 6010):
  *        Дт <operator account> per line  = line net   (operator picks account)
  *        Дт 4410                         = Σ input VAT (omitted when 0)
  *        Кт 6010 (counterparty)          = Σ gross
  *
- *      OUTGOING (Исходящие — customer, we sell → receivable 4010):
+ *      OUTGOING (Исходящие - customer, we sell → receivable 4010):
  *        Дт 4010 (counterparty)          = Σ gross
  *        Кт <operator account> per line  = line net   (operator picks account)
  *        Кт 6410                         = Σ output VAT (omitted when 0)
  *
  *   4. The per-line operator account is the OPERATOR's manual pick (Filipp,
- *      §7.2 — "same shape as the bank treasury red-row fix"). Until set, each
+ *      §7.2 - "same shape as the bank treasury red-row fix"). Until set, each
  *      operator leg carries the placeholder account '000' → the invoice is RED
  *      and blocked from commit, exactly like an unrecognised bank treasury row.
  *
  *   5. The payable/receivable leg (6010/4010) carries the counterparty as its
- *      subconto AND the settlement document — the Invoice itself when the
+ *      subconto AND the settlement document - the Invoice itself when the
  *      counterparty settles by invoice, or the auto-linked Contract when it
  *      settles by contract (methodology §7.4 + resolveSettlementDepth). That is
  *      what lets the future bank↔invoice зачёт (build phase 6) find this debt
@@ -149,7 +149,7 @@ interface InvoiceBatchContext {
  * Subtypes (methodology §7.5): CORRECTED (Исправленная) and ADDITIONAL
  * (Дополнительная) invoices are PARSED and their Invoice records created (with
  * the old-invoice link) so the data is captured, but they are NOT posted here
- * — the reopen-reverse-repost / merged-delta posting is build phase 4. They
+ * - the reopen-reverse-repost / merged-delta posting is build phase 4. They
  * are reported in the summary as `deferredSubtype`.
  *
  * Ingestion is SYNCHRONOUS (the request returns the summary directly). The
@@ -225,7 +225,7 @@ export class InvoiceIngestionService {
     const parsed = parseInvoiceRegistry(filePath, direction);
 
     if (parsed.invoices.length === 0) {
-      // Nothing signed/loadable — surface a clear 4xx rather than an empty post.
+      // Nothing signed/loadable - surface a clear 4xx rather than an empty post.
       throw new BadRequestException({
         error: 'INVOICE_REGISTRY_EMPTY',
         message:
@@ -321,11 +321,11 @@ export class InvoiceIngestionService {
     if (!inv.counterpartyInn) {
       return {
         kind: 'skipped',
-        warning: `Invoice ${inv.number} (row ${inv.sourceRow}) has no counterparty ИНН — skipped`,
+        warning: `Invoice ${inv.number} (row ${inv.sourceRow}) has no counterparty ИНН - skipped`,
       };
     }
 
-    // 1. Counterparty (find or auto-create) — same resolver as the bank engine.
+    // 1. Counterparty (find or auto-create) - same resolver as the bank engine.
     const resolved = await this.counterparties.resolve({
       organizationId: orgId,
       inn: inv.counterpartyInn,
@@ -336,13 +336,13 @@ export class InvoiceIngestionService {
     if (!resolved) {
       return {
         kind: 'skipped',
-        warning: `Invoice ${inv.number}: could not resolve counterparty — skipped`,
+        warning: `Invoice ${inv.number}: could not resolve counterparty - skipped`,
       };
     }
     const counterpartyId = resolved.counterparty._id;
     const counterpartyAutoCreated = resolved.counterparty.createdFromBankRow === true;
 
-    // 2. Dedup — an invoice already loaded (same org+counterparty+number) is not
+    // 2. Dedup - an invoice already loaded (same org+counterparty+number) is not
     //    re-posted. Prevents a re-upload double-counting.
     const existing = await this.documents.findByNumber(
       orgId,
@@ -369,14 +369,14 @@ export class InvoiceIngestionService {
       contractCreated = wasCreated;
     }
 
-    // 4. Totals — summed from the lines (never the registry's own total cell),
+    // 4. Totals - summed from the lines (never the registry's own total cell),
     //    so the posting balances by construction even if the export's gross
     //    column disagrees by a rounding unit.
     const netTotal = addDecimals(...inv.lineItems.map((l) => l.netAmount));
     const vatTotal = addDecimals(...inv.lineItems.map((l) => l.vatAmount));
     const grossTotal = addDecimals(netTotal, vatTotal);
 
-    // 5. Create the Invoice record (always — captures the document even for the
+    // 5. Create the Invoice record (always - captures the document even for the
     //    deferred subtypes). amount mirrors grossTotal for the existing
     //    DocumentsService consumers.
     const invoiceDoc = await this.invoiceModel.create({
@@ -422,21 +422,21 @@ export class InvoiceIngestionService {
       depth === SETTLEMENT_DEPTH.CONTRACT
         ? contractId
           ? { documentType: 'contract' as const, documentId: contractId }
-          : null // settles by contract but none present — leg carries no document
+          : null // settles by contract but none present - leg carries no document
         : { documentType: 'invoice' as const, documentId: invoiceDoc._id };
 
     // 7. Post per subtype (methodology §7.5, build phase 4):
     //
-    //   STANDARD / ADDITIONAL — a fresh posting in the period being loaded
+    //   STANDARD / ADDITIONAL - a fresh posting in the period being loaded
     //   (Filipp: the дополнительная delta posts to the current period, dated to
     //   the additional СФ; the additional invoice carries the delta itself, so
-    //   it posts exactly like a standard invoice — its own amount, its own
-    //   document, same counterparty — and surfaces as a new open position). A
-    //   NEGATIVE дополнительная (a reduction — Filipp confirmed these occur) is
+    //   it posts exactly like a standard invoice - its own amount, its own
+    //   document, same counterparty - and surfaces as a new open position). A
+    //   NEGATIVE дополнительная (a reduction - Filipp confirmed these occur) is
     //   handled inside createDraftForInvoice: the legs flip Дт↔Кт and post the
     //   absolute amount, reducing the same positions instead of raising them.
     //
-    //   CORRECTED — replaces a prior invoice (Filipp, variant a): on commit,
+    //   CORRECTED - replaces a prior invoice (Filipp, variant a): on commit,
     //   reverse the original (dated to the original СФ) and repost the corrected
     //   version (same original date), BOTH in the original's period, so that
     //   period nets to exactly the corrected figures. The repost draft is
@@ -455,8 +455,8 @@ export class InvoiceIngestionService {
           kind: 'skipped',
           contractCreated,
           warning: `Corrected invoice ${inv.number}: original (Didox ${
-            inv.oldInvoiceDidoxId ?? '—'
-          }) not found or not yet posted — skipped`,
+            inv.oldInvoiceDidoxId ?? '-'
+          }) not found or not yet posted - skipped`,
         };
       }
       const originalEntry = await this.entryModel.findById(originalInvoice.journalEntryId);
@@ -464,7 +464,7 @@ export class InvoiceIngestionService {
         return {
           kind: 'skipped',
           contractCreated,
-          warning: `Corrected invoice ${inv.number}: original posting is not committed — skipped`,
+          warning: `Corrected invoice ${inv.number}: original posting is not committed - skipped`,
         };
       }
 
@@ -489,7 +489,7 @@ export class InvoiceIngestionService {
       return { kind: 'posted', color, contractCreated };
     }
 
-    // STANDARD or ADDITIONAL — post in the ingestion period.
+    // STANDARD or ADDITIONAL - post in the ingestion period.
     const color = await this.createDraftForInvoice({
       orgId,
       periodId,
@@ -554,16 +554,16 @@ export class InvoiceIngestionService {
     const isIncoming = inv.direction === INVOICE_DIRECTION.INCOMING;
     const hasVat = compareDecimals(vatTotal, '0') !== 0; // non-zero, either sign
 
-    // A negative дополнительная (a reduction — Filipp confirmed these occur:
+    // A negative дополнительная (a reduction - Filipp confirmed these occur:
     // «может быть с минусом») posts the SAME legs as a positive invoice but with
     // each Дт↔Кт flipped and the ABSOLUTE amount, so it REDUCES the
     // receivable/revenue/output-VAT (outgoing) or payable/expense/input-VAT
-    // (incoming) a positive one would raise — without breaking the line
+    // (incoming) a positive one would raise - without breaking the line
     // amount-≥-0 invariant. Only an additional is ever negative; standard and
     // corrected carry positive figures, so a negative gross is the signal.
     //
     // Filipp confirmed (01.07.26): the reduction books against the
-    // receivable/payable (4010/6010), symmetric with the positive additional —
+    // receivable/payable (4010/6010), symmetric with the positive additional -
     // NOT advances (6310/4310). Booking to advances would depend on settlement
     // state (зачёт), which is a phase-6 concern.
     const isReduction = compareDecimals(grossTotal, '0') < 0;
@@ -578,7 +578,7 @@ export class InvoiceIngestionService {
       organizationId: orgId,
       periodId: entryPeriodId,
       date,
-      description: `${inv.number} — ${inv.counterpartyName}`.substring(0, 1990),
+      description: `${inv.number} - ${inv.counterpartyName}`.substring(0, 1990),
       source: 'manual', // invoices are operator-sourced documents (not bank rows)
       sourceRef: `invoice:${uploadId}:${inv.sourceRow}`,
       status: 'draft',
@@ -593,7 +593,7 @@ export class InvoiceIngestionService {
     await invoiceDoc.save();
 
     // Common subconto/document stamp for the counterparty (payable/receivable)
-    // leg — carries who and (per settlement depth) which document the debt is
+    // leg - carries who and (per settlement depth) which document the debt is
     // booked against, so the future зачёт can find it per document.
     const counterpartyLeg = {
       counterpartyId,
@@ -606,7 +606,7 @@ export class InvoiceIngestionService {
 
     // Operator-account legs (one per line item): placeholder '000' until the
     // operator picks the real expense/inventory/asset (incoming) or revenue
-    // (outgoing) account. These carry NO counterparty — the account's analytic
+    // (outgoing) account. These carry NO counterparty - the account's analytic
     // is the item/cost-centre, not the supplier/customer.
     for (const item of inv.lineItems) {
       lines.push({
@@ -636,11 +636,11 @@ export class InvoiceIngestionService {
         amount: toDecimal128(absDecimal(vatTotal)),
         counterpartyId: null,
         subconto1Value: null,
-        description: `${inv.number} — ${isIncoming ? 'input' : 'output'} VAT`,
+        description: `${inv.number} - ${isIncoming ? 'input' : 'output'} VAT`,
       });
     }
 
-    // Counterparty leg — 6010 (credit, incoming) or 4010 (debit, outgoing) for
+    // Counterparty leg - 6010 (credit, incoming) or 4010 (debit, outgoing) for
     // the gross. The single leg that carries the counterparty + document.
     lines.push({
       entryId: entry._id,
@@ -653,15 +653,15 @@ export class InvoiceIngestionService {
       direction: legDir(isIncoming ? 'credit' : 'debit'),
       amount: toDecimal128(absDecimal(grossTotal)),
       ...counterpartyLeg,
-      description: `${inv.number} — ${inv.counterpartyName}`,
+      description: `${inv.number} - ${inv.counterpartyName}`,
     });
 
     await this.lineModel.create(lines);
 
     // Color: RED while any operator leg is still the placeholder (always true at
-    // creation — the operator must pick the line accounts), YELLOW for an
+    // creation - the operator must pick the line accounts), YELLOW for an
     // auto-created counterparty, GREEN otherwise. Since every fresh invoice has
-    // unset operator legs, a just-created standard invoice is RED until fixed —
+    // unset operator legs, a just-created standard invoice is RED until fixed -
     // exactly the intended "pick the account" prompt (§7.2).
     if (inv.lineItems.length > 0) return 'red';
     if (counterpartyAutoCreated) return 'yellow';
@@ -695,7 +695,7 @@ export class InvoiceIngestionService {
     subtype: 'standard' | 'additional' | 'corrected';
     periodId: string;
     periodLabel: string | null;
-    /** True when this draft's period is locked — commit will skip it until reopened. */
+    /** True when this draft's period is locked - commit will skip it until reopened. */
     periodLocked: boolean;
     operatorLines: Array<{
       lineId: string;
@@ -752,7 +752,7 @@ export class InvoiceIngestionService {
     const isVatAccount = (code: string): boolean =>
       code === INVOICE_VAT_ACCOUNTS.INPUT || code === INVOICE_VAT_ACCOUNTS.OUTPUT;
 
-    // Subtype per entry — corrected is detectable from correctsEntryId on the
+    // Subtype per entry - corrected is detectable from correctsEntryId on the
     // entry itself; standard vs additional comes from the linked Invoice.
     const linkedInvoices = await this.invoiceModel
       .find({ organizationId: orgId, journalEntryId: { $in: entryIds } })
@@ -821,7 +821,7 @@ export class InvoiceIngestionService {
         reason = 'Pick an account for each invoice line before posting';
       } else if (cparty?.createdFromBankRow) {
         color = 'yellow';
-        reason = 'Counterparty auto-created from this registry — verify';
+        reason = 'Counterparty auto-created from this registry - verify';
       }
 
       return {
@@ -846,7 +846,7 @@ export class InvoiceIngestionService {
    * maps a leg id → the chosen NSBU account. Each account is validated against
    * the org's chart, then stamped on the leg. Only operator legs (no
    * counterparty, not a VAT account) of a draft in this upload batch can be
-   * set — the counterparty and VAT legs are engine-fixed.
+   * set - the counterparty and VAT legs are engine-fixed.
    */
   async updateDraft(args: {
     organizationId: Types.ObjectId | string;
@@ -955,7 +955,7 @@ export class InvoiceIngestionService {
   }> {
     const orgId = this.oid(args.organizationId);
 
-    // Drafts of this upload across ALL periods — a corrected repost lives in the
+    // Drafts of this upload across ALL periods - a corrected repost lives in the
     // ORIGINAL invoice's period, which may differ from the ingestion period, so
     // the batch is keyed by uploadId, not by a single period.
     const drafts = await this.entryModel.find({
@@ -973,7 +973,7 @@ export class InvoiceIngestionService {
     const writable = new Map<string, boolean>();
 
     for (const draft of drafts) {
-      // RED — an operator leg still on the placeholder '000'. Skip rather than
+      // RED - an operator leg still on the placeholder '000'. Skip rather than
       // half-fail the batch; the operator picks the accounts and commits again.
       const lines = await this.lineModel.find({ entryId: draft._id }).lean();
       if (lines.some((l) => l.accountCode === UNRESOLVED_ACCOUNT)) {
@@ -982,7 +982,7 @@ export class InvoiceIngestionService {
       }
 
       // The draft's own period must be open. A corrected repost targets the
-      // original's period; if the accountant has deliberately closed it, skip —
+      // original's period; if the accountant has deliberately closed it, skip -
       // they reopen it (audited super_admin path) and commit again. Checked
       // without throwing so one locked period doesn't abort the whole batch.
       const pid = draft.periodId.toString();
@@ -997,7 +997,7 @@ export class InvoiceIngestionService {
         continue;
       }
 
-      // Corrected repost — reverse the original first (append-only), then commit
+      // Corrected repost - reverse the original first (append-only), then commit
       // the repost. Both sit in the original's period dated to the original СФ,
       // so that period nets to exactly the corrected figures (§7.5).
       if (draft.correctsEntryId) {
@@ -1020,7 +1020,7 @@ export class InvoiceIngestionService {
     }
 
     // Materialize AccountBalance rows for every key the committed batch touched
-    // — same rollup the bank engine uses. For corrected invoices the reversing
+    // - same rollup the bank engine uses. For corrected invoices the reversing
     // entry shares the original's keys, so passing it recomputes those balances
     // and the original (+X) and reversal (-X) net out, leaving the repost.
     const rollup = await this.balanceRollup.rollupForEntries(touched);
@@ -1046,7 +1046,7 @@ export class InvoiceIngestionService {
    * legs (debit↔credit) and otherwise-identical accounts, amounts, subconto,
    * counterparty and document, in the original's period dated to the original.
    *
-   * The original is left at status 'committed' on purpose — the rollup sums
+   * The original is left at status 'committed' on purpose - the rollup sums
    * committed lines, so the original (+X) and this reversal (−X) net to zero;
    * flipping the original to 'reversed' would drop its +X and double-count.
    * `reversedAt`/`reversedBy` are stamped on the original as an audit marker.
@@ -1072,7 +1072,7 @@ export class InvoiceIngestionService {
       description: `Reversal of: ${original.description ?? ''}`.substring(0, 1990),
       source: 'manual',
       // Distinct prefix (not `invoice:{uploadId}:`) so the reversal is a
-      // standalone ledger event — it posts to balances/the matrix correctly but
+      // standalone ledger event - it posts to balances/the matrix correctly but
       // does not show up in the invoice batch/preview listings or counts. The
       // original's ref is embedded for provenance.
       sourceRef: original.sourceRef ? `invoice-reversal:${original.sourceRef}` : null,
@@ -1114,7 +1114,7 @@ export class InvoiceIngestionService {
 
   /**
    * Aggregate every invoice entry in a period into one row per upload batch.
-   * As with the bank module there is no separate "upload" collection — each
+   * As with the bank module there is no separate "upload" collection - each
    * upload's identity lives in the entries' `sourceRef`
    * (`invoice:{uploadId}:{rowIndex}`), so we group by the embedded uploadId.
    *

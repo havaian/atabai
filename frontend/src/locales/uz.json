@@ -5,7 +5,7 @@
       "titlePre": "XMHS",
       "titleHighlight": "avtomatlashtirish",
       "titlePost": "Su'niy intellekt yordamida",
-      "subtitle": "Moliyaviy ma'lumotlarni aniq, audit uchun tayyor XMHS hisobotlariga aylantiring — tezroq, arzonroq va to'liq shaffoflik bilan.",
+      "subtitle": "Moliyaviy ma'lumotlarni aniq, audit uchun tayyor XMHS hisobotlariga aylantiring - tezroq, arzonroq va to'liq shaffoflik bilan.",
       "bookDemo": "Demo buyurtma qilish",
       "howItWorks": "Bu qanday ishlaydi"
     },
@@ -58,7 +58,7 @@
       "auditReady": "Auditga tayyor",
       "cloud": {
         "title": "24/7 kirish",
-        "desc": "Bulutli platforma — qulay vaqtda, istalgan joydan, o'rnatmasdan ishlang."
+        "desc": "Bulutli platforma - qulay vaqtda, istalgan joydan, o'rnatmasdan ishlang."
       }
     }
   },
@@ -119,7 +119,7 @@
     "/openingBalances": "Boshlang'ich qoldiqlar"
   },
   "pageDescriptions": {
-    "/": "XMHS ni avtomatlashtiring. Su'niy Intellekt bilan.. Murakkab moliyaviy ma'lumotlarni aniq, auditga tayyor XMHS hisobotlariga aylantiring — tezroq, arzonroq va to'liq shaffoflik bilan..",
+    "/": "XMHS ni avtomatlashtiring. Su'niy Intellekt bilan.. Murakkab moliyaviy ma'lumotlarni aniq, auditga tayyor XMHS hisobotlariga aylantiring - tezroq, arzonroq va to'liq shaffoflik bilan..",
     "/dashboard": "ATABAI boshqaruv paneli - fayllar, XMHS shablonlari va moliyaviy hujjatlar qayta ishlashini boshqaring.",
     "/templates": "Amortizatsiya, chegirmalar, aktivlar qadrsizlanishi va moliyaviy hisobotlar hisob-kitoblarini avtomatlashtirish uchun XMHS shablonlari.",
     "/profile": "ATABAI foydalanuvchi profili sozlamalari - obuna, afzalliklar va shaxsiy ma'lumotlarni boshqaring.",
@@ -228,7 +228,7 @@
   },
   "hero": {
     "title": "XMHS ni avtomatlashtiring. Su'niy Intellekt bilan.",
-    "subtitle": "Murakkab moliyaviy ma'lumotlarni aniq, auditga tayyor XMHS hisobotlariga aylantiring — tezroq, arzonroq va to'liq shaffoflik bilan.",
+    "subtitle": "Murakkab moliyaviy ma'lumotlarni aniq, auditga tayyor XMHS hisobotlariga aylantiring - tezroq, arzonroq va to'liq shaffoflik bilan.",
     "tryFree": "Bepul sinab ko'ring",
     "bookDemo": "Demo bron qilish",
     "loginGoogle": "Google orqali kirish"
@@ -240,15 +240,15 @@
     "nsbu": {
       "colItem": "Modda",
       "colAmount": "Summa (soʻm)",
-      "row1": "010 — Asosiy vositalar",
-      "row2": "020 — Amortizatsiya",
+      "row1": "010 - Asosiy vositalar",
+      "row2": "020 - Amortizatsiya",
       "errorRow": "Qoʻlda hisoblash",
       "errorValue": "±12% xato"
     },
     "ifrs": {
       "colItem": "Modda",
       "colAmount": "Summa (UZS)",
-      "row1": "AV — Tannarx",
+      "row1": "AV - Tannarx",
       "row2": "Toʻplangan amort.",
       "successRow": "IAS 16 ga muvofiq",
       "successValue": "Tasdiqlangan"
@@ -621,7 +621,7 @@
       "profitLoss": {
         "1": "NSBU formatidagi foyda va zararlar hisobotini (PnL byudjeti) yuklang",
         "2": "Kutilayotgan bo'limlar: ДОХОДЫ (Daromad), РАСХОДЫ / ПРЯМЫЕ РАСХОДЫ (Xarajatlar), loyiha qatorlari",
-        "3": "Oylik ustunlar (yan–dek) avtomatik aniqlanadi — choraklik va yillik formatlar qo'llab-quvvatlanadi",
+        "3": "Oylik ustunlar (yan–dek) avtomatik aniqlanadi - choraklik va yillik formatlar qo'llab-quvvatlanadi",
         "4": "Sodda tuzilmalar ham, murakkab loyiha ierarxiyalari ham avtomatik ishlaydi"
       },
       "profitLossForm2": [
@@ -631,8 +631,8 @@
         "Tizim kod ustuni va davr sarlavhalarini avtomatik aniqlaydi"
       ],
       "equity": [
-        "A varianti — Balans (1-shakl): kapitalning ochilish va yopilish qoldig'i",
-        "B varianti — 4-shakl: kapital harakatlarining to'liq tafsiloti",
+        "A varianti - Balans (1-shakl): kapitalning ochilish va yopilish qoldig'i",
+        "B varianti - 4-shakl: kapital harakatlarining to'liq tafsiloti",
         "Ustun sarlavhalari: Ustav kapitali, Taqsimlanmagan foyda, Jami",
         "Tizim yuklangan fayl turini avtomatik aniqlaydi"
       ]
@@ -1189,7 +1189,7 @@
   },
   "onboarding": {
     "title": "Tashkilotni sozlash",
-    "subtitle": "Bir necha qadam — va sizning hisobot maydoningiz tayyor.",
+    "subtitle": "Bir necha qadam - va sizning hisobot maydoningiz tayyor.",
     "step1": "Maʼlumotlar",
     "step2": "Oʻtish davri",
     "step3": "Hisob siyosati",
@@ -1273,12 +1273,12 @@
     "dropSub": ".xlsx yoki .xls",
     "uploading": "Yuklanmoqda…",
     "submit": "Tahlil qilish",
-    "processingNote": "Ko'chirma qayta ishlanmoqda — katta fayllar uchun biroz vaqt olishi mumkin. Sahifani yopmasangiz ham bo'ladi.",
+    "processingNote": "Ko'chirma qayta ishlanmoqda - katta fayllar uchun biroz vaqt olishi mumkin. Sahifani yopmasangiz ham bo'ladi.",
     "statementAccount": "Koʻchirma hisobi",
     "statementAccountPlaceholder": "Ushbu koʻchirma qaysi hisobga tegishli ekanini tanlang",
     "accountRequired": "Yuklashdan oldin ushbu koʻchirma qaysi hisobga tegishli ekanini tanlang.",
     "noAccountsHint": "Hisob-kitob hisoblari kiritilmagan. Avval ularni tashkilot rekvizitlarida qoʻshing.",
-    "accountUnmappedHint": "Bu hisob uchun NSBU hisob raqami koʻrsatilmagan — undagi ichki koʻchirishlar uchun hisobni qoʻlda tanlash kerak boʻladi. Uni tashkilot rekvizitlarida koʻrsating."
+    "accountUnmappedHint": "Bu hisob uchun NSBU hisob raqami koʻrsatilmagan - undagi ichki koʻchirishlar uchun hisobni qoʻlda tanlash kerak boʻladi. Uni tashkilot rekvizitlarida koʻrsating."
   },
   "bankPreview": {
     "title": "Koʻrib chiqish",
@@ -1313,12 +1313,12 @@
       "learnRule": "Qoidaga qoʻshish"
     },
     "committedTitle": "Joylangan koʻchirma",
-    "committedSubtitle": "Allaqachon hisobga joylangan — faqat koʻrish.",
+    "committedSubtitle": "Allaqachon hisobga joylangan - faqat koʻrish.",
     "result": {
       "title": "Ko'chirma kiritildi",
       "committed": "{n} ta provodka hisobga qo'shildi",
       "skipped": "{n} ta qator o'tkazib yuborildi",
-      "skippedNote": "O'tkazib yuborilgan qatorlar — hisob raqamisiz tanilmagan g'aznachilik to'lovlari. Ularni tuzating va qaytadan kiriting.",
+      "skippedNote": "O'tkazib yuborilgan qatorlar - hisob raqamisiz tanilmagan g'aznachilik to'lovlari. Ularni tuzating va qaytadan kiriting.",
       "allDone": "Barcha qatorlar muvaffaqiyatli kiritildi.",
       "reviewRemaining": "Qolganlarini ko'rib chiqish",
       "done": "Tayyor"
@@ -1546,20 +1546,20 @@
     "targetPeriod": "Davr",
     "direction": "Reestr",
     "incoming": "Kiruvchi",
-    "incomingHint": "Yetkazib beruvchi hisob-fakturalari — kreditorlik qarzi",
+    "incomingHint": "Yetkazib beruvchi hisob-fakturalari - kreditorlik qarzi",
     "outgoing": "Chiquvchi",
-    "outgoingHint": "Sizning hisob-fakturalaringiz — debitorlik qarzi",
+    "outgoingHint": "Sizning hisob-fakturalaringiz - debitorlik qarzi",
     "dropTitle": "Reestr faylini tashlang",
     "dropSub": ".xlsx yoki .xls",
     "uploading": "Yuklanmoqda…",
     "submit": "Tahlil qilish",
-    "processingNote": "Reestr tahlil qilinmoqda — katta fayllar uchun biroz vaqt olishi mumkin."
+    "processingNote": "Reestr tahlil qilinmoqda - katta fayllar uchun biroz vaqt olishi mumkin."
   },
   "invoicePreview": {
     "title": "O'tkazmalarni ko'rib chiqish",
     "subtitle": "Yashil: tayyor. Sariq: tekshiring. Qizil: satr hisoblarini tanlang.",
     "committedTitle": "O'tkazilgan hisob-fakturalar",
-    "committedSubtitle": "Hisobga allaqachon o'tkazilgan — faqat ko'rish.",
+    "committedSubtitle": "Hisobga allaqachon o'tkazilgan - faqat ko'rish.",
     "colors": {
       "green": "aniqlandi",
       "yellow": "tekshiring",
@@ -1583,12 +1583,12 @@
       "fix": "Tuzatish"
     },
     "empty": "Bu yuklama uchun qoralamalar yo'q.",
-    "commitHelp": "Qizil hisob-fakturalar ({red}) o'tkazib yuboriladi — avval satr hisoblarini belgilang.",
+    "commitHelp": "Qizil hisob-fakturalar ({red}) o'tkazib yuboriladi - avval satr hisoblarini belgilang.",
     "commitButton": "Hisob-fakturalarni o'tkazish",
     "committing": "O'tkazilmoqda…",
     "editor": {
       "title": "Satr hisoblarini belgilang",
-      "hint": "Har bir satr uchun hisobni tanlang — xarajat, zaxira yoki aktiv (xarid) yoki daromad (sotuv).",
+      "hint": "Har bir satr uchun hisobni tanlang - xarajat, zaxira yoki aktiv (xarid) yoki daromad (sotuv).",
       "accountPlaceholder": "masalan 2910",
       "applyAll": "Birinchi hisobni barcha satrlarga qo'llash",
       "lineFallback": "{n}-satr"
@@ -1608,7 +1608,7 @@
       "corrected": "Tuzatilgan"
     },
     "locked": "Yopilgan",
-    "lockedHint": "{period} davriga kiritiladi, lekin u yopilgan — kiritish uchun davrni qayta oching.",
+    "lockedHint": "{period} davriga kiritiladi, lekin u yopilgan - kiritish uchun davrni qayta oching.",
     "repostsInto": "{period} davriga storno qilib qayta kiritadi",
     "reopenToEdit": "Davrni qayta oching"
   },

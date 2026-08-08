@@ -23,11 +23,11 @@ export const BANK_UPLOAD_JOB_STATUSES: readonly BankUploadJobStatus[] = [
  * BankIngestionSummary the synchronous path used to return) or `failed`
  * (carrying the error message).
  *
- * There is no queue infrastructure — the work runs in-process after the
+ * There is no queue infrastructure - the work runs in-process after the
  * response is sent. The trade-off: a process restart mid-run leaves a job
  * stuck in `processing`. That is acceptable for now; a stale-job sweep can be
  * added later if it proves necessary. The drafts themselves are created
- * transactionally per row, so a stuck job never corrupts the ledger — at worst
+ * transactionally per row, so a stuck job never corrupts the ledger - at worst
  * the operator re-uploads.
  */
 @Schema({
@@ -75,7 +75,7 @@ export class BankUploadJob {
   fileName!: string | null;
 
   /**
-   * The org's own settlement account this statement belongs to — the account
+   * The org's own settlement account this statement belongs to - the account
    * the file was exported for (bank ТЗ §1/§2). Chosen by the operator at
    * upload time from the org's registered accounts. It is the org-side leg of
    * every posting in this batch: for an internal transfer the engine posts
@@ -95,7 +95,7 @@ export class BankUploadJob {
   @Prop({ type: Object, default: null })
   summary!: Record<string, unknown> | null;
 
-  // Populated when status === 'failed' — a human-readable reason.
+  // Populated when status === 'failed' - a human-readable reason.
   @Prop({ type: String, default: null })
   error!: string | null;
 

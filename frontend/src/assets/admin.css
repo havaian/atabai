@@ -3,7 +3,7 @@
 
    Theming: every color in this file resolves through --adm-* tokens defined
    in theme.css ([data-theme="light"] and [data-theme="dark"] blocks). Do
-   NOT introduce raw rgba()/hex literals here — they would break one theme
+   NOT introduce raw rgba()/hex literals here - they would break one theme
    or the other. If a new visual concept needs its own color, define a new
    --adm-* token pair in theme.css first, then reference it here. */
 
@@ -432,14 +432,14 @@ select.adm-input {
 @media (max-width: 768px) {
     .adm-grid-2 {
         grid-template-columns: 1fr;
-        /* On mobile, cards stack vertically — bump the gap so adjacent cards
+        /* On mobile, cards stack vertically - bump the gap so adjacent cards
            (e.g. "Files by template" + "Users by role" on dashboard) feel
            visually separated rather than glued together. */
         gap: 20px;
     }
     .adm-page { padding: 16px; }
 
-    /* Tighten page-header bottom margin on mobile — 24px feels excessive when
+    /* Tighten page-header bottom margin on mobile - 24px feels excessive when
        the viewport is narrow and the title + content gap looks like a void. */
     .adm-page-header { margin-bottom: 14px; }
 

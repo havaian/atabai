@@ -3,7 +3,7 @@
      entry points (ОСВ upload, bank statement, adjustment) + admin actions
      (create regular period, lock, reopen).
 
-     Lock is admin-only; reopen is super_admin-only — both enforced at the
+     Lock is admin-only; reopen is super_admin-only - both enforced at the
      backend service layer. The UI hides the actions when the active
      membership lacks the right role. -->
 <template>
@@ -36,7 +36,7 @@
                         </span>
                     </div>
                     <div class="period-card-dates">
-                        {{ formatDate(p.startDate) }} — {{ formatDate(p.endDate) }}
+                        {{ formatDate(p.startDate) }} - {{ formatDate(p.endDate) }}
                     </div>
                 </div>
                 <div class="period-card-actions">

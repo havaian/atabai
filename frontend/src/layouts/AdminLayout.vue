@@ -1,12 +1,12 @@
 <!-- frontend/src/layouts/AdminLayout.vue
-     Thin wrapper around AppLayout — provides admin-side specific content
+     Thin wrapper around AppLayout - provides admin-side specific content
      (admin user dropdown with back-to-app exit in the profile slot, access
      guards on main content) via slots. All shared chrome (sidebar shell,
      mobile drawer, theme/lang pickers) is owned by AppLayout. -->
 <template>
     <AppLayout :home-link="'/admin'" :brand-tag="$t('admin.layout.brandTag')" :nav-items="navItems"
         :storage-key="'atabai-admin-sidebar-open'">
-        <!-- Profile: dropdown menu on desktop, flat row on mobile —
+        <!-- Profile: dropdown menu on desktop, flat row on mobile -
              mirrors the user-side profile block. -->
         <template #profile="{ collapsed, isMobile, closeDrawer }">
             <div v-if="!isMobile" class="admin-user-info" :class="{ 'admin-user-info--collapsed': collapsed }"
@@ -74,7 +74,7 @@ const router = useRouter()
 const adminStore = useAdminStore()
 const { t } = useI18n()
 
-// Single admin nav. The former Legacy ⇄ New mode split was removed — there is
+// Single admin nav. The former Legacy ⇄ New mode split was removed - there is
 // just one admin side now.
 const navItems = computed(() => [
     { name: 'AdminDashboard', label: t('admin.nav.dashboard'), icon: LayoutDashboard, exact: true },
@@ -91,7 +91,7 @@ const roleLabel = computed(() => {
     return ''
 })
 
-// Initials for the profile avatar — first letters of up to two name parts.
+// Initials for the profile avatar - first letters of up to two name parts.
 const adminInitials = computed(() => {
     const name = adminStore.adminInfo?.name || ''
     const parts = name.trim().split(/\s+/).filter(Boolean)
@@ -123,7 +123,7 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-/* ─── Admin user info (profile slot — pinned to sidebar bottom) ──────────────
+/* ─── Admin user info (profile slot - pinned to sidebar bottom) ──────────────
    Mirrors the user-side profile row: avatar + name/role, with the top border
    coming from the shared .app-sidebar-profile wrapper. */
 .admin-user-info {

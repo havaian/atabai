@@ -22,15 +22,15 @@ import {
 import { DocumentsService } from './documents.service';
 
 /**
- * Settlement documents (contracts / invoices) for a counterparty — methodology
+ * Settlement documents (contracts / invoices) for a counterparty - methodology
  * §7. Counterparty-scoped under the ledger namespace.
  *
  *   GET  .../counterparties/:cpId/documents?kind=invoice
- *        — list the counterparty's documents of a kind (read).
+ *        - list the counterparty's documents of a kind (read).
  *   POST .../counterparties/:cpId/documents
- *        — create one (write). Used by the preview "create new" action.
+ *        - create one (write). Used by the preview "create new" action.
  *   POST .../counterparties/:cpId/documents/suggest
- *        — recognize + match against a payment purpose (read-ish, but POST
+ *        - recognize + match against a payment purpose (read-ish, but POST
  *          because it carries a purpose body). Drives the preview picker.
  *
  * Capability gate mirrors the rest of the ledger: read for listing/suggesting,

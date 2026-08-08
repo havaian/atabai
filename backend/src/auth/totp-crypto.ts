@@ -1,7 +1,7 @@
 import * as crypto from 'crypto';
 
 /**
- * TOTP encryption helpers — AES-256-GCM with a key from TOTP_ENCRYPTION_KEY.
+ * TOTP encryption helpers - AES-256-GCM with a key from TOTP_ENCRYPTION_KEY.
  *
  * Stored ciphertext format: "ivHex:authTagHex:ciphertextHex".
  *

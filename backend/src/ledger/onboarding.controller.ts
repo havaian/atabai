@@ -13,7 +13,7 @@ import { LedgerBootstrapService } from './services/ledger-bootstrap.service';
  * bootstrap orchestrates a ledger-heavy sequence (chart seed + period
  * creation + profile). Putting the route under OrganizationsModule would
  * have required OrganizationsModule to import LedgerModule, which already
- * imports OrganizationsModule — a circular dep.
+ * imports OrganizationsModule - a circular dep.
  *
  * The path keeps `/organizations` for symmetry with the access-spine API,
  * but lives under `/onboarding` so the consumer reads it as "kick off the

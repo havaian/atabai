@@ -9,7 +9,7 @@
  * Conversion is deliberately NOT done here: the ledger keeps money in
  * Decimal128 and there is no decimal multiply/divide helper in this codebase
  * yet, so this module exposes `rate` + `nominal` (UZS per `nominal` units) and
- * leaves the actual multiplication to whichever ledger code wires it in — that
+ * leaves the actual multiplication to whichever ledger code wires it in - that
  * keeps floats out of the money path.
  */
 import { Injectable } from '@nestjs/common';
@@ -25,7 +25,7 @@ import {
   type CurrencyRateModel,
 } from './schemas/currency-rate.schema';
 
-/** The national/base currency — CBU rates are all quoted as UZS per unit. */
+/** The national/base currency - CBU rates are all quoted as UZS per unit. */
 const BASE_CURRENCY = 'UZS';
 
 export interface RateInfo {
@@ -85,7 +85,7 @@ export class CurrenciesService {
     try {
       fetched = await this.cbu.fetchOne(code, date);
     } catch {
-      // Network/CBU error — fall back to any cached row, even if stale.
+      // Network/CBU error - fall back to any cached row, even if stale.
       if (existing) return this.toInfo(existing, true);
       return null;
     }

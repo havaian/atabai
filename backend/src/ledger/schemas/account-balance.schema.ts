@@ -7,7 +7,7 @@ export type AccountBalanceModel = Model<AccountBalance>;
 /**
  * Where a balance row came from. The bank engine and the manual-entry engine
  * both write postings (JournalEntryLine rows) that are then *aggregated* into
- * a balance row — those are `posting_rollup`. `osv_import` is retained as a
+ * a balance row - those are `posting_rollup`. `osv_import` is retained as a
  * historical provenance value on rows that pre-date the reframe; the ОСВ
  * import path itself has been removed (architecture doc §1.1, §4.3).
  */
@@ -25,7 +25,7 @@ export const BALANCE_SOURCES: readonly BalanceSource[] = [
 const decimalZero = (): Types.Decimal128 => Types.Decimal128.fromString('0');
 
 /**
- * The universal currency of the ledger — architecture doc §3.2.
+ * The universal currency of the ledger - architecture doc §3.2.
  *
  * Balance key: (organizationId, periodId, accountCode, level,
  *               subconto1Value, subconto2Value, subconto3Value).
@@ -36,7 +36,7 @@ const decimalZero = (): Types.Decimal128 => Types.Decimal128.fromString('0');
  *
  * The subconto axis is MANDATORY (not optional). The bank engine's
  * per-counterparty running-balance check (bank ТЗ §6) operates at the
- * subconto grain — "account balance for account 6010" cannot answer "do we
+ * subconto grain - "account balance for account 6010" cannot answer "do we
  * owe this supplier?" and so cannot drive the posting choice between
  * 6010 (payable closing) and 4310 (advance issued).
  *
@@ -45,7 +45,7 @@ const decimalZero = (): Types.Decimal128 => Types.Decimal128.fromString('0');
  * flat single-row balances.
  *
  * Money uses Mongoose Decimal128 across the board. Accounting precision is
- * the product's reputational moat (doc §2 — "a single error gets the product
+ * the product's reputational moat (doc §2 - "a single error gets the product
  * permanently dismissed"). Number-typed money would let 0.10 × 100 ≠ 10.0 land
  * in client-visible reports; that risk is not acceptable on the ledger spine.
  */
@@ -74,13 +74,13 @@ export class AccountBalance {
    * sub-sub, … Part of the balance key so an account printed as BOTH a
    * rolled-up line and a deeper detail line under the same code can be stored
    * verbatim. Posting rollups sit at level 0, the account grain. (Inert for
-   * bank postings, which never set it — retained per the reframe note that
+   * bank postings, which never set it - retained per the reframe note that
    * `level` is harmless dead weight once OSV ingestion is gone.)
    */
   @Prop({ type: Number, default: 0 })
   level!: number;
 
-  // Subconto VALUES — see ChartOfAccount.subcontoNNName for the DIMENSION name.
+  // Subconto VALUES - see ChartOfAccount.subcontoNNName for the DIMENSION name.
   // Stored as strings; counterparty / contract / bank-account refs are
   // stringified ObjectIds. Null when the slot is unused on this account.
   @Prop({ type: String, default: null, trim: true })
@@ -154,13 +154,13 @@ export class AccountBalance {
 
 export const AccountBalanceSchema = SchemaFactory.createForClass(AccountBalance);
 
-// THE balance key — unique per row. Nulls in subconto slots are treated as
+// THE balance key - unique per row. Nulls in subconto slots are treated as
 // equal by MongoDB so accounts without subconto get exactly one row per
 // (org, period, account, level). `level` distinguishes the same code printed
 // at multiple tree depths (rollup + detail).
 //
 // MIGRATION NOTE: the previous balance_key included `layer`. Dropping a field
-// from a same-named index is not applied automatically — the old index must be
+// from a same-named index is not applied automatically - the old index must be
 // dropped once on the live DB before this definition can build, or Mongo will
 // raise an index-spec conflict on boot. See the removal notes accompanying
 // this change.
@@ -184,5 +184,5 @@ AccountBalanceSchema.index(
   { name: 'balance_by_counterparty' },
 );
 
-// Staleness sweep — find rows older than a posting batch.
+// Staleness sweep - find rows older than a posting batch.
 AccountBalanceSchema.index({ organizationId: 1, recomputedAt: 1 });

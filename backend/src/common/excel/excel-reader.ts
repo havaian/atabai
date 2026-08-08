@@ -51,7 +51,7 @@ export type ExcelInput = string | Buffer | ExcelJS.Workbook;
 
 export async function readExcelFile(input: ExcelInput): Promise<NormalizedWorkbook> {
   try {
-    // Already an ExcelJS Workbook — normalize directly.
+    // Already an ExcelJS Workbook - normalize directly.
     if (
       input &&
       typeof input === 'object' &&
@@ -61,7 +61,7 @@ export async function readExcelFile(input: ExcelInput): Promise<NormalizedWorkbo
       return await normalizeExcelJSWorkbook(input as ExcelJS.Workbook);
     }
 
-    // .xlsx file path — ExcelJS gives us font.bold / alignment.indent.
+    // .xlsx file path - ExcelJS gives us font.bold / alignment.indent.
     if (typeof input === 'string' && input.toLowerCase().endsWith('.xlsx')) {
       const wb = new ExcelJS.Workbook();
       await wb.xlsx.readFile(input);

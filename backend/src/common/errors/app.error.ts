@@ -1,5 +1,5 @@
 /**
- * Ported from the legacy AppError class — used by services that throw
+ * Ported from the legacy AppError class - used by services that throw
  * typed errors caught by the global AllExceptionsFilter.
  *
  * Prefer Nest's built-in HttpException subclasses (BadRequestException,

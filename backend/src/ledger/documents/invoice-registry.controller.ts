@@ -31,27 +31,27 @@ import {
 import { UpdateInvoiceDraftDto } from './dto/invoice-registry.dto';
 
 /**
- * Invoice-registry HTTP surface — methodology §7, build phases 1–3.
+ * Invoice-registry HTTP surface - methodology §7, build phases 1–3.
  *
  * The upload→preview→fix→commit cycle, mirroring the bank engine's shape so the
  * frontend and the mental model carry straight over:
  *
- *   POST  .../invoice-registry                      — upload a Didox registry
+ *   POST  .../invoice-registry                      - upload a Didox registry
  *                                                      export, parse it, create
  *                                                      drafts. `direction` says
  *                                                      which file (incoming /
  *                                                      outgoing). Returns the
  *                                                      uploadId + the summary.
- *   GET   .../invoice-registry                      — list the period's upload
+ *   GET   .../invoice-registry                      - list the period's upload
  *                                                      batches (history).
- *   GET   .../invoice-registry/:uploadId/drafts     — the preview feed: per
+ *   GET   .../invoice-registry/:uploadId/drafts     - the preview feed: per
  *                                                      invoice, color + the
  *                                                      operator lines to assign.
- *   PATCH .../invoice-registry/:uploadId/drafts/:id — set the per-line accounts.
- *   POST  .../invoice-registry/:uploadId/commit     — post all non-RED drafts.
+ *   PATCH .../invoice-registry/:uploadId/drafts/:id - set the per-line accounts.
+ *   POST  .../invoice-registry/:uploadId/commit     - post all non-RED drafts.
  *
  * Capability gate: `nsbu.base.write` for the mutating routes, `nsbu.base.read`
- * for the reads — identical to the bank engine. Admin role implies all.
+ * for the reads - identical to the bank engine. Admin role implies all.
  */
 @Controller('organizations/:orgId/ledger/periods/:periodId')
 @UseGuards(JwtAuthGuard, OrgMembershipGuard)
@@ -73,7 +73,7 @@ export class InvoiceRegistryController {
     }
 
     // Which registry this is (Входящие = incoming, Исходящие = outgoing). It is
-    // not in the file, so the operator picks it at upload — same shape as the
+    // not in the file, so the operator picks it at upload - same shape as the
     // bank module picking the statement account.
     const dir = (direction ?? '').trim();
     if (!isInvoiceDirection(dir)) {

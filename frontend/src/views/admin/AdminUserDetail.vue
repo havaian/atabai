@@ -76,7 +76,7 @@
                         </div>
                         <div class="adm-field">
                             <div class="adm-field-label">{{ $t('admin.userDetail.fieldLanguage') }}</div>
-                            <span class="adm-text-sm">{{ user.preferences?.language || '—' }}</span>
+                            <span class="adm-text-sm">{{ user.preferences?.language || '-' }}</span>
                         </div>
                     </div>
                     <div>
@@ -225,7 +225,7 @@ async function toggleActive() {
 }
 
 function formatDate(d) {
-    if (!d) return '—'
+    if (!d) return '-'
     const localeMap = { ru: 'ru-RU', en: 'en-GB', uz: 'uz-UZ' }
     return new Date(d).toLocaleString(localeMap[locale.value] || 'ru-RU', {
         day: '2-digit', month: '2-digit', year: 'numeric',

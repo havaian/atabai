@@ -29,7 +29,7 @@ export class CreateDocumentDto {
   @MaxLength(1000)
   description?: string;
 
-  // Invoice only — Decimal128 string. Validated as a plain decimal number
+  // Invoice only - Decimal128 string. Validated as a plain decimal number
   // shape; money is never a JS float on the ledger.
   @IsOptional()
   @IsString()

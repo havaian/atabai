@@ -38,7 +38,7 @@ export class AppLoggerService {
   }
 
   /**
-   * Mirrors the legacy logError helper — accepts an Error or string + context.
+   * Mirrors the legacy logError helper - accepts an Error or string + context.
    */
   error(error: unknown, meta: LogMeta = {}, context?: string): void {
     if (error instanceof Error) {

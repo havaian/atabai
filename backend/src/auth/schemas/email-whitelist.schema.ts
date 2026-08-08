@@ -6,7 +6,7 @@ export type EmailWhitelistDocument = HydratedDocument<EmailWhitelist>;
 /**
  * Explicit allowlist of emails permitted to sign in. Active only when
  * ENABLE_EMAIL_WHITELIST=true. Ported from
- * backend/src/admin/models/emailWhitelist.model.js — collection/field shape
+ * backend/src/admin/models/emailWhitelist.model.js - collection/field shape
  * preserved.
  */
 @Schema({ timestamps: { createdAt: true, updatedAt: false } })

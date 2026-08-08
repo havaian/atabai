@@ -7,7 +7,7 @@ import { AppLoggerService } from './app-logger.service';
 import { buildWinstonOptions } from './winston.config';
 
 /**
- * Global logger module — every other module gets `AppLoggerService` and the
+ * Global logger module - every other module gets `AppLoggerService` and the
  * underlying Winston instance for free, without having to re-import.
  */
 @Global()

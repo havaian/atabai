@@ -3,7 +3,7 @@
  *
  * Scheduled daily refresh of CBU rates. The job is registered whenever this
  * module is imported (ScheduleModule.forRoot() is already set up app-wide), but
- * it no-ops until CURRENCIES_CRON_ENABLED=true — so dropping the module into the
+ * it no-ops until CURRENCIES_CRON_ENABLED=true - so dropping the module into the
  * app never starts fetching on its own. The expression + timezone are read from
  * the environment at load time.
  */

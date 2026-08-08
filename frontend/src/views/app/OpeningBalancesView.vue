@@ -1,5 +1,5 @@
 <!--
-  Opening-balance entry (methodology §6.2 — «ввод начальных остатков»).
+  Opening-balance entry (methodology §6.2 - «ввод начальных остатков»).
 
   A company migrating onto ATABAI enters its incoming counterparty balances
   here, PER DOCUMENT (Filipp 02.07.26): one open contract/invoice per row, with
@@ -14,7 +14,7 @@
   just a placeholder document number (the dummy-document fallback).
 
   Period-scoped: the periodId comes from the route. The balance preview here is
-  display-only — the server re-validates and hard-gates on balance before
+  display-only - the server re-validates and hard-gates on balance before
   anything is written.
 -->
 <template>
@@ -246,7 +246,7 @@ const rows = reactive([])
 
 // The four settlement positions, mirrored from the backend's
 // OPENING_BALANCE_ACCOUNTS. 4010/4310 are debit-natured (assets), 6010/6310
-// credit-natured (liabilities) — the same rule the server uses.
+// credit-natured (liabilities) - the same rule the server uses.
 const DEBIT_ACCOUNTS = ['4010', '4310']
 const positionOptions = computed(() => [
   { account: '4010', label: t('openingBalances.pos.receivable') },

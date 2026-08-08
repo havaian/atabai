@@ -19,11 +19,11 @@ export type InvoiceModel = Model<Invoice>;
 /**
  * One line of a Didox invoice (methodology §7.3). Captured verbatim from the
  * registry so the operator-account picker and the future ИКПУ directory (phase
- * 5) have the per-line detail. Amounts are Decimal128 — money on the ledger is
+ * 5) have the per-line detail. Amounts are Decimal128 - money on the ledger is
  * never a JS float. `vatRate` is the ONLY non-money numeric here: a plain
  * percent (e.g. 12), null on a 0 %/exempt line.
  *
- * Sub-document only — no `_id`: nothing references a line item by id (the
+ * Sub-document only - no `_id`: nothing references a line item by id (the
  * operator sets accounts on the JournalEntryLine legs, not here).
  */
 @Schema({ _id: false })
@@ -71,7 +71,7 @@ export class InvoiceLineItem {
 export const InvoiceLineItemSchema = SchemaFactory.createForClass(InvoiceLineItem);
 
 /**
- * Invoice — the second settlement-document type (methodology §7.1,
+ * Invoice - the second settlement-document type (methodology §7.1,
  * «Контрагент → Инвойс», the rest-of-world model). Belongs to exactly one
  * counterparty and is the unit against which payments are matched when the
  * counterparty's settlement depth resolves to `invoice`.
@@ -81,10 +81,10 @@ export const InvoiceLineItemSchema = SchemaFactory.createForClass(InvoiceLineIte
  * tracked by invoices OR contracts, not a nested combination.
  *
  * TWO creation paths, which is why every registry field below is optional:
- *   - Settlement-document stub — DocumentsService.create (bank preview «create
+ *   - Settlement-document stub - DocumentsService.create (bank preview «create
  *     new», or CRUD). Writes only number/date/description/amount; the Didox
  *     fields stay null/empty.
- *   - Full registry invoice — InvoiceIngestionService, one per «Подписан» row
+ *   - Full registry invoice - InvoiceIngestionService, one per «Подписан» row
  *     of a Didox Входящие/Исходящие export. Writes the direction, subtype,
  *     Didox ids, contract columns, line items and the net/VAT/gross totals, and
  *     (after posting) links `journalEntryId`.
@@ -108,7 +108,7 @@ export class Invoice {
   organizationId!: Types.ObjectId;
 
   // The counterparty this invoice belongs to. Counterparty is always the base
-  // axis (methodology §7.1) — every document hangs off one.
+  // axis (methodology §7.1) - every document hangs off one.
   @Prop({
     type: Types.ObjectId,
     ref: 'Counterparty',
@@ -117,12 +117,12 @@ export class Invoice {
   })
   counterpartyId!: Types.ObjectId;
 
-  // Invoice number — verbatim / parsed from the registry (or payment purpose).
+  // Invoice number - verbatim / parsed from the registry (or payment purpose).
   // Matching normalizes separately.
   @Prop({ type: String, required: true, trim: true, maxlength: 200 })
   number!: string;
 
-  // Invoice date (СФ date). Optional — a stub created from a payment may carry
+  // Invoice date (СФ date). Optional - a stub created from a payment may carry
   // a number without a parseable date, filled later.
   @Prop({ type: Date, default: null })
   date!: Date | null;
@@ -140,7 +140,7 @@ export class Invoice {
 
   // ─── Didox registry fields (null on a settlement-document stub) ─────────────
 
-  // Which registry file this came from — incoming (Входящие, we buy) or
+  // Which registry file this came from - incoming (Входящие, we buy) or
   // outgoing (Исходящие, we sell). Drives the posting template (§7.3).
   @Prop({
     type: String,
@@ -154,7 +154,7 @@ export class Invoice {
   @Prop({ type: String, enum: ALL_INVOICE_SUBTYPES, default: null })
   subtype!: InvoiceSubtype | null;
 
-  // Registry document status verbatim (e.g. «Подписан»). Free text — only
+  // Registry document status verbatim (e.g. «Подписан»). Free text - only
   // «Подписан» rows are loaded, the rest are counted by the parser.
   @Prop({ type: String, default: null, trim: true, maxlength: 100 })
   documentStatus!: string | null;
@@ -173,7 +173,7 @@ export class Invoice {
   @Prop({ type: String, default: null, trim: true, maxlength: 200 })
   oldInvoiceDidoxId!: string | null;
 
-  // Contract columns off the registry — auto-linked to a Contract (§7.6). The
+  // Contract columns off the registry - auto-linked to a Contract (§7.6). The
   // raw number/date are kept even when the Contract row is created separately.
   @Prop({ type: String, default: null, trim: true, maxlength: 200 })
   contractNumber!: string | null;
@@ -216,7 +216,7 @@ export class Invoice {
   @Prop({ type: Types.ObjectId, ref: 'JournalEntry', default: null, index: true })
   journalEntryId!: Types.ObjectId | null;
 
-  // Soft-delete equivalent — an invoice no longer transacted against is marked
+  // Soft-delete equivalent - an invoice no longer transacted against is marked
   // inactive rather than removed, so historical postings keep their reference
   // (same discipline as contracts §7 and bank accounts §3.5).
   @Prop({ type: Boolean, default: true, index: true })
@@ -225,7 +225,7 @@ export class Invoice {
 
 export const InvoiceSchema = SchemaFactory.createForClass(Invoice);
 
-// A counterparty's invoice numbers are unique within the org+counterparty —
+// A counterparty's invoice numbers are unique within the org+counterparty -
 // prevents the same invoice being created twice (from a re-upload or a payment
 // that names it). Corrected/additional invoices carry their own distinct
 // numbers, so this does not collide with them.
@@ -238,11 +238,11 @@ InvoiceSchema.index(
 InvoiceSchema.index({ organizationId: 1, counterpartyId: 1, isActive: 1 });
 
 // Corrected/additional lookup: find the original by its Didox id within the org
-// (InvoiceIngestionService.ingestOneInvoice). Non-unique — stubs carry a null
+// (InvoiceIngestionService.ingestOneInvoice). Non-unique - stubs carry a null
 // didoxId, and only real registry invoices set it.
 InvoiceSchema.index({ organizationId: 1, didoxId: 1 });
 
 // Preview: read the subtype/link for a batch's entries
-// (listDraftsForUpload finds invoices by their journalEntryId). Non-unique —
+// (listDraftsForUpload finds invoices by their journalEntryId). Non-unique -
 // null until posted.
 InvoiceSchema.index({ organizationId: 1, journalEntryId: 1 });

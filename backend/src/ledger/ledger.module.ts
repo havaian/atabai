@@ -51,7 +51,7 @@ import { OrganizationProfilesService } from './services/organization-profiles.se
 import { PeriodsService } from './services/periods.service';
 
 /**
- * Ledger spine — bank-statement module.
+ * Ledger spine - bank-statement module.
  *
  * Owns the Mongoose models the bank engine reads/writes, the chart + period
  * seed services, the bootstrap orchestrator, and the bank posting engine
@@ -59,12 +59,12 @@ import { PeriodsService } from './services/periods.service';
  * Scenario А/Б postings → green/yellow/red preview → commit.
  *
  * Imports OrganizationsModule because the bootstrap delegates org+admin
- * creation to OrganizationsService. The reverse dep doesn't exist —
+ * creation to OrganizationsService. The reverse dep doesn't exist -
  * OrganizationsModule doesn't depend on ledger.
  *
  * Scope note: the IFRS transformation/methodology layers (OSV ingestion,
  * reclassification, adjustments, IFRS derivation, matrix view) have been
- * removed — only the bank-statement bookkeeping path remains. Balances are
+ * removed - only the bank-statement bookkeeping path remains. Balances are
  * materialized purely from committed postings via BalanceRollupService.
  */
 @Module({
@@ -86,14 +86,14 @@ import { PeriodsService } from './services/periods.service';
     // Integration modules. OrginfoModule exports OrginfoService (used by the
     // profile controller's "заполнить по ИНН" lookup). CurrenciesModule brings
     // its own CBU rate controller + service (methodology дополнение §2/§3);
-    // both are safe by default — no credentials → no network calls.
+    // both are safe by default - no credentials → no network calls.
     OrginfoModule,
     CurrenciesModule,
     AuthModule,
     // UsersModule is required because JwtAuthGuard (re-exported by AuthModule)
     // injects UsersService at construction time. AuthModule itself uses
     // forwardRef(UsersModule), so re-importing it here is the documented
-    // NestJS pattern — same shape as FilesModule.
+    // NestJS pattern - same shape as FilesModule.
     UsersModule,
     MulterModule.registerAsync({
       imports: [ConfigModule],

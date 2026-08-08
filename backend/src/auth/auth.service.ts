@@ -28,7 +28,7 @@ export interface SessionPayload {
 }
 
 /**
- * Auth orchestration — the OAuth callback flow, token refresh, profile fetch,
+ * Auth orchestration - the OAuth callback flow, token refresh, profile fetch,
  * and logout. Equivalent to backend/src/auth/controller.js minus the framing.
  */
 @Injectable()
@@ -291,7 +291,7 @@ export class AuthService {
         if (expiresIn > 0) await this.tokens.revokeToken(token, expiresIn);
       }
     } catch (err) {
-      // Don't fail logout on revocation issues — match legacy behavior.
+      // Don't fail logout on revocation issues - match legacy behavior.
       this.logger.error(err, { context: 'auth/logout token revoke' });
     }
     return { success: true, message: 'Logged out successfully' };
@@ -351,7 +351,7 @@ export class AuthService {
   /**
    * Stamp the userId onto any Memberships pending against this user's email
    * (architecture doc §7.6 invite-accept). Failures are logged but never block
-   * login — the user can still resolve invites later from the dashboard.
+   * login - the user can still resolve invites later from the dashboard.
    */
   private async resolvePendingInvitesQuietly(user: UserDocument): Promise<void> {
     try {

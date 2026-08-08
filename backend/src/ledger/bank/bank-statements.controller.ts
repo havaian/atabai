@@ -26,26 +26,26 @@ import { CommitBankDraftsDto, UpdateBankDraftDto } from './dto/update-draft.dto'
 import { TreasuryResolverService } from './treasury-resolver.service';
 
 /**
- * Bank engine HTTP surface — bank ТЗ §3–§7.
+ * Bank engine HTTP surface - bank ТЗ §3–§7.
  *
  * Three routes for the upload→preview→commit cycle:
  *
- *   POST .../bank-statements                — upload a statement file,
+ *   POST .../bank-statements                - upload a statement file,
  *                                              parse it, create drafts.
  *                                              Returns the uploadId + preview
  *                                              color counts.
  *
- *   GET  .../bank-statements/:uploadId/drafts — list the draft entries from
+ *   GET  .../bank-statements/:uploadId/drafts - list the draft entries from
  *                                                one upload batch (the
  *                                                preview-screen feed).
  *
- *   POST .../bank-statements/:uploadId/commit — flip all non-RED drafts in
+ *   POST .../bank-statements/:uploadId/commit - flip all non-RED drafts in
  *                                                the batch to 'committed'.
  *                                                RED drafts (account = '000')
  *                                                are skipped and reported back.
  *
  * Per-row edit (operator manually fixes a RED row) and "add to rules"
- * (learning-loop button) are deliberate follow-ups — out of scope for the
+ * (learning-loop button) are deliberate follow-ups - out of scope for the
  * first usable slice.
  *
  * Capability gate: `nsbu.base.write`. Admin role implies all.
@@ -83,7 +83,7 @@ export class BankStatementsController {
       throw new BadRequestException({
         error: 'NO_STATEMENT_ACCOUNT',
         message:
-          'statementAccountNumber is required — pick which of the organization’s accounts this statement belongs to',
+          'statementAccountNumber is required - pick which of the organization’s accounts this statement belongs to',
       });
     }
 
@@ -270,11 +270,11 @@ export class BankStatementsController {
   }
 
   /**
-   * Bank ТЗ §7 learning loop — "Добавить в правила" button after fixing a
+   * Bank ТЗ §7 learning loop - "Добавить в правила" button after fixing a
    * RED treasury row. Persists a TreasuryRule so the same pattern resolves
    * automatically on the next statement.
    *
-   * The :entryId path parameter is informational only — we don't reach back
+   * The :entryId path parameter is informational only - we don't reach back
    * into the draft from here. It's in the URL so the audit log links the
    * rule back to the row that prompted its creation.
    */

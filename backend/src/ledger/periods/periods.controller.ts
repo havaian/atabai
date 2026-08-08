@@ -21,15 +21,15 @@ import { CreatePeriodDto } from './dto/create-period.dto';
 
 /**
  * Full lifecycle surface for ReportingPeriod:
- *   GET  /periods                  — list (any active member)
- *   GET  /periods/:periodId        — one
- *   POST /periods                  — create regular period (admin only)
- *   POST /periods/:periodId/lock   — lock (admin only)
- *   POST /periods/:periodId/reopen — reopen (super_admin only — service-enforced)
+ *   GET  /periods                  - list (any active member)
+ *   GET  /periods/:periodId        - one
+ *   POST /periods                  - create regular period (admin only)
+ *   POST /periods/:periodId/lock   - lock (admin only)
+ *   POST /periods/:periodId/reopen - reopen (super_admin only - service-enforced)
  *
  * Reopen requires super_admin role at the SERVICE layer (defence-in-depth in
  * PeriodsService.reopenPeriod). The route is open to any active member here
- * so the service's own check is the single source of truth — a regular
+ * so the service's own check is the single source of truth - a regular
  * admin who hits this endpoint gets 403 from the service, not from a
  * controller-side @RequireOrgAdmin that would mask the real requirement.
  */

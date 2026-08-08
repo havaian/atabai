@@ -52,7 +52,7 @@
                         {{ $t('nav.dashboard') }}
                     </RouterLink>
 
-                    <!-- Hamburger — all screen sizes -->
+                    <!-- Hamburger - all screen sizes -->
                     <button class="navbar-burger" @click="menuOpen = !menuOpen" :aria-label="$t('nav.openMenu')">
                         <Bars3Icon class="w-5 h-5" />
                     </button>
@@ -383,7 +383,7 @@ onUnmounted(() => {
      #app is the pusher. LandingMenuSidebar teleports outside it.
      ───────────────────────────────────────────────────────────── -->
 <style>
-/* Body background behind the receded #app — pure CSS, reacts to theme instantly,
+/* Body background behind the receded #app - pure CSS, reacts to theme instantly,
    no JS timing flash. data-theme is set on <html> before Vue even mounts. */
 [data-theme="dark"] body,
 html.dark body {
@@ -402,7 +402,7 @@ html.dark body {
     transform-origin: left center;
 }
 
-/* Pusher state — desktop only */
+/* Pusher state - desktop only */
 @media (min-width: 769px) {
     #app.landing-menu-open {
         transform: translateX(-220px) scale(0.88) rotate(-1.5deg);
@@ -414,7 +414,7 @@ html.dark body {
     }
 }
 
-/* Mobile — no push effect, sidebar just overlays */
+/* Mobile - no push effect, sidebar just overlays */
 @media (max-width: 768px) {
     #app.landing-menu-open {
         transform: none;

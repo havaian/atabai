@@ -16,7 +16,7 @@ import {
 } from '../schemas/membership.schema';
 
 /**
- * Both fields optional — empty body is rejected at the service layer so this
+ * Both fields optional - empty body is rejected at the service layer so this
  * stays a partial-update shape without each field repeating the validation.
  */
 export class UpdateMembershipDto {

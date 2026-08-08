@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Post-build asset copier — mirrors what nest-cli.json's `assets` config did
+// Post-build asset copier - mirrors what nest-cli.json's `assets` config did
 // under `nest build`. We now build with direct `tsc -p tsconfig.build.json`,
 // which only emits .js/.d.ts/.js.map files; non-TS resources (seed JSON, etc.)
 // need to be copied manually so they're discoverable at runtime via

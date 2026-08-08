@@ -37,7 +37,7 @@ export interface UpsertProfileArgs {
   /** When present, REPLACES the whole bankAccounts list. */
   bankAccounts?: OrgBankAccountInput[];
   /**
-   * Accounting policy (methodology §9). Partial — only the provided fields are
+   * Accounting policy (methodology §9). Partial - only the provided fields are
    * merged onto the existing policy, so a PATCH can change one block without
    * resubmitting all six. `undefined` leaves the stored policy untouched.
    */
@@ -47,14 +47,14 @@ export interface UpsertProfileArgs {
 /**
  * CRUD for the ledger-side OrganizationProfile (architecture doc §8.1).
  *
- * 1:1 with access-spine Organization. Created lazily — the first time the
+ * 1:1 with access-spine Organization. Created lazily - the first time the
  * ledger bootstrap or any profile-touching operation runs for an org. The
  * service stays small on purpose: profile management touches few fields
  * and doesn't carry workflow state.
  *
  * `transitionDate` updates are intentionally narrowly-scoped to bootstrap
  * flows. Once set, changing it would invalidate every downstream balance
- * and adjustment — there's no API exposed for changing it in flight, only
+ * and adjustment - there's no API exposed for changing it in flight, only
  * for clearing/setting during initial setup. A bigger "redo first-time
  * adoption" workflow lives in [[project-ledger-spine]] open questions.
  */
@@ -89,7 +89,7 @@ export class OrganizationProfilesService {
       // §3.5: account-number uniqueness is validated on the FULL number
       // ("по всем знакам целиком"), not a prefix. The PATCH replaces the
       // whole list, so a duplicate here would mean the same physical account
-      // entered twice — reject the whole write rather than silently storing
+      // entered twice - reject the whole write rather than silently storing
       // both. Comparison is on the trimmed accountNumber exactly as the
       // schema stores it.
       const seen = new Set<string>();
@@ -121,7 +121,7 @@ export class OrganizationProfilesService {
         'settlementDepth',
         'payrollDetail',
         'leaveReserve',
-        // Array — the dotted $set replaces the whole list, which is what the
+        // Array - the dotted $set replaces the whole list, which is what the
         // edit form submits (methodology дополнение §6: manual, full-set edit).
         'nonMonetaryAccounts',
       ];

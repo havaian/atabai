@@ -3,7 +3,7 @@
 **NSBU → IFRS transformation platform for Uzbekistan.**
 
 ATABAI automates the transformation of Uzbek national-standard accounting (НСБУ / NSBU)
-into IFRS-compliant outputs. Go-to-market is **B2B2B** — sold through IFRS specialists who
+into IFRS-compliant outputs. Go-to-market is **B2B2B** - sold through IFRS specialists who
 each serve many client companies, not direct to end companies.
 
 The single non-negotiable constraint is **transformation accuracy**. Specialists stake their
@@ -11,9 +11,9 @@ professional reputation on the output; a single error gets the product permanent
 Every architectural decision below serves that constraint first.
 
 > **Reference documents**
-> - **`ATABAI — Architecture: Current vs Target`** (May 2026) is the authoritative design spec.
+> - **`ATABAI - Architecture: Current vs Target`** (May 2026) is the authoritative design spec.
 >   Code comments reference it as *"architecture doc §N"*. Sections 6–7 of that doc are
->   **settled decisions** — do not re-litigate them without explicit instruction.
+>   **settled decisions** - do not re-litigate them without explicit instruction.
 > - **This README** is the live source of truth for *what exists today and how to run it*.
 >   It reflects the real codebase, not the design intent.
 >
@@ -28,17 +28,17 @@ Every architectural decision below serves that constraint first.
 
 The transformation follows the IFRS specialist's **7-step methodology** (`Методика_МСФО.xlsx`):
 
-1. **Reporting period + transition date** — first-time adoption seeds an opening balance, a
+1. **Reporting period + transition date** - first-time adoption seeds an opening balance, a
    comparative year, and a full reporting period. Multi-period from the start.
-2. **IFRS accounting policy + chart of accounts** — analyze NSBU↔IFRS differences; build the
+2. **IFRS accounting policy + chart of accounts** - analyze NSBU↔IFRS differences; build the
    account-level map.
-3. **Reclassification** — move the trial balance (ОСВ) into the model and regroup
+3. **Reclassification** - move the trial balance (ОСВ) into the model and regroup
    (long/short-term, etc.). **Financial result unchanged.**
-4. **Adjustment entries** — the real IFRS work: fixed assets (IAS 16), leases (IFRS 16),
+4. **Adjustment entries** - the real IFRS work: fixed assets (IAS 16), leases (IFRS 16),
    receivables / ECL (IFRS 9), revenue / control-transfer timing (IFRS 15). **This is where
    numbers move.**
-5. **Deferred tax** — temporary differences from step 4 → deferred tax assets/liabilities (IAS 12).
-6. **Assembly** — consolidate into the four final statements (Balance Sheet, P&L, Cash Flow, SOCE).
+5. **Deferred tax** - temporary differences from step 4 → deferred tax assets/liabilities (IAS 12).
+6. **Assembly** - consolidate into the four final statements (Balance Sheet, P&L, Cash Flow, SOCE).
 7. **Notes & disclosures.**
 
 Upstream of the methodology, a **bank-statement posting module** (`Bank_statements.xlsx`, sheet
@@ -68,7 +68,7 @@ nsbu_base  →  reclassification  →  adjustment  →  ifrs
  client base)   no Δ result)         entries)        the row, derived)
 ```
 
-- **`nsbu_base`** is immutable client input — it is what the client files with the regulator.
+- **`nsbu_base`** is immutable client input - it is what the client files with the regulator.
   The trust proposition is *"your NSBU untouched; exactly what we changed and why; the IFRS result."*
 - **`reclassification`** regroups statements with zero net change to the financial result.
 - **`adjustment`** is the **only** layer where numbers move. Each carries an IFRS standard tag,
@@ -77,13 +77,13 @@ nsbu_base  →  reclassification  →  adjustment  →  ifrs
   doesn't recompute on every read.
 
 All money is **`Decimal128`** end to end (`ledger/decimal-arithmetic.ts`). Number-typed money
-would let `0.1 × 100 ≠ 10.0` land in client-visible reports — unacceptable on the ledger spine.
+would let `0.1 × 100 ≠ 10.0` land in client-visible reports - unacceptable on the ledger spine.
 
 > **Two transformation subsystems currently coexist.** The new **ledger spine**
 > (`backend/src/ledger/*`) above is the real model and the future. A **legacy processor pipeline**
 > (`backend/src/processors/*`) still exists: it does *presentation-only reclass* of one finished
 > NSBU form into IFRS sections, changes zero numbers, and is wired to the old file-upload UI. It
-> is being superseded — see §6.
+> is being superseded - see §6.
 
 ---
 
@@ -121,7 +121,7 @@ would let `0.1 × 100 ≠ 10.0` land in client-visible reports — unacceptable 
 │       └── router/  components/  locales/  layouts/
 ├── shared/types/       Cross-cutting API types
 ├── docker-compose.yml
-└── ATABAI — Architecture: Current vs Target.docx   (design spec; referenced as "arch doc §N")
+└── ATABAI - Architecture: Current vs Target.docx   (design spec; referenced as "arch doc §N")
 ```
 
 ---
@@ -133,7 +133,7 @@ would let `0.1 × 100 ≠ 10.0` land in client-visible reports — unacceptable 
 | Schema | Purpose |
 |--------|---------|
 | `OrganizationProfile` | Ledger-side org requisites: transition date, base currency, ИНН, legal name, settlement accounts. (Kept separate from the access-spine `Organization`.) |
-| `ReportingPeriod` | Period dimension — kinds `opening` / `comparative` / `reporting` / `regular`; lockable. |
+| `ReportingPeriod` | Period dimension - kinds `opening` / `comparative` / `reporting` / `regular`; lockable. |
 | `ChartOfAccount` | The 507-account NSBU chart. **`Вид` (А/П/КА/КП)** drives intrinsic sign (КА/КП = contra). `subconto1/2/3` analytical dimensions. |
 | `AccountBalance` | The universal currency. Unique `balance_key` = `(org, period, accountCode, layer, subconto1/2/3)`. Opening/period/closing × debit/credit, all `Decimal128`. |
 | `JournalEntry` | Posting header. `source` (`bank_statement` / `opening_balance` / `reclassification` / `adjustment` / `manual`), `layer`, `status` (`draft` / `committed` / `reversed`), optional `adjustmentMeta`. |
@@ -175,24 +175,24 @@ GET    /organizations/:orgId/ledger/periods/:periodId/{balances,matrix}
 
 ---
 
-## 6. Build status — what's done and what's next
+## 6. Build status - what's done and what's next
 
 The build sequence (arch doc §9) is: **(1)** ledger spine + periods + ОСВ → **(2)** bank posting
 engine → **(3)** adjustments, one IFRS standard at a time behind specialist sign-off; the
 **access spine** lands in parallel.
 
 ### Done
-- **Access spine** — `User` / `Membership` / `Organization`, capability-based authorization
+- **Access spine** - `User` / `Membership` / `Organization`, capability-based authorization
   (`nsbu.base.{read,write}`, `ifrs.overlay.{read,write}`), org-scoped guard, never-last-admin,
   invite-accept (incl. pending email invites).
-- **Ledger spine** — all schemas, chart seed (507 accts), period model + transition seeding,
+- **Ledger spine** - all schemas, chart seed (507 accts), period model + transition seeding,
   ОСВ ingestion, `BalanceRollupService`, matrix endpoint.
-- **Bank posting engine** — complete per the ТЗ.
-- **Adjustments** — the **generic** draft→commit→reverse engine.
-- **Frontend** — full ledger UI: onboarding, organizations + switcher, periods, chart-of-accounts,
+- **Bank posting engine** - complete per the ТЗ.
+- **Adjustments** - the **generic** draft→commit→reverse engine.
+- **Frontend** - full ledger UI: onboarding, organizations + switcher, periods, chart-of-accounts,
   OSV upload, bank upload + review (green/yellow/red), adjustment list/editor, matrix view.
 
-### Not yet built — the NSBU → IFRS close
+### Not yet built - the NSBU → IFRS close
 This is the live work. Steps 5–7 and the second half of step 3 have no service yet:
 
 | # | Service | Methodology step | Why it matters |
@@ -208,7 +208,7 @@ This is the live work. Steps 5–7 and the second half of step 3 have no service
 **2 → 1 → 3**, then layer in per-standard engines (4) afterward.
 
 ### Known operational tails (documented in code)
-- No bootstrap "resume" path on partial failure — a `LedgerResetService` (super_admin) is planned.
+- No bootstrap "resume" path on partial failure - a `LedgerResetService` (super_admin) is planned.
 - Bank running-balance excludes drafts, so sequentially-dependent payments in one statement need
   batch commits.
 - ОСВ ingestion writes balances with null subconto; the bank engine is subconto-aware. Grain can
@@ -242,7 +242,7 @@ Other scripts: `npm run build` · `npm run typecheck` · `npm run lint`
 
 ### Docker Compose
 `docker compose` brings up **redis**, **backend**, and **frontend-prod**. **MongoDB is expected
-to be external** (managed/host) — its service block is intentionally commented out in
+to be external** (managed/host) - its service block is intentionally commented out in
 `docker-compose.yml`; point `MONGO_*` in `.env` at your instance.
 
 ```bash
@@ -257,8 +257,8 @@ docker compose logs -f backend
 ## 8. Conventions
 
 - **English** for code and all technical identifiers; **Russian** for product/business discussion.
-- **`Decimal128`** for every monetary value — never `number`.
-- Authorization resolves through the org-membership helper/guard — **never inline `=== userId`
+- **`Decimal128`** for every monetary value - never `number`.
+- Authorization resolves through the org-membership helper/guard - **never inline `=== userId`
   ownership checks** (keeps a future Firm/Practice layer additive).
 - ExcelJS formula strings: **strip the leading `=`** (ExcelJS adds one).
 - Account sign comes from **`Вид`** (А/П/КА/КП), not a hand-set per-row flag.

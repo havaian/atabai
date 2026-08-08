@@ -32,7 +32,7 @@ export function buildWinstonOptions(logLevel: string): winston.LoggerOptions {
     },
   });
 
-  // File format — verbose, includes context + meta JSON, easy to grep.
+  // File format - verbose, includes context + meta JSON, easy to grep.
   const fileFormat = winston.format.combine(
     tashkentTimestamp,
     winston.format.errors({ stack: true }),
@@ -56,7 +56,7 @@ export function buildWinstonOptions(logLevel: string): winston.LoggerOptions {
     }),
   );
 
-  // Console format — colorized, compact.
+  // Console format - colorized, compact.
   const consoleFormat = winston.format.combine(
     winston.format.colorize({ all: true }),
     tashkentTimestamp,

@@ -54,7 +54,7 @@ const NEW = {
     },
     onboarding: {
         title:    { ru: 'Настройка новой организации', en: 'Set up your organization', uz: 'Tashkilotni sozlash' },
-        subtitle: { ru: 'Несколько шагов — и ваш учётный контур готов к работе.', en: 'A few steps and your accounting workspace is ready.', uz: 'Bir necha qadam — va sizning hisobot maydoningiz tayyor.' },
+        subtitle: { ru: 'Несколько шагов - и ваш учётный контур готов к работе.', en: 'A few steps and your accounting workspace is ready.', uz: 'Bir necha qadam - va sizning hisobot maydoningiz tayyor.' },
         step1:    { ru: 'Реквизиты', en: 'Identity', uz: 'Maʼlumotlar' },
         step2:    { ru: 'Период перехода', en: 'Transition', uz: 'Oʻtish davri' },
         step3:    { ru: 'Подтверждение', en: 'Review', uz: 'Tasdiqlash' },
@@ -113,7 +113,7 @@ const NEW = {
     },
     bankPreview: {
         title:    { ru: 'Предпросмотр проводок', en: 'Posting preview', uz: 'Koʻrib chiqish' },
-        subtitle: { ru: 'Зелёные — готовы. Жёлтые — проверьте. Красные — выберите счёт.', en: 'Green: ready. Yellow: verify. Red: pick account.', uz: 'Yashil/Sariq/Qizil.' },
+        subtitle: { ru: 'Зелёные - готовы. Жёлтые - проверьте. Красные - выберите счёт.', en: 'Green: ready. Yellow: verify. Red: pick account.', uz: 'Yashil/Sariq/Qizil.' },
         colors: {
             green:  { ru: 'распознано', en: 'recognized', uz: 'aniqlandi' },
             yellow: { ru: 'проверить', en: 'verify', uz: 'tekshiring' },
@@ -131,7 +131,7 @@ const NEW = {
             fix: { ru: 'Исправить', en: 'Fix', uz: 'Tuzatish' },
         },
         empty:        { ru: 'Нет черновиков для этой загрузки.', en: 'No drafts for this upload.', uz: 'Qoralama yoʻq.' },
-        commitHelp:   { ru: 'Красные строки ({red}) будут пропущены — исправьте их перед проведением.', en: 'Red rows ({red}) will be skipped — fix before posting.', uz: 'Qizil satrlar ({red}) oʻtkazib yuboriladi.' },
+        commitHelp:   { ru: 'Красные строки ({red}) будут пропущены - исправьте их перед проведением.', en: 'Red rows ({red}) will be skipped - fix before posting.', uz: 'Qizil satrlar ({red}) oʻtkazib yuboriladi.' },
         commitButton: { ru: 'Провести выписку', en: 'Post statement', uz: 'Qabul qilish' },
         committing:   { ru: 'Проводим…', en: 'Posting…', uz: 'Qabul qilinmoqda…' },
         editor: {

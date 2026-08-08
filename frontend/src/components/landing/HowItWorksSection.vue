@@ -122,7 +122,7 @@
                                                 <div class="p-res-c">Amount</div>
                                             </div>
                                             <div class="p-res-row">
-                                                <div class="p-res-c">PPE — Cost</div>
+                                                <div class="p-res-c">PPE - Cost</div>
                                                 <div class="p-res-c">1,250,000</div>
                                             </div>
                                             <div class="p-res-row p-res-row-s">

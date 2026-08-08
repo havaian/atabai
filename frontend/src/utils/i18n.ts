@@ -18,7 +18,7 @@ export const availableLocales = [
 // Default locale
 const DEFAULT_LOCALE = 'ru'
 
-// API base — uses the same base URL convention as the rest of the app.
+// API base - uses the same base URL convention as the rest of the app.
 // We use a bare axios call here (no apiClient) because i18n must load before
 // auth state exists and we don't want translations to fail if auth fails.
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api'
@@ -51,7 +51,7 @@ export function setLocale(locale) {
 
 /**
  * Stage 1: Load locale messages from bundled JSON files (synchronous-fast).
- * This is the bootstrap source — guarantees UI has translations before any
+ * This is the bootstrap source - guarantees UI has translations before any
  * network request. After init, fetchAndMergeFromAPI() overlays fresh values
  * from the database on top.
  */
@@ -64,10 +64,10 @@ async function loadLocaleMessages(locale) {
         // stable when admin UI strings change).
         try {
             const adminMessages = await import(`../locales/admin-${locale}.json`)
-            // Admin file has shape { admin: {...} } — merge at root level
+            // Admin file has shape { admin: {...} } - merge at root level
             return { ...baseMessages, ...adminMessages.default }
         } catch (adminErr) {
-            // No admin locale for this language — proceed without it
+            // No admin locale for this language - proceed without it
             return baseMessages
         }
     } catch (error) {
@@ -94,14 +94,14 @@ async function loadLocaleMessages(locale) {
 
 // Last seen bundle versions per app. When server reports a newer version,
 // we re-fetch that app's bundle for the current locale.
-const lastSeenVersions = {} // { user: 3, admin: 7 } — keyed by app
+const lastSeenVersions = {} // { user: 3, admin: 7 } - keyed by app
 
 /**
  * Deep-merge source into target. Mutates target. Strings in source override
  * strings in target. New keys are added. Nested objects merge recursively.
  *
  * This is needed because vue-i18n setLocaleMessage replaces the whole message
- * tree — we want to PRESERVE bundled values for keys the DB doesn't have,
+ * tree - we want to PRESERVE bundled values for keys the DB doesn't have,
  * while overlaying DB values for keys that DO exist.
  */
 function deepMerge(target, source) {
@@ -143,7 +143,7 @@ async function fetchAndMergeApp(app, locale) {
         const merged = deepMerge({ ...current }, data.bundle)
         i18n.global.setLocaleMessage(locale, merged)
     } catch (err) {
-        // Don't log every 401/network blip — the bundled JSON is already serving.
+        // Don't log every 401/network blip - the bundled JSON is already serving.
         // Only log unexpected errors to help diagnose real issues.
         if (err.response && err.response.status >= 500) {
             console.warn(`Locale bundle fetch failed for ${app}/${locale}:`, err.message)
@@ -156,7 +156,7 @@ async function fetchAndMergeApp(app, locale) {
  * Called after the initial bundled load and on each locale change.
  */
 async function fetchAndMergeFromAPI(locale) {
-    // Run both in parallel — they're independent
+    // Run both in parallel - they're independent
     await Promise.all([
         fetchAndMergeApp('user', locale),
         fetchAndMergeApp('admin', locale)
@@ -164,13 +164,13 @@ async function fetchAndMergeFromAPI(locale) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Stage 3: Polling for version changes — DISABLED
+// Stage 3: Polling for version changes - DISABLED
 // ─────────────────────────────────────────────────────────────────────────────
 // Locale strings do not change on the scale of seconds. The DB overlay is
 // loaded once at boot (Stage 2) and re-fetched on locale change. When an
 // admin edits a key in the locale editor, refreshLocaleFromAPI() is called
 // directly in that session so the editor sees its own change immediately.
-// Other users pick up the new strings on next page load — that is fine.
+// Other users pick up the new strings on next page load - that is fine.
 //
 // The previous version polled /api/locales/version every 30s for every
 // open tab of every user, which is enormous wasted traffic for a feature
@@ -258,7 +258,7 @@ async function initializeI18n() {
             isInitialized = true
 
             // Stage 2 + 3: kick off DB overlay + polling in the background.
-            // Don't await — UI is already usable with bundled translations.
+            // Don't await - UI is already usable with bundled translations.
             // Errors are swallowed inside these functions.
             fetchAndMergeFromAPI(locale).catch(() => { })
             startBundleVersionPoll()
@@ -299,7 +299,7 @@ export async function changeLocale(newLocale) {
         delete lastSeenVersions.admin
         fetchAndMergeFromAPI(validLocale).catch(() => { })
 
-        // URL sync — swap the locale segment in the current URL so the
+        // URL sync - swap the locale segment in the current URL so the
         // change is reflected as a normal navigation. This is what makes
         // the URL the session source of truth: copy/paste a /uz/... URL
         // and it opens in Uzbek for anyone.
@@ -313,14 +313,14 @@ export async function changeLocale(newLocale) {
                 const { stripLocale, SUPPORTED_LOCALES } = await import('@/router')
                 const current = router.currentRoute.value
                 const urlLocale = current.params?.locale
-                // Only push if the URL's locale differs from the target —
+                // Only push if the URL's locale differs from the target -
                 // otherwise we'd push the same path and noop, or worse
                 // confuse history when changeLocale is called as a side
                 // effect of a route change.
                 if (urlLocale !== validLocale && SUPPORTED_LOCALES.includes(validLocale)) {
                     const rest = stripLocale(current.fullPath)
                     const newPath = `/${validLocale}${rest === '/' ? '/' : rest}`
-                    // Use replace not push — otherwise a language toggle
+                    // Use replace not push - otherwise a language toggle
                     // pollutes the back button with duplicate URLs.
                     router.replace(newPath).catch(() => { })
                 }

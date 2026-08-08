@@ -1,9 +1,9 @@
 # syntax=docker/dockerfile:1.6
 
 # Three-stage build:
-#   1. prod-deps — installs ONLY production deps (fast, parallel with builder)
-#   2. builder   — installs all deps + runs the TS build
-#   3. runner    — copies prod-deps' node_modules + builder's dist
+#   1. prod-deps - installs ONLY production deps (fast, parallel with builder)
+#   2. builder   - installs all deps + runs the TS build
+#   3. runner    - copies prod-deps' node_modules + builder's dist
 #
 # This avoids the 17-minute `npm prune --production` step the previous
 # Dockerfile had, which was 90% of the build wall-time. BuildKit runs stages
@@ -18,10 +18,10 @@ WORKDIR /app
 
 COPY package*.json ./
 
-# --omit=dev  — skip devDependencies entirely (no typescript, no @nestjs/cli, etc.)
-# --no-audit  — skip the npm security audit (this was the bulk of the prune
+# --omit=dev  - skip devDependencies entirely (no typescript, no @nestjs/cli, etc.)
+# --no-audit  - skip the npm security audit (this was the bulk of the prune
 #               time; run `npm audit` out-of-band in CI if you want it)
-# --no-fund   — silence the "consider funding" footer
+# --no-fund   - silence the "consider funding" footer
 RUN npm ci --omit=dev --no-audit --no-fund
 
 
@@ -34,7 +34,7 @@ COPY package*.json ./
 COPY tsconfig*.json ./
 COPY nest-cli.json ./
 
-# Full install — includes typescript, @nestjs/cli, type packages, etc. so the
+# Full install - includes typescript, @nestjs/cli, type packages, etc. so the
 # build step has everything it needs. These deps NEVER reach the runner image.
 RUN npm ci --no-audit --no-fund
 
@@ -46,7 +46,7 @@ COPY public ./public
 COPY scripts ./scripts
 
 # `npm run build` runs `tsc -p tsconfig.build.json && node ./scripts/copy-assets.mjs`
-# — emits dist/ + copies seed JSON. No `npm prune` here (that's the 17-min step).
+# - emits dist/ + copies seed JSON. No `npm prune` here (that's the 17-min step).
 RUN npm run build
 
 

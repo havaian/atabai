@@ -2,7 +2,7 @@
  * src/integrations/currencies/cbu.client.ts
  *
  * Thin client over the Central Bank of Uzbekistan public JSON API. It only
- * fetches and normalizes — no persistence, no caching (that's the service).
+ * fetches and normalizes - no persistence, no caching (that's the service).
  *
  * Endpoints (base = CBU_API_BASE_URL):
  *   GET {base}/                     all currencies, latest

@@ -1,7 +1,7 @@
 // @ts-nocheck
 /* eslint-disable */
 /**
- * Bank statement preview store — bank ТЗ §7.
+ * Bank statement preview store - bank ТЗ §7.
  *
  * Holds the in-flight draft batch (one upload's drafts), their preview
  * colors, and the actions the operator performs on them. Each upload gets
@@ -35,7 +35,7 @@ export const useBankStore = defineStore('bank', () => {
         try {
             const fd = new FormData()
             fd.append('file', file)
-            // The org's own account this statement belongs to (bank ТЗ §1) —
+            // The org's own account this statement belongs to (bank ТЗ §1) -
             // the org-side leg of every posting in the batch.
             if (statementAccountNumber) {
                 fd.append('statementAccountNumber', statementAccountNumber)

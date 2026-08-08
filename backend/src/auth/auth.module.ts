@@ -59,7 +59,7 @@ export class AuthModule implements OnApplicationBootstrap {
   constructor(private readonly whitelist: WhitelistService) {}
 
   /**
-   * Idempotent startup seed — auto-seeds the email whitelist from existing
+   * Idempotent startup seed - auto-seeds the email whitelist from existing
    * users on first enable so we don't lock anyone out.
    */
   async onApplicationBootstrap(): Promise<void> {

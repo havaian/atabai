@@ -27,7 +27,7 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
  * Preserves every legacy route, error code and response shape.
  *
  * Note: the throttler config applied here matches the legacy `/api/auth/*`
- * limiter (30 / 15min, success-skipped). Successful logins are NOT counted —
+ * limiter (30 / 15min, success-skipped). Successful logins are NOT counted -
  * Nest's ThrottlerGuard charges on every request, so we set a high enough
  * limit (30) that occasional retries won't fingerprint legit users.
  */

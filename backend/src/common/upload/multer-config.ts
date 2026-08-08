@@ -10,7 +10,7 @@ import type { AppConfig } from '../../config/configuration';
 
 /**
  * Multer disk-storage configuration. Lives in backend/src/common/upload/ as
- * shared infrastructure — the ledger bank-statement upload endpoint uses it.
+ * shared infrastructure - the ledger bank-statement upload endpoint uses it.
  * Lifted here out of files/utils/ so it survives the removal of the legacy
  * transformation upload pipeline (files/).
  *

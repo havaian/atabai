@@ -3,10 +3,10 @@
  *
  * Reference distribution (507-account NSBU chart): A=242, П=154, КА=32, КП=4, T=75.
  *
- * Sign handling is intrinsic to the account via this field — per architecture
+ * Sign handling is intrinsic to the account via this field - per architecture
  * doc §4.3, the legacy `isNegative` flag hand-set on form rows is retired and
  * replaced by Вид-derived sign. КА/КП are contra accounts that flip the natural
- * sign of their base type (an active contra reduces an active balance — e.g.
+ * sign of their base type (an active contra reduces an active balance - e.g.
  * 0200 Амортизация ОС contra-reduces 0100 Основные средства).
  */
 export const ACCOUNT_VID = {
@@ -25,14 +25,14 @@ export const isAccountVid = (value: unknown): value is AccountVid =>
   typeof value === 'string' && (ALL_ACCOUNT_VIDS as readonly string[]).includes(value);
 
 /**
- * "Natural" side of an account — which column its closing balance lives on
+ * "Natural" side of an account - which column its closing balance lives on
  * in the trial balance.
  *
  * For an Active account, a positive balance sits in the Debit column.
  * For a Passive account, a positive balance sits in the Credit column.
  * Contras have the *opposite* natural side from their base type: КА is
  * credit-natural (reduces an active base), КП is debit-natural.
- * Technical accounts are sign-neutral by convention here — the styler must
+ * Technical accounts are sign-neutral by convention here - the styler must
  * still respect what the source data carries.
  */
 export type AccountSide = 'debit' | 'credit' | 'neutral';

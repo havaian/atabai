@@ -171,7 +171,7 @@ export const useAdminStore = defineStore('admin', () => {
         try {
             await apiClient.post('/admin/2fa/logout', {}, adminRequestConfig())
         } catch (err) {
-            // Idempotent — swallow errors
+            // Idempotent - swallow errors
         }
         clearAdminSession()
     }

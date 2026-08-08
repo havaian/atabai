@@ -25,7 +25,7 @@ import { computed } from 'vue'
  * Why not a strict <select>?
  *  - ATABAI's IFRS taxonomy is still forming. A strict select would force
  *    admin to first add a new IFRS classification through a separate UI
- *    before mapping a row — two clicks for what should be one.
+ *    before mapping a row - two clicks for what should be one.
  *  - Combobox shows existing values as suggestions (typo protection: see
  *    "PP&E - Gross" already in list → don't type "PP&E Gross BV") but
  *    allows entering new values inline.
@@ -36,7 +36,7 @@ import { computed } from 'vue'
  * but the upside is zero maintenance.
  *
  * Once methodology stabilizes (~6-12 months), we can pass `strict: true`
- * to lock the input to existing values — but that's a future feature.
+ * to lock the input to existing values - but that's a future feature.
  */
 const props = defineProps({
     modelValue: { type: String, default: '' },

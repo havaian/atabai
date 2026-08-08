@@ -91,7 +91,7 @@
                     </Transition>
                 </div>
 
-                <!-- Billing / Privacy — coming soon stubs -->
+                <!-- Billing / Privacy - coming soon stubs -->
                 <div v-else class="panel-coming-soon">
                     <div class="coming-soon-icon">
                         <component :is="currentTab?.icon" class="w-6 h-6" />
@@ -461,7 +461,7 @@ function selectTheme(value) {
     }
 
     /* Tabs become a flex-wrap pill row instead of overflow-x scroll.
-       Scrolling tab strips are bad UX on mobile — users miss off-screen items. */
+       Scrolling tab strips are bad UX on mobile - users miss off-screen items. */
     .settings-nav {
         flex-direction: row;
         flex-wrap: wrap;

@@ -30,7 +30,7 @@ export interface RollupResult {
  * Materializes AccountBalance rows from the canonical posting history.
  *
  * The bank engine and the manual-entry engine both write JournalEntryLine
- * rows but those don't move balances on their own — balances are the
+ * rows but those don't move balances on their own - balances are the
  * universal-currency materialized view (architecture doc §3.2). When an
  * entry flips to `committed`, we recompute every AccountBalance row whose
  * key matches one of the entry's lines.
@@ -44,13 +44,13 @@ export interface RollupResult {
  *   2. Look up the existing AccountBalance row for that key:
  *      a. Found → overwrite both opening and period columns from the fresh
  *         aggregation, recompute closing via `netSides(opening+period)`.
- *         Opening is derived, not preserved — the OSV importer is gone so
+ *         Opening is derived, not preserved - the OSV importer is gone so
  *         postings are authoritative for both columns.
  *      b. Not found → create a fresh row from the aggregated opening + period
  *         totals. `source = 'posting_rollup'`.
  *
  * Single-layer note (architecture doc §3.2): the ledger is a general
- * ledger with one kind of figure — the real, posted balance. The old
+ * ledger with one kind of figure - the real, posted balance. The old
  * four-layer matrix (nsbu_base → reclassification → adjustment → ifrs)
  * was a transformation overlay and has been removed; there is no longer
  * a `layer` dimension on the key, and no derived IFRS layer to compute.
@@ -75,7 +75,7 @@ export class BalanceRollupService {
 
   /**
    * Recompute balances for a set of explicit keys. Used by the bank engine
-   * after committing a batch — the caller passes the union of line-keys
+   * after committing a batch - the caller passes the union of line-keys
    * across the committed entries.
    */
   async rollupKeys(
@@ -104,7 +104,7 @@ export class BalanceRollupService {
       // Opening comes from opening_balance-source postings, period from all
       // other committed postings (methodology дополнение §1.5). Closing is
       // their net. Opening is now DERIVED from postings, not preserved from a
-      // prior osv_import value — the OSV importer is removed and postings are
+      // prior osv_import value - the OSV importer is removed and postings are
       // ground truth, so a fresh recompute is authoritative for both columns.
       const grossDebit = addDecimals(sums.openingDebit, sums.periodDebit);
       const grossCredit = addDecimals(sums.openingCredit, sums.periodCredit);

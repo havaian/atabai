@@ -58,7 +58,7 @@ export class BootstrapOrganizationDto {
   @Max(2100, { message: 'firstReportingYear must be at or before 2100' })
   firstReportingYear!: number;
 
-  // Accounting policy chosen in onboarding (methodology §9). Optional — any
+  // Accounting policy chosen in onboarding (methodology §9). Optional - any
   // blocks the client set; the rest default in the bootstrap service.
   @IsOptional()
   @ValidateNested()

@@ -19,7 +19,7 @@
             </div>
 
             <!-- Which of the org's own accounts this statement belongs to
-                 (bank ТЗ §1). Required — it's the org-side leg of every posting. -->
+                 (bank ТЗ §1). Required - it's the org-side leg of every posting. -->
             <div class="upload-account">
                 <label class="upload-account-label" for="stmt-account">
                     {{ $t('bankUpload.statementAccount') }}
@@ -32,7 +32,7 @@
                 >
                     <option value="" disabled>{{ $t('bankUpload.statementAccountPlaceholder') }}</option>
                     <option v-for="acc in accounts" :key="acc.accountNumber" :value="acc.accountNumber">
-                        {{ acc.label ? `${acc.label} — ${acc.accountNumber}` : acc.accountNumber }}
+                        {{ acc.label ? `${acc.label} - ${acc.accountNumber}` : acc.accountNumber }}
                         <template v-if="acc.currency">({{ acc.currency }})</template>
                     </option>
                 </select>
@@ -120,7 +120,7 @@ const periodLabel = computed(() => {
 const accounts = computed(() => ledger.profile?.bankAccounts || [])
 const selectedAccount = ref('')
 
-// Warn when the chosen account has no NSBU ledger account mapped yet — internal
+// Warn when the chosen account has no NSBU ledger account mapped yet - internal
 // transfers on it will land RED until it's set under Organization requisites.
 const selectedAccountUnmapped = computed(() => {
     if (!selectedAccount.value) return false
@@ -133,7 +133,7 @@ onMounted(async () => {
         ledger.fetchPeriods().catch(() => {}),
         ledger.fetchProfile().catch(() => {}),
     ])
-    // Preselect when there's exactly one account — nothing to choose.
+    // Preselect when there's exactly one account - nothing to choose.
     if (accounts.value.length === 1) {
         selectedAccount.value = accounts.value[0].accountNumber
     }

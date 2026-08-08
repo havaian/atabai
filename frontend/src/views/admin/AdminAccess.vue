@@ -72,7 +72,7 @@
                     <tbody>
                         <tr v-for="e in entries" :key="e._id">
                             <td class="adm-mono">{{ e.email }}</td>
-                            <td class="adm-text-sm">{{ e.note || '—' }}</td>
+                            <td class="adm-text-sm">{{ e.note || '-' }}</td>
                             <td class="adm-text-sm">
                                 {{ (e.addedBy && e.addedBy.email) || $t('admin.access.systemAuthor') }}
                             </td>
@@ -139,7 +139,7 @@ const bulkNote = ref('')
 const bulkSubmitting = ref(false)
 const bulkResult = ref(null)
 
-// Defensive — adminInfo may be null during initial render
+// Defensive - adminInfo may be null during initial render
 const canEdit = computed(() => {
     const info = adminStore.adminInfo
     return !!(info && info.role === 'super_admin')
@@ -321,7 +321,7 @@ onMounted(load)
     border: none;
     color: var(--adm-danger-text);
     /* Slight de-emphasis when at rest so the button doesn't pull the eye
-       on every row — full opacity returns on hover. */
+       on every row - full opacity returns on hover. */
     opacity: 0.7;
     font-size: 18px;
     line-height: 1;

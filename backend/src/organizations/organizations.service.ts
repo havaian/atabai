@@ -29,7 +29,7 @@ import type { InviteMemberDto } from './dto/invite-member.dto';
 import type { UpdateMembershipDto } from './dto/update-membership.dto';
 
 /**
- * Access spine service — architecture doc §7.6.
+ * Access spine service - architecture doc §7.6.
  *
  * Invariants enforced here, never in the schema:
  *   - Never-last-admin: a demotion, revocation or role change that would leave
@@ -43,7 +43,7 @@ import type { UpdateMembershipDto } from './dto/update-membership.dto';
  * Authorization checks live in the controller via OrgMembershipGuard. The service
  * trusts that req.membership exists and belongs to the right org. The
  * never-last-admin check IS authorization-adjacent but lives here because it
- * touches multiple rows and needs the org_id context — pushing it to the guard
+ * touches multiple rows and needs the org_id context - pushing it to the guard
  * would duplicate the same DB read.
  */
 @Injectable()
@@ -77,7 +77,7 @@ export class OrganizationsService {
         acceptedAt: new Date(),
       });
     } catch (err) {
-      // Don't leave an orphan org — we'd never let a tenant exist without an admin.
+      // Don't leave an orphan org - we'd never let a tenant exist without an admin.
       await this.orgModel.deleteOne({ _id: organization._id });
       throw err;
     }
@@ -171,7 +171,7 @@ export class OrganizationsService {
 
     const existingUser = await this.userModel.findOne({ email: normalizedEmail }).lean();
 
-    // Guard against duplicate invites — schema's partial-unique indexes catch
+    // Guard against duplicate invites - schema's partial-unique indexes catch
     // race conditions, but we want a clear error message rather than E11000.
     if (existingUser) {
       const collision = await this.membershipModel.findOne({
@@ -287,7 +287,7 @@ export class OrganizationsService {
 
     if (dto.role !== undefined) {
       membership.role = dto.role;
-      // Admins implicitly hold every capability — clear the list to avoid drift.
+      // Admins implicitly hold every capability - clear the list to avoid drift.
       if (dto.role === 'admin') membership.capabilities = [];
     }
     if (dto.capabilities !== undefined && membership.role !== 'admin') {
@@ -345,7 +345,7 @@ export class OrganizationsService {
   /**
    * Called after a user authenticates (registers or logs in). Finds any
    * memberships pending against their email address with a null userId and
-   * resolves them by stamping the userId. Status stays 'invited' — the user
+   * resolves them by stamping the userId. Status stays 'invited' - the user
    * still has to accept the invite from their dashboard.
    *
    * Idempotent: no-op when no pending invites exist for the email.
@@ -394,7 +394,7 @@ export class OrganizationsService {
   }
 
   /**
-   * Never-last-admin invariant — throws if the org has no OTHER active admin
+   * Never-last-admin invariant - throws if the org has no OTHER active admin
    * beyond the one whose role / status is about to change.
    */
   private async requireAnotherAdminExists(

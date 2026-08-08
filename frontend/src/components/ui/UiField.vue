@@ -81,7 +81,7 @@ function onInput(e) {
 .ui-field-control:hover:not(:focus):not(:disabled) { border-color: rgba(124, 58, 237, 0.25); }
 .ui-field-control:focus { border-color: var(--ws-purple); box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.15); }
 .ui-field-control:disabled { background: var(--ws-surface-2); color: var(--ws-text-3); cursor: not-allowed; }
-/* Tint the native date-picker glyph in dark theme — the default black glyph
+/* Tint the native date-picker glyph in dark theme - the default black glyph
    would otherwise vanish against a dark field. */
 [data-theme="dark"] .ui-field-control[type="date"]::-webkit-calendar-picker-indicator {
     filter: invert(0.7) sepia(1) saturate(5) hue-rotate(230deg);

@@ -1,5 +1,5 @@
 /**
- * Shared API contracts — referenced by both backend (response shapes) and
+ * Shared API contracts - referenced by both backend (response shapes) and
  * frontend (axios call sites). Pure type definitions; zero runtime code so
  * either project can `import type` from here without bundling anything.
  *

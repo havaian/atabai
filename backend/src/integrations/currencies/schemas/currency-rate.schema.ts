@@ -1,7 +1,7 @@
 /**
  * src/integrations/currencies/schemas/currency-rate.schema.ts
  *
- * MongoDB cache of CBU exchange rates, one row per (currency, date) — the
+ * MongoDB cache of CBU exchange rates, one row per (currency, date) - the
  * caching-per-currency/date-pair strategy the methodology recommends. Rates are
  * quoted by the CBU as UZS per `nominal` units of the currency. Money is
  * Decimal128 like everywhere else in the ledger; no floats.
@@ -44,7 +44,7 @@ export class CurrencyRate {
   @Prop({ type: String, default: null })
   nameRu!: string | null;
 
-  /** Where the row came from — always 'cbu' for now, kept for future providers. */
+  /** Where the row came from - always 'cbu' for now, kept for future providers. */
   @Prop({ type: String, default: 'cbu' })
   source!: string;
 

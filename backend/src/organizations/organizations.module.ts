@@ -13,7 +13,7 @@ import { Organization, OrganizationSchema } from './schemas/organization.schema'
  * Owns the Organization + Membership Mongoose models, the OrgMembershipGuard,
  * the REST surface (/api/organizations) and the registration-time pending-invite
  * resolver. AuthModule injects OrganizationsService back into AuthService to
- * call resolvePendingInvitesForUser after Google login — hence the forwardRef.
+ * call resolvePendingInvitesForUser after Google login - hence the forwardRef.
  *
  * Any feature module that protects routes with OrgMembershipGuard (or queries
  * memberships directly) must import OrganizationsModule.

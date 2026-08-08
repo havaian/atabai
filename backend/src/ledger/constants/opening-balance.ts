@@ -1,9 +1,9 @@
 /**
- * Opening-balance entry constants (methodology §6.2 — «ввод начальных остатков»).
+ * Opening-balance entry constants (methodology §6.2 - «ввод начальных остатков»).
  *
  * A company that migrates onto ATABAI mid-life brings incoming counterparty
- * balances. Filipp confirmed (02.07.26) these are entered PER DOCUMENT — one
- * open contract/invoice at a time, with its own amount and date — because
+ * balances. Filipp confirmed (02.07.26) these are entered PER DOCUMENT - one
+ * open contract/invoice at a time, with its own amount and date - because
  * settlement is strict per document (§6.3): a later payment gashes the exact
  * document it was made against, so an opening debt needs its document to be
  * settleable. The rare case where the source carries only a per-counterparty
@@ -16,12 +16,12 @@
 import { BANK_POSTING_ACCOUNTS } from '../bank/bank-accounts';
 
 /**
- * Technical offset account — 1C's «Вспомогательный счёт», chart code 0000.
+ * Technical offset account - 1C's «Вспомогательный счёт», chart code 0000.
  *
  * Each counterparty opening leg (4010/4310/6010/6310) is balanced against this
  * account so the entry is a valid double-entry on its own. It is a REAL seeded
  * chart account, deliberately distinct from the '000' UNRESOLVED_ACCOUNT
- * placeholder — so opening-balance lines are never treated as RED/unresolved.
+ * placeholder - so opening-balance lines are never treated as RED/unresolved.
  * Across a full opening-balance migration (once equity and the other accounts
  * are entered too) 0000 nets to zero; while only counterparty balances are in,
  * it holds their net, exactly as an auxiliary account is meant to.
@@ -32,10 +32,10 @@ export const OPENING_BALANCE_OFFSET_ACCOUNT = '0000';
  * The four counterparty-settlement positions an opening balance can sit on.
  * Per §6.3 the full position of a counterparty spans BOTH the debt account and
  * the advance account on each side, so all four are accepted:
- *   - RECEIVABLE       4010 (Дт) — a customer owes us
- *   - ADVANCE_ISSUED   4310 (Дт) — we prepaid a supplier
- *   - PAYABLE          6010 (Кт) — we owe a supplier
- *   - ADVANCE_RECEIVED 6310 (Кт) — a customer prepaid us
+ *   - RECEIVABLE       4010 (Дт) - a customer owes us
+ *   - ADVANCE_ISSUED   4310 (Дт) - we prepaid a supplier
+ *   - PAYABLE          6010 (Кт) - we owe a supplier
+ *   - ADVANCE_RECEIVED 6310 (Кт) - a customer prepaid us
  * The codes are reused from the bank engine's posting accounts so the two
  * modules can never drift apart on which code means what.
  */
@@ -53,10 +53,10 @@ export const ALL_OPENING_BALANCE_ACCOUNTS: readonly OpeningBalanceAccount[] =
   Object.values(OPENING_BALANCE_ACCOUNTS);
 
 /**
- * Debit-natured opening accounts (assets — receivable + advance issued). The
+ * Debit-natured opening accounts (assets - receivable + advance issued). The
  * other two (payable + advance received) are liabilities and post on credit.
  * Direction is intrinsic to the account, so a positive amount plus the account
- * fully determines the leg — the caller never passes a direction.
+ * fully determines the leg - the caller never passes a direction.
  */
 const DEBIT_OPENING_ACCOUNTS: ReadonlySet<string> = new Set([
   OPENING_BALANCE_ACCOUNTS.RECEIVABLE,

@@ -1,7 +1,7 @@
 // @ts-nocheck
 /* eslint-disable */
 /**
- * Ledger store — periods, chart of accounts, balances.
+ * Ledger store - periods, chart of accounts, balances.
  *
  * Scoped to the active organization in [[organizations]]. Calls into the
  * org-scoped REST surface (/api/organizations/:orgId/ledger/...). When the
@@ -94,7 +94,7 @@ export const useLedgerStore = defineStore("ledger", () => {
   }
 
   // Orginfo lookup by INN for the requisites form (name/address/phone/email).
-  // Returns { configured, suggestion } — the view decides whether to apply it.
+  // Returns { configured, suggestion } - the view decides whether to apply it.
   async function fetchOrgInfoByInn(inn) {
     if (!orgs.currentOrgId) throw new Error("No active organization");
     const resp = await apiClient.get(
@@ -109,7 +109,7 @@ export const useLedgerStore = defineStore("ledger", () => {
     try {
       // Backend doesn't yet expose a periods list endpoint (only created via bootstrap).
       // Until that controller lands we synthesise the periods from the bootstrap response
-      // — the org store re-fetches /organizations after bootstrap and the response carries
+      // - the org store re-fetches /organizations after bootstrap and the response carries
       // periods. For existing orgs we leave the list empty; the UI shows "fetch periods"
       // affordances against this gap.
       // Try the endpoint anyway in case it's been added; tolerate 404.
@@ -118,7 +118,7 @@ export const useLedgerStore = defineStore("ledger", () => {
       return periods.value;
     } catch (err) {
       if (err?.response?.status === 404) {
-        // Endpoint not yet exposed — leave the cache as-is rather than blanking it.
+        // Endpoint not yet exposed - leave the cache as-is rather than blanking it.
         return periods.value;
       }
       error.value =
@@ -140,7 +140,7 @@ export const useLedgerStore = defineStore("ledger", () => {
       return chart.value;
     } catch (err) {
       if (err?.response?.status === 404) {
-        // Endpoint not yet exposed — keep the cache. Per architecture doc
+        // Endpoint not yet exposed - keep the cache. Per architecture doc
         // §8.3 a chart view is in the plan; the backend READ endpoint is
         // a follow-up to the seed service.
         return chart.value;

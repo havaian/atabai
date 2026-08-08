@@ -24,7 +24,7 @@ export const REDIS_CLIENT = Symbol('REDIS_CLIENT');
  *     no log noise.
  *   - When enabled, we attempt one connect with a short retry budget. If the
  *     server is unreachable we mark Redis disabled for the rest of the process
- *     lifetime — no infinite reconnect spam. To re-enable, restart the app
+ *     lifetime - no infinite reconnect spam. To re-enable, restart the app
  *     after starting Redis.
  */
 @Injectable()
@@ -38,14 +38,14 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
 
   async onModuleInit(): Promise<void> {
     const features = this.configService.get('features', { infer: true });
-    // `features.redis` doesn't exist on AppConfig today — we read REDIS_ENABLED
+    // `features.redis` doesn't exist on AppConfig today - we read REDIS_ENABLED
     // directly from process.env so the toggle works without a config-schema
     // change. Default: disabled, matching legacy production behavior.
     const explicitly = String(process.env.REDIS_ENABLED ?? '').toLowerCase();
     this.enabled = explicitly === 'true';
 
     if (!this.enabled) {
-      this.logger.log('Redis disabled (REDIS_ENABLED != true) — cache helpers will fail-soft');
+      this.logger.log('Redis disabled (REDIS_ENABLED != true) - cache helpers will fail-soft');
       void features; // silence unused
       return;
     }
@@ -67,7 +67,7 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
         reconnectStrategy: (retries) => {
           if (retries >= 5) {
             this.logger.warn('Redis: max reconnect attempts reached; giving up');
-            return new Error('Redis unreachable — gave up after 5 retries');
+            return new Error('Redis unreachable - gave up after 5 retries');
           }
           return Math.min(100 * (retries + 1), 500);
         },
@@ -121,7 +121,7 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
     }
   }
 
-  /** Throws if the client is not yet ready — used by callers that require Redis. */
+  /** Throws if the client is not yet ready - used by callers that require Redis. */
   getClient(): RedisClientType {
     if (!this.client) throw new Error('Redis client not initialized');
     return this.client;
@@ -143,7 +143,7 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
   }
 
   // ---------------------------------------------------------------------------
-  // Cache helpers — fail-soft on every operation so callers don't need to
+  // Cache helpers - fail-soft on every operation so callers don't need to
   // branch on Redis availability. When Redis is disabled or unreachable, gets
   // return null, dels/incrs return 0, sets are no-ops.
   // ---------------------------------------------------------------------------

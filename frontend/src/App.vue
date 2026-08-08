@@ -13,7 +13,7 @@
             <Footer />
         </div>
 
-        <!-- Loading Overlay (hidden on auth pages — they render their own spinner) -->
+        <!-- Loading Overlay (hidden on auth pages - they render their own spinner) -->
         <Transition name="overlay-fade">
             <div v-if="authStore.isLoading && !isAuthRoute" class="overlay-loader">
                 <div class="overlay-loader-card">

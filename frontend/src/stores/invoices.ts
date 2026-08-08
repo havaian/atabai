@@ -1,10 +1,10 @@
 /**
- * Invoice-registry preview store — methodology §7 (build phase 3).
+ * Invoice-registry preview store - methodology §7 (build phase 3).
  *
  * Mirrors the bank store's upload → preview → fix → commit shape so the mental
  * model carries straight over, but talks to the invoice-registry endpoints and
  * carries a `direction` (incoming / outgoing) instead of a statement account.
- * Unlike the bank upload there is no background job — the invoice upload
+ * Unlike the bank upload there is no background job - the invoice upload
  * returns its summary inline.
  *
  * Consumed by InvoiceUploadView (uploadInvoice), InvoiceBatchesView
@@ -27,7 +27,7 @@ export interface InvoiceOperatorLine {
 }
 
 /** A single invoice draft as returned by the drafts endpoint. Kept permissive
- *  — the preview view reads a subset and tolerates extra fields. */
+ *  - the preview view reads a subset and tolerates extra fields. */
 export interface InvoiceDraft {
   id: string
   sourceRef: string | null
@@ -91,7 +91,7 @@ export const useInvoicesStore = defineStore('invoices', () => {
     return e?.response?.data?.message || e?.message || fallback
   }
 
-  /** Upload a Didox registry export. `direction` says which file it is — the
+  /** Upload a Didox registry export. `direction` says which file it is - the
    *  operator picks it (it isn't in the file), same shape as the bank module
    *  picking the statement account. Returns the uploadId + summary. */
   async function uploadInvoice(args: {

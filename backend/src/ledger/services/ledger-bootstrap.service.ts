@@ -16,7 +16,7 @@ import { OrganizationProfilesService } from './organization-profiles.service';
 import { PeriodsService } from './periods.service';
 
 export interface BootstrapNewOrganizationArgs {
-  /** The user creating the org — becomes the bootstrap admin. */
+  /** The user creating the org - becomes the bootstrap admin. */
   actor: UserDocument;
 
   /** Display name (access-spine Organization.name). */
@@ -25,7 +25,7 @@ export interface BootstrapNewOrganizationArgs {
   /** Legal name on rendered statements. Defaults to `name` when omitted. */
   legalName?: string;
 
-  /** Org's own ИНН — for bank-statement attribution (bank ТЗ §2). */
+  /** Org's own ИНН - for bank-statement attribution (bank ТЗ §2). */
   inn?: string;
 
   /** Defaults to 'UZS'. */
@@ -38,7 +38,7 @@ export interface BootstrapNewOrganizationArgs {
   firstReportingYear: number;
 
   /**
-   * Accounting policy chosen in onboarding (methodology §9). Partial — any
+   * Accounting policy chosen in onboarding (methodology §9). Partial - any
    * fields the client set; the rest fall back to DEFAULT_ACCOUNTING_POLICY so
    * the stored policy is always complete.
    */
@@ -57,13 +57,13 @@ export interface BootstrapResult {
  * The single entry point that turns an empty intent into a usable tenant.
  *
  * An Organization without a chart of accounts and without reporting periods
- * is a useless shell — the bank engine, ОСВ ingestion and adjustment engine
+ * is a useless shell - the bank engine, ОСВ ingestion and adjustment engine
  * all require both. So the bootstrap is one-shot: every successful call
  * leaves the org ready for ОСВ upload.
  *
  * Step order matters:
  *   1. Create the access-spine Organization + admin Membership (atomic
- *      via OrganizationsService — the membership write rolls the org back
+ *      via OrganizationsService - the membership write rolls the org back
  *      if it fails).
  *   2. Upsert the ledger-side OrganizationProfile (transition date, currency,
  *      ИНН, legal name).
@@ -79,10 +79,10 @@ export interface BootstrapResult {
  * deployment, and rolling back individual writes is fragile. The retry
  * story is: step 2 is an upsert (re-runs harmlessly), step 3 is
  * idempotent (skip-if-exists), step 4 currently rejects re-runs with
- * `TRANSITION_ALREADY_SEEDED` — which means a partial bootstrap leaves
+ * `TRANSITION_ALREADY_SEEDED` - which means a partial bootstrap leaves
  * the operator stuck. Mitigation: a follow-up `LedgerResetService` (out
  * of scope here) for super_admins to wipe a half-bootstrapped org. Until
- * that exists, the operator must run bootstrap atomically — there's no
+ * that exists, the operator must run bootstrap atomically - there's no
  * "resume" path.
  */
 @Injectable()
@@ -100,7 +100,7 @@ export class LedgerBootstrapService {
   ): Promise<BootstrapResult> {
     const { actor, name, transitionDate, firstReportingYear } = args;
 
-    // 1. Org + admin Membership — atomic at the OrganizationsService layer.
+    // 1. Org + admin Membership - atomic at the OrganizationsService layer.
     const { organization, membership } =
       await this.organizations.createOrganization(actor, { name });
 
@@ -111,7 +111,7 @@ export class LedgerBootstrapService {
     let periods: ReportingPeriodDocument[];
 
     try {
-      // 2. Ledger profile — transition date, requisites, baseline currency,
+      // 2. Ledger profile - transition date, requisites, baseline currency,
       // and the 6-block accounting policy. Merge client overrides onto the
       // defaults so the inserted profile always carries a COMPLETE policy
       // (avoids the dotted-path partial-insert edge in the upsert).
@@ -127,7 +127,7 @@ export class LedgerBootstrapService {
         },
       });
 
-      // 3. Chart of accounts — 507 NSBU accounts, idempotent.
+      // 3. Chart of accounts - 507 NSBU accounts, idempotent.
       chartSeedResult = await this.chartSeed.seedForOrganization(organization._id);
 
       // 4. First-time-adoption periods (opening + comparative + reporting).
@@ -138,7 +138,7 @@ export class LedgerBootstrapService {
         actor,
       });
     } catch (err) {
-      // The org now exists in a partial state — log loudly so operators can
+      // The org now exists in a partial state - log loudly so operators can
       // recover via super_admin tooling, but re-throw so the caller knows
       // the bootstrap did NOT succeed.
       this.logger.error(err, {

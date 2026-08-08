@@ -7,14 +7,14 @@ export type OrganizationModel = Model<Organization>;
 /**
  * Tenant entity for the access spine (architecture doc §7.6).
  *
- * An Organization cannot exist without an admin Membership row — that
+ * An Organization cannot exist without an admin Membership row - that
  * invariant lives in the service layer (creation always pairs the org with
  * a Membership), not in the schema. The `createdBy` field is informational
  * only: ownership is carried on Membership.role === 'admin', and an org may
  * have its primary admin transferred without changing `createdBy`.
  *
  * Org requisites (settlement accounts, bank codes) deliberately do NOT live
- * here — they belong to the ledger spine and attach to a sibling entity to
+ * here - they belong to the ledger spine and attach to a sibling entity to
  * avoid scope creep. See architecture doc §8.1.
  */
 @Schema({

@@ -1,4 +1,4 @@
-// Second i18n merge — adds keys for PeriodsView mutations and the new
+// Second i18n merge - adds keys for PeriodsView mutations and the new
 // OrganizationMembersView. Same merge mechanics as tmp-merge-i18n.cjs.
 const fs = require('fs');
 const path = require('path');

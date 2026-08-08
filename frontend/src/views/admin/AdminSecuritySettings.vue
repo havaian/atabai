@@ -40,7 +40,7 @@
                 </div>
             </div>
 
-            <!-- Admin 2FA session — reset/end the current verified session.
+            <!-- Admin 2FA session - reset/end the current verified session.
                  Moved here from the admin sidebar (it was a nav button); this
                  is its natural home alongside the other 2FA controls. After
                  reset the admin must re-enter their code to continue. -->
@@ -165,7 +165,7 @@ async function loadStatus() {
     try {
         status.value = await adminStore.fetch2FAStatus()
     } catch (err) {
-        // ignore — admin layout will surface bigger issues
+        // ignore - admin layout will surface bigger issues
     } finally {
         loading.value = false
     }
@@ -226,7 +226,7 @@ async function copyBackupCodes() {
 }
 
 function formatDate(d) {
-    if (!d) return '—'
+    if (!d) return '-'
     const localeMap = { ru: 'ru-RU', en: 'en-GB', uz: 'uz-UZ' }
     return new Date(d).toLocaleString(localeMap[locale.value] || 'ru-RU', {
         day: '2-digit', month: '2-digit', year: 'numeric',
@@ -242,7 +242,7 @@ onMounted(loadStatus)
     margin-top: 1em;
 }
 
-/* Success-tinted variant of .adm-card — used for the "new backup codes
+/* Success-tinted variant of .adm-card - used for the "new backup codes
    generated" notice. The base .adm-card lives in admin.css; this only
    tints the background + border via the same green token pair used by
    .adm-badge--*-success so the tone is consistent across the admin UI. */

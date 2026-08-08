@@ -29,7 +29,7 @@ apiClient.interceptors.request.use(
 
         // Attach the active organization id on every request so the backend
         // can org-scope user-side endpoints (Task 6). Read from the SAME
-        // localStorage key the organizations store persists into — we read
+        // localStorage key the organizations store persists into - we read
         // directly here rather than importing the store because this module
         // is initialized before Pinia (createPinia() runs in main.ts after
         // this file is imported). The store mirrors the server's chosen
@@ -37,7 +37,7 @@ apiClient.interceptors.request.use(
         // the value seen here is whatever the backend last blessed.
         //
         // Skip the header when explicitly suppressed via config.skipActiveOrgHeader
-        // — useful for the /session call itself if you want to ask "what's my
+        // - useful for the /session call itself if you want to ask "what's my
         // current active org?" without prejudicing the answer (we don't use
         // that escape hatch today, but leaving the door open).
         if (!config.skipActiveOrgHeader) {
@@ -48,7 +48,7 @@ apiClient.interceptors.request.use(
                 }
             } catch (_) {
                 // localStorage may be unavailable (Safari private mode,
-                // embedded contexts). Non-fatal — backend will just treat
+                // embedded contexts). Non-fatal - backend will just treat
                 // the request as having no active org and most user-side
                 // list endpoints will return empty.
             }

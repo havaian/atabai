@@ -81,7 +81,7 @@ export class OrganizationsController {
   }
 
   /**
-   * GET /api/organizations/session — authoritative session resolver.
+   * GET /api/organizations/session - authoritative session resolver.
    *
    * The frontend must NOT gate UI on its own localStorage idea of
    * "current org". It calls this endpoint after auth and on every org
@@ -94,7 +94,7 @@ export class OrganizationsController {
    *     can hide actions the user couldn't perform anyway).
    *
    * This is the spine the sidebar nav reads. Same response on every call;
-   * if the client lies about activeOrgId the server overrides — keeping
+   * if the client lies about activeOrgId the server overrides - keeping
    * presentation and authorization in sync at the only place they can
    * actually be in sync.
    *
@@ -130,7 +130,7 @@ export class OrganizationsController {
       }
       // Otherwise fall through: the client's claim is invalid (stale
       // localStorage, revoked membership, etc.) and we DON'T silently
-      // promote them into another org by accident — but we do default
+      // promote them into another org by accident - but we do default
       // to one below so they have a usable session.
     }
     if (!activeOrgId && items.length > 0) {
@@ -139,7 +139,7 @@ export class OrganizationsController {
     }
 
     // Derive the capabilities applicable RIGHT NOW. Admin role implies
-    // all capabilities — the frontend uses this set to decide which nav
+    // all capabilities - the frontend uses this set to decide which nav
     // items to render and which actions to enable.
     const isAdmin = activeMembership?.role === 'admin';
     const capabilities = activeMembership

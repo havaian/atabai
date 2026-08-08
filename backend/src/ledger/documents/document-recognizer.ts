@@ -9,7 +9,7 @@
  * without touching callers.
  *
  * Pure module: regex/string only, no I/O, no DB. It does NOT decide which
- * document a payment settles — it only surfaces candidates from the text. The
+ * document a payment settles - it only surfaces candidates from the text. The
  * actual match against a counterparty's stored documents (and the final pick)
  * happens at the call site / on the preview screen, where Filipp's rule holds:
  * if nothing matches, the accountant creates or picks one; a payment is never
@@ -21,7 +21,7 @@ export interface RecognizedDocumentReference {
   number: string;
   /** Parsed date if one sits near the number, else null. */
   date: Date | null;
-  /** The surrounding phrase the match came from — for UI highlighting/debug. */
+  /** The surrounding phrase the match came from - for UI highlighting/debug. */
   context: string;
 }
 
@@ -90,7 +90,7 @@ function findNearestDate(text: string, anchorIndex: number): Date | null {
     }
   }
   // Only treat a date as "belonging" to the number if it's reasonably close
-  // (within ~40 chars) — otherwise it's probably an unrelated date in the text.
+  // (within ~40 chars) - otherwise it's probably an unrelated date in the text.
   return best && best.dist <= 40 ? best.date : null;
 }
 
@@ -98,7 +98,7 @@ function findNearestDate(text: string, anchorIndex: number): Date | null {
  * Recognize document references in a payment-purpose string.
  *
  * Returns one entry per number token found, with a nearby date if present,
- * grouped by kind. Empty array when nothing recognizable is in the text — the
+ * grouped by kind. Empty array when nothing recognizable is in the text - the
  * caller then falls back to manual create/pick (Filipp's §7.2 rule).
  */
 export function recognizeDocumentReferences(

@@ -7,7 +7,7 @@ import { JwtTokenService } from '../jwt-token.service';
 
 /**
  * Attaches the user to the request if a valid token is provided, but never
- * fails the request when missing/invalid — for endpoints where logged-in vs.
+ * fails the request when missing/invalid - for endpoints where logged-in vs.
  * anonymous changes behavior but both are allowed. Ports the legacy
  * `optionalAuth` middleware.
  */
@@ -36,7 +36,7 @@ export class OptionalJwtAuthGuard implements CanActivate {
       req.user = user;
       req.token = token;
     } catch {
-      // ignore — anonymous is fine
+      // ignore - anonymous is fine
     }
     return true;
   }

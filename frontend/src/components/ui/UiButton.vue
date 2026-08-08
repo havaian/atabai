@@ -1,7 +1,7 @@
 <!-- frontend/src/components/ui/UiButton.vue
-     Shared button for the app surface. Uses the .ui-btn namespace — NOT the
+     Shared button for the app surface. Uses the .ui-btn namespace - NOT the
      global .btn-* classes, which belong to the landing page and are not
-     theme-aware — so every app button is driven by --ws-* tokens and renders
+     theme-aware - so every app button is driven by --ws-* tokens and renders
      correctly in both light and dark themes (fixes the white-on-white hover).
 
      Variants: primary | ghost | secondary | danger. Pass icon + label as the
@@ -57,11 +57,11 @@ defineProps({
 .ui-btn--sm { padding: 6px 12px; font-size: 0.84rem; }
 .ui-btn--block { display: flex; width: 100%; }
 
-/* primary — solid purple */
+/* primary - solid purple */
 .ui-btn--primary { background: var(--ws-purple); color: #fff; border-color: var(--ws-purple); }
 .ui-btn--primary:hover:not(:disabled) { background: #6D28D9; border-color: #6D28D9; color: #fff; }
 
-/* ghost — transparent; hover lands a token surface + token text so it stays
+/* ghost - transparent; hover lands a token surface + token text so it stays
    readable in BOTH themes (the bug we are fixing). */
 .ui-btn--ghost { background: transparent; color: var(--ws-text-2); border-color: var(--ws-border-2); }
 .ui-btn--ghost:hover:not(:disabled) {
@@ -70,11 +70,11 @@ defineProps({
     border-color: var(--ws-border);
 }
 
-/* secondary — outlined purple, for tertiary actions */
+/* secondary - outlined purple, for tertiary actions */
 .ui-btn--secondary { background: transparent; color: var(--ws-purple); border-color: var(--ws-purple); }
 .ui-btn--secondary:hover:not(:disabled) { background: var(--ws-purple-lt); color: var(--ws-purple); }
 
-/* danger — destructive */
+/* danger - destructive */
 .ui-btn--danger { background: transparent; color: #ef4444; border-color: rgba(239, 68, 68, 0.5); }
 .ui-btn--danger:hover:not(:disabled) {
     background: rgba(239, 68, 68, 0.12);

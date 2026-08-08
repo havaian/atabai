@@ -1,9 +1,9 @@
 <!-- frontend/src/views/app/InvoicePreviewView.vue
      Invoice posting preview (methodology §7, build phase 3). Draft invoice
      postings grouped by color:
-       GREEN  — every line has an account; will post as-is.
-       YELLOW — auto-created counterparty needs verification.
-       RED    — at least one invoice line has no account yet; the operator
+       GREEN  - every line has an account; will post as-is.
+       YELLOW - auto-created counterparty needs verification.
+       RED    - at least one invoice line has no account yet; the operator
                 picks the per-line accounts before posting.
      RED invoices are skipped on commit until every line account is set. -->
 <template>

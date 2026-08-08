@@ -16,7 +16,7 @@ export interface SeedAppResult {
  * Ported from backend/src/admin/localeSeed.js.
  *
  * Flattens nested JSON locale files, then bulk-inserts missing keys. DB is
- * authoritative after first bootstrap — existing keys are never overwritten.
+ * authoritative after first bootstrap - existing keys are never overwritten.
  */
 @Injectable()
 export class LocaleSeedService {
@@ -114,7 +114,7 @@ export class LocaleSeedService {
       if (results.user.inserted > 0) parts.push(`user: ${results.user.inserted}/${results.user.total} new`);
       if (results.admin.inserted > 0)
         parts.push(`admin: ${results.admin.inserted}/${results.admin.total} new`);
-      if (parts.length > 0) this.logger.log(`Locale seed inserted keys — ${parts.join(', ')}`);
+      if (parts.length > 0) this.logger.log(`Locale seed inserted keys - ${parts.join(', ')}`);
     } catch (err) {
       this.logger.error(`Locale seed at startup failed: ${(err as Error).message}`);
     }

@@ -4,7 +4,7 @@ import { SkipThrottle } from '@nestjs/throttler';
 @Controller()
 export class AppController {
   /**
-   * Root info — preserved from the legacy Express handler.
+   * Root info - preserved from the legacy Express handler.
    */
   @Get('/')
   @SkipThrottle()
@@ -18,7 +18,7 @@ export class AppController {
   }
 
   /**
-   * Health endpoint — used by container orchestrators / load balancers.
+   * Health endpoint - used by container orchestrators / load balancers.
    * Skips rate limiting because it's hit on a fast cadence by infra probes.
    */
   @Get('/health')

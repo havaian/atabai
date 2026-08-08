@@ -20,19 +20,19 @@ import type { OrganizationProfileDocument } from './schemas/organization-profile
 import { OrganizationProfilesService } from './services/organization-profiles.service';
 
 /**
- * Organization requisites (ledger-side profile) — view + admin edit.
+ * Organization requisites (ledger-side profile) - view + admin edit.
  *
  * The requisites are created once during onboarding (bootstrap) and were
  * previously unreachable afterward: no read, no edit, and `bankAccounts` had
  * no writer at all. This controller closes both gaps.
  *
- *   GET   .../ledger/profile   — any active member with nsbu.base.read.
+ *   GET   .../ledger/profile   - any active member with nsbu.base.read.
  *                                Returns the profile, lazily creating an
  *                                empty one if the org never had it touched.
- *   PATCH .../ledger/profile   — admins only (@RequireOrgAdmin). Updates the
+ *   PATCH .../ledger/profile   - admins only (@RequireOrgAdmin). Updates the
  *                                editable requisites + bankAccounts.
  *
- * `transitionDate` is intentionally read-only here — it anchors every
+ * `transitionDate` is intentionally read-only here - it anchors every
  * downstream balance, so it is set during first-time-adoption setup only and
  * is surfaced for display, never accepted on the PATCH body.
  */
@@ -100,11 +100,11 @@ export class OrganizationProfileController {
    * "заполнить по ИНН" button on the profile edit screen: the admin enters an
    * ИНН, this returns the enrichable fields as `suggestion`, the form is
    * populated, and the admin saves via PATCH. The р/с is deliberately NOT
-   * returned — it is sourced from the bank statement, not orginfo.
+   * returned - it is sourced from the bank statement, not orginfo.
    *
    * Response shape matches the frontend: `{ configured, suggestion }`.
    * `configured` tells the UI whether the provider has credentials at all
-   * (без ключей — не ходит в сеть), so it can show "lookup unavailable"
+   * (без ключей - не ходит в сеть), so it can show "lookup unavailable"
    * instead of "not found". `suggestion` is null on a miss so the UI falls
    * back to manual entry.
    */

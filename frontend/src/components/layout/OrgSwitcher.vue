@@ -4,7 +4,7 @@
      collapsed so it still surfaces the active context.
 
      When the user has no orgs OR exactly one, the dropdown becomes a
-     read-only label — there's nothing to switch to. The "Create / Manage"
+     read-only label - there's nothing to switch to. The "Create / Manage"
      entry at the bottom of the menu is the universal escape hatch. -->
 <template>
     <div class="org-switcher" :class="{ 'org-switcher--collapsed': collapsed }" ref="rootRef">
@@ -99,7 +99,7 @@ function select(orgId) {
     }
     orgs.setCurrentOrg(orgId)
     close()
-    // Reload current route data — simplest cross-page invalidation.
+    // Reload current route data - simplest cross-page invalidation.
     router.push('/app/dashboard')
 }
 
@@ -125,7 +125,7 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', handleDocumentCl
 /* OrgSwitcher lives inside the sidebar chrome, so it styles against the
    --sb-* token family (same as the nav items around it) rather than the
    content-area --ws-* tokens. This is what makes hover/active states and
-   text colors match the surrounding sidebar in both themes — the previous
+   text colors match the surrounding sidebar in both themes - the previous
    version referenced an undefined --primary/--accent/--text/--border set,
    which fell back to browser-default blue and near-black text (invisible
    on the dark sidebar). */
@@ -157,7 +157,7 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', handleDocumentCl
 }
 
 /* When the menu is open, keep the trigger in its hover/active appearance
-   so it reads as "this is the thing that's currently expanded" — and
+   so it reads as "this is the thing that's currently expanded" - and
    crucially uses the purple-tinted sidebar active bg, not blue. */
 .org-switcher-trigger--open {
     background: var(--sb-item-active-bg);
@@ -175,7 +175,7 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', handleDocumentCl
     width: 28px;
     height: 28px;
     border-radius: 6px;
-    /* Product violet — was var(--primary) (undefined → browser blue). */
+    /* Product violet - was var(--primary) (undefined → browser blue). */
     background: var(--ws-purple);
     color: #fff;
     display: flex;
@@ -273,7 +273,7 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', handleDocumentCl
     background: var(--sb-item-hover);
 }
 
-/* Active org row — purple tint bg + violet text, was blue (var(--primary)). */
+/* Active org row - purple tint bg + violet text, was blue (var(--primary)). */
 .org-switcher-menu-item--active {
     background: var(--sb-item-active-bg);
     color: var(--sb-text-active);

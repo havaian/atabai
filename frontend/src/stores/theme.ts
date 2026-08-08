@@ -10,7 +10,7 @@ import { ref, computed } from 'vue'
 
 const STORAGE_KEY = 'atabai-theme'
 
-    // Apply theme immediately before Vue even mounts — eliminates flash
+    // Apply theme immediately before Vue even mounts - eliminates flash
     ; (() => {
         try {
             const saved = localStorage.getItem(STORAGE_KEY)

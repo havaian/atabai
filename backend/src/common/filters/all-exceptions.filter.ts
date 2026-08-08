@@ -40,7 +40,7 @@ interface AppErrorShape {
 }
 
 /**
- * Global exception filter — ports the legacy errorHandler middleware.
+ * Global exception filter - ports the legacy errorHandler middleware.
  *
  * Behavior preserved:
  *   - Mongoose CastError → 404 RESOURCE_NOT_FOUND

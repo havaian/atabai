@@ -12,7 +12,7 @@ import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import type { AppConfig } from './config/configuration';
 
 async function bootstrap(): Promise<void> {
-  // bufferLogs intentionally disabled — with it on, bootstrap logs are held in
+  // bufferLogs intentionally disabled - with it on, bootstrap logs are held in
   // memory until `app.useLogger(...)` is called below. If anything goes wrong
   // during NestFactory.create (a DI error, a misconfigured module) those logs
   // never flush and you get a silent crash in docker. Cheap to lose Winston
@@ -35,14 +35,14 @@ async function bootstrap(): Promise<void> {
   // Trust proxy (behind reverse proxy like nginx)
   app.set('trust proxy', 1);
 
-  // Body parsers — large limit to support spreadsheet payloads
+  // Body parsers - large limit to support spreadsheet payloads
   // Stripe webhook needs raw body, so we add a route-level raw parser inside the stripe controller.
   const { json, urlencoded } = await import('express');
   app.use(json({ limit: '50mb' }));
   app.use(urlencoded({ limit: '50mb', extended: true }));
   app.use(cookieParser());
 
-  // Security headers — preserves the CSP from the legacy Express app
+  // Security headers - preserves the CSP from the legacy Express app
   app.use(
     helmet({
       crossOriginEmbedderPolicy: false,
@@ -59,7 +59,7 @@ async function bootstrap(): Promise<void> {
 
   app.use(compression());
 
-  // CORS — explicit allowlist (matches legacy behavior, supports null origin for native apps)
+  // CORS - explicit allowlist (matches legacy behavior, supports null origin for native apps)
   const allowedOrigins = [
     frontendUrl,
     'http://localhost:8080',
@@ -78,14 +78,14 @@ async function bootstrap(): Promise<void> {
   });
 
   // Global API prefix matches legacy /api/* routes. Versioning is intentionally
-  // NOT enabled — the legacy backend exposed routes at `/api/...` directly and
+  // NOT enabled - the legacy backend exposed routes at `/api/...` directly and
   // the frontend hard-codes those paths. Enabling URI versioning would force
   // every URL to include a version segment, which produced 404s for every
   // request the frontend made (every controller was Mapped as "version: 1"
   // in the boot logs, so the routes existed but only at `/v1/api/...`).
   app.setGlobalPrefix('api', { exclude: ['health', '/'] });
 
-  // Class-validator/transformer pipeline — DTOs are validated on every request
+  // Class-validator/transformer pipeline - DTOs are validated on every request
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -95,7 +95,7 @@ async function bootstrap(): Promise<void> {
     }),
   );
 
-  // Global exception filter — mirrors legacy errorHandler shape
+  // Global exception filter - mirrors legacy errorHandler shape
   app.useGlobalFilters(app.get(AllExceptionsFilter));
 
   // Graceful shutdown hooks (Nest will close modules in reverse dependency order)

@@ -10,7 +10,7 @@ import { UsersService } from '../../users/users.service';
 import { WhitelistService } from '../whitelist.service';
 
 /**
- * Google OAuth2 passport strategy — used by the `/api/auth/google` redirect
+ * Google OAuth2 passport strategy - used by the `/api/auth/google` redirect
  * flow (the legacy backend also supports a frontend-driven manual code
  * exchange, handled by AuthService.handleManualGoogleCallback).
  *

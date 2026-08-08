@@ -214,7 +214,7 @@ import {
     border: 1px solid var(--landing-border);
 }
 
-/* Flow diagram — compact, no wrap */
+/* Flow diagram - compact, no wrap */
 .bf-flow {
     display: grid;
     grid-template-columns: 1fr auto 1fr auto 1fr;

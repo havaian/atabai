@@ -9,7 +9,7 @@
 
 import { ref } from 'vue'
 
-// Module-level singleton — shared across all imports
+// Module-level singleton - shared across all imports
 const menuOpen = ref(false)
 
 export function useLandingMenu() {

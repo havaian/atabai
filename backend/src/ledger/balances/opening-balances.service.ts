@@ -57,7 +57,7 @@ export interface OpeningBalanceEntryView {
 }
 
 /**
- * Opening-balance entry (methodology §6.2 — «ввод начальных остатков»).
+ * Opening-balance entry (methodology §6.2 - «ввод начальных остатков»).
  *
  * A company migrating onto ATABAI brings incoming counterparty balances. Filipp
  * confirmed (02.07.26) each is entered PER DOCUMENT (one open contract/invoice,
@@ -65,7 +65,7 @@ export interface OpeningBalanceEntryView {
  * payment gashes the exact document it was made against, so an opening debt
  * needs its document to be settleable.
  *
- * Recording model — WHY journal-entry lines, not a direct balance seed:
+ * Recording model - WHY journal-entry lines, not a direct balance seed:
  *   - Per-document settlement (getDocumentPosition / RunningBalanceService)
  *     reads JournalEntryLine rows narrowed on (counterparty, documentType,
  *     documentId). AccountBalance is keyed per counterparty with no document
@@ -77,7 +77,7 @@ export interface OpeningBalanceEntryView {
  *     double counting.
  *
  * The entry is created directly as `committed` (there is no account-picking
- * gate — the accounts are fixed by the position), then the same rollup the bank
+ * gate - the accounts are fixed by the position), then the same rollup the bank
  * and invoice engines use materializes the affected AccountBalance rows.
  *
  * Opening-vs-period presentation split: handled in BalanceRollupService, which
@@ -153,7 +153,7 @@ export class OpeningBalancesService {
           message: `Opening amount must be greater than zero (got ${item.amount}).`,
         });
       }
-      // Defensive — the DTO already restricts account to the four codes.
+      // Defensive - the DTO already restricts account to the four codes.
       if (!isOpeningBalanceAccount(item.account)) {
         throw new BadRequestException({
           error: 'INVALID_OPENING_ACCOUNT',
@@ -268,7 +268,7 @@ export class OpeningBalancesService {
       debitSum = addDecimals(debitSum, abs);
     }
 
-    // Hard balance gate — an imbalanced entry must never persist.
+    // Hard balance gate - an imbalanced entry must never persist.
     if (compareDecimals(debitSum, creditSum) !== 0) {
       throw new BadRequestException({
         error: 'OPENING_ENTRY_IMBALANCED',
@@ -297,7 +297,7 @@ export class OpeningBalancesService {
     }
     await this.lineModel.create(lines);
 
-    // Materialize the affected AccountBalance rows — the same rollup the bank
+    // Materialize the affected AccountBalance rows - the same rollup the bank
     // and invoice engines use. rollupForEntries reads the lines by entryId (now
     // written) and recomputes each touched key.
     const rollup = await this.balanceRollup.rollupForEntries([entry]);
@@ -324,7 +324,7 @@ export class OpeningBalancesService {
 
   /**
    * List the opening-balance entries already posted in a period, each with its
-   * counterparty legs (the 0000 offset leg is omitted — it is bookkeeping
+   * counterparty legs (the 0000 offset leg is omitted - it is bookkeeping
    * plumbing, not something the operator entered). Lets the onboarding UI show
    * what has been entered so far.
    */

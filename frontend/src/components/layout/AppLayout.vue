@@ -7,7 +7,7 @@
      so the two layouts stay structurally + visually identical. -->
 <template>
     <div class="app-layout">
-        <!-- Mobile top bar — visible only on <768px -->
+        <!-- Mobile top bar - visible only on <768px -->
         <header class="app-mobile-header">
             <button class="app-mobile-menu-btn" @click="openDrawer" :aria-label="$t('nav.openMenu')">
                 <Menu :size="20" />
@@ -32,7 +32,7 @@
                 </button>
             </div>
 
-            <!-- CTA slot — e.g. "New file" button -->
+            <!-- CTA slot - e.g. "New file" button -->
             <div v-if="$slots['header-cta']" class="app-sidebar-cta">
                 <slot name="header-cta" :collapsed="!sidebarOpen" :is-mobile="false" />
             </div>
@@ -48,7 +48,7 @@
                 </router-link>
             </nav>
 
-            <!-- Body slot — recent files, etc. (scrollable / takes remaining
+            <!-- Body slot - recent files, etc. (scrollable / takes remaining
                  vertical space). When the sidebar is collapsed it's hidden so
                  the bottom cluster pinches up against the nav. -->
             <div v-if="$slots.body && sidebarOpen" class="app-sidebar-body">
@@ -56,13 +56,13 @@
             </div>
             <div v-else class="app-sidebar-spacer"></div>
 
-            <!-- Bottom cluster — everything below the scrolling body is pinned
+            <!-- Bottom cluster - everything below the scrolling body is pinned
                  to the sidebar's bottom edge as one flex-shrink:0 group, so
                  it never floats up into the body or gets pushed off-screen.
                  Order: extras (e.g. admin mode toggle) → theme → lang →
                  footer → profile. -->
             <div class="app-sidebar-bottom">
-                <!-- Extras slot — bottom-pinned controls like the admin
+                <!-- Extras slot - bottom-pinned controls like the admin
                      Legacy/New mode toggle. Sits directly above the theme row. -->
                 <div v-if="$slots['bottom-extras']" class="app-sidebar-extras">
                     <slot name="bottom-extras" :collapsed="!sidebarOpen" :is-mobile="false" :close-drawer="closeDrawer" />
@@ -108,12 +108,12 @@
                     </Transition>
                 </div>
 
-                <!-- Footer buttons slot — reserved for surface-specific extras. -->
+                <!-- Footer buttons slot - reserved for surface-specific extras. -->
                 <div v-if="$slots.footer" class="app-sidebar-footer">
                     <slot name="footer" :collapsed="!sidebarOpen" :is-mobile="false" />
                 </div>
 
-                <!-- Profile slot — avatar + menu (user-side) / admin info. -->
+                <!-- Profile slot - avatar + menu (user-side) / admin info. -->
                 <div v-if="$slots.profile" class="app-sidebar-profile">
                     <slot name="profile" :collapsed="!sidebarOpen" :is-mobile="false" />
                 </div>
@@ -203,7 +203,7 @@
 
         <!-- Main content -->
         <main class="app-main">
-            <!-- Top-right corner control — surface-switch button (user→admin
+            <!-- Top-right corner control - surface-switch button (user→admin
                  "Admin panel" entry, admin→user "Back to app" exit) lives here
                  instead of in the sidebar so both sit in the same fixed spot.
                  Floats over the content's top-right; pages with their own top
@@ -362,7 +362,7 @@ defineExpose({})
 .app-layout {
     display: flex;
     height: 100vh;
-    /* Dynamic viewport height — handles iOS Safari address bar gracefully */
+    /* Dynamic viewport height - handles iOS Safari address bar gracefully */
     height: 100dvh;
     background: var(--ws-bg);
     color: var(--ws-text);
@@ -792,7 +792,7 @@ defineExpose({})
     flex-direction: column;
 }
 
-/* Extras (admin Legacy/New toggle, etc.) — sits at the very top of the
+/* Extras (admin Legacy/New toggle, etc.) - sits at the very top of the
    bottom cluster, separated from the body above by a hairline. */
 .app-sidebar-extras {
     flex-shrink: 0;

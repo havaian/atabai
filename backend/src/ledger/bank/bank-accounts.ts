@@ -11,7 +11,7 @@
  *     receivable open → Дт 5110 / Кт 4010  (close the receivable)
  *     no receivable   → Дт 5110 / Кт 6310  (advance received)
  *
- * 5110 is the constant — it's the org's settlement (current) account.
+ * 5110 is the constant - it's the org's settlement (current) account.
  * The other four flip based on direction + running balance.
  *
  * If a real chart variant uses different codes, the values are wrapped in
@@ -19,7 +19,7 @@
  * they're constants; the existing 1C "УЗ" chart uses exactly these codes.
  */
 export const BANK_POSTING_ACCOUNTS = {
-  CURRENT_ACCOUNT: '5110',         // Расчетный счет — the org's settlement account.
+  CURRENT_ACCOUNT: '5110',         // Расчетный счет - the org's settlement account.
   ACCOUNTS_PAYABLE: '6010',        // Счета к оплате поставщикам.
   ADVANCES_ISSUED: '4310',         // Авансы, выданные поставщикам.
   ACCOUNTS_RECEIVABLE: '4010',     // Счета к получению от покупателей.
@@ -44,7 +44,7 @@ export const UNRESOLVED_ACCOUNT = '000';
  * movement against the company's own FX-transit account. Per the methodology
  * (Filipp, June 2026) the transit account 22613… maps to:
  *   - 5730 «Приобретение иностранной валюты» when the company is BUYING fx
- *     (sums leave the current account — debit-out on the statement),
+ *     (sums leave the current account - debit-out on the statement),
  *   - 5740 «Реализация иностранной валюты» when SELLING fx.
  *
  * The chosen direction is decided by which side of the statement the row sits

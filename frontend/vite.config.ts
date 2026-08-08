@@ -2,7 +2,7 @@ import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import { fileURLToPath, URL } from 'node:url';
 
-// Vite config — TypeScript version of the legacy vite.config.js. Behavior
+// Vite config - TypeScript version of the legacy vite.config.js. Behavior
 // preserved exactly: same alias, same dev port, same allowed-hosts list. The
 // `@` alias maps to src/ so absolute imports (`@/stores/auth`) keep working.
 export default defineConfig({

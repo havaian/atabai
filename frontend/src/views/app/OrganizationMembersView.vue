@@ -1,5 +1,5 @@
 <!-- frontend/src/views/app/OrganizationMembersView.vue
-     Member management for the active org. Admin-only — non-admins see a
+     Member management for the active org. Admin-only - non-admins see a
      read-only view of the member list.
 
      Backend invariants visible here:
@@ -53,7 +53,7 @@
                         </span>
                     </div>
                 </div>
-                <!-- Admins manage everyone EXCEPT themselves — self-edit/revoke
+                <!-- Admins manage everyone EXCEPT themselves - self-edit/revoke
                      is blocked here (and the never-last-admin rule guards the
                      server side anyway). -->
                 <div v-if="isAdmin && m.status !== 'revoked' && !isSelf(m)" class="member-card-actions">
@@ -201,7 +201,7 @@ function isSelf(m) {
 
 /** Primary display: real name → invited email → raw id as last resort. */
 function displayName(m) {
-    return m.userName || m.invitedEmail || m.userId || '—'
+    return m.userName || m.invitedEmail || m.userId || '-'
 }
 
 /** Secondary line under the name: email when we have a name to pair it with. */
@@ -357,7 +357,7 @@ function back() { router.push('/app/organizations') }
     border-radius: 50%; margin: 0 auto; animation: spin 0.85s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
-/* Modal body bits — scaffolding now from UiModal/UiButton; selects and
+/* Modal body bits - scaffolding now from UiModal/UiButton; selects and
    checkboxes stay native (UiField covers text inputs only). */
 .modal-fields { display: flex; flex-direction: column; gap: 12px; }
 .modal-context {
@@ -367,7 +367,7 @@ function back() { router.push('/app/organizations') }
 .modal-field { display: flex; flex-direction: column; gap: 6px; font-size: 0.85rem; }
 .modal-field > span,
 .modal-fieldset > legend { color: var(--ws-text-2); font-weight: 500; }
-/* Native select — atabai chrome, theme-aware via --ws-* tokens. */
+/* Native select - atabai chrome, theme-aware via --ws-* tokens. */
 .modal-select {
     width: 100%;
     padding: 9px 11px; border: 1px solid var(--ws-border); border-radius: 8px; font-size: 0.9rem;
@@ -387,7 +387,7 @@ function back() { router.push('/app/organizations') }
 .modal-select option { background: var(--ws-surface); color: var(--ws-text); }
 .modal-fieldset { border: none; padding: 0; margin: 0; }
 
-/* Stylized checkbox — native input hidden, custom box driven by :checked. */
+/* Stylized checkbox - native input hidden, custom box driven by :checked. */
 .modal-checkbox {
     display: flex; align-items: center; gap: 9px; font-size: 0.85rem; cursor: pointer;
     padding: 3px 0;

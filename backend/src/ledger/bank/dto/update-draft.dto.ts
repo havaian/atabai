@@ -12,14 +12,14 @@ import {
 import { Type } from 'class-transformer';
 
 /**
- * Payload for fixing a RED bank draft (bank ТЗ §7 — operator review).
+ * Payload for fixing a RED bank draft (bank ТЗ §7 - operator review).
  *
  * The placeholder line on a RED draft carries accountCode '000' and the
  * operator picks the real account here. Optionally re-attributes the
  * draft to a different counterparty (e.g. they meant a different supplier)
  * and/or rewrites the description.
  *
- * All fields are optional — but the service rejects an entirely empty
+ * All fields are optional - but the service rejects an entirely empty
  * patch, since the only reason to call this endpoint is to materially
  * change the draft.
  */
@@ -45,7 +45,7 @@ export class UpdateBankDraftDto {
   /**
    * Settlement documents this payment gashes (methodology §6.3 / §7.2). One
    * entry settles the whole payment against a single document; several entries
-   * split the payment across documents (multi-doc split — amounts entered by
+   * split the payment across documents (multi-doc split - amounts entered by
    * the operator, their sum must equal the payment). Attaching document(s) is
    * what clears the "document required" block on an external row.
    */

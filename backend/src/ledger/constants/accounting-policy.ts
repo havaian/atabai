@@ -1,31 +1,31 @@
 /**
- * Accounting policy — the 6-block ruleset configured once at registration
+ * Accounting policy - the 6-block ruleset configured once at registration
  * (methodology §9). This module holds ONLY the structure + option enums +
  * defaults. The effect each block has on postings (cost-of-sales formula,
  * VAT entries, leave-reserve accrual, negative-stock blocking, etc.) is
- * deliberately out of scope here — §9: "Логика влияния каждого блока на
- * проводки — отдельно, позже, по каждому блоку под методологию Filipp."
+ * deliberately out of scope here - §9: "Логика влияния каждого блока на
+ * проводки - отдельно, позже, по каждому блоку под методологию Filipp."
  *
  * Storing the structure now (and surfacing it in onboarding) lets a client
  * declare their policy up front; the posting engines read these flags when
  * each block's logic is built later, behind Filipp sign-off.
  *
  * The six blocks (methodology §9):
- *   1. Taxes               — regime + VAT payer flag + default VAT rate
- *   2. Inventory valuation — cost method (FIFO / weighted average)
- *   3. Accounting currency — base reporting currency (already on the profile)
- *   4. Operational control — allow posting stock-out (negative balances)
- *   5. Counterparty depth  — settlement granularity (contract / invoice)
- *   6. Payroll             — cost detail + leave-reserve recognition
+ *   1. Taxes               - regime + VAT payer flag + default VAT rate
+ *   2. Inventory valuation - cost method (FIFO / weighted average)
+ *   3. Accounting currency - base reporting currency (already on the profile)
+ *   4. Operational control - allow posting stock-out (negative balances)
+ *   5. Counterparty depth  - settlement granularity (contract / invoice)
+ *   6. Payroll             - cost detail + leave-reserve recognition
  */
 
 // ─── Block 1: Taxes ──────────────────────────────────────────────────────────
 
 /** Tax regime (methodology §9 block 1). */
 export const TAX_REGIME = {
-  /** Общеустановленный — VAT + profit tax. */
+  /** Общеустановленный - VAT + profit tax. */
   GENERAL: 'general',
-  /** Упрощённый — turnover tax. */
+  /** Упрощённый - turnover tax. */
   SIMPLIFIED: 'simplified',
 } as const;
 export type TaxRegime = (typeof TAX_REGIME)[keyof typeof TAX_REGIME];
@@ -35,9 +35,9 @@ export const ALL_TAX_REGIMES: readonly TaxRegime[] = Object.values(TAX_REGIME);
 
 /** Inventory cost-of-sales method (methodology §9 block 2). */
 export const INVENTORY_VALUATION = {
-  /** FIFO — first in, first out. */
+  /** FIFO - first in, first out. */
   FIFO: 'fifo',
-  /** Weighted average — recomputed on each issue. Most common / simplest. */
+  /** Weighted average - recomputed on each issue. Most common / simplest. */
   WEIGHTED_AVERAGE: 'weighted_average',
 } as const;
 export type InventoryValuation =
@@ -49,7 +49,7 @@ export const ALL_INVENTORY_VALUATIONS: readonly InventoryValuation[] =
 
 /**
  * Settlement-tracking granularity (methodology §9 block 5, refined in §7.1).
- * §7.1 narrowed the working choice to two — contract or invoice — with the
+ * §7.1 narrowed the working choice to two - contract or invoice - with the
  * counterparty always the base axis. "By counterparty as a whole" is NOT a
  * separate third level; it is the base every option already carries.
  */
@@ -72,7 +72,7 @@ export const ALL_SETTLEMENT_DEPTHS: readonly SettlementDepth[] =
  * counterparties with it rather than freezing a copied value.
  *
  * Always resolve the effective depth through a single helper
- * (resolveSettlementDepth) — never read the counterparty field inline — so the
+ * (resolveSettlementDepth) - never read the counterparty field inline - so the
  * inherit fallback is applied consistently everywhere.
  */
 export const COUNTERPARTY_SETTLEMENT_DEPTH = {
@@ -90,7 +90,7 @@ export const ALL_COUNTERPARTY_SETTLEMENT_DEPTHS: readonly CounterpartySettlement
  * Resolve the effective settlement depth for a counterparty: its own setting,
  * or the company policy default when the counterparty inherits (or is unset).
  * The single source of truth for "by contract or by invoice for THIS
- * counterparty" — posting logic and document matching both call this.
+ * counterparty" - posting logic and document matching both call this.
  */
 export function resolveSettlementDepth(
   counterpartyDepth: CounterpartySettlementDepth | null | undefined,
@@ -109,7 +109,7 @@ export function resolveSettlementDepth(
 
 /** Payroll cost-detail level (methodology §9 block 6). */
 export const PAYROLL_DETAIL = {
-  /** Сводно по всей компании — one entry to general expense. */
+  /** Сводно по всей компании - one entry to general expense. */
   COMPANY_WIDE: 'company_wide',
   /** С детализацией по сотрудникам/отделам. */
   BY_EMPLOYEE_DEPARTMENT: 'by_employee_department',
@@ -142,8 +142,8 @@ export const ALL_LEAVE_RESERVES: readonly LeaveReserve[] =
  * §6). Advances given / received (43xx / 63xx) are non-monetary: their sum
  * valuation is locked on the date the advance is paid / received.
  *
- * Per Filipp the list is MANUAL — the user picks which accounts they treat as
- * non-monetary, because situations vary — so this is only the default seed,
+ * Per Filipp the list is MANUAL - the user picks which accounts they treat as
+ * non-monetary, because situations vary - so this is only the default seed,
  * editable on the accounting-policy screen. FX revaluation (later work) reads
  * this list to decide which balances to skip.
  */

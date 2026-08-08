@@ -6,7 +6,7 @@
  * into any app without touching the global env schema.
  *
  * The concrete provider is iHamkor (the recommended gateway), but its exact
- * request/response contract isn't pinned here — the base URL and auth are fully
+ * request/response contract isn't pinned here - the base URL and auth are fully
  * configurable so the real endpoint can be plugged in without code changes.
  *
  * Env vars (all optional):
@@ -16,7 +16,7 @@
  *   IHAMKOR_AUTH_HEADER       header carrying the key   default 'Authorization'
  *   IHAMKOR_AUTH_SCHEME       prefix before the key     default 'Bearer' ('' = raw key)
  *   ORGINFO_API_TIMEOUT_MS    default 10000
- *   ORGINFO_CACHE_TTL_HRS     default 720 (30 days — org data changes rarely)
+ *   ORGINFO_CACHE_TTL_HRS     default 720 (30 days - org data changes rarely)
  */
 export interface OrginfoConfig {
   provider: 'ihamkor' | 'none';
