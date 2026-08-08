@@ -141,6 +141,22 @@
                         <ArrowRightIcon class="template-arrow w-4 h-4" />
                     </div>
                 </div>
+                <div class="template-card" @click="goPeriod('invoice-batches')">
+                    <div class="template-card-top">
+                        <div class="template-icon">
+                            <FileText :size="18" />
+                        </div>
+                        <span class="template-badge">ESF</span>
+                    </div>
+                    <div class="template-card-body">
+                        <h3 class="template-name">{{ $t('dashboard.workflow.invoiceTitle') }}</h3>
+                        <p class="template-desc">{{ $t('dashboard.workflow.invoiceDesc') }}</p>
+                    </div>
+                    <div class="template-card-footer">
+                        <span class="template-cat">{{ $t('dashboard.workflow.catImport') }}</span>
+                        <ArrowRightIcon class="template-arrow w-4 h-4" />
+                    </div>
+                </div>
                 <div class="template-card" @click="goPeriod('opening-balances')">
                     <div class="template-card-top">
                         <div class="template-icon">
@@ -177,6 +193,7 @@ import {
 import {
     Landmark,
     Scale,
+    FileText,
 } from 'lucide-vue-next'
 
 const router = useRouter()

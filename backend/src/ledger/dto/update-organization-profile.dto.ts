@@ -120,6 +120,18 @@ export class AccountingPolicyDto {
   @IsOptional()
   @IsIn(ALL_LEAVE_RESERVES)
   leaveReserve?: LeaveReserve;
+
+  // Accounts excluded from FX revaluation (methodology дополнение §1.2 / §6).
+  // When present, REPLACES the whole list (the edit form submits the full
+  // set). Each entry must look like an NSBU account code.
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  @Matches(/^\d{3,4}(\.\d+)?$/, {
+    each: true,
+    message: 'each non-monetary account must be an NSBU account code (3-4 digits, optional dot-suffix)',
+  })
+  nonMonetaryAccounts?: string[];
 }
 
 /**
@@ -152,6 +164,23 @@ export class UpdateOrganizationProfileDto {
     message: 'baseCurrency must be a 3-letter code (e.g. UZS)',
   })
   baseCurrency?: string;
+
+  // Contact requisites (methodology дополнение §2). Auto-filled from the
+  // orginfo lookup, then editable. Free-form; kept loose on purpose.
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  address?: string | null;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(50)
+  phone?: string | null;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  email?: string | null;
 
   @IsOptional()
   @IsArray()

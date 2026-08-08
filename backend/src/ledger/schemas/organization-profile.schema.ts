@@ -8,6 +8,7 @@ import {
   ALL_SETTLEMENT_DEPTHS,
   ALL_TAX_REGIMES,
   DEFAULT_ACCOUNTING_POLICY,
+  DEFAULT_NON_MONETARY_ACCOUNTS,
   type InventoryValuation,
   type LeaveReserve,
   type PayrollDetail,
@@ -134,6 +135,15 @@ class AccountingPolicy {
     default: DEFAULT_ACCOUNTING_POLICY.leaveReserve,
   })
   leaveReserve!: LeaveReserve;
+
+  /**
+   * Accounts the org treats as non-monetary — excluded from FX revaluation
+   * (methodology дополнение §1.2 / §6). Manual per Filipp; seeded from the
+   * default. The factory copies the default array so profiles don't share one
+   * mutable instance.
+   */
+  @Prop({ type: [String], default: () => [...DEFAULT_NON_MONETARY_ACCOUNTS] })
+  nonMonetaryAccounts!: string[];
 }
 const AccountingPolicySchema = SchemaFactory.createForClass(AccountingPolicy);
 
@@ -198,6 +208,19 @@ export class OrganizationProfile {
   @Prop({ type: String, default: 'UZS', trim: true, uppercase: true })
   baseCurrency!: string;
 
+  // Contact requisites. Auto-filled from the orginfo lookup by ИНН
+  // (methodology дополнение §2 — "наименование / адрес / телефон / имейл"),
+  // editable afterwards. The р/с is deliberately NOT sourced here — it comes
+  // from the bank statement. Null until filled.
+  @Prop({ type: String, default: null, trim: true, maxlength: 500 })
+  address!: string | null;
+
+  @Prop({ type: String, default: null, trim: true, maxlength: 50 })
+  phone!: string | null;
+
+  @Prop({ type: String, default: null, trim: true, maxlength: 200 })
+  email!: string | null;
+
   // Settlement accounts the org owns. Bank statements are matched to the org
   // by comparing the statement's "Счёт" / org-side account against this list.
   @Prop({ type: [OrgBankAccountSchema], default: [] })
@@ -209,7 +232,13 @@ export class OrganizationProfile {
    * complete, valid policy even if the onboarding step is skipped; the client
    * adjusts it in onboarding or later on the profile screen.
    */
-  @Prop({ type: AccountingPolicySchema, default: () => ({ ...DEFAULT_ACCOUNTING_POLICY }) })
+  @Prop({
+    type: AccountingPolicySchema,
+    default: () => ({
+      ...DEFAULT_ACCOUNTING_POLICY,
+      nonMonetaryAccounts: [...DEFAULT_ACCOUNTING_POLICY.nonMonetaryAccounts],
+    }),
+  })
   accountingPolicy!: AccountingPolicy;
 }
 

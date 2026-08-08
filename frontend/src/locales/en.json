@@ -1487,6 +1487,7 @@
     "upload": "Upload statement",
     "empty": "No statements uploaded for this period yet.",
     "rows": "{n} rows",
+    "pending": "{n} need review",
     "status": {
       "draft": "Needs review",
       "committed": "Posted"

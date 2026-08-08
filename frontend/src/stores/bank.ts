@@ -162,12 +162,39 @@ export const useBankStore = defineStore('bank', () => {
         return resp.data.rule
     }
 
-    async function commit({ periodId, uploadId }) {
+    // ─── Settlement documents (§1.2 doc picker) ──────────────────────────────
+    // Counterparty-scoped: the preview doc modal lists / recognizes / creates
+    // documents for the row's counterparty, then attaches them via updateDraft.
+    async function fetchCounterpartyDocuments(cpId, kind) {
+        const resp = await apiClient.get(
+            orgScope(`/counterparties/${cpId}/documents`),
+            { params: { kind } },
+        )
+        return resp.data.documents || []
+    }
+    async function suggestCounterpartyDocuments(cpId, kind, purpose) {
+        const resp = await apiClient.post(
+            orgScope(`/counterparties/${cpId}/documents/suggest`),
+            { kind, purpose: purpose || '' },
+        )
+        return resp.data
+    }
+    async function createCounterpartyDocument(cpId, payload) {
+        const resp = await apiClient.post(
+            orgScope(`/counterparties/${cpId}/documents`),
+            payload,
+        )
+        return resp.data.document
+    }
+
+    async function commit({ periodId, uploadId, entryIds }) {
         isCommitting.value = true
         error.value = null
         try {
             const resp = await apiClient.post(
                 orgScope(`/periods/${periodId}/bank-statements/${uploadId}/commit`),
+                // Only the operator-ticked rows (§1.3). Omitted → whole batch.
+                entryIds ? { entryIds } : {},
             )
             return resp.data
         } catch (err) {
@@ -199,6 +226,9 @@ export const useBankStore = defineStore('bank', () => {
         fetchDrafts,
         updateDraft,
         learnRule,
+        fetchCounterpartyDocuments,
+        suggestCounterpartyDocuments,
+        createCounterpartyDocument,
         commit,
         reset,
     }

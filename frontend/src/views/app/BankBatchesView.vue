@@ -41,17 +41,12 @@
                     </div>
                     <div class="batch-card-meta">
                         <span>{{ $t('bankBatches.rows', { n: b.totalRows }) }}</span>
-                        <template v-if="b.status === 'draft'">
-                            <span class="batch-dot batch-dot--green" v-if="b.draftColorCounts.green">
-                                {{ b.draftColorCounts.green }} {{ $t('bankPreview.colors.green') }}
-                            </span>
-                            <span class="batch-dot batch-dot--yellow" v-if="b.draftColorCounts.yellow">
-                                {{ b.draftColorCounts.yellow }} {{ $t('bankPreview.colors.yellow') }}
-                            </span>
-                            <span class="batch-dot batch-dot--red" v-if="b.draftColorCounts.red">
-                                {{ b.draftColorCounts.red }} {{ $t('bankPreview.colors.red') }}
-                            </span>
-                        </template>
+                        <span
+                            v-if="b.status === 'draft' && (b.pendingRed || 0) > 0"
+                            class="batch-pending"
+                        >
+                            {{ $t('bankBatches.pending', { n: b.pendingRed }) }}
+                        </span>
                     </div>
                 </div>
                 <ChevronRight :size="18" class="batch-card-chevron" />
@@ -148,18 +143,14 @@ function formatDateTime(d) {
     display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
     font-size: 0.82rem; color: var(--ws-text-3); margin-top: 3px;
 }
-.batch-dot {
+.batch-pending {
     display: inline-flex; align-items: center; gap: 4px; font-weight: 600;
+    color: #c05621;
 }
-.batch-dot--green { color: #2f855a; }
-.batch-dot--yellow { color: #c05621; }
-.batch-dot--red { color: #c53030; }
-.batch-dot::before {
+.batch-pending::before {
     content: ''; width: 7px; height: 7px; border-radius: 50%; display: inline-block;
+    background: #ed8936;
 }
-.batch-dot--green::before { background: #48bb78; }
-.batch-dot--yellow::before { background: #ed8936; }
-.batch-dot--red::before { background: #f56565; }
 .batch-card-chevron { color: var(--ws-text-3); flex-shrink: 0; }
 
 .batches-empty {

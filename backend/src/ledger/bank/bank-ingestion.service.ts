@@ -11,6 +11,13 @@ import { AppLoggerService } from '../../common/logger/app-logger.service';
 import type { UserDocument } from '../../users/schemas/user.schema';
 import { isTreasuryInn } from '../constants/treasury';
 import {
+  addDecimals,
+  compareDecimals,
+  toDecimalString,
+} from '../decimal-arithmetic';
+import { DocumentsService } from '../documents/documents.service';
+import type { DocumentKind } from '../documents/documents.service';
+import {
   ChartOfAccount,
   type ChartOfAccountModel,
 } from '../schemas/chart-of-account.schema';
@@ -94,6 +101,14 @@ interface CommitDraftsArgs {
   organizationId: Types.ObjectId | string;
   periodId: Types.ObjectId | string;
   uploadId: string;
+  /**
+   * Which drafts to post (methodology дополнение §1.3). The preview lets the
+   * operator tick the commit-ready rows; only those ids are committed. When
+   * omitted, every draft in the batch is considered (legacy behaviour). Rows
+   * still carrying the '000' placeholder are skipped regardless, so a stale or
+   * not-ready id in this list can never post an unresolved entry.
+   */
+  entryIds?: string[];
   actor: UserDocument;
 }
 
@@ -152,10 +167,40 @@ export class BankIngestionService {
     private readonly treasury: TreasuryResolverService,
     private readonly runningBalance: RunningBalanceService,
     private readonly balanceRollup: BalanceRollupService,
+    private readonly documents: DocumentsService,
     private readonly logger: AppLoggerService,
   ) {}
 
   // ─── Upload + parse + create drafts ────────────────────────────────────────
+
+  /**
+   * Reject an upload booked onto an inactive statement account (methodology
+   * §3.5 / дополнение §1.4). Closed accounts are flagged inactive and kept so
+   * existing postings keep their reference, but new statements must not land
+   * on them. Only blocks when the account is registered AND inactive — an
+   * unregistered number is out of scope here (the upload selector only offers
+   * registered active accounts; this is the server-side backstop).
+   */
+  private async assertStatementAccountActive(
+    orgId: Types.ObjectId,
+    statementAccountNumber: string | null | undefined,
+  ): Promise<void> {
+    const num = (statementAccountNumber ?? '').trim();
+    if (!num) return;
+    const profile = await this.profileModel
+      .findOne({ organizationId: orgId })
+      .select('bankAccounts')
+      .lean();
+    const acc = profile?.bankAccounts?.find(
+      (a) => (a.accountNumber ?? '').trim() === num,
+    );
+    if (acc && acc.isActive === false) {
+      throw new BadRequestException({
+        error: 'INACTIVE_STATEMENT_ACCOUNT',
+        message: `Statement account ${num} is inactive. Reactivate it or choose an active account before uploading.`,
+      });
+    }
+  }
 
   async ingestFromFile(args: IngestBankArgs): Promise<BankIngestionSummary> {
     const orgId =
@@ -168,6 +213,7 @@ export class BankIngestionService {
         : args.periodId;
 
     await this.periods.assertWritable(orgId, periodId);
+    await this.assertStatementAccountActive(orgId, args.statementAccountNumber);
 
     const uploadId = crypto.randomUUID();
     const summary = await this.parseAndCreateDrafts(
@@ -212,6 +258,7 @@ export class BankIngestionService {
 
     // Fail fast on a locked period — before creating a job or returning.
     await this.periods.assertWritable(orgId, periodId);
+    await this.assertStatementAccountActive(orgId, args.statementAccountNumber);
 
     const uploadId = crypto.randomUUID();
     const job = await this.jobModel.create({
@@ -444,16 +491,23 @@ export class BankIngestionService {
   /**
    * Enriched draft listing for the bank-preview screen (bank ТЗ §7).
    *
-   * Each draft is returned with a server-derived `color`:
-   *   - RED    — at least one line carries the placeholder account '000'.
-   *              These are gated against commit until the operator fixes them.
-   *   - YELLOW — the draft's counterparty was auto-created from a bank row
-   *              and hasn't been verified yet. Posts fine but worth a glance.
-   *   - GREEN  — known counterparty + real account. Will commit as-is.
+   * Each draft is returned with server-derived readiness flags (methodology
+   * дополнение §1.3 — the green/yellow/red traffic light is replaced by an
+   * explicit "commit-ready" signal + soft flags the operator selects against):
+   *   - needsAccount            — a line carries the placeholder '000'; the
+   *                               operator must pick the record account.
+   *   - needsDocument           — reserved for the settlement-document epic
+   *                               (§1.2); always false until that ships.
+   *   - autoCreatedCounterparty — the counterparty was auto-created from a bank
+   *                               row and hasn't been verified (was "yellow").
+   *                               Does NOT block commit.
+   *   - commitReady             — !needsAccount && !needsDocument. Rows that are
+   *                               commit-ready are pre-selected in the preview;
+   *                               the operator ticks/unticks and posts the
+   *                               selected set.
    *
-   * Deriving the color server-side (rather than in the UI) keeps the
-   * frontend a thin presenter and means a CLI / future native client gets
-   * the same labels for free.
+   * Deriving these server-side keeps the frontend a thin presenter and means a
+   * CLI / future native client gets the same labels for free.
    */
   async listDraftsForUpload(args: {
     organizationId: Types.ObjectId | string;
@@ -467,11 +521,18 @@ export class BankIngestionService {
     statuses?: JournalEntryStatus[];
   }): Promise<Array<{
     entry: JournalEntryDocument;
-    color: BankPreviewColor;
+    commitReady: boolean;
+    needsAccount: boolean;
+    needsDocument: boolean;
+    autoCreatedCounterparty: boolean;
     reason: string;
     recordAccount: string | null;
     direction: 'we_pay' | 'we_receive' | null;
     isInternalTransfer: boolean;
+    counterpartyId: string | null;
+    counterpartyName: string | null;
+    documentKind: DocumentKind;
+    documents: Array<{ documentType: 'contract' | 'invoice'; documentId: string; amount: string }>;
   }>> {
     const orgId =
       typeof args.organizationId === 'string'
@@ -497,7 +558,7 @@ export class BankIngestionService {
     const entryIds = entries.map((e) => e._id);
     const allLines = await this.lineModel
       .find({ entryId: { $in: entryIds } })
-      .select('entryId accountCode counterpartyId direction')
+      .select('entryId accountCode counterpartyId direction documentType documentId amount subconto1Value')
       .lean();
     const linesByEntryId = new Map<string, typeof allLines>();
     for (const line of allLines) {
@@ -518,12 +579,24 @@ export class BankIngestionService {
       counterpartyIds.length > 0
         ? await this.counterpartyModel
               .find({ _id: { $in: counterpartyIds.map((id) => new Types.ObjectId(id)) } })
-              .select('_id createdFromBankRow')
+              .select('_id createdFromBankRow inn name')
               .lean()
         : [];
     const cpartyById = new Map(
       counterparties.map((c) => [c._id.toString(), c]),
     );
+
+    // The org's settlement depth decides which document kind external rows
+    // must gash by (methodology §7.1: contract or invoice — a document is
+    // always required; the counterparty is only the base cut). Loaded once.
+    const profile = await this.profileModel
+      .findOne({ organizationId: orgId })
+      .select('accountingPolicy.settlementDepth')
+      .lean();
+    const documentKind: DocumentKind =
+      profile?.accountingPolicy?.settlementDepth === 'contract'
+        ? 'contract'
+        : 'invoice';
 
     return entries.map((entry) => {
       const lines = linesByEntryId.get(entry._id.toString()) ?? [];
@@ -539,50 +612,75 @@ export class BankIngestionService {
           : 'we_receive'
         : null;
 
-      const hasPlaceholder = lines.some(
+      const needsAccount = lines.some(
         (l) => l.accountCode === UNRESOLVED_ACCOUNT,
       );
       const hasCounterparty = lines.some((l) => l.counterpartyId);
       // An internal-contour posting carries no counterparty on either leg
       // (bank ТЗ §1). A fully-resolved one therefore has no counterparty and
-      // no placeholder; a half-resolved one shows up as RED via the
-      // placeholder branch below, which is the correct "pick the account"
-      // prompt. We compute this flag for labelling regardless of color.
+      // no placeholder; a half-resolved one shows up via needsAccount below,
+      // which is the correct "pick the account" prompt. We compute this flag
+      // for labelling regardless of readiness.
       const isInternalTransfer = !hasCounterparty && lines.length > 0;
 
-      if (hasPlaceholder) {
-        return {
-          entry,
-          color: 'red' as const,
-          reason: isInternalTransfer
-            ? 'Internal transfer — map the account on both own accounts before posting'
-            : 'Unrecognized treasury payment — pick the record account before posting',
-          recordAccount,
-          direction,
-          isInternalTransfer,
-        };
-      }
       const counterpartyId = lines.find((l) => l.counterpartyId)?.counterpartyId;
-      if (counterpartyId) {
-        const cparty = cpartyById.get(counterpartyId.toString());
-        if (cparty?.createdFromBankRow) {
-          return {
-            entry,
-            color: 'yellow' as const,
-            reason: 'Counterparty auto-created from this statement — verify',
-            recordAccount,
-            direction,
-            isInternalTransfer: false,
-          };
-        }
+      const cparty = counterpartyId
+        ? cpartyById.get(counterpartyId.toString())
+        : null;
+      const autoCreatedCounterparty = !!cparty?.createdFromBankRow;
+      const isTreasury = !!(cparty?.inn && isTreasuryInn(cparty.inn));
+
+      // Documents attached to the record leg (one per settlement document).
+      const recordLines = lines.filter(
+        (l) => l.accountCode !== BANK_POSTING_ACCOUNTS.CURRENT_ACCOUNT,
+      );
+      const documents = recordLines
+        .filter((l) => l.documentId)
+        .map((l) => ({
+          documentType: (l.documentType ?? 'invoice') as 'contract' | 'invoice',
+          documentId: (l.documentId as Types.ObjectId).toString(),
+          amount: toDecimalString(l.amount),
+        }));
+      const hasDocument = documents.length > 0;
+
+      // A settlement document is mandatory for an external, non-treasury row
+      // (methodology §6.3 / §7.2). Internal transfers (no counterparty) and
+      // treasury payments are exempt. Rows still missing their account are
+      // handled by needsAccount first (a counterparty implies a real account).
+      const needsDocument =
+        !!counterpartyId && !isTreasury && !isInternalTransfer && !hasDocument;
+
+      // §1.3: a row is commit-ready when nothing blocks it. An auto-created
+      // counterparty is a soft flag, not a blocker.
+      const commitReady = !needsAccount && !needsDocument;
+
+      let reason = '';
+      if (needsAccount) {
+        reason = isInternalTransfer
+          ? 'Internal transfer — map the account on both own accounts before posting'
+          : 'Unrecognized treasury payment — pick the record account before posting';
+      } else if (needsDocument) {
+        reason = 'Attach the settlement document (contract/invoice) before posting';
+      } else if (autoCreatedCounterparty) {
+        reason = 'Counterparty auto-created from this statement — verify';
+      } else if (isInternalTransfer) {
+        reason = 'Internal transfer between own accounts';
       }
+
       return {
         entry,
-        color: 'green' as const,
-        reason: isInternalTransfer ? 'Internal transfer between own accounts' : '',
+        commitReady,
+        needsAccount,
+        needsDocument,
+        autoCreatedCounterparty,
+        reason,
         recordAccount,
         direction,
         isInternalTransfer,
+        counterpartyId: counterpartyId ? counterpartyId.toString() : null,
+        counterpartyName: cparty?.name ?? null,
+        documentKind,
+        documents,
       };
     });
   }
@@ -605,13 +703,25 @@ export class BankIngestionService {
 
     await this.periods.assertWritable(orgId, periodId);
 
-    const drafts = await this.entryModel.find({
+    // Operator-selected subset (§1.3): restrict to the ticked rows when the
+    // caller passes ids. Invalid ids are ignored by the $in; the placeholder
+    // guard below still skips any not-ready row that slips through.
+    const selectedIds = (args.entryIds ?? [])
+      .filter((id) => isValidObjectId(id))
+      .map((id) => new Types.ObjectId(id));
+
+    const draftQuery: Record<string, unknown> = {
       organizationId: orgId,
       periodId,
       source: 'bank_statement',
       status: 'draft',
       sourceRef: { $regex: `^bank:${this.escapeRegex(args.uploadId)}:` },
-    });
+    };
+    if (selectedIds.length > 0) {
+      draftQuery._id = { $in: selectedIds };
+    }
+
+    const drafts = await this.entryModel.find(draftQuery);
 
     let committed = 0;
     let skipped = 0;
@@ -669,17 +779,24 @@ export class BankIngestionService {
       accountCode?: string;
       counterpartyId?: string;
       description?: string;
+      documents?: Array<{
+        documentType: 'contract' | 'invoice';
+        documentId: string;
+        amount?: string;
+      }>;
     };
     actor: UserDocument;
   }): Promise<JournalEntryDocument> {
     if (
       args.patch.accountCode === undefined &&
       args.patch.counterpartyId === undefined &&
-      args.patch.description === undefined
+      args.patch.description === undefined &&
+      args.patch.documents === undefined
     ) {
       throw new BadRequestException({
         error: 'EMPTY_PATCH',
-        message: 'Provide at least one of: accountCode, counterpartyId, description',
+        message:
+          'Provide at least one of: accountCode, counterpartyId, description, documents',
       });
     }
 
@@ -800,6 +917,132 @@ export class BankIngestionService {
             'This draft has no counterparty-bearing leg to set a counterparty on (internal transfers carry no counterparty).',
         });
       }
+    }
+
+    // Settlement documents (§6.3 / §7.2). Attaching document(s) rebuilds the
+    // record leg: one document settles the whole payment; several split it
+    // (operator-entered amounts that must sum to the payment). The org-side
+    // (5110) leg is never touched — only the record leg is re-expressed as one
+    // line per document, each tagged with its document so the per-document
+    // running-balance search (getDocumentPosition) can narrow on it.
+    if (args.patch.documents !== undefined) {
+      const currentLines = await this.lineModel.find({ entryId: entry._id });
+      const recordLines = currentLines.filter(
+        (l) => l.accountCode !== BANK_POSTING_ACCOUNTS.CURRENT_ACCOUNT,
+      );
+      if (recordLines.length === 0) {
+        throw new BadRequestException({
+          error: 'NO_RECORD_LINE',
+          message:
+            'Could not identify the record-side leg to attach a document to.',
+        });
+      }
+      // The record legs share account / direction / counterparty / subconto;
+      // take the shape from the first and re-express per document.
+      const template = recordLines[0];
+      if (template.accountCode === UNRESOLVED_ACCOUNT) {
+        throw new BadRequestException({
+          error: 'DOCUMENT_BEFORE_ACCOUNT',
+          message:
+            'Pick the record account for this row before attaching a settlement document.',
+        });
+      }
+      const recordCounterparty = template.counterpartyId ?? undefined;
+
+      // Every referenced document must exist and belong to this counterparty.
+      for (const d of args.patch.documents) {
+        if (!isValidObjectId(d.documentId)) {
+          throw new BadRequestException({
+            error: 'INVALID_DOCUMENT_ID',
+            message: 'documentId is not a valid id',
+          });
+        }
+        await this.documents.assertExists(
+          orgId,
+          d.documentType as DocumentKind,
+          new Types.ObjectId(d.documentId),
+          recordCounterparty,
+        );
+      }
+
+      // Resolve the per-document allocation.
+      const total = entry.totalAmount.toString();
+      let allocations: Array<{
+        documentType: 'contract' | 'invoice';
+        documentId: string;
+        amount: string;
+      }>;
+      if (args.patch.documents.length === 1) {
+        // Single document settles the whole payment.
+        allocations = [
+          {
+            documentType: args.patch.documents[0].documentType,
+            documentId: args.patch.documents[0].documentId,
+            amount: total,
+          },
+        ];
+      } else {
+        // Multi-doc split: each entry must carry an amount and the amounts
+        // must sum exactly to the payment (methodology §6.3).
+        for (const d of args.patch.documents) {
+          if (d.amount === undefined) {
+            throw new BadRequestException({
+              error: 'DOCUMENT_AMOUNT_REQUIRED',
+              message:
+                'Each document needs an amount when splitting a payment across several documents.',
+            });
+          }
+        }
+        const sum = addDecimals(
+          ...args.patch.documents.map((d) => d.amount as string),
+        );
+        if (compareDecimals(sum, total) !== 0) {
+          throw new BadRequestException({
+            error: 'DOCUMENT_SPLIT_MISMATCH',
+            message: `Allocated ${sum} does not equal the payment amount ${total}.`,
+          });
+        }
+        allocations = args.patch.documents.map((d) => ({
+          documentType: d.documentType,
+          documentId: d.documentId,
+          amount: d.amount as string,
+        }));
+      }
+
+      // Replace the record leg with one line per document. Each line lands on
+      // the account its own document position implies (methodology §6.3), so a
+      // split payment can settle a payable on one document and sit as an
+      // advance on another. The 5110 leg is untouched, so Σ record = payment.
+      await this.lineModel.deleteMany({
+        entryId: entry._id,
+        _id: { $in: recordLines.map((l) => l._id) },
+      });
+      const newRecordLines = [];
+      for (const a of allocations) {
+        const accountCode = await this.deriveDocumentSettlementAccount({
+          orgId,
+          periodId,
+          counterpartyId: template.counterpartyId ?? null,
+          currentAccount: template.accountCode,
+          documentType: a.documentType,
+          documentId: new Types.ObjectId(a.documentId),
+        });
+        newRecordLines.push({
+          entryId: entry._id,
+          organizationId: orgId,
+          periodId,
+          date: template.date,
+          accountCode,
+          direction: template.direction,
+          amount: Types.Decimal128.fromString(a.amount),
+          counterpartyId: template.counterpartyId ?? null,
+          subconto1Value: template.subconto1Value ?? null,
+          documentType: a.documentType,
+          documentId: new Types.ObjectId(a.documentId),
+          description: template.description,
+        });
+      }
+      await this.lineModel.create(newRecordLines);
     }
 
     this.logger.logAction('ledger.bank.draft_edited', {
@@ -1168,6 +1411,69 @@ export class BankIngestionService {
     if (hasDebit && !hasCredit) return 'we_pay';
     if (hasCredit && !hasDebit) return 'we_receive';
     return null;
+  }
+
+  /**
+   * Re-derive the settlement account for a payment leg against ONE document
+   * (methodology §6.3 — "гасим по документу"). Mirrors the counterparty-level
+   * hasOpenPayable / hasOpenReceivable logic but scopes the position to the
+   * single document via getDocumentPosition:
+   *   - pay side (Дт): the document has an open payable (credit-heavy across
+   *     6010+4310) → settle on 6010; otherwise it's an advance → 4310.
+   *   - receive side (Кт): open receivable (debit-heavy across 4010+6310) →
+   *     4010; otherwise advance received → 6310.
+   * A brand-new document has a zero position, so a payment against it lands as
+   * an advance — exactly Filipp's per-document rule. Non-settlement accounts
+   * (treasury record accounts, or an account the operator picked by hand) are
+   * left untouched — only the standard Scenario A/B accounts are re-derived.
+   */
+  private async deriveDocumentSettlementAccount(args: {
+    orgId: Types.ObjectId;
+    periodId: Types.ObjectId;
+    counterpartyId: Types.ObjectId | null;
+    currentAccount: string;
+    documentType: 'contract' | 'invoice';
+    documentId: Types.ObjectId;
+  }): Promise<string> {
+    const PAY = BANK_POSTING_ACCOUNTS.ACCOUNTS_PAYABLE;
+    const ADV_ISSUED = BANK_POSTING_ACCOUNTS.ADVANCES_ISSUED;
+    const REC = BANK_POSTING_ACCOUNTS.ACCOUNTS_RECEIVABLE;
+    const ADV_RECEIVED = BANK_POSTING_ACCOUNTS.ADVANCES_RECEIVED;
+
+    const payableSide =
+      args.currentAccount === PAY || args.currentAccount === ADV_ISSUED;
+    const receivableSide =
+      args.currentAccount === REC || args.currentAccount === ADV_RECEIVED;
+
+    // Only the standard settlement accounts get re-derived; keep anything else
+    // (treasury / manually-picked) exactly as it is.
+    if ((!payableSide && !receivableSide) || !args.counterpartyId) {
+      return args.currentAccount;
+    }
+
+    if (payableSide) {
+      const pos = await this.runningBalance.getDocumentPosition({
+        organizationId: args.orgId,
+        periodId: args.periodId,
+        counterpartyId: args.counterpartyId,
+        accountCodes: [PAY, ADV_ISSUED],
+        documentType: args.documentType,
+        documentId: args.documentId,
+      });
+      // Open payable on this document (we owe → credit-heavy) settles on 6010.
+      return compareDecimals(pos.credit, pos.debit) > 0 ? PAY : ADV_ISSUED;
+    }
+
+    const pos = await this.runningBalance.getDocumentPosition({
+      organizationId: args.orgId,
+      periodId: args.periodId,
+      counterpartyId: args.counterpartyId,
+      accountCodes: [REC, ADV_RECEIVED],
+      documentType: args.documentType,
+      documentId: args.documentId,
+    });
+    // Open receivable on this document (they owe → debit-heavy) settles on 4010.
+    return compareDecimals(pos.debit, pos.credit) > 0 ? REC : ADV_RECEIVED;
   }
 
   private async pickStandardRecordAccount(args: {

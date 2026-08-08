@@ -14,6 +14,7 @@ import { RequireCapability } from '../organizations/decorators/require-capabilit
 import { RequireOrgAdmin } from '../organizations/decorators/require-org-admin.decorator';
 import { OrgMembershipGuard } from '../organizations/guards/org-membership.guard';
 import type { MembershipDocument } from '../organizations/schemas/membership.schema';
+import { OrginfoService } from '../integrations/orginfo/orginfo.service';
 import { UpdateOrganizationProfileDto } from './dto/update-organization-profile.dto';
 import type { OrganizationProfileDocument } from './schemas/organization-profile.schema';
 import { OrganizationProfilesService } from './services/organization-profiles.service';
@@ -38,7 +39,10 @@ import { OrganizationProfilesService } from './services/organization-profiles.se
 @Controller('organizations/:orgId/ledger/profile')
 @UseGuards(JwtAuthGuard, OrgMembershipGuard)
 export class OrganizationProfileController {
-  constructor(private readonly profiles: OrganizationProfilesService) {}
+  constructor(
+    private readonly profiles: OrganizationProfilesService,
+    private readonly orginfo: OrginfoService,
+  ) {}
 
   @Get()
   @RequireCapability(MEMBERSHIP_CAPABILITIES.NSBU_BASE_READ)
@@ -67,6 +71,9 @@ export class OrganizationProfileController {
       legalName: body.legalName,
       inn: body.inn,
       baseCurrency: body.baseCurrency,
+      address: body.address,
+      phone: body.phone,
+      email: body.email,
       accountingPolicy: body.accountingPolicy,
       // Normalize optional sub-fields so the stored shape is consistent.
       bankAccounts: body.bankAccounts?.map((a) => ({
@@ -88,6 +95,42 @@ export class OrganizationProfileController {
     };
   }
 
+  /**
+   * Look up org requisites by ИНН (methodology дополнение §2). Feeds the
+   * "заполнить по ИНН" button on the profile edit screen: the admin enters an
+   * ИНН, this returns the enrichable fields as `suggestion`, the form is
+   * populated, and the admin saves via PATCH. The р/с is deliberately NOT
+   * returned — it is sourced from the bank statement, not orginfo.
+   *
+   * Response shape matches the frontend: `{ configured, suggestion }`.
+   * `configured` tells the UI whether the provider has credentials at all
+   * (без ключей — не ходит в сеть), so it can show "lookup unavailable"
+   * instead of "not found". `suggestion` is null on a miss so the UI falls
+   * back to manual entry.
+   */
+  @Get('lookup/:inn')
+  @RequireOrgAdmin()
+  async lookup(@Param('inn') inn: string) {
+    const info = await this.orginfo.getByInn(inn);
+    if (!info) {
+      return {
+        success: true,
+        configured: this.orginfo.isConfigured(),
+        suggestion: null,
+      };
+    }
+    return {
+      success: true,
+      configured: this.orginfo.isConfigured(),
+      suggestion: {
+        legalName: info.name,
+        address: info.address,
+        phone: info.phone,
+        email: info.email,
+      },
+    };
+  }
+
   private serialize(profile: OrganizationProfileDocument) {
     return {
       id: profile._id.toString(),
@@ -95,6 +138,9 @@ export class OrganizationProfileController {
       inn: profile.inn,
       transitionDate: profile.transitionDate,
       baseCurrency: profile.baseCurrency,
+      address: profile.address ?? null,
+      phone: profile.phone ?? null,
+      email: profile.email ?? null,
       accountingPolicy: profile.accountingPolicy,
       bankAccounts: (profile.bankAccounts ?? []).map((a) => ({
         accountNumber: a.accountNumber,

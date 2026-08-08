@@ -6,6 +6,8 @@ import { MulterModule } from '@nestjs/platform-express';
 import { AuthModule } from '../auth/auth.module';
 import type { AppConfig } from '../config/configuration';
 import { buildMulterOptions } from '../common/upload/multer-config';
+import { CurrenciesModule } from '../integrations/currencies/currencies.module';
+import { OrginfoModule } from '../integrations/orginfo/orginfo.module';
 import { OrganizationsModule } from '../organizations/organizations.module';
 import { UsersModule } from '../users/users.module';
 import { BalancesController } from './balances/balances.controller';
@@ -21,6 +23,8 @@ import { RunningBalanceService } from './bank/running-balance.service';
 import { TreasuryResolverService } from './bank/treasury-resolver.service';
 import { DocumentsController } from './documents/documents.controller';
 import { DocumentsService } from './documents/documents.service';
+import { InvoiceRegistryController } from './documents/invoice-registry.controller';
+import { InvoiceIngestionService } from './documents/invoice-ingestion.service';
 import { OnboardingController } from './onboarding.controller';
 import { OrganizationProfileController } from './organization-profile.controller';
 import { AccountBalance, AccountBalanceSchema } from './schemas/account-balance.schema';
@@ -79,6 +83,12 @@ import { PeriodsService } from './services/periods.service';
       { name: BankUploadJob.name, schema: BankUploadJobSchema },
     ]),
     OrganizationsModule,
+    // Integration modules. OrginfoModule exports OrginfoService (used by the
+    // profile controller's "заполнить по ИНН" lookup). CurrenciesModule brings
+    // its own CBU rate controller + service (methodology дополнение §2/§3);
+    // both are safe by default — no credentials → no network calls.
+    OrginfoModule,
+    CurrenciesModule,
     AuthModule,
     // UsersModule is required because JwtAuthGuard (re-exported by AuthModule)
     // injects UsersService at construction time. AuthModule itself uses
@@ -102,6 +112,7 @@ import { PeriodsService } from './services/periods.service';
     OpeningBalancesController,
     CounterpartiesController,
     DocumentsController,
+    InvoiceRegistryController,
   ],
   providers: [
     ChartSeedService,
@@ -114,6 +125,7 @@ import { PeriodsService } from './services/periods.service';
     RunningBalanceService,
     DocumentsService,
     BankIngestionService,
+    InvoiceIngestionService,
     OpeningBalancesService,
   ],
   exports: [

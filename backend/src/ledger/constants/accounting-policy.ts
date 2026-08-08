@@ -134,6 +134,21 @@ export type LeaveReserve = (typeof LEAVE_RESERVE)[keyof typeof LEAVE_RESERVE];
 export const ALL_LEAVE_RESERVES: readonly LeaveReserve[] =
   Object.values(LEAVE_RESERVE);
 
+// ─── Non-monetary accounts (FX-revaluation exclusion) ────────────────────────
+
+/**
+ * Accounts whose UZS carrying value is fixed at recognition and NOT restated
+ * at the CBU rate on month-end or on settlement (methodology дополнение §1.2 /
+ * §6). Advances given / received (43xx / 63xx) are non-monetary: their sum
+ * valuation is locked on the date the advance is paid / received.
+ *
+ * Per Filipp the list is MANUAL — the user picks which accounts they treat as
+ * non-monetary, because situations vary — so this is only the default seed,
+ * editable on the accounting-policy screen. FX revaluation (later work) reads
+ * this list to decide which balances to skip.
+ */
+export const DEFAULT_NON_MONETARY_ACCOUNTS: readonly string[] = ['4310', '6310'];
+
 // ─── Defaults ────────────────────────────────────────────────────────────────
 
 /**
@@ -160,6 +175,11 @@ export interface AccountingPolicyShape {
   settlementDepth: SettlementDepth;
   payrollDetail: PayrollDetail;
   leaveReserve: LeaveReserve;
+  /**
+   * Accounts excluded from FX revaluation (methodology дополнение §1.2 / §6).
+   * Editable list; seeded from DEFAULT_NON_MONETARY_ACCOUNTS.
+   */
+  nonMonetaryAccounts: string[];
 }
 
 export const DEFAULT_ACCOUNTING_POLICY: AccountingPolicyShape = {
@@ -171,4 +191,5 @@ export const DEFAULT_ACCOUNTING_POLICY: AccountingPolicyShape = {
   settlementDepth: SETTLEMENT_DEPTH.INVOICE,
   payrollDetail: PAYROLL_DETAIL.COMPANY_WIDE,
   leaveReserve: LEAVE_RESERVE.ACCRUE_MONTHLY,
+  nonMonetaryAccounts: [...DEFAULT_NON_MONETARY_ACCOUNTS],
 };

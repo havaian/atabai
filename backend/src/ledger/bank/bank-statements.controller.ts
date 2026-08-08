@@ -20,12 +20,9 @@ import { MEMBERSHIP_CAPABILITIES } from '../../organizations/constants/membershi
 import { RequireCapability } from '../../organizations/decorators/require-capability.decorator';
 import { OrgMembershipGuard } from '../../organizations/guards/org-membership.guard';
 import type { UserDocument } from '../../users/schemas/user.schema';
-import {
-  BankIngestionService,
-  type BankPreviewColor,
-} from './bank-ingestion.service';
+import { BankIngestionService } from './bank-ingestion.service';
 import { LearnTreasuryRuleDto } from './dto/learn-treasury-rule.dto';
-import { UpdateBankDraftDto } from './dto/update-draft.dto';
+import { CommitBankDraftsDto, UpdateBankDraftDto } from './dto/update-draft.dto';
 import { TreasuryResolverService } from './treasury-resolver.service';
 
 /**
@@ -159,7 +156,6 @@ export class BankStatementsController {
   async listDrafts(
     @Param('orgId') orgId: string,
     @Param('uploadId') uploadId: string,
-    @Query('color') color?: BankPreviewColor,
     @Query('status') status?: 'draft' | 'committed',
   ) {
     const enriched = await this.bank.listDraftsForUpload({
@@ -170,22 +166,43 @@ export class BankStatementsController {
       statuses: status ? [status] : undefined,
     });
 
-    const items = enriched
-      .filter((d) => !color || d.color === color)
-      .map(({ entry, color: c, reason, recordAccount, direction, isInternalTransfer }) => ({
+    const items = enriched.map(
+      ({
+        entry,
+        commitReady,
+        needsAccount,
+        needsDocument,
+        autoCreatedCounterparty,
+        reason,
+        recordAccount,
+        direction,
+        isInternalTransfer,
+        counterpartyId,
+        counterpartyName,
+        documentKind,
+        documents,
+      }) => ({
         id: entry._id.toString(),
         sourceRef: entry.sourceRef,
         date: entry.date,
         description: entry.description,
         totalAmount: entry.totalAmount.toString(),
         status: entry.status,
-        color: c,
+        commitReady,
+        needsAccount,
+        needsDocument,
+        autoCreatedCounterparty,
         previewReason: reason,
         recordAccount,
         direction,
         isInternalTransfer,
+        counterpartyId,
+        counterpartyName,
+        documentKind,
+        documents,
         createdAt: (entry as unknown as { createdAt: Date }).createdAt,
-      }));
+      }),
+    );
 
     return { success: true, uploadId, drafts: items };
   }
@@ -198,11 +215,13 @@ export class BankStatementsController {
     @Param('orgId') orgId: string,
     @Param('periodId') periodId: string,
     @Param('uploadId') uploadId: string,
+    @Body() body: CommitBankDraftsDto,
   ) {
     const result = await this.bank.commitDrafts({
       organizationId: orgId,
       periodId,
       uploadId,
+      entryIds: body.entryIds,
       actor: user,
     });
     return { success: true, uploadId, ...result };
@@ -232,6 +251,7 @@ export class BankStatementsController {
         accountCode: body.accountCode,
         counterpartyId: body.counterpartyId,
         description: body.description,
+        documents: body.documents,
       },
       actor: user,
     });

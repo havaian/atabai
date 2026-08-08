@@ -35,6 +35,9 @@ import OrgProfileView from '@/views/app/OrgProfileView.vue'
 import BankUploadView from '@/views/app/BankUploadView.vue'
 import BankBatchesView from '@/views/app/BankBatchesView.vue'
 import BankPreviewView from '@/views/app/BankPreviewView.vue'
+import InvoiceUploadView from '@/views/app/InvoiceUploadView.vue'
+import InvoiceBatchesView from '@/views/app/InvoiceBatchesView.vue'
+import InvoicePreviewView from '@/views/app/InvoicePreviewView.vue'
 import PeriodsView from '@/views/app/PeriodsView.vue'
 import ChartOfAccountsView from '@/views/app/ChartOfAccountsView.vue'
 import OpeningBalancesView from '@/views/app/OpeningBalancesView.vue'
@@ -191,6 +194,24 @@ const appChildren = [
         name: 'OpeningBalances',
         component: OpeningBalancesView,
         meta: { titleKey: 'pageTitles./openingBalances', requiresOrg: true }
+    },
+    {
+        path: 'ledger/periods/:periodId/invoices',
+        name: 'InvoiceUpload',
+        component: InvoiceUploadView,
+        meta: { titleKey: 'pageTitles./invoiceUpload', requiresOrg: true }
+    },
+    {
+        path: 'ledger/periods/:periodId/invoice-batches',
+        name: 'InvoiceBatches',
+        component: InvoiceBatchesView,
+        meta: { titleKey: 'pageTitles./invoiceBatches', requiresOrg: true }
+    },
+    {
+        path: 'ledger/periods/:periodId/invoices/:uploadId',
+        name: 'InvoicePreview',
+        component: InvoicePreviewView,
+        meta: { titleKey: 'pageTitles./invoicePreview', requiresOrg: true }
     }
 ]
 

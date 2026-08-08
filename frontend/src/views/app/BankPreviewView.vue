@@ -1,12 +1,11 @@
 <!-- frontend/src/views/app/BankPreviewView.vue
      The signature UX of the bank engine — bank ТЗ §7's "Экран
-     предпросмотра". Draft journal entries grouped by preview color:
-       GREEN  — fully recognized, will commit as-is.
-       YELLOW — auto-created counterparty needs operator verification.
-       RED    — unrecognized treasury / missing record account; operator
-                must pick an account before commit.
-     RED rows are skipped on commit until fixed. Operators can also click
-     "Add to rules" after fixing a RED to teach the next pass. -->
+     предпросмотра". Per Filipp (methodology дополнение §1.3) the green/yellow/
+     red traffic light is gone: every draft carries a server-derived
+     `commitReady` flag plus soft flags, and the operator ticks which rows to
+     post. Commit-ready rows are pre-selected; rows still missing a record
+     account ('000' placeholder) can't be ticked until fixed via "Fix" and are
+     highlighted with an amber accent. Only the ticked rows are posted. -->
 <template>
     <div class="bank-preview">
         <header class="bank-preview-header">
@@ -18,14 +17,11 @@
                 <p>{{ isReadOnly ? $t('bankPreview.committedSubtitle') : $t('bankPreview.subtitle') }}</p>
             </div>
             <div v-if="!isReadOnly" class="bank-preview-counts">
-                <span class="bank-preview-count bank-preview-count--green">
-                    {{ countByColor.green }} {{ $t('bankPreview.colors.green') }}
+                <span class="bank-preview-count bank-preview-count--selected">
+                    {{ $t('bankPreview.summary.selected', { n: selectedCount, total: readyCount }) }}
                 </span>
-                <span class="bank-preview-count bank-preview-count--yellow">
-                    {{ countByColor.yellow }} {{ $t('bankPreview.colors.yellow') }}
-                </span>
-                <span class="bank-preview-count bank-preview-count--red">
-                    {{ countByColor.red }} {{ $t('bankPreview.colors.red') }}
+                <span v-if="needInputCount > 0" class="bank-preview-count bank-preview-count--attention">
+                    {{ $t('bankPreview.summary.needInput', { n: needInputCount }) }}
                 </span>
             </div>
             <span v-else class="bank-preview-count bank-preview-count--committed">
@@ -37,17 +33,41 @@
             <table class="bank-preview-table">
                 <thead>
                     <tr>
+                        <th v-if="!isReadOnly" class="bank-preview-check">
+                            <input
+                                type="checkbox"
+                                :checked="allReadySelected"
+                                :indeterminate.prop="someReadySelected && !allReadySelected"
+                                :disabled="readyCount === 0"
+                                @change="toggleAll(($event.target as HTMLInputElement).checked)"
+                            />
+                        </th>
                         <th>{{ $t('bankPreview.cols.row') }}</th>
                         <th>{{ $t('bankPreview.cols.date') }}</th>
                         <th>{{ $t('bankPreview.cols.description') }}</th>
                         <th>{{ $t('bankPreview.cols.account') }}</th>
+                        <th>{{ $t('bankPreview.cols.document') }}</th>
                         <th class="bank-preview-num">{{ $t('bankPreview.cols.amount') }}</th>
                         <th>{{ $t('bankPreview.cols.status') }}</th>
                         <th v-if="!isReadOnly">{{ $t('bankPreview.cols.actions') }}</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="draft in bank.drafts" :key="draft.id" :class="`bank-preview-row bank-preview-row--${rowColor(draft)}`">
+                    <tr
+                        v-for="draft in bank.drafts"
+                        :key="draft.id"
+                        class="bank-preview-row"
+                        :class="{ 'bank-preview-row--attention': !isReadOnly && !draft.commitReady }"
+                    >
+                        <td v-if="!isReadOnly" class="bank-preview-check">
+                            <input
+                                type="checkbox"
+                                :checked="selected.has(draft.id)"
+                                :disabled="!draft.commitReady"
+                                :title="draft.commitReady ? '' : $t(rowHint(draft))"
+                                @change="toggleOne(draft.id, ($event.target as HTMLInputElement).checked)"
+                            />
+                        </td>
                         <td class="bank-preview-row-id">{{ shortRef(draft.sourceRef) }}</td>
                         <td>{{ formatDate(draft.date) }}</td>
                         <td class="bank-preview-desc">
@@ -57,24 +77,51 @@
                             {{ draft.description }}
                         </td>
                         <td class="bank-preview-account">{{ draft.recordAccount || '—' }}</td>
+                        <td class="bank-preview-doc">
+                            <button
+                                v-if="!isReadOnly && draft.needsDocument"
+                                class="bank-preview-docbtn bank-preview-docbtn--req"
+                                @click="openDocModal(draft)"
+                            >
+                                {{ $t('bankPreview.doc.required') }}
+                            </button>
+                            <button
+                                v-else-if="!isReadOnly && draft.documents && draft.documents.length"
+                                class="bank-preview-docbtn"
+                                @click="openDocModal(draft)"
+                            >
+                                {{ $t('bankPreview.doc.count', { n: draft.documents.length }) }}
+                            </button>
+                            <span
+                                v-else-if="draft.documents && draft.documents.length"
+                                class="bank-preview-doc-count"
+                            >
+                                {{ $t('bankPreview.doc.count', { n: draft.documents.length }) }}
+                            </span>
+                            <span v-else class="bank-preview-doc-na">—</span>
+                        </td>
                         <td class="bank-preview-num">{{ formatAmount(draft.totalAmount) }}</td>
                         <td>
                             <span v-if="isReadOnly" class="bank-preview-pill bank-preview-pill--committed">
                                 {{ $t('bankBatches.status.committed') }}
                             </span>
-                            <span v-else :class="`bank-preview-pill bank-preview-pill--${rowColor(draft)}`">
-                                {{ $t(`bankPreview.colors.${rowColor(draft)}`) }}
+                            <span
+                                v-else
+                                class="bank-preview-pill"
+                                :class="draft.commitReady ? 'bank-preview-pill--ready' : 'bank-preview-pill--attention'"
+                            >
+                                {{ draft.commitReady ? $t('bankPreview.ready') : $t('bankPreview.needsInput') }}
                             </span>
                         </td>
                         <td v-if="!isReadOnly">
-                            <button class="bank-preview-fix" v-if="rowColor(draft) !== 'green'" @click="openEditor(draft)">
+                            <button class="bank-preview-fix" v-if="!draft.commitReady" @click="openEditor(draft)">
                                 <Pencil :size="13" />
                                 {{ $t('bankPreview.actions.fix') }}
                             </button>
                         </td>
                     </tr>
                     <tr v-if="bank.drafts.length === 0 && !bank.isLoading">
-                        <td :colspan="isReadOnly ? 6 : 7" class="bank-preview-empty">{{ $t('bankPreview.empty') }}</td>
+                        <td :colspan="isReadOnly ? 7 : 9" class="bank-preview-empty">{{ $t('bankPreview.empty') }}</td>
                     </tr>
                 </tbody>
             </table>
@@ -83,15 +130,18 @@
         <div v-if="bank.error" class="bank-preview-error">{{ bank.error }}</div>
 
         <footer v-if="!isReadOnly" class="bank-preview-footer">
-            <span class="bank-preview-help">{{ $t('bankPreview.commitHelp', { red: countByColor.red }) }}</span>
+            <span class="bank-preview-help">
+                <template v-if="needInputCount > 0">{{ $t('bankPreview.summary.needInput', { n: needInputCount }) }}</template>
+                <template v-else>{{ $t('bankPreview.summary.selected', { n: selectedCount, total: readyCount }) }}</template>
+            </span>
             <span class="bank-preview-spacer" />
             <UiButton
                 variant="primary"
                 :loading="bank.isCommitting"
-                :disabled="bank.drafts.length === 0"
+                :disabled="selectedCount === 0"
                 @click="commit"
             >
-                {{ bank.isCommitting ? $t('bankPreview.committing') : $t('bankPreview.commitButton') }}
+                {{ bank.isCommitting ? $t('bankPreview.committing') : $t('bankPreview.commitSelected', { n: selectedCount }) }}
             </UiButton>
         </footer>
 
@@ -132,9 +182,95 @@
             </template>
         </UiModal>
 
-        <!-- Commit result — shown after "Provести выписку". Surfaces how many
-             entries posted and how many were skipped (RED rows that still need
-             a record account) rather than bouncing silently to the batch list. -->
+        <!-- Settlement document picker (§1.2). Recognized-in-purpose numbers
+             one-click add; the counterparty's existing documents pick from the
+             list; a new number can be created inline. One document settles the
+             whole payment; several split it (amounts must sum to the payment). -->
+        <UiModal v-model="docModalOpen" :title="$t('bankPreview.doc.title')" max-width="560px" @close="closeDocModal">
+            <p class="modal-context">
+                <strong>{{ docRow && formatDate(docRow.date) }}</strong> ·
+                {{ docRow && formatAmount(docRow.totalAmount) }}
+                <template v-if="docRow && docRow.counterpartyName"> · {{ docRow.counterpartyName }}</template>
+            </p>
+            <p class="doc-kind-note">{{ docRow && $t(`bankPreview.doc.kind.${docRow.documentKind}`) }}</p>
+
+            <div
+                v-if="docSuggestion && (docSuggestion.matched.length || docSuggestion.recognizedUnmatched.length)"
+                class="doc-suggest"
+            >
+                <span class="doc-suggest-label">{{ $t('bankPreview.doc.recognized') }}</span>
+                <div class="doc-suggest-chips">
+                    <button v-for="m in docSuggestion.matched" :key="m.id" class="doc-chip" @click="addDoc(m)">
+                        + {{ m.number }}
+                    </button>
+                    <button
+                        v-for="u in docSuggestion.recognizedUnmatched"
+                        :key="u.number"
+                        class="doc-chip doc-chip--new"
+                        @click="doCreate(u.number, '')"
+                    >
+                        + {{ u.number }}
+                    </button>
+                </div>
+            </div>
+
+            <div class="doc-pick">
+                <label class="doc-pick-label">{{ $t('bankPreview.doc.pick') }}</label>
+                <select class="doc-select" @change="onPickExisting">
+                    <option value="">—</option>
+                    <option v-for="d in docList" :key="d.id" :value="d.id">{{ d.number }}</option>
+                </select>
+            </div>
+
+            <div class="doc-create">
+                <input v-model="newDoc.number" :placeholder="$t('bankPreview.doc.newNumber')" class="doc-input" />
+                <input
+                    v-if="docRow && docRow.documentKind === 'invoice'"
+                    v-model="newDoc.amount"
+                    :placeholder="$t('bankPreview.doc.amount')"
+                    class="doc-input doc-input--amt"
+                    inputmode="decimal"
+                />
+                <UiButton variant="secondary" :disabled="!newDoc.number" @click="createNew">
+                    {{ $t('bankPreview.doc.create') }}
+                </UiButton>
+            </div>
+
+            <div v-if="allocations.length" class="doc-allocs">
+                <div v-for="(a, i) in allocations" :key="a.documentId" class="doc-alloc">
+                    <span class="doc-alloc-num">{{ a.number }}</span>
+                    <input
+                        v-if="allocations.length > 1"
+                        v-model="a.amount"
+                        class="doc-input doc-input--amt"
+                        inputmode="decimal"
+                    />
+                    <span v-else class="doc-alloc-amt">{{ docRow && formatAmount(docRow.totalAmount) }}</span>
+                    <button class="doc-alloc-remove" @click="removeAlloc(i)"><X :size="14" /></button>
+                </div>
+                <p v-if="allocations.length > 1" class="doc-sum" :class="{ 'doc-sum--bad': !allocationsValid }">
+                    {{ $t('bankPreview.doc.sum', { sum: allocSum, total: docRow && docRow.totalAmount }) }}
+                </p>
+            </div>
+
+            <div v-if="docError" class="modal-error">{{ docError }}</div>
+
+            <template #footer>
+                <UiButton variant="ghost" @click="closeDocModal">{{ $t('common.cancel') }}</UiButton>
+                <UiButton
+                    variant="primary"
+                    :disabled="!allocations.length || !allocationsValid"
+                    :loading="docSaving"
+                    @click="applyDocs"
+                >
+                    {{ $t('bankPreview.doc.apply') }}
+                </UiButton>
+            </template>
+        </UiModal>
+
+        <!-- Commit result — shown after posting. Surfaces how many entries
+             posted and how many were skipped (rows that still need a record
+             account) rather than bouncing silently to the batch list. -->
         <UiModal v-model="resultOpen" :title="$t('bankPreview.result.title')" max-width="420px">
             <template v-if="commitResult">
                 <div class="result-stat result-stat--committed">
@@ -166,7 +302,7 @@
 // @ts-nocheck
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { AlertTriangle, ArrowLeft, CheckCircle2, Pencil } from 'lucide-vue-next'
+import { AlertTriangle, ArrowLeft, CheckCircle2, Pencil, X } from 'lucide-vue-next'
 import { useBankStore } from '@/stores/bank'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiField from '@/components/ui/UiField.vue'
@@ -186,6 +322,19 @@ const editPatch = ref({ accountCode: '', description: '' })
 const isSavingEdit = ref(false)
 const modalError = ref('')
 
+// Which drafts the operator has ticked to post (§1.3). Holds entry ids; only
+// commit-ready rows can be in here. Defaults to every commit-ready row after
+// each load, so the common case (all rows recognized) is one click.
+const selected = ref(new Set())
+
+function initSelection() {
+    const next = new Set()
+    for (const d of bank.drafts) {
+        if (d.commitReady) next.add(d.id)
+    }
+    selected.value = next
+}
+
 // UiModal takes a boolean v-model. Bridge it to the existing `editing` source
 // of truth so Esc / backdrop close routes through closeEditor().
 const editorOpen = computed({
@@ -199,22 +348,38 @@ onMounted(async () => {
         uploadId: uploadId.value,
         status: isReadOnly.value ? 'committed' : undefined,
     })
+    initSelection()
 })
 
-/**
- * Color now comes from the backend (`draft.color`) — the list endpoint
- * derives it server-side by joining lines + counterparty.createdFromBankRow.
- * The fallback to GREEN handles drafts cached pre-deploy (no field set).
- */
-function rowColor(draft) {
-    return draft?.color || 'green'
+// Row-level counters drive the header + footer summary (no traffic light).
+const readyCount = computed(() => bank.drafts.filter((d) => d.commitReady).length)
+const needInputCount = computed(() => bank.drafts.filter((d) => !d.commitReady).length)
+const selectedCount = computed(() => {
+    let n = 0
+    for (const d of bank.drafts) if (selected.value.has(d.id)) n++
+    return n
+})
+const allReadySelected = computed(() => readyCount.value > 0 && selectedCount.value === readyCount.value)
+const someReadySelected = computed(() => selectedCount.value > 0)
+
+// Why a row can't be ticked — reused as the checkbox tooltip.
+function rowHint(draft) {
+    return draft?.needsAccount ? 'bankPreview.pickAccount' : 'bankPreview.needsInput'
 }
 
-const countByColor = computed(() => {
-    const out = { green: 0, yellow: 0, red: 0 }
-    for (const d of bank.drafts) out[rowColor(d)]++
-    return out
-})
+function toggleOne(id, checked) {
+    const next = new Set(selected.value)
+    if (checked) next.add(id)
+    else next.delete(id)
+    selected.value = next
+}
+function toggleAll(checked) {
+    const next = new Set()
+    if (checked) {
+        for (const d of bank.drafts) if (d.commitReady) next.add(d.id)
+    }
+    selected.value = next
+}
 
 function openEditor(draft) {
     editing.value = draft
@@ -240,6 +405,7 @@ async function saveEdit() {
             },
         })
         await bank.fetchDrafts({ periodId: periodId.value, uploadId: uploadId.value })
+        initSelection()
         closeEditor()
     } catch (err) {
         modalError.value = err?.response?.data?.message || err?.message || 'Save failed'
@@ -270,8 +436,138 @@ async function learnRule() {
     }
 }
 
+// ─── Settlement document picker (§1.2) ───────────────────────────────────────
+const docRow = ref(null)          // the draft being documented
+const docSuggestion = ref(null)   // { matched, recognizedUnmatched } from suggest
+const docList = ref([])           // counterparty's existing documents
+const allocations = ref([])       // { documentId, documentType, number, amount }
+const newDoc = ref({ number: '', amount: '' })
+const docError = ref('')
+const docSaving = ref(false)
+
+const docModalOpen = computed({
+    get: () => !!docRow.value,
+    set: (v) => { if (!v) closeDocModal() },
+})
+
+async function openDocModal(draft) {
+    docRow.value = draft
+    docError.value = ''
+    newDoc.value = { number: '', amount: '' }
+    docSuggestion.value = null
+    docList.value = []
+    allocations.value = []
+    if (!draft.counterpartyId) return
+    try {
+        const [sug, list] = await Promise.all([
+            bank.suggestCounterpartyDocuments(draft.counterpartyId, draft.documentKind, draft.description),
+            bank.fetchCounterpartyDocuments(draft.counterpartyId, draft.documentKind),
+        ])
+        docSuggestion.value = sug
+        docList.value = list
+        // Seed from already-attached documents (re-edit), resolving numbers
+        // from the freshly-loaded list.
+        allocations.value = (draft.documents || []).map((d) => {
+            const doc = list.find((x) => x.id === d.documentId)
+            return {
+                documentId: d.documentId,
+                documentType: d.documentType,
+                number: doc?.number || d.documentId.slice(-6),
+                amount: d.amount,
+            }
+        })
+    } catch (_) {
+        // leave the modal usable with manual create even if suggest/list fail
+    }
+}
+function closeDocModal() {
+    docRow.value = null
+    docError.value = ''
+}
+
+function addDoc(doc) {
+    if (allocations.value.some((a) => a.documentId === doc.id)) return
+    allocations.value.push({
+        documentId: doc.id,
+        documentType: doc.kind || docRow.value.documentKind,
+        number: doc.number,
+        amount: '',
+    })
+}
+function onPickExisting(e) {
+    const id = e.target.value
+    e.target.value = ''
+    if (!id) return
+    const doc = docList.value.find((d) => d.id === id)
+    if (doc) addDoc(doc)
+}
+async function createNew() {
+    await doCreate(newDoc.value.number, newDoc.value.amount)
+}
+async function doCreate(number, amount) {
+    if (!docRow.value?.counterpartyId || !number) return
+    docError.value = ''
+    try {
+        const payload = { kind: docRow.value.documentKind, number }
+        if (docRow.value.documentKind === 'invoice' && amount) payload.amount = amount
+        const doc = await bank.createCounterpartyDocument(docRow.value.counterpartyId, payload)
+        if (!docList.value.some((d) => d.id === doc.id)) docList.value.push(doc)
+        addDoc(doc)
+        newDoc.value = { number: '', amount: '' }
+    } catch (err) {
+        docError.value = err?.response?.data?.message || err?.message || 'Create failed'
+    }
+}
+function removeAlloc(i) {
+    allocations.value.splice(i, 1)
+}
+
+const allocSum = computed(() => {
+    let s = 0
+    for (const a of allocations.value) s += parseFloat(a.amount || '0') || 0
+    // Trim trailing .0 noise for display; backend validates precisely.
+    return Number.isInteger(s) ? String(s) : String(s)
+})
+const allocationsValid = computed(() => {
+    if (allocations.value.length === 0) return false
+    if (allocations.value.length === 1) return true
+    const total = parseFloat(docRow.value?.totalAmount || '0')
+    const everyHasAmount = allocations.value.every((a) => a.amount && parseFloat(a.amount) > 0)
+    return everyHasAmount && Math.abs(parseFloat(allocSum.value) - total) < 0.005
+})
+
+async function applyDocs() {
+    if (!docRow.value || !allocationsValid.value) return
+    docSaving.value = true
+    docError.value = ''
+    try {
+        // Single doc → send without amount (backend allocates the full payment).
+        // Multiple → send per-document amounts (backend re-checks the sum).
+        const documents = allocations.value.length === 1
+            ? [{ documentType: allocations.value[0].documentType, documentId: allocations.value[0].documentId }]
+            : allocations.value.map((a) => ({
+                documentType: a.documentType,
+                documentId: a.documentId,
+                amount: a.amount,
+            }))
+        await bank.updateDraft({
+            periodId: periodId.value,
+            uploadId: uploadId.value,
+            entryId: docRow.value.id,
+            patch: { documents },
+        })
+        await bank.fetchDrafts({ periodId: periodId.value, uploadId: uploadId.value })
+        initSelection()
+        closeDocModal()
+    } catch (err) {
+        docError.value = err?.response?.data?.message || err?.message || 'Save failed'
+    } finally {
+        docSaving.value = false
+    }
+}
+
 // Holds the commit outcome ({ committed, skipped, rolledUpKeys }) so the
-// operator gets a confirmation with counts — including how many RED rows were
+// operator gets a confirmation with counts — including how many rows were
 // skipped — instead of a silent redirect.
 const commitResult = ref(null)
 
@@ -283,8 +579,12 @@ const resultOpen = computed({
 })
 
 async function commit() {
+    if (selectedCount.value === 0) return
     try {
-        const result = await bank.commit({ periodId: periodId.value, uploadId: uploadId.value })
+        // Post only the ticked rows (§1.3). Backend still guards against any
+        // not-ready id, so a stale selection can never post a '000' row.
+        const entryIds = bank.drafts.filter((d) => selected.value.has(d.id)).map((d) => d.id)
+        const result = await bank.commit({ periodId: periodId.value, uploadId: uploadId.value, entryIds })
         commitResult.value = {
             committed: result?.committed ?? 0,
             skipped: result?.skipped ?? 0,
@@ -299,11 +599,12 @@ function goToBatches() {
     router.push(`/app/ledger/periods/${periodId.value}/bank-batches`)
 }
 
-// Skipped rows are still drafts (RED, account '000'). Reload the batch so the
-// operator can fix and re-commit them without leaving the screen.
+// After posting, reload so any rows the operator still needs to fix reappear
+// with fresh readiness, and re-seed the selection.
 async function reviewRemaining() {
     commitResult.value = null
     await bank.fetchDrafts({ periodId: periodId.value, uploadId: uploadId.value })
+    initSelection()
 }
 
 function back() { router.push(`/app/ledger/periods/${periodId.value}/bank-batches`) }
@@ -336,9 +637,10 @@ function shortRef(ref) {
 .bank-preview-count {
     padding: 6px 12px; border-radius: 999px; font-size: 0.8rem; font-weight: 600;
 }
-.bank-preview-count--green { background: rgba(72, 187, 120, 0.15); color: #2f855a; }
-.bank-preview-count--yellow { background: rgba(237, 137, 54, 0.15); color: #c05621; }
-.bank-preview-count--red { background: rgba(245, 101, 101, 0.15); color: #c53030; }
+/* No traffic light (§1.3): a neutral "selected" chip + a single amber
+   "needs input" chip. Amber is the one accent used for anything unfinished. */
+.bank-preview-count--selected { background: var(--ws-surface-2); color: var(--ws-text-2); }
+.bank-preview-count--attention { background: rgba(237, 137, 54, 0.15); color: #c05621; }
 .bank-preview-count--committed { background: rgba(72, 187, 120, 0.15); color: #2f855a; }
 
 .bank-preview-table-wrap {
@@ -357,8 +659,11 @@ function shortRef(ref) {
 .bank-preview-table td {
     padding: 10px 12px; border-bottom: 1px solid var(--ws-border); color: var(--ws-text);
 }
-.bank-preview-row--red { background: rgba(245, 101, 101, 0.04); }
-.bank-preview-row--yellow { background: rgba(237, 137, 54, 0.04); }
+.bank-preview-check { width: 36px; text-align: center; }
+.bank-preview-check input { cursor: pointer; width: 15px; height: 15px; accent-color: var(--ws-purple); }
+.bank-preview-check input:disabled { cursor: not-allowed; opacity: 0.5; }
+/* Amber left-accent marks a row that isn't ready to post. */
+.bank-preview-row--attention { background: rgba(237, 137, 54, 0.05); box-shadow: inset 3px 0 0 #ed8936; }
 .bank-preview-row-id { font-family: monospace; font-size: 0.78rem; color: var(--ws-text-3); }
 .bank-preview-desc {
     max-width: 380px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
@@ -371,9 +676,8 @@ function shortRef(ref) {
 .bank-preview-pill {
     padding: 2px 8px; border-radius: 999px; font-size: 0.74rem; font-weight: 600;
 }
-.bank-preview-pill--green { background: rgba(72, 187, 120, 0.15); color: #2f855a; }
-.bank-preview-pill--yellow { background: rgba(237, 137, 54, 0.15); color: #c05621; }
-.bank-preview-pill--red { background: rgba(245, 101, 101, 0.15); color: #c53030; }
+.bank-preview-pill--ready { background: var(--ws-surface-2); color: var(--ws-text-2); }
+.bank-preview-pill--attention { background: rgba(237, 137, 54, 0.15); color: #c05621; }
 .bank-preview-pill--committed { background: rgba(72, 187, 120, 0.15); color: #2f855a; }
 .bank-preview-account { font-family: monospace; font-size: 0.82rem; color: var(--ws-text-2); }
 .bank-preview-fix {
@@ -405,6 +709,58 @@ function shortRef(ref) {
     padding: 8px 10px; background: rgba(245, 101, 101, 0.1);
     color: #c53030; border-radius: 6px; font-size: 0.82rem;
 }
+
+/* ─── Document column + picker modal (§1.2) ───────────────────────────────── */
+.bank-preview-doc { white-space: nowrap; }
+.bank-preview-docbtn {
+    display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px;
+    background: transparent; border: 1px solid var(--ws-border); border-radius: 6px;
+    color: var(--ws-text-2); font-size: 0.76rem; cursor: pointer;
+}
+.bank-preview-docbtn:hover { background: var(--ws-surface-2); }
+.bank-preview-docbtn--req {
+    border-color: rgba(237, 137, 54, 0.5); background: rgba(237, 137, 54, 0.1); color: #c05621;
+}
+.bank-preview-doc-count { font-size: 0.78rem; color: var(--ws-text-2); }
+.bank-preview-doc-na { color: var(--ws-text-3); }
+
+.doc-kind-note { font-size: 0.8rem; color: var(--ws-text-3); margin: -4px 0 12px; }
+.doc-suggest { margin-bottom: 14px; }
+.doc-suggest-label { font-size: 0.78rem; color: var(--ws-text-3); display: block; margin-bottom: 6px; }
+.doc-suggest-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.doc-chip {
+    padding: 3px 10px; border-radius: 999px; font-size: 0.78rem; cursor: pointer;
+    background: rgba(124, 58, 237, 0.1); border: 1px solid rgba(124, 58, 237, 0.3);
+    color: var(--ws-purple); font-weight: 600;
+}
+.doc-chip--new { background: var(--ws-surface-2); border-color: var(--ws-border); color: var(--ws-text-2); }
+.doc-pick { margin-bottom: 12px; }
+.doc-pick-label { font-size: 0.8rem; color: var(--ws-text-2); display: block; margin-bottom: 4px; }
+.doc-select {
+    width: 100%; padding: 8px 10px; border-radius: 8px;
+    border: 1px solid var(--ws-border); background: var(--ws-surface); color: var(--ws-text);
+    font-size: 0.85rem;
+}
+.doc-create { display: flex; gap: 8px; margin-bottom: 14px; }
+.doc-input {
+    flex: 1; padding: 8px 10px; border-radius: 8px;
+    border: 1px solid var(--ws-border); background: var(--ws-surface); color: var(--ws-text);
+    font-size: 0.85rem;
+}
+.doc-input--amt { flex: 0 0 130px; text-align: right; font-variant-numeric: tabular-nums; }
+.doc-allocs {
+    border-top: 1px solid var(--ws-border); padding-top: 12px; display: flex; flex-direction: column; gap: 8px;
+}
+.doc-alloc { display: flex; align-items: center; gap: 10px; }
+.doc-alloc-num { flex: 1; font-family: monospace; font-size: 0.82rem; color: var(--ws-text); }
+.doc-alloc-amt { flex: 0 0 130px; text-align: right; font-variant-numeric: tabular-nums; color: var(--ws-text-2); }
+.doc-alloc-remove {
+    background: transparent; border: none; cursor: pointer; color: var(--ws-text-3);
+    display: inline-flex; padding: 2px;
+}
+.doc-alloc-remove:hover { color: #c53030; }
+.doc-sum { font-size: 0.82rem; color: var(--ws-text-3); text-align: right; margin: 2px 0 0; }
+.doc-sum--bad { color: #c53030; font-weight: 600; }
 
 /* ─── Commit result modal body ────────────────────────────────────────────── */
 .result-stat {

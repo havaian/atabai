@@ -1487,6 +1487,7 @@
     "upload": "Koʻchirma yuklash",
     "empty": "Bu davr uchun hali koʻchirma yuklanmagan.",
     "rows": "{n} qator",
+    "pending": "Tekshirish kerak: {n}",
     "status": {
       "draft": "Tekshirish kerak",
       "committed": "Joylangan"

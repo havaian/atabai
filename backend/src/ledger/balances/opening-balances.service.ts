@@ -80,10 +80,11 @@ export interface OpeningBalanceEntryView {
  * gate — the accounts are fixed by the position), then the same rollup the bank
  * and invoice engines use materializes the affected AccountBalance rows.
  *
- * Not handled here (deliberately, per the plan Malik approved): routing
- * `opening_balance` sums into the AccountBalance opening column vs. period
- * turnover. Closing balances and per-document settlement are correct without
- * it; the opening-vs-period presentation split is a separate rollup follow-up.
+ * Opening-vs-period presentation split: handled in BalanceRollupService, which
+ * routes `opening_balance`-source postings into the AccountBalance opening
+ * columns and everything else into period turnover (methodology дополнение
+ * §1.5). This service just posts the entries with source='opening_balance';
+ * the rollup does the column routing.
  */
 @Injectable()
 export class OpeningBalancesService {

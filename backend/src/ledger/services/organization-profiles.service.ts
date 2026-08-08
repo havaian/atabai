@@ -30,6 +30,10 @@ export interface UpsertProfileArgs {
   inn?: string | null;
   transitionDate?: Date | null;
   baseCurrency?: string;
+  /** Contact requisites (methodology дополнение §2). */
+  address?: string | null;
+  phone?: string | null;
+  email?: string | null;
   /** When present, REPLACES the whole bankAccounts list. */
   bankAccounts?: OrgBankAccountInput[];
   /**
@@ -78,6 +82,9 @@ export class OrganizationProfilesService {
     if (args.inn !== undefined) setPayload.inn = args.inn;
     if (args.transitionDate !== undefined) setPayload.transitionDate = args.transitionDate;
     if (args.baseCurrency !== undefined) setPayload.baseCurrency = args.baseCurrency;
+    if (args.address !== undefined) setPayload.address = args.address;
+    if (args.phone !== undefined) setPayload.phone = args.phone;
+    if (args.email !== undefined) setPayload.email = args.email;
     if (args.bankAccounts !== undefined) {
       // §3.5: account-number uniqueness is validated on the FULL number
       // ("по всем знакам целиком"), not a prefix. The PATCH replaces the
@@ -114,6 +121,9 @@ export class OrganizationProfilesService {
         'settlementDepth',
         'payrollDetail',
         'leaveReserve',
+        // Array — the dotted $set replaces the whole list, which is what the
+        // edit form submits (methodology дополнение §6: manual, full-set edit).
+        'nonMonetaryAccounts',
       ];
       for (const key of allowed) {
         if (policy[key] !== undefined) {

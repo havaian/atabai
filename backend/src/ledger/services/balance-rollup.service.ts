@@ -37,14 +37,17 @@ export interface RollupResult {
  *
  * Algorithm per key:
  *   1. Aggregate sums of `amount` per direction across all COMMITTED
- *      JournalEntryLine rows for (org, period, accountCode,
- *      subconto1/2/3) — yields `periodDebit`, `periodCredit`.
+ *      JournalEntryLine rows for (org, period, accountCode, subconto1/2/3),
+ *      SPLIT by the parent entry's `source` (methodology дополнение §1.5):
+ *      `opening_balance` postings → `openingDebit` / `openingCredit`, all
+ *      others → `periodDebit` / `periodCredit`.
  *   2. Look up the existing AccountBalance row for that key:
- *      a. Found → preserve its existing `openingDebit` / `openingCredit`,
- *         replace `periodDebit` / `periodCredit` with the new sums,
- *         recompute closing via `netSides(opening+period)`.
- *      b. Not found → create a fresh row with opening = 0 and the new
- *         period totals. `source = 'posting_rollup'`.
+ *      a. Found → overwrite both opening and period columns from the fresh
+ *         aggregation, recompute closing via `netSides(opening+period)`.
+ *         Opening is derived, not preserved — the OSV importer is gone so
+ *         postings are authoritative for both columns.
+ *      b. Not found → create a fresh row from the aggregated opening + period
+ *         totals. `source = 'posting_rollup'`.
  *
  * Single-layer note (architecture doc §3.2): the ledger is a general
  * ledger with one kind of figure — the real, posted balance. The old
@@ -98,27 +101,38 @@ export class BalanceRollupService {
         subconto3Value: key.subconto3Value,
       });
 
-      if (existing) {
-        const grossDebit = addDecimals(existing.openingDebit, sums.debit);
-        const grossCredit = addDecimals(existing.openingCredit, sums.credit);
-        const closing = netSides(grossDebit, grossCredit);
+      // Opening comes from opening_balance-source postings, period from all
+      // other committed postings (methodology дополнение §1.5). Closing is
+      // their net. Opening is now DERIVED from postings, not preserved from a
+      // prior osv_import value — the OSV importer is removed and postings are
+      // ground truth, so a fresh recompute is authoritative for both columns.
+      const grossDebit = addDecimals(sums.openingDebit, sums.periodDebit);
+      const grossCredit = addDecimals(sums.openingCredit, sums.periodCredit);
+      const closing = netSides(grossDebit, grossCredit);
+      const contributed =
+        sums.openingDebit !== '0' ||
+        sums.openingCredit !== '0' ||
+        sums.periodDebit !== '0' ||
+        sums.periodCredit !== '0';
 
-        existing.periodDebit = toDecimal128(sums.debit);
-        existing.periodCredit = toDecimal128(sums.credit);
+      if (existing) {
+        existing.openingDebit = toDecimal128(sums.openingDebit);
+        existing.openingCredit = toDecimal128(sums.openingCredit);
+        existing.periodDebit = toDecimal128(sums.periodDebit);
+        existing.periodCredit = toDecimal128(sums.periodCredit);
         existing.closingDebit = toDecimal128(closing.closingDebit);
         existing.closingCredit = toDecimal128(closing.closingCredit);
         existing.recomputedAt = now;
         // Source flips to 'posting_rollup' only when this rollup actually
-        // contributed turnover. A pre-existing osv_import row with zero
+        // contributed figures. A pre-existing osv_import row with zero
         // matching postings stays labelled osv_import so the audit trail
         // preserves the import-derived provenance.
-        if (sums.debit !== '0' || sums.credit !== '0') {
+        if (contributed) {
           existing.source = 'posting_rollup';
         }
         await existing.save();
         recomputed++;
       } else {
-        const closing = netSides(sums.debit, sums.credit);
         await this.balanceModel.create({
           organizationId,
           periodId,
@@ -128,10 +142,10 @@ export class BalanceRollupService {
           subconto2Value: key.subconto2Value,
           subconto3Value: key.subconto3Value,
           counterpartyId: key.counterpartyId,
-          openingDebit: toDecimal128('0'),
-          openingCredit: toDecimal128('0'),
-          periodDebit: toDecimal128(sums.debit),
-          periodCredit: toDecimal128(sums.credit),
+          openingDebit: toDecimal128(sums.openingDebit),
+          openingCredit: toDecimal128(sums.openingCredit),
+          periodDebit: toDecimal128(sums.periodDebit),
+          periodCredit: toDecimal128(sums.periodCredit),
           closingDebit: toDecimal128(closing.closingDebit),
           closingCredit: toDecimal128(closing.closingCredit),
           currency: null,
@@ -190,21 +204,70 @@ export class BalanceRollupService {
     organizationId: Types.ObjectId,
     periodId: Types.ObjectId,
     key: RollupKey,
-  ): Promise<{ debit: string; credit: string }> {
+  ): Promise<{
+    openingDebit: string;
+    openingCredit: string;
+    periodDebit: string;
+    periodCredit: string;
+  }> {
     // Two-step: collect committed entry ids first, then sum lines. Sumtotal
     // pipelines that $lookup into the entries collection are doable but
     // less flexible (and the entry list is usually small).
+    //
+    // Split by JournalEntry.source (methodology дополнение §1.5): postings
+    // seeded by «ввод начальных остатков» (source='opening_balance', §6.2)
+    // are the OPENING position; everything else is period turnover. Without
+    // this split the opening postings leaked into turnover and the opening
+    // columns stayed zero.
     const committed = await this.entryModel
       .find({
         organizationId,
         periodId,
         status: 'committed',
       })
-      .select('_id')
+      .select('_id source')
       .lean();
-    const committedIds = committed.map((e) => e._id);
 
-    if (committedIds.length === 0) {
+    const openingIds = committed
+      .filter((e) => e.source === 'opening_balance')
+      .map((e) => e._id);
+    const turnoverIds = committed
+      .filter((e) => e.source !== 'opening_balance')
+      .map((e) => e._id);
+
+    const opening = await this.sumLinesByDirection(
+      organizationId,
+      periodId,
+      key,
+      openingIds,
+    );
+    const period = await this.sumLinesByDirection(
+      organizationId,
+      periodId,
+      key,
+      turnoverIds,
+    );
+
+    return {
+      openingDebit: opening.debit,
+      openingCredit: opening.credit,
+      periodDebit: period.debit,
+      periodCredit: period.credit,
+    };
+  }
+
+  /**
+   * Sum committed JournalEntryLine `amount` per direction for one balance key,
+   * restricted to a given set of entry ids. Returns '0'/'0' for an empty id
+   * set so the caller can treat "no opening postings" as a zero opening.
+   */
+  private async sumLinesByDirection(
+    organizationId: Types.ObjectId,
+    periodId: Types.ObjectId,
+    key: RollupKey,
+    entryIds: Types.ObjectId[],
+  ): Promise<{ debit: string; credit: string }> {
+    if (entryIds.length === 0) {
       return { debit: '0', credit: '0' };
     }
 
@@ -220,7 +283,7 @@ export class BalanceRollupService {
           subconto1Value: key.subconto1Value,
           subconto2Value: key.subconto2Value,
           subconto3Value: key.subconto3Value,
-          entryId: { $in: committedIds },
+          entryId: { $in: entryIds },
         },
       },
       { $group: { _id: '$direction', total: { $sum: '$amount' } } },
